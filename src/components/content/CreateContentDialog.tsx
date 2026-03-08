@@ -19,7 +19,7 @@ interface CreateContentDialogProps {
   defaultStatus?: string;
 }
 
-const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogProps) => {
+const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: CreateContentDialogProps) => {
   const { projects, refetch } = useApp();
   const { user } = useAuth();
   const { toast } = useToast();
