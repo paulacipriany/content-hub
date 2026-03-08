@@ -3,7 +3,7 @@ import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, Ba
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { contrastText } from '@/lib/clientPalette';
+import { contrastText, generatePalette } from '@/lib/clientPalette';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
