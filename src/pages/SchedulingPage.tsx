@@ -255,7 +255,7 @@ const SchedulingPage = () => {
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Checklist de agendamento</h4>
                     <div className="space-y-2.5">
                       {platforms.map(p => {
-                        const Icon = platformIcons[p as Platform];
+                        const Icon = PLATFORM_ICONS[p];
                         return (
                           <label key={p} className="flex items-center gap-2.5 cursor-pointer group">
                             <Checkbox
