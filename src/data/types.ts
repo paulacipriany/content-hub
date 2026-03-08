@@ -29,7 +29,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea-bank': 'Banco de Ideias',
   'production': 'Produção',
   'review': 'Revisão',
-  'approval-internal': 'Aprovação Interna',
+  
   'approval-client': 'Aprovação Cliente',
   'scheduled': 'Agendado',
   'published': 'Publicado',
