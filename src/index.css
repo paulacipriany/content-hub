@@ -37,12 +37,12 @@
 
     --radius: 0.625rem;
 
-    /* Sidebar — near-black with blue accent */
-    --sidebar-bg: 0 0% 5%;
-    --sidebar-fg: 0 0% 65%;
-    --sidebar-fg-active: 0 0% 100%;
-    --sidebar-hover: 0 0% 10%;
-    --sidebar-border: 0 0% 12%;
+    /* Sidebar — light blue */
+    --sidebar-bg: 214 78% 87%;
+    --sidebar-fg: 0 0% 15%;
+    --sidebar-fg-active: 0 0% 0%;
+    --sidebar-hover: 214 60% 80%;
+    --sidebar-border: 214 40% 78%;
     --sidebar-accent: 220 100% 50%;
 
     /* Status colors — vibrant and distinct */
@@ -63,13 +63,13 @@
     --platform-youtube: 0 72% 51%;
 
     /* Shadcn sidebar tokens */
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 65%;
+    --sidebar-background: 214 78% 87%;
+    --sidebar-foreground: 0 0% 15%;
     --sidebar-primary: 220 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 10%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 12%;
+    --sidebar-accent: 214 60% 80%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 214 40% 78%;
     --sidebar-ring: 220 100% 50%;
   }
 
@@ -102,12 +102,12 @@
     --input: 220 12% 22%;
     --ring: 220 100% 58%;
 
-    /* Sidebar — darker than bg for depth */
-    --sidebar-bg: 220 15% 5%;
-    --sidebar-fg: 220 5% 60%;
-    --sidebar-fg-active: 0 0% 100%;
-    --sidebar-hover: 220 12% 12%;
-    --sidebar-border: 220 12% 14%;
+    /* Sidebar — black */
+    --sidebar-bg: 0 0% 0%;
+    --sidebar-fg: 270 13% 85%;
+    --sidebar-fg-active: 270 13% 97%;
+    --sidebar-hover: 0 0% 8%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-accent: 220 100% 58%;
 
     /* Status colors — brighter for dark bg */
@@ -128,13 +128,13 @@
     --platform-youtube: 0 72% 60%;
 
     /* Shadcn sidebar tokens */
-    --sidebar-background: 220 15% 5%;
-    --sidebar-foreground: 220 5% 60%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 270 13% 85%;
     --sidebar-primary: 220 100% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 12% 12%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 12% 14%;
+    --sidebar-primary-foreground: 270 13% 97%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 270 13% 97%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-ring: 220 100% 58%;
   }
 }
