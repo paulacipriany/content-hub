@@ -237,6 +237,10 @@ const ProjectsPage = () => {
                         />
                       ))}
                     </div>
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
+                      <PlatformSelector selected={editPlatforms} onChange={setEditPlatforms} size={32} />
+                    </div>
                     <div className="flex gap-2">
                       <Button size="sm" className="gap-1" onClick={handleUpdate}>
                         <Check size={14} /> Salvar
