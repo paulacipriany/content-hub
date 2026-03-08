@@ -51,6 +51,8 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   tiktok: 'TikTok',
   youtube: 'YouTube',
   pinterest: 'Pinterest',
+  twitter: 'X (Twitter)',
+  google_business: 'Google Business',
 };
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {

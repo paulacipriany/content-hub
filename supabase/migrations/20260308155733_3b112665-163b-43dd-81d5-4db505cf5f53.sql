@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS platforms platform[] NOT NULL DEFAULT ARRAY['instagram'::platform];
