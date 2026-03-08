@@ -24,8 +24,20 @@ const NotificationContext = createContext<NotificationContextType>({
 export const useNotifications = () => useContext(NotificationContext);
 
 const AppLayout = () => {
-  const { selectedContent, setSelectedContent, contents } = useApp();
+  const { selectedContent, setSelectedContent, contents, projects, setSelectedProject, loading } = useApp();
+  const { role } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const notifs = useRealtimeNotifications();
+
+  // Redirect client-role users from home to their first project dashboard
+  useEffect(() => {
+    if (role === 'client' && location.pathname === '/' && !loading && projects.length > 0) {
+      const first = projects[0];
+      setSelectedProject(first);
+      navigate(`/clients/${first.id}/dashboard`, { replace: true });
+    }
+  }, [role, location.pathname, loading, projects]);
 
   const handleNotificationClick = (contentId: string) => {
     const content = contents.find(c => c.id === contentId);
