@@ -37,10 +37,10 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Projects */}
           <div className="bg-card border border-border rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Projetos</h2>
+             <h2 className="text-sm font-semibold text-foreground mb-4">Clientes</h2>
             <div className="space-y-2.5">
               {projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum projeto ainda. Crie seu primeiro projeto!</p>
+                <p className="text-sm text-muted-foreground">Nenhum cliente ainda. Crie seu primeiro cliente!</p>
               ) : (
                 projects.map(p => {
                   const count = contents.filter(c => c.project_id === p.id).length;

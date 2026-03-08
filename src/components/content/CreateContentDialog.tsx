@@ -61,7 +61,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
 
   const handleSubmit = async () => {
     if (!title.trim() || !projectId || !user) {
-      toast({ title: 'Campos obrigatórios', description: 'Preencha ao menos o título e selecione um projeto.', variant: 'destructive' });
+      toast({ title: 'Campos obrigatórios', description: 'Preencha ao menos o título e selecione um cliente.', variant: 'destructive' });
       return;
     }
 

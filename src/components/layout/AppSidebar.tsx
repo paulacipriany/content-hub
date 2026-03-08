@@ -80,7 +80,7 @@ const AppSidebar = () => {
         {!sidebarCollapsed && (
           <div className="pt-4">
             <div className="flex items-center justify-between px-3 mb-1">
-              <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Projetos</span>
+              <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" />
             </div>
             {projects.map(project => (
