@@ -38,7 +38,8 @@ function useAutoSave(contentId: string | undefined, field: string, value: string
 
 const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
-  const { user, profile } = useAuth();
+  const { user, profile, role } = useAuth();
+  const isClient = role === 'client';
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
@@ -238,8 +239,8 @@ const ContentPanel = () => {
 
       {/* Two-column layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left column — Edit */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5 max-w-2xl">
+        {/* Left column — Edit (or Preview for client) */}
+        <div className={cn("flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5", isClient ? "max-w-xl" : "max-w-2xl")}>
           {/* Status */}
           <div>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
@@ -335,120 +336,145 @@ const ContentPanel = () => {
             </div>
           )}
 
-          {/* Copy text (editable) */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
-              <button
-                onClick={() => {
-                  const next = !perPlatformCopy;
-                  setPerPlatformCopy(next);
-                  if (!next) {
-                    // Switching to shared: clear per-platform, keep shared
-                    setEditCopyTexts({});
-                    updateContentFields(selectedContent.id, { copy_texts: {} });
-                  } else {
-                    // Switching to per-platform: seed each platform with shared text
-                    const platforms = Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform];
-                    const seeded: Record<string, string> = {};
-                    platforms.forEach(p => { seeded[p] = editCopyText; });
-                    setEditCopyTexts(seeded);
-                    updateContentFields(selectedContent.id, { copy_texts: seeded });
-                  }
-                }}
-                className="text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors"
-                style={{
-                  backgroundColor: perPlatformCopy ? 'var(--client-100, hsl(var(--primary) / 0.1))' : 'hsl(var(--secondary))',
-                  color: perPlatformCopy ? 'var(--client-600, hsl(var(--primary)))' : 'hsl(var(--muted-foreground))',
-                }}
-              >
-                {perPlatformCopy ? '✓ Texto por rede' : 'Mesmo texto para todas'}
-              </button>
-            </div>
-
-            {perPlatformCopy ? (
-              <div className="space-y-3">
-                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
-                  <div key={p}>
-                    <label className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
-                      {platformIcon([p], 14)}
-                      {PLATFORM_LABELS[p]}
-                    </label>
-                    <textarea
-                      value={editCopyTexts[p] ?? ''}
-                      onChange={e => {
-                        const updated = { ...editCopyTexts, [p]: e.target.value };
-                        setEditCopyTexts(updated);
-                        updateContentFields(selectedContent.id, { copy_texts: updated });
-                      }}
-                      rows={3}
-                      placeholder={`Copy para ${PLATFORM_LABELS[p]}...`}
-                      className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <textarea
-                value={editCopyText}
-                onChange={e => {
-                  setEditCopyText(e.target.value);
-                  updateContentFields(selectedContent.id, { copy_text: e.target.value });
-                }}
-                rows={5}
-                placeholder="Escreva a copy da postagem..."
-                className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
-              />
-            )}
-          </div>
-
-          {/* Media Upload — multiple images */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <ImagePlus size={12} />Mídia
-            </label>
-            {mediaUrls.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                {mediaUrls.map((url, i) => (
-                  <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                    {url.match(/\.(mp4|webm|mov)$/i) ? (
-                      <video src={url} controls className="w-full h-full object-cover" />
-                    ) : (
-                      <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover" />
+          {/* Client view: show preview inline instead of copy/media */}
+          {isClient ? (
+            <div className="space-y-4">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
+              <div className="flex gap-1.5">
+                {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                      previewPlatform === p
+                        ? "text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
-                    <button
-                      onClick={() => handleRemoveMedia(i)}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 size={10} />
-                    </button>
-                  </div>
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                  >
+                    {PLATFORM_LABELS[p]}
+                  </button>
                 ))}
               </div>
-            )}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-            >
-              {uploading ? (
-                <Loader2 size={18} className="animate-spin text-primary" />
-              ) : (
-                <>
-                  <ImagePlus size={18} />
-                  <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
-                </>
-              )}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
+              <PostPreview content={selectedContent} platform={previewPlatform} />
+            </div>
+          ) : (
+            <>
+              {/* Copy text (editable) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
+                  <button
+                    onClick={() => {
+                      const next = !perPlatformCopy;
+                      setPerPlatformCopy(next);
+                      if (!next) {
+                        setEditCopyTexts({});
+                        updateContentFields(selectedContent.id, { copy_texts: {} });
+                      } else {
+                        const platforms = Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform];
+                        const seeded: Record<string, string> = {};
+                        platforms.forEach(p => { seeded[p] = editCopyText; });
+                        setEditCopyTexts(seeded);
+                        updateContentFields(selectedContent.id, { copy_texts: seeded });
+                      }
+                    }}
+                    className="text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors"
+                    style={{
+                      backgroundColor: perPlatformCopy ? 'var(--client-100, hsl(var(--primary) / 0.1))' : 'hsl(var(--secondary))',
+                      color: perPlatformCopy ? 'var(--client-600, hsl(var(--primary)))' : 'hsl(var(--muted-foreground))',
+                    }}
+                  >
+                    {perPlatformCopy ? '✓ Texto por rede' : 'Mesmo texto para todas'}
+                  </button>
+                </div>
+
+                {perPlatformCopy ? (
+                  <div className="space-y-3">
+                    {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
+                      <div key={p}>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                          {platformIcon([p], 14)}
+                          {PLATFORM_LABELS[p]}
+                        </label>
+                        <textarea
+                          value={editCopyTexts[p] ?? ''}
+                          onChange={e => {
+                            const updated = { ...editCopyTexts, [p]: e.target.value };
+                            setEditCopyTexts(updated);
+                            updateContentFields(selectedContent.id, { copy_texts: updated });
+                          }}
+                          rows={3}
+                          placeholder={`Copy para ${PLATFORM_LABELS[p]}...`}
+                          className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <textarea
+                    value={editCopyText}
+                    onChange={e => {
+                      setEditCopyText(e.target.value);
+                      updateContentFields(selectedContent.id, { copy_text: e.target.value });
+                    }}
+                    rows={5}
+                    placeholder="Escreva a copy da postagem..."
+                    className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+                  />
+                )}
+              </div>
+
+              {/* Media Upload */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <ImagePlus size={12} />Mídia
+                </label>
+                {mediaUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    {mediaUrls.map((url, i) => (
+                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                        {url.match(/\.(mp4|webm|mov)$/i) ? (
+                          <video src={url} controls className="w-full h-full object-cover" />
+                        ) : (
+                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover" />
+                        )}
+                        <button
+                          onClick={() => handleRemoveMedia(i)}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+                >
+                  {uploading ? (
+                    <Loader2 size={18} className="animate-spin text-primary" />
+                  ) : (
+                    <>
+                      <ImagePlus size={18} />
+                      <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
+                    </>
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </div>
+            </>
+          )}
 
           {/* Checklist */}
           {checklist.length > 0 && (
@@ -470,33 +496,34 @@ const ContentPanel = () => {
           )}
         </div>
 
-        {/* Right column — Preview & Comments */}
-        <div className="w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card">
-          {/* Preview */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
-            <div className="flex gap-1.5 justify-center">
-              {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setPreviewPlatform(p)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                    previewPlatform === p
-                      ? "text-primary-foreground"
-                      : "bg-secondary text-muted-foreground hover:bg-accent"
-                  )}
-                  style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
-                >
-                  {PLATFORM_LABELS[p]}
-                </button>
-              ))}
+        {/* Right column — Preview & Comments (hidden for client, who sees preview inline) */}
+        <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
+          {!isClient && (
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
+              <div className="flex gap-1.5 justify-center">
+                {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                      previewPlatform === p
+                        ? "text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:bg-accent"
+                    )}
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                  >
+                    {PLATFORM_LABELS[p]}
+                  </button>
+                ))}
+              </div>
+              <PostPreview content={selectedContent} platform={previewPlatform} />
             </div>
-            <PostPreview content={selectedContent} platform={previewPlatform} />
-          </div>
+          )}
 
           {/* Comments */}
-          <div className="border-t border-border p-5 max-h-[40%] flex flex-col">
+          <div className={cn("border-t border-border p-5 flex flex-col", isClient ? "flex-1" : "max-h-[40%]")}>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
             <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
               {comments.map(c => (
