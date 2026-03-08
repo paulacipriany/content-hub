@@ -133,6 +133,7 @@ const MediaLibraryPage = () => {
                         <Trash2 size={12} className="text-white" />
                       </button>
                     )}
+                    </div>
                   </div>
                 </div>
               </div>
