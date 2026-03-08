@@ -37,13 +37,13 @@
 
     --radius: 0.625rem;
 
-    /* Sidebar — light blue */
-    --sidebar-bg: 214 78% 87%;
-    --sidebar-fg: 0 0% 15%;
-    --sidebar-fg-active: 0 0% 0%;
-    --sidebar-hover: 214 60% 80%;
-    --sidebar-border: 214 40% 78%;
-    --sidebar-accent: 220 100% 50%;
+    /* Sidebar — blue */
+    --sidebar-bg: 213 83% 47%;
+    --sidebar-fg: 270 13% 97%;
+    --sidebar-fg-active: 0 0% 100%;
+    --sidebar-hover: 213 80% 40%;
+    --sidebar-border: 213 70% 38%;
+    --sidebar-accent: 0 0% 100%;
 
     /* Status colors — vibrant and distinct */
     --status-idea: 220 10% 62%;
