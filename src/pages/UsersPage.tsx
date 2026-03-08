@@ -41,6 +41,8 @@ const UsersPage = () => {
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
   const [editRole, setEditRole] = useState<string>('social_media');
   const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
