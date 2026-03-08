@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
-import { PlatformSelector, getContentTypesForPlatforms } from './PlatformIcons';
+import { PlatformSelector } from './PlatformIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
