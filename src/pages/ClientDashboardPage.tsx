@@ -1,4 +1,5 @@
 import TopBar from '@/components/layout/TopBar';
+import TaskListCard from '@/components/dashboard/TaskListCard';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform } from '@/data/types';
