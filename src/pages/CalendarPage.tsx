@@ -298,17 +298,29 @@ const CalendarPage = () => {
 
   // --- DnD ---
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveContent(event.active.data.current?.content ?? null);
+    const data = event.active.data.current;
+    if (data?.type === 'content') setActiveContent(data.content);
+    else if (data?.type === 'task') setActiveTask(data.task);
   };
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveContent(null);
+    setActiveTask(null);
     if (!over) return;
-    const contentId = active.id as string;
+    const data = active.data.current;
     const newDate = over.id as string;
-    const content = projectContents.find(c => c.id === contentId);
-    if (!content || content.publish_date === newDate) return;
-    updateContentDate(contentId, newDate);
+
+    if (data?.type === 'content') {
+      const content = projectContents.find(c => c.id === active.id);
+      if (!content || content.publish_date === newDate) return;
+      updateContentDate(active.id as string, newDate);
+    } else if (data?.type === 'task') {
+      const taskId = (active.id as string).replace('task-', '');
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || task.due_date === newDate) return;
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, due_date: newDate } : t));
+      await supabase.from('project_tasks').update({ due_date: newDate } as any).eq('id', taskId);
+    }
   };
 
   // --- Render day cell contents ---
