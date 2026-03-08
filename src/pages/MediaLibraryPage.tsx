@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Image, Search, ExternalLink } from 'lucide-react';
+import { Image, Search, ExternalLink, Trash2 } from 'lucide-react';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const MediaLibraryPage = () => {
   useClientFromUrl();
