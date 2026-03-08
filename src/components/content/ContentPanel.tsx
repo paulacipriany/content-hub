@@ -1,10 +1,11 @@
-import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil, Eye } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
 import { platformIcon } from './ContentCard';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import PostPreview from './PostPreview';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,6 +41,8 @@ const ContentPanel = () => {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
 
   // Editable local state
   const [editTitle, setEditTitle] = useState('');
@@ -157,7 +160,28 @@ const ContentPanel = () => {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-border flex-shrink-0">
+        <button
+          onClick={() => setActiveTab('edit')}
+          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
+            activeTab === 'edit' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Pencil size={12} /> Editar
+        </button>
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
+            activeTab === 'preview' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Eye size={12} /> Preview
+        </button>
+      </div>
+
       {/* Content */}
+      {activeTab === 'edit' ? (
       <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-5">
         {/* Status */}
         <div>
@@ -339,6 +363,28 @@ const ContentPanel = () => {
           </div>
         </div>
       </div>
+      ) : (
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
+        {/* Platform selector for preview */}
+        <div className="flex gap-1.5 justify-center">
+          {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+            <button
+              key={p}
+              onClick={() => setPreviewPlatform(p)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                previewPlatform === p
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:bg-accent"
+              )}
+            >
+              {PLATFORM_LABELS[p]}
+            </button>
+          ))}
+        </div>
+        <PostPreview content={selectedContent} platform={previewPlatform} />
+      </div>
+      )}
 
       {/* Footer */}
       {canAdvance && (
