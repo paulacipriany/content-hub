@@ -83,7 +83,7 @@ const AppSidebar = () => {
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Projetos</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" />
             </div>
-            {mockProjects.map(project => (
+            {projects.map(project => (
               <button
                 key={project.id}
                 onClick={() => navigate(`/projects/${project.id}`)}
