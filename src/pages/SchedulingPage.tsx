@@ -61,48 +61,53 @@ const SchedulingPage = () => {
                   </h3>
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="space-y-2">
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
                     const assigneeName = content.assignee_profile?.display_name ?? 'Sem responsável';
+                    const checked = checkedPlatforms[content.id] ?? {};
+                    const checkedCount = Object.values(checked).filter(Boolean).length;
 
                     return (
                       <button
                         key={content.id}
                         onClick={() => setPreviewContent(content)}
-                        className="w-full text-left p-4 rounded-xl bg-card border border-border hover:shadow-md transition-all group"
+                        className="w-full text-left px-4 py-3 rounded-lg bg-card border border-border hover:shadow-sm transition-all flex items-center gap-4"
                       >
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {platformIcon(content.platform)}
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {CONTENT_TYPE_LABELS[content.content_type as ContentType]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-foreground truncate">{content.title}</h4>
+                          <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                            <span>{CONTENT_TYPE_LABELS[content.content_type as ContentType]}</span>
+                            <span className="flex items-center gap-1"><User size={10} /> {assigneeName.split(' ')[0]}</span>
+                          </div>
+                        </div>
+                        {content.publish_time && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                            <Clock size={11} />
+                            {content.publish_time}
                           </span>
-                          {content.publish_time && (
-                            <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock size={11} />
-                              {content.publish_time}
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="text-sm font-medium text-foreground mb-1.5">{content.title}</h4>
-                        {content.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                            {content.description.replace(/<[^>]*>/g, '')}
-                          </p>
                         )}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <User size={11} />
-                            <span>{assigneeName.split(' ')[0]}</span>
-                          </div>
-                          <div className="flex items-center gap-1 ml-auto">
-                            {platforms.map(p => (
-                              <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary">
-                                {PLATFORM_LABELS[p as Platform] ?? p}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {platforms.map(p => (
+                            <span
+                              key={p}
+                              className={cn(
+                                "text-[10px] px-1.5 py-0.5 rounded",
+                                checked[p] ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-secondary text-muted-foreground"
+                              )}
+                            >
+                              {PLATFORM_LABELS[p as Platform] ?? p}
+                            </span>
+                          ))}
                         </div>
+                        {platforms.length > 0 && (
+                          <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                            {checkedCount}/{platforms.length}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
