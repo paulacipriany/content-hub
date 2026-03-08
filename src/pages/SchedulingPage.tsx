@@ -215,6 +215,25 @@ const SchedulingPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Download images */}
+              {getContentMediaUrls(previewContent).length > 0 && (
+                <div className="px-6 py-4 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={downloading}
+                    onClick={() => handleDownloadZip(previewContent)}
+                  >
+                    {downloading ? (
+                      <><Loader2 size={14} className="mr-2 animate-spin" /> Baixando...</>
+                    ) : (
+                      <><Download size={14} className="mr-2" /> Baixar mídias (.zip)</>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </SheetContent>
