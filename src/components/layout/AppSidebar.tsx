@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { contrastText, generatePalette } from '@/lib/clientPalette';
+import { useTheme } from 'next-themes';
+import { Switch } from '@/components/ui/switch';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
