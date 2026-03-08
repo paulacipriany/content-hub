@@ -121,29 +121,23 @@ const AppSidebar = () => {
         {/* Client sections - only when a client is selected */}
         {selectedProject && (
           <>
-            {!sidebarCollapsed && (() => {
-              const pal = generatePalette(selectedProject.color);
-              return (
-                <div className="pt-4 pb-1 px-3">
-                  <span
-                    className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
-                    style={{ backgroundColor: pal[800], color: pal[300] }}
-                  >
-                    {selectedProject.name}
-                  </span>
+            {!sidebarCollapsed && (
+              <div className="pt-4 pb-1 px-3">
+                <span
+                  className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
+                  style={{ backgroundColor: selectedProject.color, color: contrastText(selectedProject.color) }}
+                >
+                  {selectedProject.name}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <div className="pt-3 pb-1 flex justify-center">
+                <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: selectedProject.color, color: contrastText(selectedProject.color) }}>
+                  {selectedProject.name.charAt(0)}
                 </div>
-              );
-            })()}
-            {sidebarCollapsed && (() => {
-              const pal = generatePalette(selectedProject.color);
-              return (
-                <div className="pt-3 pb-1 flex justify-center">
-                  <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: pal[800], color: pal[300] }}>
-                    {selectedProject.name.charAt(0)}
-                  </div>
-                </div>
-              );
-            })()}
+              </div>
+            )}
             {clientNavItems
               .filter(item => {
                 // Hide management items from client role
