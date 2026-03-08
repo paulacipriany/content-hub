@@ -127,8 +127,8 @@ const WorkflowPage = () => {
                     {items.map(item => (
                       isClient
                         ? (
-                          <div key={item.id} onClick={() => handleClientCardClick(item)} className="cursor-pointer">
-                            <ContentCard content={item} hideStatus />
+                          <div key={item.id}>
+                            <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
                           </div>
                         )
                         : <DraggableCard key={item.id} content={item} />
