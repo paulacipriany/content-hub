@@ -5,9 +5,10 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Checkbox } from '@/components/ui/checkbox';
 import PostPreview from '@/components/content/PostPreview';
 
 const SchedulingPage = () => {
