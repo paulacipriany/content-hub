@@ -478,6 +478,11 @@ const CalendarPage = () => {
 
               <DragOverlay>
                 {activeContent && <ContentOverlay content={activeContent} />}
+                {activeTask && (
+                  <div className="px-2 py-1 rounded text-xs font-medium bg-card border border-border shadow-lg w-48 truncate">
+                    {activeTask.text}
+                  </div>
+                )}
               </DragOverlay>
             </DndContext>
           </div>
