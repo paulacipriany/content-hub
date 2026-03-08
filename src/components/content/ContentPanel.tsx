@@ -762,6 +762,27 @@ const ContentPanel = () => {
           </div>
         </div>}
       </div>
+
+      {/* Lightbox modal */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X size={20} className="text-white" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Preview"
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
