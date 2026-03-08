@@ -54,7 +54,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   'published': '--status-published',
 };
 
-const DroppableColumn = ({ status, children }: { status: WorkflowStatus; children: React.ReactNode }) => {
+const DroppableColumn = ({ status, isEmpty, children }: { status: WorkflowStatus; isEmpty?: boolean; children: React.ReactNode }) => {
   const { isOver, setNodeRef } = useDroppable({ id: status });
   const cssVar = STATUS_CSS_VARS[status];
 
