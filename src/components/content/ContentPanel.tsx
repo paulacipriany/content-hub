@@ -198,41 +198,71 @@ const ContentPanel = () => {
             <X size={18} />
           </button>
           {platformIcon(selectedContent.platform, 18)}
-          <input
-            value={editTitle}
-            onChange={e => setEditTitle(e.target.value)}
-            className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
-            placeholder="Título do conteúdo"
-          />
-          <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
-            {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
-          </span>
+          {isClient ? (
+            <span className="font-semibold text-base text-foreground px-2">{editTitle}</span>
+          ) : (
+            <input
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
+              placeholder="Título do conteúdo"
+            />
+          )}
+          {!isClient && (
+            <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+              {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 ml-4">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              updateContentFields(selectedContent.id, {
-                title: editTitle,
-                copy_text: editCopyText,
-                copy_texts: editCopyTexts,
-                publish_time: editPublishTime || null,
-                media_url: mediaUrls[0] ?? null,
-                media_urls: mediaUrls,
-              });
-            }}
-          >
-            Salvar rascunho
-          </Button>
-          {canAdvance && (
-            <Button
-              size="sm"
-              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
-              onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
-            >
-              Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
-            </Button>
+          {isClient ? (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+                onClick={() => updateContentStatus(selectedContent.id, 'review')}
+              >
+                Enviar para ajustes
+              </Button>
+              {canAdvance && (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                >
+                  Aprovar
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  updateContentFields(selectedContent.id, {
+                    title: editTitle,
+                    copy_text: editCopyText,
+                    copy_texts: editCopyTexts,
+                    publish_time: editPublishTime || null,
+                    media_url: mediaUrls[0] ?? null,
+                    media_urls: mediaUrls,
+                  });
+                }}
+              >
+                Salvar rascunho
+              </Button>
+              {canAdvance && (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                >
+                  Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
