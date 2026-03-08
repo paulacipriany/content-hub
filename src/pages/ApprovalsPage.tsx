@@ -1,0 +1,74 @@
+import TopBar from '@/components/layout/TopBar';
+import { useApp } from '@/contexts/AppContext';
+import { STATUS_LABELS, STATUS_COLORS } from '@/data/mockData';
+import { platformIcon } from '@/components/content/ContentCard';
+import { cn } from '@/lib/utils';
+import { CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const ApprovalsPage = () => {
+  const { contents, setSelectedContent, updateContentStatus } = useApp();
+  const approvals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+
+  return (
+    <>
+      <TopBar title="Aprovações" subtitle="Revise e aprove conteúdos pendentes" />
+      <div className="p-6">
+        {approvals.length === 0 ? (
+          <div className="text-center py-20">
+            <CheckCircle size={48} className="mx-auto text-status-published mb-4" />
+            <h2 className="text-lg font-semibold text-foreground mb-1">Tudo aprovado!</h2>
+            <p className="text-sm text-muted-foreground">Não há conteúdos aguardando aprovação.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {approvals.map(c => (
+              <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {platformIcon(c.platform, 14)}
+                    <span className="text-sm font-medium text-foreground">{c.title}</span>
+                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[c.status])}>
+                      {STATUS_LABELS[c.status]}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{c.description}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Por {c.assignee.name} · {new Date(c.publishDate).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-xs"
+                    onClick={() => setSelectedContent(c)}
+                  >
+                    <MessageSquare size={14} /> Revisar
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="gap-1 text-xs bg-status-published hover:bg-status-published/90"
+                    onClick={() => updateContentStatus(c.id, 'scheduled')}
+                  >
+                    <CheckCircle size={14} /> Aprovar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10"
+                    onClick={() => updateContentStatus(c.id, 'review')}
+                  >
+                    <XCircle size={14} /> Rejeitar
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default ApprovalsPage;
