@@ -43,6 +43,7 @@ const App = () => (
               <Route path="/clients" element={<ProjectsPage />} />
               {/* Client-scoped routes */}
               <Route path="/clients/:id/contents" element={<ContentsPage />} />
+              <Route path="/clients/:id/dashboard" element={<ClientDashboardPage />} />
               <Route path="/clients/:id/calendar" element={<CalendarPage />} />
               <Route path="/clients/:id/workflow" element={<WorkflowPage />} />
               <Route path="/clients/:id/approvals" element={<ApprovalsPage />} />
