@@ -263,8 +263,19 @@ const UsersPage = () => {
               <Input id="edit-name" value={editName} onChange={e => setEditName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="edit-email">E-mail</Label>
+              <Input id="edit-email" type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Deixe vazio para manter o atual" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-password">Nova senha</Label>
+              <Input id="edit-password" type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} placeholder="Deixe vazio para manter a atual" />
+            </div>
+            <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={editRole} onValueChange={setEditRole}>
+              <Select value={editRole} onValueChange={(val) => {
+                setEditRole(val);
+                if (val === 'admin') setEditProjectIds(projects.map(p => p.id));
+              }}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -276,9 +287,11 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            {editRole === 'client' && (
-              <div className="space-y-1.5">
-                <Label>Clientes vinculados</Label>
+            <div className="space-y-1.5">
+              <Label>Clientes vinculados</Label>
+              {editRole === 'admin' ? (
+                <p className="text-xs text-muted-foreground">Admins têm acesso a todos os clientes automaticamente.</p>
+              ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
                   {projects.map(p => (
                     <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -295,8 +308,8 @@ const UsersPage = () => {
                   ))}
                   {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>Cancelar</Button>
