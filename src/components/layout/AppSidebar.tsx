@@ -25,6 +25,7 @@ const clientNavItems = [
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
+  { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
   { icon: BarChart3, label: 'Relatórios', path: '/reports', hideFromClient: true },
   { icon: Users, label: 'Usuários', path: '/members', hideFromClient: true },
 ];
