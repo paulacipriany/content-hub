@@ -251,7 +251,7 @@ const ContentPanel = () => {
                 disabled={!newComment.trim() && !commentImageUrl && comments.length === 0}
                 title={!newComment.trim() && !commentImageUrl && comments.length === 0 ? 'Adicione um comentário antes de enviar para ajustes' : ''}
                 onClick={async () => {
-                  if ((!newComment.trim() && !commentImageUrl) || !user) return;
+                  if (!user) return;
                   const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
                   if (commentImageUrl) insertData.image_url = commentImageUrl;
                   await supabase.from('comments').insert(insertData);
