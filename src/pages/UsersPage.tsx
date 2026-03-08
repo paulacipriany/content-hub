@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Trash2, Pencil, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
 interface SimpleProject { id: string; name: string; color: string; }
 
@@ -37,6 +38,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [projects, setProjects] = useState<SimpleProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
@@ -239,7 +241,7 @@ const UsersPage = () => {
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(u.user_id)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(u.user_id), `"${u.display_name || 'este usuário'}"`)}>
                   <Trash2 size={14} />
                 </Button>
               </div>
@@ -388,6 +390,7 @@ const UsersPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog />
     </>
   );
 };

@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
 interface MediaItem {
   id: string;
@@ -29,6 +30,7 @@ const MediaLibraryPage = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canDelete = role === 'admin' || role === 'moderator';
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
 
   const fetchMedia = useCallback(async () => {
@@ -253,7 +255,7 @@ const MediaLibraryPage = () => {
                     <div className="ml-auto">
                       {canDelete && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                          onClick={(e) => { e.stopPropagation(); confirmDelete(() => handleDelete(item), `"${item.filename}"`); }}
                           className="w-7 h-7 rounded-full bg-destructive/80 hover:bg-destructive flex items-center justify-center transition-colors"
                           title="Excluir"
                         >
@@ -269,6 +271,7 @@ const MediaLibraryPage = () => {
         )}
       </div>
 
+      <ConfirmDialog />
     </>
   );
 };
