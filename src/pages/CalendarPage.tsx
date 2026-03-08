@@ -240,6 +240,7 @@ const CalendarPage = () => {
   const [newTaskText, setNewTaskText] = useState('');
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
