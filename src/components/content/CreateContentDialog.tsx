@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { PLATFORM_LABELS, CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
+import { CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
+import { PlatformSelector, getContentTypesForPlatforms } from './PlatformIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +32,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [platform, setPlatform] = useState<Platform>('instagram');
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [contentType, setContentType] = useState<ContentType>('feed');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
   const [publishDate, setPublishDate] = useState<Date | undefined>();
@@ -39,10 +40,17 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [assigneeEmail, setAssigneeEmail] = useState('');
 
+  const availableContentTypes = getContentTypesForPlatforms(platforms);
+
+  // Reset content type if not available for selected platforms
+  if (platforms.length > 0 && !availableContentTypes.includes(contentType) && availableContentTypes.length > 0) {
+    setContentType(availableContentTypes[0]);
+  }
+
   const reset = () => {
     setTitle('');
     setDescription('');
-    setPlatform('instagram');
+    setPlatforms([]);
     setContentType('feed');
     setProjectId(defaultProjectId ?? '');
     setPublishDate(undefined);
@@ -60,14 +68,13 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !projectId || !user) {
-      toast({ title: 'Campos obrigatórios', description: 'Preencha ao menos o título e selecione um cliente.', variant: 'destructive' });
+    if (!title.trim() || !projectId || !user || platforms.length === 0) {
+      toast({ title: 'Campos obrigatórios', description: 'Preencha o título, selecione um cliente e ao menos uma plataforma.', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
 
-    // Resolve assignee by email if provided
     let assigneeId: string | null = null;
     if (assigneeEmail.trim()) {
       const { data: profile } = await supabase
@@ -82,7 +89,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
     const { error } = await supabase.from('contents').insert({
       title: title.trim(),
       description: description.trim(),
-      platform,
+      platform: platforms,
       content_type: contentType,
       project_id: projectId,
       publish_date: publishDate ? format(publishDate, 'yyyy-MM-dd') : null,
@@ -90,7 +97,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
       status: 'idea',
-    });
+    } as any);
 
     setLoading(false);
 
@@ -151,21 +158,17 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             </Select>
           </div>
 
-          {/* Platform + Type row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Plataforma</Label>
-              <Select value={platform} onValueChange={v => setPlatform(v as Platform)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(PLATFORM_LABELS) as [Platform, string][]).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Platforms */}
+          <div className="space-y-2">
+            <Label>Plataformas *</Label>
+            <PlatformSelector selected={platforms} onChange={setPlatforms} size={40} />
+            {platforms.length === 0 && (
+              <p className="text-[11px] text-muted-foreground">Selecione ao menos uma plataforma.</p>
+            )}
+          </div>
+
+          {/* Content Type - only shows after platform selection */}
+          {platforms.length > 0 && (
             <div className="space-y-1.5">
               <Label>Tipo de conteúdo</Label>
               <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
@@ -173,13 +176,13 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.entries(CONTENT_TYPE_LABELS) as [ContentType, string][]).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  {availableContentTypes.map(t => (
+                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          )}
 
           {/* Description */}
           <div className="space-y-1.5">
