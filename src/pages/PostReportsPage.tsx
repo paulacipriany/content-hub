@@ -12,6 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+type AnalysisResult = 'positivo' | 'negativo' | 'neutro';
+
 interface PostAnalysis {
   id: string;
   content_id: string;
@@ -20,8 +22,15 @@ interface PostAnalysis {
   comments_count: number;
   shares: number;
   analysis_text: string;
+  result: AnalysisResult | null;
   created_by: string;
 }
+
+const resultOptions: { value: AnalysisResult; label: string; color: string }[] = [
+  { value: 'positivo', label: 'Positivo', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+  { value: 'negativo', label: 'Negativo', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  { value: 'neutro', label: 'Neutro', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800/40 dark:text-zinc-300' },
+];
 
 const contentTypeBadgeColors: Record<string, string> = {
   stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
