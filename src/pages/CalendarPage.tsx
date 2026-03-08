@@ -193,6 +193,7 @@ const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
+  const [activeTask, setActiveTask] = useState<CalTask | null>(null);
   const [tasks, setTasks] = useState<CalTask[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
 
