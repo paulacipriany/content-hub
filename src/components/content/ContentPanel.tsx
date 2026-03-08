@@ -62,7 +62,10 @@ const ContentPanel = () => {
   const [editPublishTime, setEditPublishTime] = useState('');
   const [uploading, setUploading] = useState(false);
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [briefingImages, setBriefingImages] = useState<string[]>([]);
+  const [briefingUploading, setBriefingUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const briefingFileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
