@@ -336,7 +336,7 @@ const ContentPanel = () => {
       <div className="flex items-center justify-between px-6 h-14 border-b border-border bg-card flex-shrink-0">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
-            onClick={() => setSelectedContent(null)}
+            onClick={handleClose}
             className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <X size={18} />
