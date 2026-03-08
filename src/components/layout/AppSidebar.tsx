@@ -140,10 +140,14 @@ const AppSidebar = () => {
                       setSelectedProject(project);
                       navigate(`/clients/${project.id}/dashboard`);
                     }}
-                    className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all hover:brightness-110 active:scale-[0.98]"
-                    style={{ backgroundColor: project.color, color: contrastText(project.color) }}
+                    className="w-full px-4 py-1.5 text-sm font-medium truncate text-left transition-all hover:brightness-125 active:scale-[0.98]"
                   >
-                    {project.name}
+                    <span
+                      className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-medium"
+                      style={{ backgroundColor: project.color + '25', color: project.color }}
+                    >
+                      {project.name}
+                    </span>
                   </button>
                 ))}
               </div>
