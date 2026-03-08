@@ -32,6 +32,47 @@ interface TaskListCardProps {
   projectId: string;
 }
 
+const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(text);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setValue(text); }, [text]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (value.trim() && value.trim() !== text) onSave(value.trim());
+    else setValue(text);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); } }}
+        className="text-sm bg-transparent border-b border-primary/40 outline-none w-full text-foreground"
+      />
+    );
+  }
+
+  return (
+    <span
+      onDoubleClick={() => setEditing(true)}
+      className={cn(
+        "text-sm block truncate transition-colors cursor-text",
+        done ? "line-through text-muted-foreground" : "text-foreground"
+      )}
+      title="Clique duplo para editar"
+    >
+      {text}
+    </span>
+  );
+};
+
 const TaskListCard = ({ projectId }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
