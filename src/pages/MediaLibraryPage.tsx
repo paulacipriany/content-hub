@@ -17,7 +17,7 @@ interface MediaItem {
   filename: string;
   content_id: string | null;
   contentTitle: string | null;
-  source: 'library';
+  source: 'library' | 'content';
 }
 
 const MediaLibraryPage = () => {
@@ -45,19 +45,45 @@ const MediaLibraryPage = () => {
       .eq('project_id', selectedProject.id)
       .order('created_at', { ascending: false });
 
-    if (data) {
-      setMediaItems(data.map((m: any) => {
-        const content = m.content_id ? projectContents.find(c => c.id === m.content_id) : null;
-        return {
-          id: m.id,
-          url: m.url,
-          filename: m.filename,
-          content_id: m.content_id,
-          contentTitle: content?.title ?? null,
-          source: 'library' as const,
-        };
-      }));
-    }
+    const libraryItems: MediaItem[] = (data ?? []).map((m: any) => {
+      const content = m.content_id ? projectContents.find(c => c.id === m.content_id) : null;
+      return {
+        id: m.id,
+        url: m.url,
+        filename: m.filename,
+        content_id: m.content_id,
+        contentTitle: content?.title ?? null,
+        source: 'library' as const,
+      };
+    });
+
+    // Collect media from contents
+    const libraryUrls = new Set(libraryItems.map(i => i.url));
+    const contentItems: MediaItem[] = [];
+    projectContents.forEach(content => {
+      const urls: string[] = [];
+      if (content.media_urls && Array.isArray(content.media_urls)) {
+        (content.media_urls as string[]).forEach(u => { if (u) urls.push(u); });
+      }
+      if (content.media_url && !urls.includes(content.media_url)) {
+        urls.push(content.media_url);
+      }
+      urls.forEach(url => {
+        if (!libraryUrls.has(url)) {
+          libraryUrls.add(url);
+          contentItems.push({
+            id: `content-${content.id}-${url}`,
+            url,
+            filename: content.title,
+            content_id: content.id,
+            contentTitle: content.title,
+            source: 'content',
+          });
+        }
+      });
+    });
+
+    setMediaItems([...libraryItems, ...contentItems]);
     setLoading(false);
   }, [selectedProject?.id, projectContents]);
 
@@ -94,7 +120,21 @@ const MediaLibraryPage = () => {
   };
 
   const handleDelete = async (item: MediaItem) => {
-    await supabase.from('media_library').delete().eq('id', item.id);
+    if (item.source === 'library') {
+      await supabase.from('media_library').delete().eq('id', item.id);
+    }
+    // Also remove from content media_urls if linked
+    if (item.content_id) {
+      const content = projectContents.find(c => c.id === item.content_id);
+      if (content) {
+        const currentUrls = (content.media_urls && Array.isArray(content.media_urls) ? content.media_urls : []).filter(Boolean) as string[];
+        const updatedUrls = currentUrls.filter(u => u !== item.url);
+        await updateContentFields(item.content_id, {
+          media_url: updatedUrls[0] ?? null,
+          media_urls: updatedUrls,
+        });
+      }
+    }
     setMediaItems(prev => prev.filter(m => m.id !== item.id));
     toast({ title: 'Mídia excluída' });
   };
