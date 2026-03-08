@@ -149,31 +149,23 @@ const AppSidebar = () => {
 
             {/* Other clients */}
             {projects.filter(p => p.id !== selectedProject.id).length > 0 && (
-              <div className="pt-4">
-                <div className="px-3 mb-1">
+              <div className="pt-4 -mx-2 space-y-0.5">
+                <div className="px-4 mb-1">
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
-                {projects.filter(p => p.id !== selectedProject.id).map(project => {
-                  const hex = project.color.replace('#', '');
-                  const r = parseInt(hex.substring(0, 2), 16) / 255;
-                  const g = parseInt(hex.substring(2, 4), 16) / 255;
-                  const b = parseInt(hex.substring(4, 6), 16) / 255;
-                  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-                  const textColor = luminance > 0.55 ? '#1a1a1a' : '#ffffff';
-                  return (
-                    <button
-                      key={project.id}
-                      onClick={() => {
-                        setSelectedProject(project);
-                        navigate(`/clients/${project.id}/dashboard`);
-                      }}
-                      className="w-full px-3 py-1.5 rounded-md text-sm font-medium truncate text-left transition-all hover:brightness-110 active:scale-[0.98]"
-                      style={{ backgroundColor: project.color, color: textColor }}
-                    >
-                      {project.name}
-                    </button>
-                  );
-                })}
+                {projects.filter(p => p.id !== selectedProject.id).map(project => (
+                  <button
+                    key={project.id}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      navigate(`/clients/${project.id}/dashboard`);
+                    }}
+                    className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all hover:brightness-110 active:scale-[0.98]"
+                    style={{ backgroundColor: project.color, color: getTextColor(project.color) }}
+                  >
+                    {project.name}
+                  </button>
+                ))}
               </div>
             )}
             {sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
