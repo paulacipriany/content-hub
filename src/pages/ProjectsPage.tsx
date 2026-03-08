@@ -106,11 +106,12 @@ const ProjectsPage = () => {
     }
   };
 
-  const startEdit = (project: { id: string; name: string; color: string; logo_url?: string | null }) => {
+  const startEdit = (project: any) => {
     setEditingId(project.id);
     setEditName(project.name);
     setEditColor(project.color);
     setEditLogoUrl(project.logo_url ?? null);
+    setEditPlatforms(project.platforms ?? []);
   };
 
   const handleEditLogoUpload = async (file: File) => {
