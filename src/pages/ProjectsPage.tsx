@@ -65,6 +65,7 @@ const ProjectsPage = () => {
   const [newColor, setNewColor] = useState(COLORS[0]);
   const [newLogoUrl, setNewLogoUrl] = useState<string | null>(null);
   const [uploadingNew, setUploadingNew] = useState(false);
+  const [newPlatforms, setNewPlatforms] = useState<Platform[]>([]);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
