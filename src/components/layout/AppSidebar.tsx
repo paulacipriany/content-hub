@@ -30,6 +30,8 @@ const AppSidebar = () => {
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
   const { profile, role, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   const isClient = role === 'client';
 
