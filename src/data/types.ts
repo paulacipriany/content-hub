@@ -1,7 +1,7 @@
 import { Tables } from '@/integrations/supabase/types';
 
 // DB-backed types
-export type DbProject = Tables<'projects'>;
+export type DbProject = Tables<'projects'> & { logo_url?: string | null };
 export type DbContent = Tables<'contents'>;
 export type DbComment = Tables<'comments'>;
 export type DbChecklistItem = Tables<'checklist_items'>;
