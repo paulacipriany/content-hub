@@ -62,6 +62,7 @@ const AnalysisRow = ({
   const [commentsCount, setCommentsCount] = useState(analysis?.comments_count ?? 0);
   const [shares, setShares] = useState(analysis?.shares ?? 0);
   const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
+  const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
   const [saving, setSaving] = useState(false);
 
   const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
