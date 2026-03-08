@@ -120,7 +120,21 @@ const MediaLibraryPage = () => {
   };
 
   const handleDelete = async (item: MediaItem) => {
-    await supabase.from('media_library').delete().eq('id', item.id);
+    if (item.source === 'library') {
+      await supabase.from('media_library').delete().eq('id', item.id);
+    }
+    // Also remove from content media_urls if linked
+    if (item.content_id) {
+      const content = projectContents.find(c => c.id === item.content_id);
+      if (content) {
+        const currentUrls = (content.media_urls && Array.isArray(content.media_urls) ? content.media_urls : []).filter(Boolean) as string[];
+        const updatedUrls = currentUrls.filter(u => u !== item.url);
+        await updateContentFields(item.content_id, {
+          media_url: updatedUrls[0] ?? null,
+          media_urls: updatedUrls,
+        });
+      }
+    }
     setMediaItems(prev => prev.filter(m => m.id !== item.id));
     toast({ title: 'Mídia excluída' });
   };
