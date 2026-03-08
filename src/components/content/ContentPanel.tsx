@@ -144,6 +144,35 @@ const ContentPanel = () => {
     updateContentFields(selectedContent.id, { hashtags: newTags });
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedContent) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${selectedContent.id}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+      await updateContentFields(selectedContent.id, { media_url: publicUrl } as any);
+    } catch (err) {
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveMedia = async () => {
+    if (!selectedContent || !user) return;
+    const { data: files } = await supabase.storage.from('content-media').list(user.id);
+    const match = files?.find(f => f.name.startsWith(selectedContent.id));
+    if (match) {
+      await supabase.storage.from('content-media').remove([`${user.id}/${match.name}`]);
+    }
+    await updateContentFields(selectedContent.id, { media_url: null } as any);
+  };
+
   return (
     <div className="w-[420px] border-l border-border bg-card flex flex-col h-full animate-slide-in-right flex-shrink-0">
       {/* Header */}
