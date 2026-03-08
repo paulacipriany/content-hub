@@ -90,14 +90,6 @@ const TopBar = ({ title, subtitle, actions }: TopBarProps) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative hidden md:flex items-center">
-          <Search size={16} className="absolute left-3 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar conteúdos..."
-            className="h-9 pl-9 pr-4 rounded-lg bg-secondary text-sm text-foreground placeholder:text-muted-foreground border-none outline-none focus:ring-2 focus:ring-ring/20 w-64"
-          />
-        </div>
 
         <Popover>
           <PopoverTrigger asChild>
