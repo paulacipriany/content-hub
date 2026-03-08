@@ -128,13 +128,13 @@
     --platform-youtube: 0 72% 60%;
 
     /* Shadcn sidebar tokens */
-    --sidebar-background: 220 15% 5%;
-    --sidebar-foreground: 220 5% 60%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 270 13% 85%;
     --sidebar-primary: 220 100% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 12% 12%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 12% 14%;
+    --sidebar-primary-foreground: 270 13% 97%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 270 13% 97%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-ring: 220 100% 58%;
   }
 }
