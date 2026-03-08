@@ -2,21 +2,25 @@ import { Search, Bell, MessageSquare, ArrowRightLeft, CheckCheck } from 'lucide-
 import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Notification } from '@/hooks/useRealtimeNotifications';
+import { useNotifications } from '@/components/layout/AppLayout';
+import { useApp } from '@/contexts/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface TopBarProps {
   title?: string;
   subtitle?: string;
-  notifications?: Notification[];
-  unreadCount?: number;
-  onMarkAsRead?: (id: string) => void;
-  onMarkAllAsRead?: () => void;
-  onNotificationClick?: (contentId: string) => void;
 }
 
-const TopBar = ({ title, subtitle, notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllAsRead, onNotificationClick }: TopBarProps) => {
+const TopBar = ({ title, subtitle }: TopBarProps) => {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { contents, setSelectedContent } = useApp();
+
+  const handleNotificationClick = (contentId: string) => {
+    const content = contents.find(c => c.id === contentId);
+    if (content) setSelectedContent(content);
+  };
+
   return (
     <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0">
       <div>
@@ -50,7 +54,7 @@ const TopBar = ({ title, subtitle, notifications = [], unreadCount = 0, onMarkAs
               <h3 className="text-sm font-semibold text-foreground">Notificações</h3>
               {unreadCount > 0 && (
                 <button
-                  onClick={onMarkAllAsRead}
+                  onClick={markAllAsRead}
                   className="text-xs text-primary hover:underline flex items-center gap-1"
                 >
                   <CheckCheck size={12} /> Marcar todas como lidas
@@ -67,8 +71,8 @@ const TopBar = ({ title, subtitle, notifications = [], unreadCount = 0, onMarkAs
                   <button
                     key={n.id}
                     onClick={() => {
-                      onMarkAsRead?.(n.id);
-                      onNotificationClick?.(n.contentId);
+                      markAsRead(n.id);
+                      handleNotificationClick(n.contentId);
                     }}
                     className={cn(
                       "w-full text-left px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/50 transition-colors flex gap-3",
