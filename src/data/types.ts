@@ -20,8 +20,8 @@ export type ContentWithRelations = DbContent & {
 };
 
 // Keep label/color maps for UI
-export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube';
-export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post';
+export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest';
+export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image';
 export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
@@ -50,6 +50,7 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   linkedin: 'LinkedIn',
   tiktok: 'TikTok',
   youtube: 'YouTube',
+  pinterest: 'Pinterest',
 };
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
@@ -59,7 +60,9 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   carousel: 'Carrossel',
   video: 'Vídeo',
   post: 'Post',
+  shorts: 'Shorts',
+  image: 'Imagem',
 };
 
 // Content types visible in UI (carousel merged into feed)
-export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post'];
+export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post', 'shorts', 'image'];
