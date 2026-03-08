@@ -76,6 +76,7 @@ const AnalysisRow = ({
       comments_count: commentsCount,
       shares,
       analysis_text: analysisText,
+      result,
       created_by: userId,
     };
 
