@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
-import { PlatformSelector, getContentTypesForPlatforms } from './PlatformIcons';
+import { PlatformSelector } from './PlatformIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,23 +29,19 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const [title, setTitle] = useState('');
   const [briefing, setBriefing] = useState('');
   const [platforms, setPlatforms] = useState<Platform[]>([]);
-  const [contentType, setContentType] = useState<ContentType>('feed');
+  const [contentType, setContentType] = useState<ContentType>('post');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
   const [assigneeEmail, setAssigneeEmail] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
-  const availableContentTypes = getContentTypesForPlatforms(platforms);
-
-  if (platforms.length > 0 && !availableContentTypes.includes(contentType) && availableContentTypes.length > 0) {
-    setContentType(availableContentTypes[0]);
-  }
+  const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
 
   const reset = () => {
     setTitle('');
     setBriefing('');
     setPlatforms([]);
-    setContentType('feed');
+    setContentType('post');
     setProjectId(defaultProjectId ?? '');
     setAssigneeEmail('');
     setSelectedFiles([]);
@@ -162,18 +158,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label htmlFor="content-title">Título *</Label>
-            <Input
-              id="content-title"
-              placeholder="Ex: Post sobre lançamento..."
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-          </div>
-
-          {/* Project */}
+          {/* Project — moved to top */}
           <div className="space-y-1.5">
             <Label>Cliente *</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -193,6 +178,17 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             </Select>
           </div>
 
+          {/* Title */}
+          <div className="space-y-1.5">
+            <Label htmlFor="content-title">Título *</Label>
+            <Input
+              id="content-title"
+              placeholder="Ex: Post sobre lançamento..."
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </div>
+
           {/* Platforms */}
           <div className="space-y-2">
             <Label>Plataformas *</Label>
@@ -202,22 +198,20 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             )}
           </div>
 
-          {/* Content Type - only shows after platform selection */}
-          {platforms.length > 0 && (
-            <div className="space-y-1.5">
-              <Label>Tipo de conteúdo</Label>
-              <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableContentTypes.map(t => (
-                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {/* Content Type — universal, always visible */}
+          <div className="space-y-1.5">
+            <Label>Tipo de conteúdo</Label>
+            <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {universalContentTypes.map(t => (
+                  <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Briefing */}
           <div className="space-y-2">
