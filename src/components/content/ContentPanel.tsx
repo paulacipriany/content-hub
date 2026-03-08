@@ -459,7 +459,8 @@ const ContentPanel = () => {
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
                 <RichTextEditor
-                  content={editBriefing}
+                  key={selectedContent.id}
+                  content={selectedContent.description ?? ''}
                   onChange={setEditBriefing}
                   contentId={selectedContent.id}
                 />
