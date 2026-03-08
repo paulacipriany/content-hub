@@ -139,19 +139,14 @@ const AppSidebar = () => {
                   setSelectedProject(project);
                   navigate(`/clients/${project.id}/dashboard`);
                 }}
-                className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
+                className="flex items-center w-full px-3 py-1.5 rounded-md text-sm transition-colors hover:opacity-80"
               >
-                {(project as any).logo_url ? (
-                  <img src={(project as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <span
-                    className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                    style={{ backgroundColor: project.color + '25', color: project.color }}
-                  >
-                    {project.name.charAt(0)}
-                  </span>
-                )}
-                <span className="truncate">{project.name}</span>
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded truncate"
+                  style={{ backgroundColor: project.color + '25', color: project.color }}
+                >
+                  {project.name}
+                </span>
               </button>
             ))}
           </div>
