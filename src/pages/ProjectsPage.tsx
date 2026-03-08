@@ -179,6 +179,10 @@ const ProjectsPage = () => {
                 />
               ))}
             </div>
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
+              <PlatformSelector selected={newPlatforms} onChange={setNewPlatforms} size={36} />
+            </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate}>Criar</Button>
               <Button size="sm" variant="outline" onClick={() => { setShowCreate(false); setNewLogoUrl(null); }}>Cancelar</Button>
