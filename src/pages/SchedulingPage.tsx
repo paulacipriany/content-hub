@@ -124,7 +124,7 @@ const SchedulingPage = () => {
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
                     const checked = checkedPlatforms[content.id] ?? {};
-                    const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
+                    const PlatformIconFirst = platforms[0] ? PLATFORM_ICONS[platforms[0]] : null;
 
                     return (
                       <div
