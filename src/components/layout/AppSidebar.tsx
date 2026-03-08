@@ -19,6 +19,9 @@ const navItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { sidebarCollapsed, setSidebarCollapsed, projects } = useApp();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
   const { profile, role, signOut } = useAuth();
 
