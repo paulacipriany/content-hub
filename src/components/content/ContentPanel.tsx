@@ -754,24 +754,6 @@ const ContentPanel = () => {
             </>
           )}
 
-          {/* Checklist */}
-          {checklist.length > 0 && (
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
-              <div className="space-y-1.5">
-                {checklist.map(item => (
-                  <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
-                    <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
-                      item.done ? "bg-status-published border-status-published" : "border-border"
-                    )}>
-                      {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
-                    </div>
-                    <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right column — Checklist sidebar for idea-bank, Preview & Comments otherwise */}
