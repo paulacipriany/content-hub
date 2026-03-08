@@ -5,7 +5,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform } from '@/data/types';
 import {
   FileText, Calendar, GitBranch, CheckCircle, Image, BarChart3,
-  TrendingUp, Clock, ArrowRight,
+  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
