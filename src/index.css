@@ -165,3 +165,31 @@
     border-radius: 3px;
   }
 }
+
+/* Tiptap rich editor styles */
+.tiptap {
+  outline: none;
+}
+.tiptap p {
+  margin-bottom: 0.5em;
+}
+.tiptap h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+.tiptap ul, .tiptap ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+.tiptap ul { list-style: disc; }
+.tiptap ol { list-style: decimal; }
+.tiptap a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+.tiptap img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 0.5em 0;
+}
