@@ -61,6 +61,11 @@ const AppSidebar = () => {
     ? contents.filter(c => c.project_id === selectedProject.id && ['approval-internal', 'approval-client'].includes(c.status)).length
     : 0;
 
+  // Count posts pending review for selected project
+  const reviewCount = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'review').length
+    : 0;
+
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Gestor',
@@ -167,6 +172,11 @@ const AppSidebar = () => {
                   {item.path === '/approvals' && approvalCount > 0 && (
                     <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                       {approvalCount}
+                    </span>
+                  )}
+                  {item.path === '/review' && reviewCount > 0 && (
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                      {reviewCount}
                     </span>
                   )}
                 </button>
