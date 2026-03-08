@@ -617,7 +617,7 @@ const ContentPanel = () => {
                         {url.match(/\.(mp4|webm|mov)$/i) ? (
                           <video src={url} controls className="w-full h-full object-cover" />
                         ) : (
-                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
                         )}
                         <button
                           onClick={() => handleRemoveMedia(i)}
