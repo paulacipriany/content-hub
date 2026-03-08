@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,7 @@ const clientNavItems = [
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
+  { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
   { icon: BarChart3, label: 'Relatórios', path: '/reports', hideFromClient: true },
   { icon: Users, label: 'Usuários', path: '/members', hideFromClient: true },
 ];
