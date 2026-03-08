@@ -831,68 +831,89 @@ const ContentPanel = () => {
                 ))}
               </div>
               <PostPreview content={selectedContent} platform={previewPlatform} />
+
+              {/* Checklist — only for idea/production */}
+              {(selectedContent.status === 'idea' || selectedContent.status === 'production') && checklist.length > 0 && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
+                  <div className="space-y-1.5">
+                    {checklist.map(item => (
+                      <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
+                        <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
+                          item.done ? "bg-status-published border-status-published" : "border-border"
+                        )}>
+                          {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
+                        </div>
+                        <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Comments */}
-          <div className={cn("border-t border-border p-5 flex flex-col", isClient ? "flex-1" : "max-h-[40%]")}>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
-            <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
-              {comments.map(c => (
-                <div key={c.id} className="bg-secondary rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
-                    <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')} {new Date(c.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+          {/* Comments — hidden when status is idea (rascunho) */}
+          {selectedContent.status !== 'idea' && (
+            <div className={cn("border-t border-border p-5 flex flex-col", isClient ? "flex-1" : "max-h-[40%]")}>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
+              <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
+                {comments.map(c => (
+                  <div key={c.id} className="bg-secondary rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
+                      <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')} {new Date(c.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    {c.text && <p className="text-xs text-muted-foreground">{c.text}</p>}
+                    {c.image_url && (
+                      <img src={c.image_url} alt="Anexo" className="mt-2 rounded-md max-h-40 object-cover cursor-pointer" onClick={() => window.open(c.image_url, '_blank')} />
+                    )}
                   </div>
-                  {c.text && <p className="text-xs text-muted-foreground">{c.text}</p>}
-                  {c.image_url && (
-                    <img src={c.image_url} alt="Anexo" className="mt-2 rounded-md max-h-40 object-cover cursor-pointer" onClick={() => window.open(c.image_url, '_blank')} />
+                ))}
+                {comments.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
+                )}
+              </div>
+              {(!isClient || isClientApproval) && (
+                <>
+                  {commentImageUrl && (
+                    <div className="relative mb-2 inline-block">
+                      <img src={commentImageUrl} alt="Preview" className="h-16 rounded-md object-cover" />
+                      <button
+                        onClick={() => setCommentImageUrl(null)}
+                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]"
+                      >✕</button>
+                    </div>
                   )}
-                </div>
-              ))}
-              {comments.length === 0 && (
-                <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
+                  <div className="flex gap-2">
+                    <input
+                      value={newComment}
+                      onChange={e => setNewComment(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddComment()}
+                      placeholder="Adicionar comentário..."
+                      className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+                    />
+                    <button
+                      onClick={() => commentFileRef.current?.click()}
+                      disabled={commentUploading}
+                      className="w-8 h-8 rounded-md flex items-center justify-center bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      title="Anexar imagem"
+                    >
+                      {commentUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+                    </button>
+                    <input ref={commentFileRef} type="file" accept="image/*" onChange={handleCommentImageUpload} className="hidden" />
+                    <button
+                      onClick={handleAddComment}
+                      className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                    >
+                      <Send size={14} className="text-primary-foreground" />
+                    </button>
+                  </div>
+                </>
               )}
             </div>
-            {(!isClient || isClientApproval) && (
-              <>
-                {commentImageUrl && (
-                  <div className="relative mb-2 inline-block">
-                    <img src={commentImageUrl} alt="Preview" className="h-16 rounded-md object-cover" />
-                    <button
-                      onClick={() => setCommentImageUrl(null)}
-                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]"
-                    >✕</button>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <input
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-                    placeholder="Adicionar comentário..."
-                    className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
-                  />
-                  <button
-                    onClick={() => commentFileRef.current?.click()}
-                    disabled={commentUploading}
-                    className="w-8 h-8 rounded-md flex items-center justify-center bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                    title="Anexar imagem"
-                  >
-                    {commentUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-                  </button>
-                  <input ref={commentFileRef} type="file" accept="image/*" onChange={handleCommentImageUpload} className="hidden" />
-                  <button
-                    onClick={handleAddComment}
-                    className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
-                  >
-                    <Send size={14} className="text-primary-foreground" />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          )}
         </div>}
       </div>
 
