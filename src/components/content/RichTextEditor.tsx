@@ -122,9 +122,6 @@ const RichTextEditor = ({ content, onChange, contentId }: RichTextEditorProps) =
         <ToolBtn active={editor.isActive('link')} onClick={addLink} title="Link">
           <LinkIcon size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => fileInputRef.current?.click()} title="Imagem">
-          <ImageIcon size={14} />
-        </ToolBtn>
         <div className="w-px h-5 bg-border mx-1" />
         <ToolBtn onClick={() => editor.chain().focus().undo().run()} title="Desfazer">
           <Undo size={14} />
@@ -135,7 +132,6 @@ const RichTextEditor = ({ content, onChange, contentId }: RichTextEditorProps) =
       </div>
 
       <EditorContent editor={editor} />
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={addImage} className="hidden" />
     </div>
   );
 };
