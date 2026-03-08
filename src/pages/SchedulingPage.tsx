@@ -4,8 +4,8 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
-import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check, Download, Loader2, Copy, Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
+import { platformIcon, PLATFORM_ICONS, PLATFORM_COLORS } from '@/components/content/PlatformIcons';
+import { Calendar, Clock, User, Check, Download, Loader2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -13,13 +13,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import PostPreview from '@/components/content/PostPreview';
 import JSZip from 'jszip';
-
-const platformIcons: Partial<Record<Platform, React.ElementType>> = {
-  instagram: Instagram,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  youtube: Youtube,
-};
 
 const contentTypeBadgeColors: Record<string, string> = {
   stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
@@ -131,7 +124,7 @@ const SchedulingPage = () => {
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
                     const checked = checkedPlatforms[content.id] ?? {};
-                    const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
+                    const PlatformIconFirst = platforms[0] ? PLATFORM_ICONS[platforms[0]] : null;
 
                     return (
                       <div
@@ -160,17 +153,19 @@ const SchedulingPage = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           {platforms.map(p => {
-                            const Icon = platformIcons[p as Platform];
+                            const Icon = PLATFORM_ICONS[p];
                             const isChecked = checked[p] ?? false;
                             return Icon ? (
-                              <Icon
+                              <span
                                 key={p}
-                                size={16}
+                                style={{ color: isChecked ? undefined : (PLATFORM_COLORS[p] || 'var(--muted-foreground)') }}
                                 className={cn(
                                   "transition-colors",
-                                  isChecked ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                  isChecked && "text-emerald-600 dark:text-emerald-400"
                                 )}
-                              />
+                              >
+                                <Icon size={16} />
+                              </span>
                             ) : null;
                           })}
                         </div>
@@ -260,7 +255,7 @@ const SchedulingPage = () => {
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Checklist de agendamento</h4>
                     <div className="space-y-2.5">
                       {platforms.map(p => {
-                        const Icon = platformIcons[p as Platform];
+                        const Icon = PLATFORM_ICONS[p];
                         return (
                           <label key={p} className="flex items-center gap-2.5 cursor-pointer group">
                             <Checkbox
@@ -284,7 +279,7 @@ const SchedulingPage = () => {
                                 }
                               }}
                             />
-                            {Icon && <Icon size={14} className={cn(checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")} />}
+                            {Icon && <span className={cn(checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}><Icon size={14} /></span>}
                             <span className={cn(
                               "text-sm font-medium transition-colors",
                               checked[p] ? "text-emerald-600 dark:text-emerald-400 line-through" : "text-foreground"
