@@ -66,7 +66,7 @@ const AppSidebar = () => {
         "flex flex-col h-screen border-r border-sidebar-border-custom transition-all duration-300 flex-shrink-0",
         sidebarCollapsed ? "w-16" : "w-60"
       )}
-      style={{ backgroundColor: selectedProject ? selectedProject.color : 'hsl(var(--sidebar-bg))' }}
+      style={{ backgroundColor: selectedProject ? getDarkShade(selectedProject.color) : 'hsl(var(--sidebar-bg))' }}
     >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border-custom">
