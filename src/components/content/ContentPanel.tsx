@@ -813,7 +813,7 @@ const ContentPanel = () => {
               </>
             )}
           </div>
-        </div>)}
+        </div>}
       </div>
 
       {/* Lightbox modal */}
