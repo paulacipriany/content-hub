@@ -403,19 +403,14 @@ const ContentPanel = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  updateContentFields(selectedContent.id, {
-                    title: editTitle,
-                    copy_text: editCopyText,
-                    copy_texts: editCopyTexts,
-                    publish_time: editPublishTime || null,
-                    media_url: mediaUrls[0] ?? null,
-                    media_urls: mediaUrls,
-                    briefing_images: briefingImages,
-                  });
-                }}
+                disabled={draftSaved}
+                onClick={handleSaveDraft}
               >
-                Salvar rascunho
+                {draftSaved ? (
+                  <><Check size={14} className="mr-1" /> Salvo</>
+                ) : (
+                  'Salvar rascunho'
+                )}
               </Button>
               {isIdeaBank ? (
                 <Button
