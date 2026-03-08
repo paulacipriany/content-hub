@@ -61,6 +61,11 @@ const AppSidebar = () => {
     ? contents.filter(c => c.project_id === selectedProject.id && ['approval-internal', 'approval-client'].includes(c.status)).length
     : 0;
 
+  // Count posts pending review for selected project
+  const reviewCount = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'review').length
+    : 0;
+
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Gestor',
