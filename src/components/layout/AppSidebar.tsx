@@ -4,6 +4,27 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
+/** Given a hex color, return a very dark version (10% lightness) for sidebar bg */
+const getDarkShade = (hex: string): string => {
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substring(0, 2), 16) / 255;
+  const g = parseInt(c.substring(2, 4), 16) / 255;
+  const b = parseInt(c.substring(4, 6), 16) / 255;
+  // darken by mixing with black at 85%
+  const dr = Math.round(r * 0.15 * 255);
+  const dg = Math.round(g * 0.15 * 255);
+  const db = Math.round(b * 0.15 * 255);
+  return `rgb(${dr}, ${dg}, ${db})`;
+};
+
+const getTextColor = (hex: string): string => {
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substring(0, 2), 16) / 255;
+  const g = parseInt(c.substring(2, 4), 16) / 255;
+  const b = parseInt(c.substring(4, 6), 16) / 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.55 ? '#1a1a1a' : '#ffffff';
+};
+
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
   { icon: FolderOpen, label: 'Clientes', path: '/clients' },
