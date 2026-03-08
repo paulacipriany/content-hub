@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -240,6 +240,7 @@ const CalendarPage = () => {
   const [newTaskText, setNewTaskText] = useState('');
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -387,43 +388,70 @@ const CalendarPage = () => {
       <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
       <div className="flex h-[calc(100vh-130px)]">
         {/* Sidebar: undated tasks */}
-        <div className="w-60 flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto">
-          <div className="p-3">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
-              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
-                {undatedTasks.length}
-              </span>
-            </div>
-
-            {undatedTasks.length === 0 ? (
-              <p className="text-xs text-muted-foreground/60 py-4 text-center">Nenhuma tarefa</p>
-            ) : (
-              <div className="space-y-0.5 mb-3">
-                {undatedTasks.map(t => (
-                  <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
-                ))}
+        <div className={cn(
+          "flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto transition-all duration-200",
+          sidebarOpen ? "w-60" : "w-10"
+        )}>
+          {sidebarOpen ? (
+            <div className="p-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
+                    {undatedTasks.length}
+                  </span>
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground"
+                    title="Minimizar"
+                  >
+                    <PanelLeftClose size={14} />
+                  </button>
+                </div>
               </div>
-            )}
 
-            <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex items-center gap-1.5 mt-2">
-              <Input
-                value={newTaskText}
-                onChange={e => setNewTaskText(e.target.value)}
-                placeholder="Adicionar tarefa..."
-                className="h-8 text-xs border-dashed bg-transparent"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-primary"
-                disabled={!newTaskText.trim()}
+              {undatedTasks.length === 0 ? (
+                <p className="text-xs text-muted-foreground/60 py-4 text-center">Nenhuma tarefa</p>
+              ) : (
+                <div className="space-y-0.5 mb-3">
+                  {undatedTasks.map(t => (
+                    <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
+                  ))}
+                </div>
+              )}
+
+              <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex items-center gap-1.5 mt-2">
+                <Input
+                  value={newTaskText}
+                  onChange={e => setNewTaskText(e.target.value)}
+                  placeholder="Adicionar tarefa..."
+                  className="h-8 text-xs border-dashed bg-transparent"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-primary"
+                  disabled={!newTaskText.trim()}
+                >
+                  <Plus size={14} />
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center pt-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground"
+                title="Expandir tarefas"
               >
-                <Plus size={14} />
-              </Button>
-            </form>
-          </div>
+                <PanelLeftOpen size={14} />
+              </button>
+              {undatedTasks.length > 0 && (
+                <span className="text-[9px] text-muted-foreground mt-1 font-medium">{undatedTasks.length}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Main calendar area */}
