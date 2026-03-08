@@ -39,7 +39,7 @@ export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   'production': 'bg-status-production',
   'review': 'bg-status-review',
   'approval-internal': 'bg-status-approval',
-  'approval-client': 'bg-status-approval',
+  'approval-client': 'bg-status-approval-client',
   'scheduled': 'bg-status-scheduled',
   'published': 'bg-status-published',
 };
