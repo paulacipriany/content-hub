@@ -30,9 +30,6 @@ const MediaLibraryPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canDelete = role === 'admin' || role === 'moderator';
 
-  // Associate dialog
-  const [associateItem, setAssociateItem] = useState<MediaItem | null>(null);
-  const [contentSearch, setContentSearch] = useState('');
 
   const fetchMedia = useCallback(async () => {
     if (!selectedProject) return;
