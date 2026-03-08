@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { contrastText, generatePalette } from '@/lib/clientPalette';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -32,6 +34,21 @@ const AppSidebar = () => {
   const { profile, role, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
+
+  // Load saved theme from profile
+  useEffect(() => {
+    if (profile?.theme) {
+      setTheme(profile.theme);
+    }
+  }, [profile?.theme]);
+
+  const handleThemeChange = async (dark: boolean) => {
+    const newTheme = dark ? 'dark' : 'light';
+    setTheme(newTheme);
+    if (profile) {
+      await supabase.from('profiles').update({ theme: newTheme } as any).eq('id', profile.id);
+    }
+  };
 
   const isClient = role === 'client';
 
@@ -248,7 +265,7 @@ const AppSidebar = () => {
       <div className={cn("px-3 py-2 border-t border-sidebar-border-custom", sidebarCollapsed && "flex justify-center")}>
         {sidebarCollapsed ? (
           <button
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            onClick={() => handleThemeChange(!isDark)}
             className="w-8 h-8 rounded-md flex items-center justify-center text-sidebar-fg hover:text-sidebar-fg-active hover:bg-sidebar-hover transition-colors"
             title={isDark ? 'Modo claro' : 'Modo escuro'}
           >
@@ -262,7 +279,7 @@ const AppSidebar = () => {
             </div>
             <Switch
               checked={isDark}
-              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              onCheckedChange={handleThemeChange}
               className="h-4 w-8 data-[state=checked]:bg-primary"
             />
           </div>

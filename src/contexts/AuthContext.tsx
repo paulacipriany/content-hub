@@ -9,6 +9,7 @@ interface Profile {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
+  theme: string;
 }
 
 interface AuthContextType {
