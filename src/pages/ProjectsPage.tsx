@@ -128,6 +128,7 @@ const ProjectsPage = () => {
       name: editName.trim(),
       color: editColor,
       logo_url: editLogoUrl,
+      platforms: editPlatforms.length > 0 ? editPlatforms : ['instagram'],
     } as any).eq('id', editingId);
     if (error) {
       toast({ title: 'Erro ao atualizar', description: error.message, variant: 'destructive' });
