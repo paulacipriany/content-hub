@@ -15,7 +15,7 @@ interface ContentCardProps {
   onClick?: () => void;
 }
 
-const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
+const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: ContentCardProps) => {
   const { setSelectedContent, deleteContent } = useApp();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
