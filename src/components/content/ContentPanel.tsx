@@ -248,8 +248,8 @@ const ContentPanel = () => {
                 size="sm"
                 variant="outline"
                 className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                disabled={!newComment.trim() && !commentImageUrl}
-                title={!newComment.trim() && !commentImageUrl ? 'Adicione um comentário antes de enviar para ajustes' : ''}
+                disabled={!newComment.trim() && !commentImageUrl && comments.length === 0}
+                title={!newComment.trim() && !commentImageUrl && comments.length === 0 ? 'Adicione um comentário antes de enviar para ajustes' : ''}
                 onClick={async () => {
                   if ((!newComment.trim() && !commentImageUrl) || !user) return;
                   const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
