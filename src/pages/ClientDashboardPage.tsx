@@ -36,7 +36,10 @@ const ClientDashboardPage = () => {
   const platforms = (['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'] as Platform[]).map(p => ({
     platform: p,
     label: PLATFORM_LABELS[p],
-    count: projectContents.filter(c => c.platform === p).length,
+    count: projectContents.filter(c => {
+      const arr = Array.isArray(c.platform) ? c.platform : [c.platform];
+      return arr.includes(p);
+    }).length,
   })).filter(p => p.count > 0);
 
   // Status breakdown

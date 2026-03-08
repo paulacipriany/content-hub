@@ -2,7 +2,7 @@ import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, C
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
-import { platformIcon } from './ContentCard';
+import { platformIcon, PlatformSelector } from './PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PostPreview from './PostPreview';
@@ -116,8 +116,8 @@ const ContentPanel = () => {
     setChecklist(prev => prev.map(i => i.id === itemId ? { ...i, done: !done } : i));
   };
 
-  const handlePlatformChange = (value: string) => {
-    updateContentFields(selectedContent.id, { platform: value as Platform });
+  const handlePlatformChange = (platforms: Platform[]) => {
+    updateContentFields(selectedContent.id, { platform: platforms } as any);
   };
 
   const handleTypeChange = (value: string) => {
@@ -240,16 +240,11 @@ const ContentPanel = () => {
           {/* Platform */}
           <div className="flex items-center gap-3 text-sm">
             <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
-            <Select value={selectedContent.platform} onValueChange={handlePlatformChange}>
-              <SelectTrigger className="h-8 text-xs flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {allPlatforms.map(p => (
-                  <SelectItem key={p} value={p}>{PLATFORM_LABELS[p]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <PlatformSelector
+              selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
+              onChange={handlePlatformChange}
+              size={28}
+            />
           </div>
 
           {/* Content Type */}

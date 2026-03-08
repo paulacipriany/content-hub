@@ -12,7 +12,10 @@ const ContentsPage = () => {
   const [filterStatus, setFilterStatus] = useState<WorkflowStatus | 'all'>('all');
 
   const filtered = projectContents.filter(c => {
-    if (filterPlatform !== 'all' && c.platform !== filterPlatform) return false;
+    if (filterPlatform !== 'all') {
+      const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+      if (!platforms.includes(filterPlatform)) return false;
+    }
     if (filterStatus !== 'all' && c.status !== filterStatus) return false;
     return true;
   });
