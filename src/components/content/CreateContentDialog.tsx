@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CalendarIcon, Plus, X } from 'lucide-react';
+import { CalendarIcon, Plus, X, ImagePlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -39,6 +40,8 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const [hashtagInput, setHashtagInput] = useState('');
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [assigneeEmail, setAssigneeEmail] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
   const availableContentTypes = getContentTypesForPlatforms(platforms);
 
@@ -57,6 +60,9 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
     setHashtagInput('');
     setHashtags([]);
     setAssigneeEmail('');
+    setSelectedFiles([]);
+    filePreviews.forEach(url => URL.revokeObjectURL(url));
+    setFilePreviews([]);
   };
 
   const addHashtag = () => {
@@ -65,6 +71,46 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       setHashtags(prev => [...prev, tag]);
       setHashtagInput('');
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) {
+      toast({ title: 'Formato inválido', description: 'Selecione apenas imagens.', variant: 'destructive' });
+      return;
+    }
+
+    setSelectedFiles(prev => [...prev, ...imageFiles]);
+    const newPreviews = imageFiles.map(f => URL.createObjectURL(f));
+    setFilePreviews(prev => [...prev, ...newPreviews]);
+
+    // Reset input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    URL.revokeObjectURL(filePreviews[index]);
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setFilePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFiles = async (contentId: string): Promise<string | null> => {
+    if (selectedFiles.length === 0) return null;
+
+    const urls: string[] = [];
+    for (const file of selectedFiles) {
+      const ext = file.name.split('.').pop();
+      const path = `${contentId}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file);
+      if (!error) {
+        const { data } = supabase.storage.from('content-media').getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+    }
+    return urls.length > 0 ? urls[0] : null;
   };
 
   const handleSubmit = async () => {
@@ -86,29 +132,41 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       assigneeId = profile?.user_id ?? null;
     }
 
-    const { error } = await supabase.from('contents').insert({
+    // Determine actual content_type: if feed + multiple photos → carousel in DB
+    const dbContentType = (contentType === 'feed' && selectedFiles.length > 1) ? 'carousel' : contentType;
+
+    const { data: inserted, error } = await supabase.from('contents').insert({
       title: title.trim(),
       description: description.trim(),
       platform: platforms,
-      content_type: contentType,
+      content_type: dbContentType,
       project_id: projectId,
       publish_date: publishDate ? format(publishDate, 'yyyy-MM-dd') : null,
       hashtags,
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
       status: 'idea',
-    } as any);
-
-    setLoading(false);
+    } as any).select('id').single();
 
     if (error) {
+      setLoading(false);
       toast({ title: 'Erro ao criar conteúdo', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Conteúdo criado!' });
-      reset();
-      setOpen(false);
-      await refetch();
+      return;
     }
+
+    // Upload files if any
+    if (inserted && selectedFiles.length > 0) {
+      const mediaUrl = await uploadFiles(inserted.id);
+      if (mediaUrl) {
+        await supabase.from('contents').update({ media_url: mediaUrl } as any).eq('id', inserted.id);
+      }
+    }
+
+    setLoading(false);
+    toast({ title: 'Conteúdo criado!' });
+    reset();
+    setOpen(false);
+    await refetch();
   };
 
   return (
@@ -181,6 +239,52 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {/* Photo upload - visible when content type is feed */}
+          {contentType === 'feed' && platforms.length > 0 && (
+            <div className="space-y-2">
+              <Label>Fotos</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              
+              {selectedFiles.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {filePreviews.map((url, i) => (
+                    <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeFile(i)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full gap-2"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImagePlus size={16} />
+                {selectedFiles.length === 0 ? 'Selecionar fotos' : 'Adicionar mais fotos'}
+              </Button>
+              <p className="text-[11px] text-muted-foreground">
+                Selecione uma foto para post único ou várias para carrossel.
+              </p>
             </div>
           )}
 
