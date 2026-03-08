@@ -18,6 +18,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage";
 import ReportsPage from "@/pages/ReportsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
+import UsersPage from "@/pages/UsersPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
