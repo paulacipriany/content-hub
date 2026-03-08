@@ -30,6 +30,7 @@ const MediaLibraryPage = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canDelete = role === 'admin' || role === 'moderator';
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
 
   const fetchMedia = useCallback(async () => {
