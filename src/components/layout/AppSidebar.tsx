@@ -67,6 +67,11 @@ const AppSidebar = () => {
     ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'review').length
     : 0;
 
+  // Count posts ready for scheduling
+  const schedulingCount = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'scheduled').length
+    : 0;
+
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Gestor',
