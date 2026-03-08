@@ -178,6 +178,10 @@ const ProjectsPage = () => {
                   style={{ backgroundColor: c, borderColor: newColor === c ? 'var(--foreground)' : 'transparent' }}
                 />
               ))}
+              <label className="relative w-6 h-6 rounded-full border-2 border-dashed border-border cursor-pointer overflow-hidden hover:border-primary/40 transition-colors" title="Escolher cor">
+                <input type="color" value={newColor} onChange={e => setNewColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                <span className="w-full h-full block rounded-full" style={{ backgroundColor: newColor }} />
+              </label>
             </div>
             <div className="space-y-1.5">
               <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
@@ -236,6 +240,10 @@ const ProjectsPage = () => {
                           style={{ backgroundColor: c, borderColor: editColor === c ? 'var(--foreground)' : 'transparent' }}
                         />
                       ))}
+                      <label className="relative w-5 h-5 rounded-full border-2 border-dashed border-border cursor-pointer overflow-hidden hover:border-primary/40 transition-colors" title="Escolher cor">
+                        <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <span className="w-full h-full block rounded-full" style={{ backgroundColor: editColor }} />
+                      </label>
                     </div>
                     <div className="space-y-1.5">
                       <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
