@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import PostPreview from '@/components/content/PostPreview';
+import JSZip from 'jszip';
 
 const SchedulingPage = () => {
   useClientFromUrl();
@@ -17,6 +19,45 @@ const SchedulingPage = () => {
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
+  const [downloading, setDownloading] = useState(false);
+
+  const getContentMediaUrls = (content: ContentWithRelations): string[] => {
+    const urls: string[] = [];
+    if (content.media_urls && Array.isArray(content.media_urls)) {
+      urls.push(...content.media_urls.filter(Boolean));
+    }
+    if (content.media_url && !urls.includes(content.media_url)) {
+      urls.push(content.media_url);
+    }
+    return urls;
+  };
+
+  const handleDownloadZip = useCallback(async (content: ContentWithRelations) => {
+    const urls = getContentMediaUrls(content);
+    if (urls.length === 0) return;
+
+    setDownloading(true);
+    try {
+      const zip = new JSZip();
+      await Promise.all(urls.map(async (url, i) => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+        const name = `${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_${i + 1}.${ext}`;
+        zip.file(name, blob);
+      }));
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_midias.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      console.error('Erro ao baixar mídias:', e);
+    } finally {
+      setDownloading(false);
+    }
+  }, []);
 
   const scheduled = projectContents
     .filter(c => c.status === 'scheduled')
@@ -172,6 +213,25 @@ const SchedulingPage = () => {
                       <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Download images */}
+              {getContentMediaUrls(previewContent).length > 0 && (
+                <div className="px-6 py-4 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={downloading}
+                    onClick={() => handleDownloadZip(previewContent)}
+                  >
+                    {downloading ? (
+                      <><Loader2 size={14} className="mr-2 animate-spin" /> Baixando...</>
+                    ) : (
+                      <><Download size={14} className="mr-2" /> Baixar mídias (.zip)</>
+                    )}
+                  </Button>
                 </div>
               )}
             </div>
