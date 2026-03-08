@@ -91,6 +91,9 @@ export function applyClientPalette(hex: string | null) {
   (Object.entries(palette) as [string, string][]).forEach(([shade, value]) => {
     root.style.setProperty(`--client-${shade}`, value);
   });
+
+  // Set contrast text color for the 500 shade
+  root.style.setProperty('--client-500-contrast', contrastText(palette['500']));
 }
 
 /** Returns white or dark text color for best contrast on a given hex bg */
