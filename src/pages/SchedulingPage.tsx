@@ -123,11 +123,10 @@ const SchedulingPage = () => {
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
                 <div className="border border-border rounded-xl overflow-hidden bg-card">
-                  <div className="grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <div></div>
+                  <div className="grid grid-cols-[1fr_140px_120px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <div>Título</div>
                     <div>Formato</div>
-                    <div>Agendamento</div>
+                    <div>Redes</div>
                   </div>
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
