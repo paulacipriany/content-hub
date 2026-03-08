@@ -44,6 +44,7 @@ export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   
   'approval-client': 'bg-status-approval-client',
   'scheduled': 'bg-status-scheduled',
+  'programmed': 'bg-status-programmed',
   'published': 'bg-status-published',
 };
 
