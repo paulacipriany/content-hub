@@ -3,6 +3,8 @@ import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { FolderOpen, Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
