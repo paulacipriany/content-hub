@@ -124,28 +124,32 @@ const AppSidebar = () => {
             })}
 
             {/* Other clients */}
-            {!sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
+            {projects.filter(p => p.id !== selectedProject.id).length > 0 && (
               <div className="pt-4">
                 <div className="px-3 mb-1">
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
-                {projects.filter(p => p.id !== selectedProject.id).map(project => (
-                  <button
-                    key={project.id}
-                    onClick={() => {
-                      setSelectedProject(project);
-                      navigate(`/clients/${project.id}/dashboard`);
-                    }}
-                    className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm transition-colors text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
-                  >
-                    {(project as any).logo_url ? (
-                      <img src={(project as any).logo_url} alt="" className="w-4 h-4 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-                    )}
-                    <span className="truncate">{project.name}</span>
-                  </button>
-                ))}
+                {projects.filter(p => p.id !== selectedProject.id).map(project => {
+                  const hex = project.color.replace('#', '');
+                  const r = parseInt(hex.substring(0, 2), 16) / 255;
+                  const g = parseInt(hex.substring(2, 4), 16) / 255;
+                  const b = parseInt(hex.substring(4, 6), 16) / 255;
+                  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                  const textColor = luminance > 0.55 ? '#1a1a1a' : '#ffffff';
+                  return (
+                    <button
+                      key={project.id}
+                      onClick={() => {
+                        setSelectedProject(project);
+                        navigate(`/clients/${project.id}/dashboard`);
+                      }}
+                      className="w-full px-3 py-1.5 rounded-md text-sm font-medium truncate text-left transition-all hover:brightness-110 active:scale-[0.98]"
+                      style={{ backgroundColor: project.color, color: textColor }}
+                    >
+                      {project.name}
+                    </button>
+                  );
+                })}
               </div>
             )}
             {sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
