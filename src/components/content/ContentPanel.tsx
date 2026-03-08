@@ -666,6 +666,53 @@ const ContentPanel = () => {
           </div>
         </div>
       </div>
+
+      {/* Adjust prompt modal */}
+      {showAdjustPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAdjustPrompt(false)}>
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-lg space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={18} className="text-amber-500" />
+              <h3 className="text-sm font-semibold text-foreground">Enviar para ajustes</h3>
+            </div>
+            <p className="text-xs text-muted-foreground">Descreva o que precisa ser ajustado neste conteúdo. Este comentário é obrigatório.</p>
+            <textarea
+              value={adjustComment}
+              onChange={e => setAdjustComment(e.target.value)}
+              rows={4}
+              placeholder="Ex: A imagem precisa de mais contraste, o texto está com erro no segundo parágrafo..."
+              className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="outline" onClick={() => { setShowAdjustPrompt(false); setAdjustComment(''); }}>
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                disabled={!adjustComment.trim()}
+                className="bg-amber-500 text-white hover:bg-amber-600"
+                onClick={async () => {
+                  if (!adjustComment.trim() || !user) return;
+                  // Add the comment
+                  await supabase.from('comments').insert({
+                    content_id: selectedContent.id,
+                    user_id: user.id,
+                    text: adjustComment.trim(),
+                  });
+                  // Update status to review
+                  await updateContentStatus(selectedContent.id, 'review');
+                  setShowAdjustPrompt(false);
+                  setAdjustComment('');
+                  setSelectedContent(null);
+                }}
+              >
+                Enviar para ajustes
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
