@@ -538,6 +538,7 @@ export type Database = {
         | "pinterest"
         | "twitter"
         | "google_business"
+        | "blog"
       workflow_status:
         | "idea"
         | "production"
@@ -695,6 +696,7 @@ export const Constants = {
         "pinterest",
         "twitter",
         "google_business",
+        "blog",
       ],
       workflow_status: [
         "idea",
