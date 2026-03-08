@@ -34,7 +34,7 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const SchedulingPage = () => {
   useClientFromUrl();
-  const { projectContents } = useApp();
+  const { projectContents, updateContentStatus } = useApp();
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
@@ -164,13 +164,20 @@ const SchedulingPage = () => {
                               <Checkbox
                                 checked={checked[p] ?? false}
                                 onCheckedChange={(val) => {
+                                  const updated = {
+                                    ...checked,
+                                    [p]: !!val,
+                                  };
                                   setCheckedPlatforms(prev => ({
                                     ...prev,
-                                    [content.id]: {
-                                      ...prev[content.id],
-                                      [p]: !!val,
-                                    },
+                                    [content.id]: updated,
                                   }));
+                                  // Check if all platforms are now checked
+                                  const allChecked = platforms.every(pl => updated[pl]);
+                                  if (allChecked) {
+                                    updateContentStatus(content.id, 'programmed');
+                                    toast.success(`"${content.title}" movido para Programado`);
+                                  }
                                 }}
                               />
                               <span className={cn(
