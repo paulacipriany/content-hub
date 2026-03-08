@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import PostPreview from '@/components/content/PostPreview';
+import { getCommemorativeDatesForDay, COMMEMORATIVE_DATES } from '@/data/commemorativeDates';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
