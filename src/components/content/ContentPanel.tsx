@@ -2,7 +2,7 @@ import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, C
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
-import { platformIcon } from './ContentCard';
+import { platformIcon, PlatformSelector } from './PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PostPreview from './PostPreview';
