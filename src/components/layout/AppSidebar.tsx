@@ -142,8 +142,7 @@ const AppSidebar = () => {
             )}
             {clientNavItems
               .filter(item => {
-                // Hide management items from client role
-                if (isClient && ['/members', '/reports'].includes(item.path)) return false;
+                if (isClient && (item as any).hideFromClient) return false;
                 return true;
               })
               .map(item => {
