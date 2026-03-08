@@ -1,4 +1,4 @@
-import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil, Eye } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
@@ -49,6 +49,8 @@ const ContentPanel = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editHashtagInput, setEditHashtagInput] = useState('');
   const [editHashtags, setEditHashtags] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync local state when selected content changes
   useEffect(() => {
@@ -140,6 +142,35 @@ const ContentPanel = () => {
     const newTags = editHashtags.filter(h => h !== tag);
     setEditHashtags(newTags);
     updateContentFields(selectedContent.id, { hashtags: newTags });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedContent) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${selectedContent.id}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+      await updateContentFields(selectedContent.id, { media_url: publicUrl } as any);
+    } catch (err) {
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveMedia = async () => {
+    if (!selectedContent || !user) return;
+    const { data: files } = await supabase.storage.from('content-media').list(user.id);
+    const match = files?.find(f => f.name.startsWith(selectedContent.id));
+    if (match) {
+      await supabase.storage.from('content-media').remove([`${user.id}/${match.name}`]);
+    }
+    await updateContentFields(selectedContent.id, { media_url: null } as any);
   };
 
   return (
@@ -278,6 +309,50 @@ const ContentPanel = () => {
             rows={4}
             placeholder="Adicione a descrição ou copy do conteúdo..."
             className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+          />
+        </div>
+
+        {/* Media Upload */}
+        <div>
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <ImagePlus size={12} />Mídia
+          </label>
+          {(selectedContent as any).media_url ? (
+            <div className="relative group rounded-lg overflow-hidden border border-border">
+              {(selectedContent as any).media_url.match(/\.(mp4|webm|mov)$/i) ? (
+                <video src={(selectedContent as any).media_url} controls className="w-full max-h-48 object-cover" />
+              ) : (
+                <img src={(selectedContent as any).media_url} alt="Mídia do conteúdo" className="w-full max-h-48 object-cover" />
+              )}
+              <button
+                onClick={handleRemoveMedia}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+            >
+              {uploading ? (
+                <Loader2 size={20} className="animate-spin text-primary" />
+              ) : (
+                <>
+                  <ImagePlus size={20} />
+                  <span className="text-xs">Clique para enviar imagem ou vídeo</span>
+                </>
+              )}
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileUpload}
+            className="hidden"
           />
         </div>
 
