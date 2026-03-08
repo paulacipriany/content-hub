@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Circle, Plus, CalendarDays, CalendarRange } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical } from 'lucide-react';
 import { STATUS_COLORS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const DAYS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
 interface CalTask {
   id: string;
@@ -37,7 +37,7 @@ interface CalTask {
   sort_order: number;
 }
 
-// --- Draggable content chip ---
+// --- Draggable content chip (Google-style event pill) ---
 const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
@@ -48,7 +48,8 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left px-1.5 py-1 rounded text-[11px] font-medium truncate flex items-center gap-1 hover:opacity-80 transition-opacity cursor-grab active:cursor-grabbing",
+        "w-full text-left px-2 py-[3px] rounded-[4px] text-[11px] font-medium truncate flex items-center gap-1.5",
+        "hover:brightness-95 transition-all cursor-grab active:cursor-grabbing",
         STATUS_COLORS[content.status as WorkflowStatus],
         "text-primary-foreground",
         isDragging && "opacity-30"
@@ -70,18 +71,19 @@ const DraggableTask = ({ task, onToggle }: { task: CalTask; onToggle: (id: strin
     <div
       ref={setNodeRef} {...listeners} {...attributes}
       className={cn(
-        "flex items-start gap-2 py-1.5 px-1 rounded-md hover:bg-secondary/50 transition-colors cursor-grab active:cursor-grabbing",
+        "flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/60 transition-colors cursor-grab active:cursor-grabbing group",
         isDragging && "opacity-30"
       )}
     >
+      <GripVertical size={12} className="text-muted-foreground/0 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
       <Checkbox
         checked={task.done}
         onCheckedChange={(checked) => { onToggle(task.id, !!checked); }}
         onClick={(e) => e.stopPropagation()}
-        className="mt-0.5 flex-shrink-0"
+        className="h-3.5 w-3.5 flex-shrink-0 rounded-sm"
       />
       <span className={cn(
-        "text-sm leading-snug",
+        "text-[13px] leading-snug truncate",
         task.done ? "line-through text-muted-foreground" : "text-foreground"
       )}>
         {task.text}
@@ -90,11 +92,13 @@ const DraggableTask = ({ task, onToggle }: { task: CalTask; onToggle: (id: strin
   );
 };
 
-// --- Droppable day cell ---
-const DroppableDay = ({ dateStr, dayLabel, isToday: todayFlag, tall, children }: {
+// --- Droppable day cell (Google Calendar style) ---
+const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentMonth, tall, children }: {
   dateStr: string;
-  dayLabel: React.ReactNode;
+  dayNum?: number;
+  dayName?: string;
   isToday: boolean;
+  isCurrentMonth?: boolean;
   tall?: boolean;
   children: React.ReactNode;
 }) => {
@@ -103,30 +107,46 @@ const DroppableDay = ({ dateStr, dayLabel, isToday: todayFlag, tall, children }:
     <div
       ref={setNodeRef}
       className={cn(
-        "p-2 border-r border-border last:border-r-0 transition-colors",
-        tall ? "min-h-[300px]" : "min-h-[100px]",
-        isOver && "ring-2 ring-inset"
+        "border-b border-r border-border/50 last:border-r-0 transition-colors relative",
+        tall ? "min-h-[calc(100vh-280px)]" : "min-h-[120px]",
+        isOver && "bg-primary/5",
+        isCurrentMonth === false && "bg-muted/20"
       )}
-      style={{
-        backgroundColor: isOver ? 'var(--client-50, hsl(var(--primary) / 0.1))' : undefined,
-      }}
     >
-      <div className="flex items-center justify-between mb-1.5">
-        <span
-          className={cn("text-sm font-medium", todayFlag ? "w-7 h-7 rounded-full flex items-center justify-center" : "text-foreground")}
-          style={todayFlag ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' } : undefined}
-        >
-          {dayLabel}
-        </span>
+      {/* Day header area */}
+      <div className="flex flex-col items-center pt-2 pb-1">
+        {dayName && (
+          <span className={cn(
+            "text-[11px] font-medium uppercase tracking-wide mb-0.5",
+            todayFlag ? "text-primary" : "text-muted-foreground"
+          )}>
+            {dayName}
+          </span>
+        )}
+        {dayNum !== undefined && (
+          <span
+            className={cn(
+              "text-sm leading-none flex items-center justify-center transition-colors",
+              todayFlag
+                ? "w-7 h-7 rounded-full bg-primary text-primary-foreground font-semibold"
+                : isCurrentMonth === false
+                  ? "text-muted-foreground/50 font-normal"
+                  : "text-foreground font-medium hover:bg-muted rounded-full w-7 h-7"
+            )}
+          >
+            {dayNum}
+          </span>
+        )}
       </div>
-      <div className="space-y-1">{children}</div>
+      {/* Events area */}
+      <div className="px-1 pb-1 space-y-[2px]">{children}</div>
     </div>
   );
 };
 
 const ContentOverlay = ({ content }: { content: ContentWithRelations }) => (
   <div className={cn(
-    "px-2 py-1 rounded text-[11px] font-medium flex items-center gap-1 shadow-lg w-40",
+    "px-2.5 py-1 rounded-[4px] text-[11px] font-medium flex items-center gap-1.5 shadow-xl w-44",
     STATUS_COLORS[content.status as WorkflowStatus],
     "text-primary-foreground"
   )}>
@@ -135,7 +155,7 @@ const ContentOverlay = ({ content }: { content: ContentWithRelations }) => (
   </div>
 );
 
-// --- Editable task in calendar ---
+// --- Editable task in calendar (Google-style task chip) ---
 const EditableCalTask = ({ task, onToggle, onUpdate }: {
   task: CalTask;
   onToggle: (id: string, done: boolean) => void;
@@ -147,6 +167,8 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
 
   useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
 
+  const isOverdue = !task.done && task.due_date && isPast(new Date(task.due_date + 'T23:59:59')) && !isTodayDateFns(new Date(task.due_date));
+
   const save = () => {
     setEditing(false);
     const trimmed = val.trim();
@@ -155,11 +177,14 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
   };
 
   return (
-    <div className="flex items-center gap-1 px-1 py-0.5 rounded text-[11px] group/task">
+    <div className={cn(
+      "flex items-center gap-1 px-1.5 py-[2px] rounded-[4px] text-[11px] group/task border-l-2 transition-colors",
+      isOverdue ? "border-l-destructive bg-destructive/5" : "border-l-muted-foreground/30 hover:bg-muted/40"
+    )}>
       <Checkbox
         checked={task.done}
         onCheckedChange={(checked) => onToggle(task.id, !!checked)}
-        className="h-3 w-3 flex-shrink-0"
+        className={cn("h-3 w-3 flex-shrink-0 rounded-sm", isOverdue && "border-destructive")}
       />
       {editing ? (
         <input
@@ -168,14 +193,14 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
           onChange={e => setVal(e.target.value)}
           onBlur={save}
           onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setVal(task.text); setEditing(false); } }}
-          className="flex-1 min-w-0 bg-transparent outline-none text-[11px] text-foreground border-b border-primary/40"
+          className="flex-1 min-w-0 bg-transparent outline-none text-[11px] text-foreground"
         />
       ) : (
         <span
           onClick={() => setEditing(true)}
           className={cn(
-            "truncate cursor-text hover:underline decoration-dotted underline-offset-2",
-            task.done ? "line-through text-muted-foreground" : "text-foreground"
+            "truncate cursor-text",
+            task.done ? "line-through text-muted-foreground" : isOverdue ? "text-destructive" : "text-foreground"
           )}
         >
           {task.text}
@@ -243,7 +268,6 @@ const CalendarPage = () => {
   // --- Date helpers ---
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const today = new Date();
   const isDateToday = (d: Date) => d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   const fmtDateStr = (d: Date) => format(d, 'yyyy-MM-dd');
@@ -252,13 +276,11 @@ const CalendarPage = () => {
   const getTasksForDate = (dateStr: string) => tasks.filter(t => t.due_date === dateStr);
   const undatedTasks = tasks.filter(t => !t.due_date);
 
-  // --- Week view data ---
   const getWeekDays = () => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
-  // --- Month view data ---
   const getMonthWeeks = () => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -291,10 +313,10 @@ const CalendarPage = () => {
     ? (() => {
         const days = getWeekDays();
         const s = days[0], e = days[6];
-        if (s.getMonth() === e.getMonth()) return `${format(s, 'd')} – ${format(e, "d 'de' MMMM yyyy", { locale: ptBR })}`;
-        return `${format(s, "d MMM", { locale: ptBR })} – ${format(e, "d MMM yyyy", { locale: ptBR })}`;
+        if (s.getMonth() === e.getMonth()) return format(e, "MMMM yyyy", { locale: ptBR });
+        return `${format(s, "MMM", { locale: ptBR })} – ${format(e, "MMM yyyy", { locale: ptBR })}`;
       })()
-    : currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    : format(currentDate, "MMMM yyyy", { locale: ptBR });
 
   // --- DnD ---
   const handleDragStart = (event: DragStartEvent) => {
@@ -333,7 +355,7 @@ const CalendarPage = () => {
           <DraggableContent key={c.id} content={c} onClick={() => setSelectedContent(c)} />
         ))}
         {viewMode === 'month' && dayContents.length > 3 && (
-          <span className="text-[10px] text-muted-foreground">+{dayContents.length - 3} mais</span>
+          <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
         )}
         {dayTasks.map(t => (
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
@@ -344,148 +366,178 @@ const CalendarPage = () => {
 
   return (
     <>
-      <TopBar title="Calendário" subtitle="Planejamento mensal de conteúdos" />
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={goBack}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
-          >
-            <ChevronLeft size={18} style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }} />
-          </button>
-          <button onClick={goToday}
-            className="px-3 py-1 text-xs font-medium rounded-md transition-colors"
-            style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--foreground)))' }}
-          >
-            Hoje
-          </button>
-          <button onClick={goForward}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
-          >
-            <ChevronRight size={18} style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }} />
-          </button>
-          <span className="text-lg font-semibold text-foreground capitalize">{headerLabel}</span>
+      <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
+      <div className="flex h-[calc(100vh-130px)]">
+        {/* Sidebar: undated tasks — Google Calendar style side panel */}
+        <div className="w-60 flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto">
+          <div className="p-3">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
+              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
+                {undatedTasks.length}
+              </span>
+            </div>
 
-          {/* View mode toggle */}
-          <div className="ml-auto flex items-center bg-secondary rounded-lg p-0.5 gap-0.5">
-            <button
-              onClick={() => setViewMode('week')}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                viewMode === 'week' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <CalendarRange size={14} />
-              Semana
-            </button>
-            <button
-              onClick={() => setViewMode('month')}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                viewMode === 'month' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <CalendarDays size={14} />
-              Mês
-            </button>
+            {undatedTasks.length === 0 ? (
+              <p className="text-xs text-muted-foreground/60 py-4 text-center">Nenhuma tarefa</p>
+            ) : (
+              <div className="space-y-0.5 mb-3">
+                {undatedTasks.map(t => (
+                  <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
+                ))}
+              </div>
+            )}
+
+            {/* Add new task — minimal input */}
+            <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex items-center gap-1.5 mt-2">
+              <Input
+                value={newTaskText}
+                onChange={e => setNewTaskText(e.target.value)}
+                placeholder="Adicionar tarefa..."
+                className="h-8 text-xs border-dashed bg-transparent"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-primary"
+                disabled={!newTaskText.trim()}
+              >
+                <Plus size={14} />
+              </Button>
+            </form>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Sidebar: undated tasks */}
-          <div className="w-64 flex-shrink-0">
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Circle size={14} className="text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">Sem data</h3>
-                <span className="ml-auto text-xs text-muted-foreground">{undatedTasks.length}</span>
-              </div>
+        {/* Main calendar area */}
+        <div className="flex-1 min-w-0 flex flex-col bg-background">
+          {/* Google Calendar-style toolbar */}
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
+            <button
+              onClick={goToday}
+              className="px-4 py-1.5 text-sm font-medium rounded-md border border-border hover:bg-muted transition-colors text-foreground"
+            >
+              Hoje
+            </button>
+            <button onClick={goBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <ChevronLeft size={18} className="text-muted-foreground" />
+            </button>
+            <button onClick={goForward} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <ChevronRight size={18} className="text-muted-foreground" />
+            </button>
+            <h2 className="text-[22px] font-normal text-foreground capitalize ml-2">{headerLabel}</h2>
 
-              {undatedTasks.length === 0 ? (
-                <p className="text-xs text-muted-foreground mb-3">Nenhuma tarefa sem data.</p>
-              ) : (
-                <div className="space-y-1 mb-3">
-                  {undatedTasks.map(t => (
-                    <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
-                  ))}
-                </div>
-              )}
-
-              {/* Add new task */}
-              <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex gap-1.5">
-                <Input
-                  value={newTaskText}
-                  onChange={e => setNewTaskText(e.target.value)}
-                  placeholder="Nova tarefa..."
-                  className="h-7 text-xs"
-                />
-                <Button type="submit" size="sm" variant="outline" className="h-7 px-2 flex-shrink-0" disabled={!newTaskText.trim()}>
-                  <Plus size={12} />
-                </Button>
-              </form>
+            {/* View mode toggle — pill style */}
+            <div className="ml-auto flex items-center border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode('week')}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                  viewMode === 'week'
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <CalendarRange size={13} />
+                Semana
+              </button>
+              <div className="w-px h-5 bg-border" />
+              <button
+                onClick={() => setViewMode('month')}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                  viewMode === 'month'
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <CalendarDays size={13} />
+                Mês
+              </button>
             </div>
           </div>
 
           {/* Calendar grid */}
-          <div className="flex-1 min-w-0">
-            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="border border-border rounded-xl overflow-hidden bg-card">
-                {/* Day headers */}
-                <div className="grid grid-cols-7 border-b border-border">
-                  {viewMode === 'week'
-                    ? getWeekDays().map((d, i) => (
-                        <div key={i} className="py-2.5 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {DAYS[i]} <span className="text-foreground">{d.getDate()}</span>
-                        </div>
-                      ))
-                    : DAYS.map(d => (
-                        <div key={d} className="py-2.5 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">{d}</div>
-                      ))
-                  }
-                </div>
-
-                {/* Week view */}
-                {viewMode === 'week' && (
-                  <div className="grid grid-cols-7">
-                    {getWeekDays().map((d, i) => {
-                      const dateStr = fmtDateStr(d);
-                      return (
-                        <DroppableDay key={i} dateStr={dateStr} dayLabel="" isToday={isDateToday(d)} tall>
-                          {renderDayItems(dateStr)}
-                        </DroppableDay>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Month view */}
-                {viewMode === 'month' && getMonthWeeks().map((week, wi) => (
-                  <div key={wi} className="grid grid-cols-7 border-b border-border last:border-b-0">
-                    {week.map((d, di) => {
-                      if (!d) return <div key={di} className="min-h-[100px] p-2 border-r border-border last:border-r-0 bg-secondary/30" />;
-                      const dateStr = fmtDateStr(d);
-                      return (
-                        <DroppableDay key={di} dateStr={dateStr} dayLabel={d.getDate()} isToday={isDateToday(d)}>
-                          {renderDayItems(dateStr)}
-                        </DroppableDay>
-                      );
-                    })}
-                  </div>
-                ))}
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className="flex-1 overflow-y-auto">
+              {/* Day name headers */}
+              <div className="grid grid-cols-7 border-b border-border/50 sticky top-0 bg-background z-10">
+                {viewMode === 'week'
+                  ? getWeekDays().map((d, i) => (
+                      <div key={i} className="flex flex-col items-center py-2">
+                        <span className={cn(
+                          "text-[11px] font-medium uppercase tracking-wide",
+                          isDateToday(d) ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          {DAYS_SHORT[d.getDay()]}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[26px] leading-tight font-light mt-0.5 w-11 h-11 flex items-center justify-center rounded-full transition-colors",
+                            isDateToday(d)
+                              ? "bg-primary text-primary-foreground font-normal"
+                              : "text-foreground hover:bg-muted"
+                          )}
+                        >
+                          {d.getDate()}
+                        </span>
+                      </div>
+                    ))
+                  : DAYS_SHORT.map(d => (
+                      <div key={d} className="py-2 text-center text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                        {d}
+                      </div>
+                    ))
+                }
               </div>
 
-              <DragOverlay>
-                {activeContent && <ContentOverlay content={activeContent} />}
-                {activeTask && (
-                  <div className="px-2 py-1 rounded text-xs font-medium bg-card border border-border shadow-lg w-48 truncate">
-                    {activeTask.text}
-                  </div>
-                )}
-              </DragOverlay>
-            </DndContext>
-          </div>
+              {/* Week view */}
+              {viewMode === 'week' && (
+                <div className="grid grid-cols-7">
+                  {getWeekDays().map((d, i) => {
+                    const dateStr = fmtDateStr(d);
+                    return (
+                      <DroppableDay key={i} dateStr={dateStr} isToday={isDateToday(d)} isCurrentMonth tall>
+                        {renderDayItems(dateStr)}
+                      </DroppableDay>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Month view */}
+              {viewMode === 'month' && getMonthWeeks().map((week, wi) => (
+                <div key={wi} className="grid grid-cols-7">
+                  {week.map((d, di) => {
+                    if (!d) return (
+                      <div key={di} className="min-h-[120px] border-b border-r border-border/50 last:border-r-0 bg-muted/10" />
+                    );
+                    const dateStr = fmtDateStr(d);
+                    return (
+                      <DroppableDay
+                        key={di}
+                        dateStr={dateStr}
+                        dayNum={d.getDate()}
+                        isToday={isDateToday(d)}
+                        isCurrentMonth={d.getMonth() === month}
+                      >
+                        {renderDayItems(dateStr)}
+                      </DroppableDay>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            <DragOverlay>
+              {activeContent && <ContentOverlay content={activeContent} />}
+              {activeTask && (
+                <div className="px-2.5 py-1 rounded-[4px] text-[11px] font-medium bg-card border border-border shadow-xl w-48 truncate">
+                  {activeTask.text}
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
         </div>
       </div>
     </>
