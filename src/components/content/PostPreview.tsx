@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface PostPreviewProps {
   content: ContentWithRelations;
   platform: Platform;
+  compact?: boolean;
 }
 
 const CarouselMedia = ({ urls, platform }: { urls: string[]; platform: string }) => {
