@@ -122,6 +122,55 @@ const AppSidebar = () => {
                 </button>
               );
             })}
+
+            {/* Other clients */}
+            {!sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
+              <div className="pt-4">
+                <div className="px-3 mb-1">
+                  <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
+                </div>
+                {projects.filter(p => p.id !== selectedProject.id).map(project => (
+                  <button
+                    key={project.id}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      navigate(`/clients/${project.id}/dashboard`);
+                    }}
+                    className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm transition-colors text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
+                  >
+                    {(project as any).logo_url ? (
+                      <img src={(project as any).logo_url} alt="" className="w-4 h-4 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                    )}
+                    <span className="truncate">{project.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
+              <div className="pt-3 space-y-1">
+                {projects.filter(p => p.id !== selectedProject.id).map(project => (
+                  <button
+                    key={project.id}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      navigate(`/clients/${project.id}/dashboard`);
+                    }}
+                    className="w-full flex justify-center py-1"
+                    title={project.name}
+                  >
+                    {(project as any).logo_url ? (
+                      <img src={(project as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: project.color + '25', color: project.color }}>
+                        {project.name.charAt(0)}
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
 
