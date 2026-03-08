@@ -78,6 +78,21 @@ const ContentPanel = () => {
   const briefingFileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(true);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const savedSnapshotRef = useRef<string>('');
+
+  // Helper to get current draft fingerprint
+  const getDraftFingerprint = useCallback(() => {
+    return JSON.stringify({ editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing });
+  }, [editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing]);
+
+  // Mark dirty when fields change
+  useEffect(() => {
+    if (savedSnapshotRef.current && getDraftFingerprint() !== savedSnapshotRef.current) {
+      setDraftSaved(false);
+    }
+  }, [getDraftFingerprint]);
 
   // Sync local state when selected content changes
   useEffect(() => {
