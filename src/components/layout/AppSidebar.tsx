@@ -279,7 +279,7 @@ const AppSidebar = () => {
             </div>
             <Switch
               checked={isDark}
-              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              onCheckedChange={handleThemeChange}
               className="h-4 w-8 data-[state=checked]:bg-primary"
             />
           </div>
