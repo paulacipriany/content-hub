@@ -18,6 +18,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage";
 import ReportsPage from "@/pages/ReportsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
+import UsersPage from "@/pages/UsersPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/clients/:id/media" element={<MediaLibraryPage />} />
               <Route path="/clients/:id/reports" element={<ReportsPage />} />
               <Route path="/clients/:id/members" element={<ClientMembersPage />} />
+              <Route path="/users" element={<UsersPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

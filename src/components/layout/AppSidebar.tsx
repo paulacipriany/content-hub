@@ -8,6 +8,7 @@ import { contrastText, generatePalette } from '@/lib/clientPalette';
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
   { icon: FolderOpen, label: 'Clientes', path: '/clients' },
+  { icon: Users, label: 'Usuários', path: '/users', adminOnly: true },
   { icon: Settings, label: 'Configurações', path: '/settings' },
 ];
 
@@ -69,7 +70,9 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {!isClient && globalNavItems.map(item => {
+        {!isClient && globalNavItems
+          .filter(item => !(item as any).adminOnly || role === 'admin')
+          .map(item => {
           const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
             <button
