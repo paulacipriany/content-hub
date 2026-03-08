@@ -29,7 +29,7 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const IdeasBankPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus, selectedProject } = useApp();
+  const { projectContents, updateContentStatus, selectedProject, setSelectedContent } = useApp();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Only show idea-bank items
@@ -119,12 +119,13 @@ const IdeasBankPage = () => {
               return (
                 <div
                   key={idea.id}
+                  onClick={() => setSelectedContent(idea)}
                   className={cn(
-                    "grid grid-cols-[40px_40px_1fr_180px_180px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors",
+                    "grid grid-cols-[40px_40px_1fr_180px_180px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer",
                     selected.has(idea.id) && "bg-primary/5"
                   )}
                 >
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center" onClick={e => e.stopPropagation()}>
                     <Checkbox
                       checked={selected.has(idea.id)}
                       onCheckedChange={() => toggleSelect(idea.id)}
