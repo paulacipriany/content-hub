@@ -132,23 +132,29 @@ const AppSidebar = () => {
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
-            {projects.map(project => (
-              <button
-                key={project.id}
-                onClick={() => {
-                  setSelectedProject(project);
-                  navigate(`/clients/${project.id}/dashboard`);
-                }}
-                className="flex items-center w-full px-3 py-1.5 rounded-md text-sm transition-colors hover:opacity-80"
-              >
-                <span
-                  className="text-xs font-medium px-2 py-0.5 rounded truncate"
-                  style={{ backgroundColor: project.color + '25', color: project.color }}
+            {projects.map(project => {
+              // Determine contrasting text color based on luminance
+              const hex = project.color.replace('#', '');
+              const r = parseInt(hex.substring(0, 2), 16) / 255;
+              const g = parseInt(hex.substring(2, 4), 16) / 255;
+              const b = parseInt(hex.substring(4, 6), 16) / 255;
+              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+              const textColor = luminance > 0.55 ? '#1a1a1a' : '#ffffff';
+
+              return (
+                <button
+                  key={project.id}
+                  onClick={() => {
+                    setSelectedProject(project);
+                    navigate(`/clients/${project.id}/dashboard`);
+                  }}
+                  className="w-full px-3 py-2 rounded-lg text-sm font-medium truncate text-left transition-all duration-200 hover:scale-[1.03] hover:shadow-md hover:brightness-110 active:scale-[0.98]"
+                  style={{ backgroundColor: project.color, color: textColor }}
                 >
                   {project.name}
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </nav>
