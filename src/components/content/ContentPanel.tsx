@@ -48,6 +48,8 @@ const ContentPanel = () => {
   // Editable local state
   const [editTitle, setEditTitle] = useState('');
   const [editCopyText, setEditCopyText] = useState('');
+  const [editCopyTexts, setEditCopyTexts] = useState<Record<string, string>>({});
+  const [perPlatformCopy, setPerPlatformCopy] = useState(false);
   const [editPublishTime, setEditPublishTime] = useState('');
   const [uploading, setUploading] = useState(false);
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
@@ -58,8 +60,11 @@ const ContentPanel = () => {
     if (!selectedContent) return;
     setEditTitle(selectedContent.title);
     setEditCopyText((selectedContent as any).copy_text ?? '');
+    const texts = (selectedContent as any).copy_texts;
+    const parsedTexts = texts && typeof texts === 'object' ? texts : {};
+    setEditCopyTexts(parsedTexts);
+    setPerPlatformCopy(Object.keys(parsedTexts).length > 0);
     setEditPublishTime((selectedContent as any).publish_time ?? '');
-    // Load media_urls or fallback to single media_url
     const urls = (selectedContent as any).media_urls;
     if (urls && Array.isArray(urls) && urls.length > 0) {
       setMediaUrls(urls);
@@ -70,9 +75,8 @@ const ContentPanel = () => {
     }
   }, [selectedContent?.id]);
 
-  // Auto-save title & copy_text
+  // Auto-save title
   useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
-  useAutoSave(selectedContent?.id, 'copy_text', editCopyText, updateContentFields);
 
   useEffect(() => {
     if (!selectedContent) return;
