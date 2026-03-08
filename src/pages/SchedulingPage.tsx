@@ -5,7 +5,8 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check, Download, Loader2 } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -231,6 +232,23 @@ const SchedulingPage = () => {
                     ) : (
                       <><Download size={14} className="mr-2" /> Baixar mídias (.zip)</>
                     )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Copy text */}
+              {previewContent.copy_text && (
+                <div className="px-6 py-4 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                      toast.success('Texto copiado!');
+                    }}
+                  >
+                    <Copy size={14} className="mr-2" /> Copiar texto do post
                   </Button>
                 </div>
               )}
