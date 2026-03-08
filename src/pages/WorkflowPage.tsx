@@ -48,7 +48,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   'idea-bank': '--status-idea',
   'production': '--status-production',
   'review': '--status-review',
-  'approval-internal': '--status-approval',
+  
   'approval-client': '--status-approval-client',
   'scheduled': '--status-scheduled',
   'published': '--status-published',

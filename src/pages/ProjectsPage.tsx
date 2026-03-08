@@ -330,7 +330,7 @@ const ProjectsPage = () => {
 
                     {/* Progress bar */}
                     <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden flex">
-                      {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                      {(['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
                         const count = projectContents.filter(c => c.status === s).length;
                         if (count === 0 || projectContents.length === 0) return null;
                         const pct = (count / projectContents.length) * 100;
