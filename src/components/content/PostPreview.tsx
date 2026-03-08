@@ -192,7 +192,7 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       <div className="px-3 pb-2">
-        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content)}</p>
+        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content, 'linkedin')}</p>
       </div>
 
       <MediaOrPlaceholder content={content} platform="linkedin" />
