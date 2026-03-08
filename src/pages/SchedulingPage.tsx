@@ -151,6 +151,47 @@ const SchedulingPage = () => {
                 )}
               </div>
 
+              {/* Platform checklist */}
+              {(() => {
+                const platforms = Array.isArray(previewContent.platform) ? previewContent.platform : [previewContent.platform];
+                if (platforms.length === 0) return null;
+                return (
+                  <div className="px-6 py-4 border-b border-border/50">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Redes Sociais</h4>
+                    <div className="space-y-2.5">
+                      {platforms.map(p => (
+                        <label key={p} className="flex items-center gap-3 cursor-pointer group">
+                          <Checkbox
+                            checked={checkedPlatforms[previewContent.id]?.[p] ?? false}
+                            onCheckedChange={(checked) => {
+                              setCheckedPlatforms(prev => ({
+                                ...prev,
+                                [previewContent.id]: {
+                                  ...prev[previewContent.id],
+                                  [p]: !!checked,
+                                },
+                              }));
+                            }}
+                          />
+                          <div className="flex items-center gap-2">
+                            {platformIcon([p] as Platform[], 14)}
+                            <span className="text-sm text-foreground">{PLATFORM_LABELS[p as Platform] ?? p}</span>
+                          </div>
+                          {checkedPlatforms[previewContent.id]?.[p] && (
+                            <Check size={14} className="ml-auto text-emerald-500" />
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                    {platforms.length > 1 && (
+                      <p className="text-[10px] text-muted-foreground mt-2">
+                        {Object.values(checkedPlatforms[previewContent.id] ?? {}).filter(Boolean).length} de {platforms.length} agendada(s)
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
               {previewContent.description && (
                 <div className="px-6 py-4 border-b border-border/50">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
