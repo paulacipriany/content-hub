@@ -320,14 +320,69 @@ const ContentPanel = () => {
 
           {/* Copy text (editable) */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Copy</label>
-            <textarea
-              value={editCopyText}
-              onChange={e => setEditCopyText(e.target.value)}
-              rows={5}
-              placeholder="Escreva a copy da postagem..."
-              className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
+              <button
+                onClick={() => {
+                  const next = !perPlatformCopy;
+                  setPerPlatformCopy(next);
+                  if (!next) {
+                    // Switching to shared: clear per-platform, keep shared
+                    setEditCopyTexts({});
+                    updateContentFields(selectedContent.id, { copy_texts: {} });
+                  } else {
+                    // Switching to per-platform: seed each platform with shared text
+                    const platforms = Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform];
+                    const seeded: Record<string, string> = {};
+                    platforms.forEach(p => { seeded[p] = editCopyText; });
+                    setEditCopyTexts(seeded);
+                    updateContentFields(selectedContent.id, { copy_texts: seeded });
+                  }
+                }}
+                className="text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors"
+                style={{
+                  backgroundColor: perPlatformCopy ? 'var(--client-100, hsl(var(--primary) / 0.1))' : 'hsl(var(--secondary))',
+                  color: perPlatformCopy ? 'var(--client-600, hsl(var(--primary)))' : 'hsl(var(--muted-foreground))',
+                }}
+              >
+                {perPlatformCopy ? '✓ Texto por rede' : 'Mesmo texto para todas'}
+              </button>
+            </div>
+
+            {perPlatformCopy ? (
+              <div className="space-y-3">
+                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
+                  <div key={p}>
+                    <label className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                      {platformIcon([p], 14)}
+                      {PLATFORM_LABELS[p]}
+                    </label>
+                    <textarea
+                      value={editCopyTexts[p] ?? ''}
+                      onChange={e => {
+                        const updated = { ...editCopyTexts, [p]: e.target.value };
+                        setEditCopyTexts(updated);
+                        updateContentFields(selectedContent.id, { copy_texts: updated });
+                      }}
+                      rows={3}
+                      placeholder={`Copy para ${PLATFORM_LABELS[p]}...`}
+                      className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <textarea
+                value={editCopyText}
+                onChange={e => {
+                  setEditCopyText(e.target.value);
+                  updateContentFields(selectedContent.id, { copy_text: e.target.value });
+                }}
+                rows={5}
+                placeholder="Escreva a copy da postagem..."
+                className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+              />
+            )}
           </div>
 
           {/* Media Upload — multiple images */}
