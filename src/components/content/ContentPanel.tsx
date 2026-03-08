@@ -629,7 +629,7 @@ const ContentPanel = () => {
         </div>
 
         {/* Right column — Preview & Comments (hidden for client, who sees preview inline) */}
-        <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
+        {!isIdeaBank && <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
           {!isClient && !isIdeaBank && (
             <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
@@ -713,7 +713,7 @@ const ContentPanel = () => {
               </>
             )}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );
