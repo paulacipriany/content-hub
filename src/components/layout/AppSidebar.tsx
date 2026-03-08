@@ -135,7 +135,7 @@ const AppSidebar = () => {
                 key={project.id}
                 onClick={() => {
                   setSelectedProject(project);
-                  navigate(`/clients/${project.id}/contents`);
+                  navigate(`/clients/${project.id}/dashboard`);
                 }}
                 className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
               >
