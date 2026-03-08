@@ -162,7 +162,7 @@ const SchedulingPage = () => {
                             {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
                           {platforms.map(p => (
                             <label key={p} className="flex items-center gap-1.5 cursor-pointer">
                               <Checkbox
