@@ -41,6 +41,9 @@ const ContentPanel = () => {
   const { user, profile, role } = useAuth();
   const isClient = role === 'client';
   const [newComment, setNewComment] = useState('');
+  const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
+  const [commentUploading, setCommentUploading] = useState(false);
+  const commentFileRef = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
