@@ -134,28 +134,6 @@ const MediaLibraryPage = () => {
     toast({ title: 'Mídia excluída' });
   };
 
-  const handleAssociate = async (contentId: string) => {
-    if (!associateItem) return;
-    await supabase.from('media_library').update({ content_id: contentId } as any).eq('id', associateItem.id);
-
-    // Also add to content's media_urls
-    const content = projectContents.find(c => c.id === contentId);
-    if (content) {
-      const currentUrls = (content.media_urls && Array.isArray(content.media_urls) ? content.media_urls : []).filter(Boolean) as string[];
-      if (!currentUrls.includes(associateItem.url)) {
-        const updatedUrls = [...currentUrls, associateItem.url];
-        await updateContentFields(contentId, {
-          media_url: updatedUrls[0] ?? null,
-          media_urls: updatedUrls,
-        });
-      }
-    }
-
-    setMediaItems(prev => prev.map(m => m.id === associateItem.id ? { ...m, content_id: contentId, contentTitle: content?.title ?? null } : m));
-    setAssociateItem(null);
-    setContentSearch('');
-    toast({ title: 'Imagem associada à postagem!' });
-  };
 
   const filtered = search.trim()
     ? mediaItems.filter(item =>
