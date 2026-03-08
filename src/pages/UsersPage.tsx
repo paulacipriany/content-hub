@@ -241,7 +241,7 @@ const UsersPage = () => {
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(u.user_id)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(u.user_id), `"${u.display_name || 'este usuário'}"`)}>
                   <Trash2 size={14} />
                 </Button>
               </div>
