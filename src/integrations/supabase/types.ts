@@ -244,6 +244,7 @@ export type Database = {
           created_by: string
           id: string
           likes: number | null
+          result: string | null
           shares: number | null
           updated_at: string
           views: number | null
@@ -256,6 +257,7 @@ export type Database = {
           created_by: string
           id?: string
           likes?: number | null
+          result?: string | null
           shares?: number | null
           updated_at?: string
           views?: number | null
@@ -268,6 +270,7 @@ export type Database = {
           created_by?: string
           id?: string
           likes?: number | null
+          result?: string | null
           shares?: number | null
           updated_at?: string
           views?: number | null

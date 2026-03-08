@@ -12,6 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+type AnalysisResult = 'positivo' | 'negativo' | 'neutro';
+
 interface PostAnalysis {
   id: string;
   content_id: string;
@@ -20,8 +22,15 @@ interface PostAnalysis {
   comments_count: number;
   shares: number;
   analysis_text: string;
+  result: AnalysisResult | null;
   created_by: string;
 }
+
+const resultOptions: { value: AnalysisResult; label: string; color: string }[] = [
+  { value: 'positivo', label: 'Positivo', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+  { value: 'negativo', label: 'Negativo', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  { value: 'neutro', label: 'Neutro', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800/40 dark:text-zinc-300' },
+];
 
 const contentTypeBadgeColors: Record<string, string> = {
   stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
@@ -53,6 +62,7 @@ const AnalysisRow = ({
   const [commentsCount, setCommentsCount] = useState(analysis?.comments_count ?? 0);
   const [shares, setShares] = useState(analysis?.shares ?? 0);
   const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
+  const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
   const [saving, setSaving] = useState(false);
 
   const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
@@ -66,6 +76,7 @@ const AnalysisRow = ({
       comments_count: commentsCount,
       shares,
       analysis_text: analysisText,
+      result,
       created_by: userId,
     };
 
@@ -109,6 +120,11 @@ const AnalysisRow = ({
               <span className="flex items-center gap-1"><Heart size={12} /> {analysis.likes}</span>
               <span className="flex items-center gap-1"><MessageCircle size={12} /> {analysis.comments_count}</span>
               <span className="flex items-center gap-1"><Share2 size={12} /> {analysis.shares}</span>
+              {analysis.result && (
+                <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
+                  {resultOptions.find(o => o.value === analysis.result)?.label}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-muted-foreground/60 italic">Sem análise</span>
@@ -178,6 +194,28 @@ const AnalysisRow = ({
               placeholder="Escreva sua análise sobre o desempenho deste conteúdo..."
               className="text-sm min-h-[80px]"
             />
+          </div>
+          <div className="mb-3">
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">
+              Resultado
+            </label>
+            <div className="flex gap-2">
+              {resultOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setResult(result === opt.value ? null : opt.value)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                    result === opt.value
+                      ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
+                      : "border-border text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
           <Button size="sm" onClick={handleSave} disabled={saving}>
             {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}

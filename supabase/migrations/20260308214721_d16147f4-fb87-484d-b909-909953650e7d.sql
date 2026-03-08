@@ -1,0 +1,1 @@
+ALTER TABLE public.post_analyses ADD COLUMN result text DEFAULT null;
