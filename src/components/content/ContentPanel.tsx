@@ -305,7 +305,18 @@ const ContentPanel = () => {
               >
                 Salvar rascunho
               </Button>
-              {canAdvance && (
+              {isIdeaBank ? (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => {
+                    updateContentStatus(selectedContent.id, 'idea');
+                    setSelectedContent(null);
+                  }}
+                >
+                  Enviar para Workflow
+                </Button>
+              ) : canAdvance && (
                 <Button
                   size="sm"
                   style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
