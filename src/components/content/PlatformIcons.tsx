@@ -101,6 +101,8 @@ export const PLATFORM_CONTENT_TYPES: Record<Platform, ContentType[]> = {
   tiktok: ['video'],
   youtube: ['video', 'post', 'shorts'],
   pinterest: ['image', 'video'],
+  twitter: ['feed'],
+  google_business: ['feed', 'image'],
 };
 
 // Get available content types for a set of platforms (intersection)
