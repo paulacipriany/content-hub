@@ -21,6 +21,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
 import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
+import IdeasBankPage from "@/pages/IdeasBankPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
