@@ -20,7 +20,7 @@ export type ContentWithRelations = DbContent & {
 };
 
 // Keep label/color maps for UI
-export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business';
+export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business' | 'blog';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image';
 export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'programmed' | 'published';
 
