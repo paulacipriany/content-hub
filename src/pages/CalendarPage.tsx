@@ -622,6 +622,83 @@ const CalendarPage = () => {
         </div>
       </div>
       </DndContext>
+
+      {/* Client preview sheet */}
+      <Sheet open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+          {previewContent && (() => {
+            const previewPlatform = Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform;
+            return (
+              <div className="flex flex-col h-full">
+                <div className="px-6 pt-6 pb-4 border-b border-border">
+                  <SheetTitle className="text-lg font-semibold text-foreground mb-3">
+                    {previewContent.title}
+                  </SheetTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground",
+                      STATUS_COLORS[previewContent.status as WorkflowStatus]
+                    )}>
+                      {STATUS_LABELS[previewContent.status as WorkflowStatus]}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                      {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                      {platformIcon(previewContent.platform, 12)}
+                      {Array.isArray(previewContent.platform) ? previewContent.platform.join(', ') : previewContent.platform}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  {previewContent.publish_date && (
+                    <div className="flex items-center gap-1.5">
+                      <CalIcon size={12} />
+                      <span>
+                        {new Date(previewContent.publish_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        {(previewContent as any).publish_time && ` às ${(previewContent as any).publish_time}`}
+                      </span>
+                    </div>
+                  )}
+                  {previewContent.assignee_profile && (
+                    <div className="flex items-center gap-1.5">
+                      <User size={12} />
+                      <span>{previewContent.assignee_profile.display_name}</span>
+                    </div>
+                  )}
+                </div>
+
+                {previewContent.description && (
+                  <div className="px-6 py-4 border-b border-border/50">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                  </div>
+                )}
+
+                <div className="px-6 py-4 flex-1">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
+                  {previewPlatform ? (
+                    <PostPreview content={previewContent} platform={previewPlatform as Platform} />
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
+                  )}
+                </div>
+
+                {previewContent.hashtags && previewContent.hashtags.length > 0 && (
+                  <div className="px-6 py-3 border-t border-border/50">
+                    <div className="flex flex-wrap gap-1.5">
+                      {previewContent.hashtags.map((tag, i) => (
+                        <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
