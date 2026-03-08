@@ -11,6 +11,7 @@ export type DbStatusHistory = Tables<'status_history'>;
 
 // Extended content with relations
 export type ContentWithRelations = DbContent & {
+  media_url?: string | null;
   assignee_profile?: DbProfile | null;
   creator_profile?: DbProfile | null;
   project?: DbProject | null;
