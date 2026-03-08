@@ -83,13 +83,19 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
   );
 };
 
-const getDisplayText = (content: ContentWithRelations, platform?: string) => {
+const getDisplayText = (content: ContentWithRelations, platform?: string, maxChars?: number) => {
   const copyTexts = (content as any).copy_texts;
+  let text = '';
   if (platform && copyTexts && typeof copyTexts === 'object' && copyTexts[platform]) {
-    return copyTexts[platform];
+    text = copyTexts[platform];
+  } else {
+    const copyText = (content as any).copy_text;
+    text = copyText || content.description || content.title;
   }
-  const copyText = (content as any).copy_text;
-  return copyText || content.description || content.title;
+  if (maxChars && text.length > maxChars) {
+    return text.slice(0, maxChars) + '...';
+  }
+  return text;
 };
 
 const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
