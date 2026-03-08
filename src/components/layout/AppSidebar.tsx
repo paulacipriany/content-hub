@@ -133,23 +133,26 @@ const AppSidebar = () => {
                 <div className="px-4 mb-1">
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
-                {projects.filter(p => p.id !== selectedProject.id).map(project => (
-                  <button
-                    key={project.id}
-                    onClick={() => {
-                      setSelectedProject(project);
-                      navigate(`/clients/${project.id}/dashboard`);
-                    }}
-                    className="w-full px-4 py-1.5 text-sm font-medium truncate text-left transition-all hover:brightness-125 active:scale-[0.98]"
-                  >
-                    <span
-                      className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-medium"
-                      style={{ backgroundColor: project.color + '25', color: project.color }}
+                {projects.filter(p => p.id !== selectedProject.id).map(project => {
+                  const pal = generatePalette(project.color);
+                  return (
+                    <button
+                      key={project.id}
+                      onClick={() => {
+                        setSelectedProject(project);
+                        navigate(`/clients/${project.id}/dashboard`);
+                      }}
+                      className="w-full px-4 py-1.5 text-sm font-medium truncate text-left transition-all hover:brightness-125 active:scale-[0.98]"
                     >
-                      {project.name}
-                    </span>
-                  </button>
-                ))}
+                      <span
+                        className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
+                        style={{ backgroundColor: pal[800], color: pal[300] }}
+                      >
+                        {project.name}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
             {sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
