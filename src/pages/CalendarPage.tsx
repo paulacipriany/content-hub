@@ -446,8 +446,22 @@ const CalendarPage = () => {
   const renderDayItems = (dateStr: string) => {
     const dayContents = showContents ? getContentsForDate(dateStr) : [];
     const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
+    const commemoratives = showDates ? getCommemorativesForDate(dateStr) : [];
     return (
       <>
+        {commemoratives.length > 0 && (
+          <div className="space-y-0.5 mb-1">
+            {commemoratives.slice(0, viewMode === 'week' ? 5 : 2).map((title, i) => (
+              <div key={i} className="flex items-center gap-1 px-1.5 py-[1px] rounded-[4px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+                <Star size={8} className="flex-shrink-0" />
+                <span className="truncate">{title}</span>
+              </div>
+            ))}
+            {commemoratives.length > (viewMode === 'week' ? 5 : 2) && (
+              <span className="text-[9px] text-amber-600/60 pl-1">+{commemoratives.length - (viewMode === 'week' ? 5 : 2)} mais</span>
+            )}
+          </div>
+        )}
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
           <DraggableContent key={c.id} content={c} onClick={() => isClient ? setPreviewContent(c) : setSelectedContent(c)} />
         ))}
