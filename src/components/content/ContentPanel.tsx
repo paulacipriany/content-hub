@@ -1,10 +1,11 @@
-import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil, Eye } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
 import { platformIcon } from './ContentCard';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import PostPreview from './PostPreview';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
