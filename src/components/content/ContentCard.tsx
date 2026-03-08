@@ -6,6 +6,7 @@ import { platformIcon } from './PlatformIcons';
 interface ContentCardProps {
   content: ContentWithRelations;
   compact?: boolean;
+  hideStatus?: boolean;
 }
 
 const ContentCard = ({ content, compact }: ContentCardProps) => {
