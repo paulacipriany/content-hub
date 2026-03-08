@@ -26,10 +26,15 @@ const clientNavItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject } = useApp();
+  const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
   const { profile, role, signOut } = useAuth();
 
   const isClient = role === 'client';
+
+  // Count posts pending approval for selected project
+  const approvalCount = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && ['approval-internal', 'approval-client'].includes(c.status)).length
+    : 0;
 
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
@@ -140,7 +145,12 @@ const AppSidebar = () => {
                   title={sidebarCollapsed ? item.label : undefined}
                 >
                   <item.icon size={18} className="flex-shrink-0" />
-                  {!sidebarCollapsed && <span>{item.label}</span>}
+                  {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
+                  {item.path === '/approvals' && approvalCount > 0 && (
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                      {approvalCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
