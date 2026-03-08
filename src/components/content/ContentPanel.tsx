@@ -437,7 +437,7 @@ const ContentPanel = () => {
             <div className="space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
               <div className="flex gap-1.5">
-                {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
                   <button
                     key={p}
                     onClick={() => setPreviewPlatform(p)}
@@ -598,7 +598,7 @@ const ContentPanel = () => {
             <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
               <div className="flex gap-1.5 justify-center">
-                {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
                   <button
                     key={p}
                     onClick={() => setPreviewPlatform(p)}
