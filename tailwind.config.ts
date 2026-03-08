@@ -73,6 +73,7 @@ export default {
           approval: "hsl(var(--status-approval))",
           "approval-client": "hsl(var(--status-approval-client))",
           scheduled: "hsl(var(--status-scheduled))",
+          programmed: "hsl(var(--status-programmed))",
           published: "hsl(var(--status-published))",
           rejected: "hsl(var(--status-rejected))",
         },

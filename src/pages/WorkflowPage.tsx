@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { X, Calendar, User } from 'lucide-react';
 
-const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'];
+const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
 
 const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -51,6 +51,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   
   'approval-client': '--status-approval-client',
   'scheduled': '--status-scheduled',
+  'programmed': '--status-programmed',
   'published': '--status-published',
 };
 
