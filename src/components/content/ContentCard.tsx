@@ -11,6 +11,8 @@ interface ContentCardProps {
   content: ContentWithRelations;
   compact?: boolean;
   hideStatus?: boolean;
+  readOnly?: boolean;
+  onClick?: () => void;
 }
 
 const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
