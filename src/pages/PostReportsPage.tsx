@@ -50,11 +50,13 @@ const AnalysisRow = ({
   analysis,
   userId,
   onSaved,
+  readOnly = false,
 }: {
   content: ContentWithRelations;
   analysis: PostAnalysis | null;
   userId: string;
   onSaved: () => void;
+  readOnly?: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [views, setViews] = useState(analysis?.views ?? 0);
