@@ -23,6 +23,7 @@ import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
 import PostReportsPage from "@/pages/PostReportsPage";
+import ReviewPage from "@/pages/ReviewPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
