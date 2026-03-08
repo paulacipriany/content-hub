@@ -174,7 +174,7 @@ const ContentPanel = () => {
   };
 
   return (
-    <div className="w-[420px] border-l border-border bg-card flex flex-col h-full animate-slide-in-right flex-shrink-0">
+    <div className="flex-1 flex flex-col h-full bg-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 h-14 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2 flex-1 min-w-0">
