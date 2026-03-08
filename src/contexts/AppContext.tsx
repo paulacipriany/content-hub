@@ -9,6 +9,7 @@ interface AppContextType {
   selectedContent: ContentWithRelations | null;
   setSelectedContent: (content: ContentWithRelations | null) => void;
   updateContentStatus: (id: string, status: WorkflowStatus) => Promise<void>;
+  updateContentDate: (id: string, date: string | null) => Promise<void>;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   loading: boolean;
