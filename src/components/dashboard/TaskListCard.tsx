@@ -102,10 +102,10 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
       </div>
 
       {tasks.length > 0 && (
-        <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-4">
+        <div className="h-1.5 rounded-full overflow-hidden mb-4" style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))' }}>
           <div
-            className="h-full bg-primary rounded-full transition-all"
-            style={{ width: `${(doneCount / tasks.length) * 100}%` }}
+            className="h-full rounded-full transition-all"
+            style={{ width: `${(doneCount / tasks.length) * 100}%`, backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
           />
         </div>
       )}
