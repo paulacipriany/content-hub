@@ -30,8 +30,8 @@ const IdeasBankPage = () => {
   const { projectContents, updateContentStatus } = useApp();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Only show ideas (status = 'idea')
-  const ideas = projectContents.filter(c => c.status === 'idea');
+  // Only show idea-bank items
+  const ideas = projectContents.filter(c => c.status === 'idea-bank');
 
   const toggleSelect = (id: string) => {
     setSelected(prev => {
