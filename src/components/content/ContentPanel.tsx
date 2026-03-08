@@ -453,14 +453,60 @@ const ContentPanel = () => {
 
           {/* Briefing — rich editor for idea-bank, read-only otherwise */}
           {isIdeaBank ? (
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
-              <RichTextEditor
-                content={editBriefing}
-                onChange={setEditBriefing}
-                contentId={selectedContent.id}
-              />
-            </div>
+            <>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
+                <RichTextEditor
+                  content={editBriefing}
+                  onChange={setEditBriefing}
+                  contentId={selectedContent.id}
+                />
+              </div>
+
+              {/* Images for idea-bank */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <ImagePlus size={12} />Imagens de referência
+                </label>
+                {mediaUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    {mediaUrls.map((url, i) => (
+                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => handleRemoveMedia(i)}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+                >
+                  {uploading ? (
+                    <Loader2 size={18} className="animate-spin text-primary" />
+                  ) : (
+                    <>
+                      <ImagePlus size={18} />
+                      <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
+                    </>
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </div>
+            </>
           ) : selectedContent.description ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
