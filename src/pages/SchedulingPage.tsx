@@ -235,6 +235,23 @@ const SchedulingPage = () => {
                   </Button>
                 </div>
               )}
+
+              {/* Copy text */}
+              {previewContent.copy_text && (
+                <div className="px-6 py-4 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                      toast.success('Texto copiado!');
+                    }}
+                  >
+                    <Copy size={14} className="mr-2" /> Copiar texto do post
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </SheetContent>
