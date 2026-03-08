@@ -1,14 +1,12 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Image, Search, ExternalLink, Trash2, Download, Plus, Link2, X } from 'lucide-react';
+import { Image, Search, ExternalLink, Trash2, Download, Plus } from 'lucide-react';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 
 interface MediaItem {
@@ -32,9 +30,6 @@ const MediaLibraryPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canDelete = role === 'admin' || role === 'moderator';
 
-  // Associate dialog
-  const [associateItem, setAssociateItem] = useState<MediaItem | null>(null);
-  const [contentSearch, setContentSearch] = useState('');
 
   const fetchMedia = useCallback(async () => {
     if (!selectedProject) return;
@@ -139,28 +134,6 @@ const MediaLibraryPage = () => {
     toast({ title: 'Mídia excluída' });
   };
 
-  const handleAssociate = async (contentId: string) => {
-    if (!associateItem) return;
-    await supabase.from('media_library').update({ content_id: contentId } as any).eq('id', associateItem.id);
-
-    // Also add to content's media_urls
-    const content = projectContents.find(c => c.id === contentId);
-    if (content) {
-      const currentUrls = (content.media_urls && Array.isArray(content.media_urls) ? content.media_urls : []).filter(Boolean) as string[];
-      if (!currentUrls.includes(associateItem.url)) {
-        const updatedUrls = [...currentUrls, associateItem.url];
-        await updateContentFields(contentId, {
-          media_url: updatedUrls[0] ?? null,
-          media_urls: updatedUrls,
-        });
-      }
-    }
-
-    setMediaItems(prev => prev.map(m => m.id === associateItem.id ? { ...m, content_id: contentId, contentTitle: content?.title ?? null } : m));
-    setAssociateItem(null);
-    setContentSearch('');
-    toast({ title: 'Imagem associada à postagem!' });
-  };
 
   const filtered = search.trim()
     ? mediaItems.filter(item =>
@@ -169,9 +142,6 @@ const MediaLibraryPage = () => {
       )
     : mediaItems;
 
-  const filteredContents = contentSearch.trim()
-    ? projectContents.filter(c => c.title.toLowerCase().includes(contentSearch.toLowerCase()))
-    : projectContents.slice(0, 10);
 
   return (
     <>
@@ -280,12 +250,6 @@ const MediaLibraryPage = () => {
                     >
                       <Download size={10} /> Download
                     </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setAssociateItem(item); }}
-                      className="inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
-                    >
-                      <Link2 size={10} /> Vincular
-                    </button>
                     <div className="ml-auto">
                       {canDelete && (
                         <button
@@ -305,43 +269,6 @@ const MediaLibraryPage = () => {
         )}
       </div>
 
-      {/* Associate dialog */}
-      <Dialog open={!!associateItem} onOpenChange={(v) => { if (!v) { setAssociateItem(null); setContentSearch(''); } }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Vincular imagem a uma postagem</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar postagem..."
-                value={contentSearch}
-                onChange={e => setContentSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="max-h-64 overflow-y-auto space-y-1">
-              {filteredContents.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">Nenhuma postagem encontrada</p>
-              ) : (
-                filteredContents.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleAssociate(c.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary transition-colors flex items-center gap-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{c.status} · {c.publish_date || 'Sem data'}</p>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
