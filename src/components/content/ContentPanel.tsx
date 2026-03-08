@@ -473,7 +473,7 @@ const ContentPanel = () => {
                   <div className="grid grid-cols-3 gap-2 mb-2">
                     {mediaUrls.map((url, i) => (
                       <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
                         <button
                           onClick={() => handleRemoveMedia(i)}
                           className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
