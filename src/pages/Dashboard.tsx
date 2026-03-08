@@ -5,7 +5,7 @@ import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { contents, projects } = useApp();
+  const { contents, projects, setSelectedProject } = useApp();
   const navigate = useNavigate();
 
   const stats = [
@@ -16,6 +16,11 @@ const Dashboard = () => {
   ];
 
   const pendingApprovals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+
+  const handleClientClick = (project: typeof projects[number]) => {
+    setSelectedProject(project);
+    navigate(`/clients/${project.id}/contents`);
+  };
 
   return (
     <>
@@ -35,9 +40,9 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Projects */}
+          {/* Clients */}
           <div className="bg-card border border-border rounded-xl p-5">
-             <h2 className="text-sm font-semibold text-foreground mb-4">Clientes</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-4">Clientes</h2>
             <div className="space-y-2.5">
               {projects.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhum cliente ainda. Crie seu primeiro cliente!</p>
@@ -47,7 +52,7 @@ const Dashboard = () => {
                   return (
                     <button
                       key={p.id}
-                      onClick={() => navigate(`/projects/${p.id}`)}
+                      onClick={() => handleClientClick(p)}
                       className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-secondary transition-colors"
                     >
                       <div className="flex items-center gap-3">
