@@ -676,8 +676,60 @@ const ContentPanel = () => {
           )}
         </div>
 
-        {/* Right column — Preview & Comments (hidden for client, who sees preview inline) */}
-        {!isIdeaBank && <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
+        {/* Right column — Checklist sidebar for idea-bank, Preview & Comments otherwise */}
+        {isIdeaBank ? (
+          <div className="w-[300px] border-l border-border flex flex-col flex-shrink-0 bg-card overflow-y-auto scrollbar-thin p-5 space-y-4">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <CheckSquare size={12} />Para fazer
+            </label>
+            <div className="space-y-1.5">
+              {checklist.map(item => (
+                <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left group">
+                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                    item.done ? "bg-status-published border-status-published" : "border-border"
+                  )}>
+                    {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
+                  </div>
+                  <span className={cn("flex-1", item.done && "line-through text-muted-foreground")}>{item.text}</span>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await supabase.from('checklist_items').delete().eq('id', item.id);
+                      setChecklist(prev => prev.filter(i => i.id !== item.id));
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </button>
+              ))}
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newCheckItem.trim() || !selectedContent) return;
+                const { data } = await supabase.from('checklist_items').insert({
+                  content_id: selectedContent.id,
+                  text: newCheckItem.trim(),
+                  sort_order: checklist.length,
+                }).select().maybeSingle();
+                if (data) setChecklist(prev => [...prev, data]);
+                setNewCheckItem('');
+              }}
+              className="flex gap-2"
+            >
+              <Input
+                value={newCheckItem}
+                onChange={e => setNewCheckItem(e.target.value)}
+                placeholder="Novo item..."
+                className="h-8 text-sm"
+              />
+              <Button type="submit" size="sm" variant="outline" className="h-8 px-2 flex-shrink-0">
+                <Plus size={14} />
+              </Button>
+            </form>
+          </div>
+        ) : <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
           {!isClient && !isIdeaBank && (
             <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
