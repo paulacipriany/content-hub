@@ -763,7 +763,7 @@ const ContentPanel = () => {
                 <div key={c.id} className="bg-secondary rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
-                    <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')} {new Date(c.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                   {c.text && <p className="text-xs text-muted-foreground">{c.text}</p>}
                   {c.image_url && (
