@@ -11,6 +11,7 @@ const globalNavItems = [
 ];
 
 const clientNavItems = [
+  { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
@@ -134,7 +135,7 @@ const AppSidebar = () => {
                 key={project.id}
                 onClick={() => {
                   setSelectedProject(project);
-                  navigate(`/clients/${project.id}/contents`);
+                  navigate(`/clients/${project.id}/dashboard`);
                 }}
                 className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
               >

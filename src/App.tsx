@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import ContentsPage from "@/pages/ContentsPage";
+import ClientDashboardPage from "@/pages/ClientDashboardPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import CalendarPage from "@/pages/CalendarPage";
 import WorkflowPage from "@/pages/WorkflowPage";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/clients" element={<ProjectsPage />} />
               {/* Client-scoped routes */}
               <Route path="/clients/:id/contents" element={<ContentsPage />} />
+              <Route path="/clients/:id/dashboard" element={<ClientDashboardPage />} />
               <Route path="/clients/:id/calendar" element={<CalendarPage />} />
               <Route path="/clients/:id/workflow" element={<WorkflowPage />} />
               <Route path="/clients/:id/approvals" element={<ApprovalsPage />} />

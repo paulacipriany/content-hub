@@ -19,7 +19,7 @@ const Dashboard = () => {
 
   const handleClientClick = (project: typeof projects[number]) => {
     setSelectedProject(project);
-    navigate(`/clients/${project.id}/contents`);
+    navigate(`/clients/${project.id}/dashboard`);
   };
 
   return (
