@@ -378,13 +378,15 @@ const ContentPanel = () => {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
-              <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
-                <User size={12} className="text-muted-foreground" />
-                <span>{assigneeName}</span>
+            {!isClient && (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
+                <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
+                  <User size={12} className="text-muted-foreground" />
+                  <span>{assigneeName}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Briefing (read-only) */}
