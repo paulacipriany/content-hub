@@ -37,6 +37,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
 
 export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   'idea': 'bg-status-idea',
+  'idea-bank': 'bg-status-idea',
   'production': 'bg-status-production',
   'review': 'bg-status-review',
   'approval-internal': 'bg-status-approval',

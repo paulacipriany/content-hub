@@ -49,7 +49,7 @@ const IdeasBankPage = () => {
 
   const moveToProduction = async () => {
     for (const id of selected) {
-      await updateContentStatus(id, 'production');
+      await updateContentStatus(id, 'idea');
     }
     setSelected(new Set());
   };
