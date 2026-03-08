@@ -29,7 +29,7 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const IdeasBankPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus } = useApp();
+  const { projectContents, updateContentStatus, selectedProject } = useApp();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Only show idea-bank items
