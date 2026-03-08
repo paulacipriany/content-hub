@@ -126,7 +126,7 @@ export type Database = {
           hashtags: string[] | null
           id: string
           media_url: string | null
-          platform: Database["public"]["Enums"]["platform"]
+          platform: Database["public"]["Enums"]["platform"][]
           project_id: string
           publish_date: string | null
           status: Database["public"]["Enums"]["workflow_status"]
@@ -142,7 +142,7 @@ export type Database = {
           hashtags?: string[] | null
           id?: string
           media_url?: string | null
-          platform?: Database["public"]["Enums"]["platform"]
+          platform?: Database["public"]["Enums"]["platform"][]
           project_id: string
           publish_date?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
@@ -158,7 +158,7 @@ export type Database = {
           hashtags?: string[] | null
           id?: string
           media_url?: string | null
-          platform?: Database["public"]["Enums"]["platform"]
+          platform?: Database["public"]["Enums"]["platform"][]
           project_id?: string
           publish_date?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
