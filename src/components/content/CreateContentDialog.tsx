@@ -35,11 +35,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
-  const availableContentTypes = getContentTypesForPlatforms(platforms);
-
-  if (platforms.length > 0 && !availableContentTypes.includes(contentType) && availableContentTypes.length > 0) {
-    setContentType(availableContentTypes[0]);
-  }
+  const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
 
   const reset = () => {
     setTitle('');
