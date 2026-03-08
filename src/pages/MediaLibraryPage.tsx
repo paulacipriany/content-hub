@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Image, Search, ExternalLink, Trash2, Download, Plus, Link2, X } from 'lucide-react';
+import { Image, Search, ExternalLink, Trash2, Download, Plus } from 'lucide-react';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
