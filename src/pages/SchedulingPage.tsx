@@ -179,8 +179,16 @@ const SchedulingPage = () => {
                                   // Check if all platforms are now checked
                                   const allChecked = platforms.every(pl => updated[pl]);
                                   if (allChecked) {
-                                    updateContentStatus(content.id, 'programmed');
+                                    setExitingIds(prev => new Set(prev).add(content.id));
                                     toast.success(`"${content.title}" movido para Programado`);
+                                    setTimeout(() => {
+                                      updateContentStatus(content.id, 'programmed');
+                                      setExitingIds(prev => {
+                                        const next = new Set(prev);
+                                        next.delete(content.id);
+                                        return next;
+                                      });
+                                    }, 600);
                                   }
                                 }}
                               />
