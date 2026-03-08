@@ -581,6 +581,35 @@ const CalendarPage = () => {
                   Tarefas
                   {showTasks ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
                 </button>
+                <button
+                  onClick={() => setShowDates(prev => !prev)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                    showDates
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                      : "text-muted-foreground border-border hover:bg-muted"
+                  )}
+                >
+                  <Star size={11} />
+                  Datas
+                  {showDates ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
+                </button>
+                {!isClient && (
+                  <>
+                    <button
+                      onClick={() => setAddDateDialogOpen(true)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-muted-foreground border border-dashed border-border hover:bg-muted transition-colors"
+                    >
+                      <Plus size={10} /> Data
+                    </button>
+                    <button
+                      onClick={() => setImportDialogOpen(true)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-muted-foreground border border-dashed border-border hover:bg-muted transition-colors"
+                    >
+                      <PartyPopper size={10} /> Importar
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* View mode toggle */}
