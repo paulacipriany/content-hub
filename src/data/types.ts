@@ -50,6 +50,7 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   linkedin: 'LinkedIn',
   tiktok: 'TikTok',
   youtube: 'YouTube',
+  pinterest: 'Pinterest',
 };
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
