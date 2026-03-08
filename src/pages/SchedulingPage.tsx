@@ -217,15 +217,7 @@ const SchedulingPage = () => {
                 )}
               </div>
 
-              {previewContent.description && (
-                <div className="px-6 py-4 border-b border-border/50">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Briefing</h4>
-                  <div
-                    className="text-sm text-foreground prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:max-w-full [&_img]:my-2 [&_a]:text-primary [&_a]:underline"
-                    dangerouslySetInnerHTML={{ __html: previewContent.description }}
-                  />
-                </div>
-              )}
+
 
               <div className="px-6 py-4 flex-1">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
