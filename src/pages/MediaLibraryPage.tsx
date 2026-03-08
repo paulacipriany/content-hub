@@ -269,43 +269,6 @@ const MediaLibraryPage = () => {
         )}
       </div>
 
-      {/* Associate dialog */}
-      <Dialog open={!!associateItem} onOpenChange={(v) => { if (!v) { setAssociateItem(null); setContentSearch(''); } }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Vincular imagem a uma postagem</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar postagem..."
-                value={contentSearch}
-                onChange={e => setContentSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="max-h-64 overflow-y-auto space-y-1">
-              {filteredContents.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">Nenhuma postagem encontrada</p>
-              ) : (
-                filteredContents.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleAssociate(c.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-secondary transition-colors flex items-center gap-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{c.status} · {c.publish_date || 'Sem data'}</p>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
