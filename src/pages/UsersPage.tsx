@@ -126,15 +126,24 @@ const UsersPage = () => {
         : Promise.resolve({ error: null }),
     ]);
 
-    // Sync project_members for client role
-    if (editRole === 'client') {
-      // Remove all existing memberships, then re-insert selected
-      await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
-      if (editProjectIds.length > 0) {
-        await supabase.from('project_members').insert(
-          editProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
-        );
+    // Update email/password via edge function if changed
+    if (editEmail || editPassword) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (token) {
+        await supabase.functions.invoke('admin-update-user', {
+          body: { user_id: editUser.user_id, email: editEmail || undefined, password: editPassword || undefined },
+        });
       }
+    }
+
+    // Sync project_members: auto-select all for admin
+    const finalProjectIds = editRole === 'admin' ? projects.map(p => p.id) : editProjectIds;
+    await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
+    if (finalProjectIds.length > 0) {
+      await supabase.from('project_members').insert(
+        finalProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
+      );
     }
 
     if (profileRes.error || roleRes.error) {
