@@ -265,7 +265,7 @@ const AppSidebar = () => {
       <div className={cn("px-3 py-2 border-t border-sidebar-border-custom", sidebarCollapsed && "flex justify-center")}>
         {sidebarCollapsed ? (
           <button
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            onClick={() => handleThemeChange(!isDark)}
             className="w-8 h-8 rounded-md flex items-center justify-center text-sidebar-fg hover:text-sidebar-fg-active hover:bg-sidebar-hover transition-colors"
             title={isDark ? 'Modo claro' : 'Modo escuro'}
           >
