@@ -1,4 +1,4 @@
-import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, AlertTriangle } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
@@ -45,8 +45,6 @@ const ContentPanel = () => {
   const [commentUploading, setCommentUploading] = useState(false);
   const commentFileRef = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState<any[]>([]);
-  const [showAdjustPrompt, setShowAdjustPrompt] = useState(false);
-  const [adjustComment, setAdjustComment] = useState('');
   const [checklist, setChecklist] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
@@ -250,7 +248,18 @@ const ContentPanel = () => {
                 size="sm"
                 variant="outline"
                 className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                onClick={() => setShowAdjustPrompt(true)}
+                disabled={!newComment.trim() && !commentImageUrl}
+                title={!newComment.trim() && !commentImageUrl ? 'Adicione um comentário antes de enviar para ajustes' : ''}
+                onClick={async () => {
+                  if ((!newComment.trim() && !commentImageUrl) || !user) return;
+                  const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
+                  if (commentImageUrl) insertData.image_url = commentImageUrl;
+                  await supabase.from('comments').insert(insertData);
+                  await updateContentStatus(selectedContent.id, 'review');
+                  setNewComment('');
+                  setCommentImageUrl(null);
+                  setSelectedContent(null);
+                }}
               >
                 Enviar para ajustes
               </Button>
@@ -666,53 +675,6 @@ const ContentPanel = () => {
           </div>
         </div>
       </div>
-
-      {/* Adjust prompt modal */}
-      {showAdjustPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAdjustPrompt(false)}>
-          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-lg space-y-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={18} className="text-amber-500" />
-              <h3 className="text-sm font-semibold text-foreground">Enviar para ajustes</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">Descreva o que precisa ser ajustado neste conteúdo. Este comentário é obrigatório.</p>
-            <textarea
-              value={adjustComment}
-              onChange={e => setAdjustComment(e.target.value)}
-              rows={4}
-              placeholder="Ex: A imagem precisa de mais contraste, o texto está com erro no segundo parágrafo..."
-              className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20"
-              autoFocus
-            />
-            <div className="flex justify-end gap-2">
-              <Button size="sm" variant="outline" onClick={() => { setShowAdjustPrompt(false); setAdjustComment(''); }}>
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                disabled={!adjustComment.trim()}
-                className="bg-amber-500 text-white hover:bg-amber-600"
-                onClick={async () => {
-                  if (!adjustComment.trim() || !user) return;
-                  // Add the comment
-                  await supabase.from('comments').insert({
-                    content_id: selectedContent.id,
-                    user_id: user.id,
-                    text: adjustComment.trim(),
-                  });
-                  // Update status to review
-                  await updateContentStatus(selectedContent.id, 'review');
-                  setShowAdjustPrompt(false);
-                  setAdjustComment('');
-                  setSelectedContent(null);
-                }}
-              >
-                Enviar para ajustes
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
