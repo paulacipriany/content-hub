@@ -120,6 +120,11 @@ const AnalysisRow = ({
               <span className="flex items-center gap-1"><Heart size={12} /> {analysis.likes}</span>
               <span className="flex items-center gap-1"><MessageCircle size={12} /> {analysis.comments_count}</span>
               <span className="flex items-center gap-1"><Share2 size={12} /> {analysis.shares}</span>
+              {analysis.result && (
+                <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
+                  {resultOptions.find(o => o.value === analysis.result)?.label}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-muted-foreground/60 italic">Sem análise</span>
