@@ -1,4 +1,5 @@
 import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock } from 'lucide-react';
+import RichTextEditor from './RichTextEditor';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
@@ -40,6 +41,7 @@ const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
   const { user, profile, role } = useAuth();
   const isClient = role === 'client';
+  const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
   const [newComment, setNewComment] = useState('');
   const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
@@ -59,11 +61,13 @@ const ContentPanel = () => {
   const [uploading, setUploading] = useState(false);
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editBriefing, setEditBriefing] = useState('');
 
   // Sync local state when selected content changes
   useEffect(() => {
     if (!selectedContent) return;
     setEditTitle(selectedContent.title);
+    setEditBriefing(selectedContent.description ?? '');
     setEditCopyText((selectedContent as any).copy_text ?? '');
     const texts = (selectedContent as any).copy_texts;
     const parsedTexts = texts && typeof texts === 'object' ? texts : {};
@@ -82,6 +86,7 @@ const ContentPanel = () => {
 
   // Auto-save title
   useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
+  useAutoSave(selectedContent?.id, 'description', editBriefing, updateContentFields);
 
   useEffect(() => {
     if (!selectedContent) return;
@@ -236,7 +241,7 @@ const ContentPanel = () => {
               placeholder="Título do conteúdo"
             />
           )}
-          {!isClient && (
+          {!isClient && !isIdeaBank && (
             <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
               {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
             </span>
@@ -318,8 +323,8 @@ const ContentPanel = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left column — Edit (or Preview for client) */}
         <div className={cn("flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5", isClient ? "max-w-xl" : "max-w-2xl")}>
-          {/* Status — hidden for client */}
-          {!isClient && (
+          {/* Status — hidden for client and idea-bank */}
+          {!isClient && !isIdeaBank && (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
               <div className="flex flex-wrap gap-1.5">
@@ -403,26 +408,28 @@ const ContentPanel = () => {
                 </Popover>
               )}
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
-              {isClient ? (
-                <span className="text-foreground text-xs flex items-center gap-2">
-                  <Clock size={12} className="text-muted-foreground" />
-                  {editPublishTime || 'Não definido'}
-                </span>
-              ) : (
-                <div className="relative flex-1">
-                  <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="time"
-                    value={editPublishTime}
-                    onChange={e => handleTimeChange(e.target.value)}
-                    className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
-                  />
-                </div>
-              )}
-            </div>
-            {!isClient && (
+            {!isIdeaBank && (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
+                {isClient ? (
+                  <span className="text-foreground text-xs flex items-center gap-2">
+                    <Clock size={12} className="text-muted-foreground" />
+                    {editPublishTime || 'Não definido'}
+                  </span>
+                ) : (
+                  <div className="relative flex-1">
+                    <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="time"
+                      value={editPublishTime}
+                      onChange={e => handleTimeChange(e.target.value)}
+                      className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {!isClient && !isIdeaBank && (
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
                 <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
@@ -433,16 +440,25 @@ const ContentPanel = () => {
             )}
           </div>
 
-          {/* Briefing (read-only) */}
-          {selectedContent.description && (
+          {/* Briefing — rich editor for idea-bank, read-only otherwise */}
+          {isIdeaBank ? (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
+              <RichTextEditor
+                content={editBriefing}
+                onChange={setEditBriefing}
+                contentId={selectedContent.id}
+              />
+            </div>
+          ) : selectedContent.description ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
               <p className="text-sm text-foreground whitespace-pre-wrap">{selectedContent.description}</p>
             </div>
-          )}
+          ) : null}
 
           {/* Client view: show preview inline instead of copy/media */}
-          {isClient ? (
+          {isIdeaBank ? null : isClient ? (
             <div className="space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
               <div className="flex gap-1.5">
