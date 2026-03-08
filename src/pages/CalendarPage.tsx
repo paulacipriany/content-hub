@@ -819,6 +819,95 @@ const CalendarPage = () => {
           })()}
         </SheetContent>
       </Sheet>
+
+      {/* Add commemorative date dialog */}
+      <Dialog open={addDateDialogOpen} onOpenChange={setAddDateDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar Data Comemorativa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Nome da data *</label>
+              <Input
+                value={newDateTitle}
+                onChange={e => setNewDateTitle(e.target.value)}
+                placeholder="Ex: Dia do Cliente"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Data *</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newDateValue && "text-muted-foreground")}>
+                    <CalIcon className="mr-2 h-4 w-4" />
+                    {newDateValue ? format(newDateValue, 'dd MMM yyyy', { locale: ptBR }) : 'Selecionar data'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newDateValue}
+                    onSelect={setNewDateValue}
+                    locale={ptBR}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddDateDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={addCommemorativeDate} disabled={!newDateTitle.trim() || !newDateValue}>Adicionar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import commemorative dates dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Importar Datas Comemorativas</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-3">
+            Selecione um mês para importar as datas comemorativas mais relevantes para o seu calendário.
+            <br />
+            <span className="text-[11px]">Fonte: datascomemorativas.me</span>
+          </p>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((m, i) => (
+              <button
+                key={i}
+                onClick={() => setImportMonth(i)}
+                className={cn(
+                  "px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+                  importMonth === i
+                    ? "bg-primary/10 text-primary border-primary/20"
+                    : "text-muted-foreground border-border hover:bg-muted"
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+          {/* Preview dates for selected month */}
+          <div className="space-y-1 max-h-60 overflow-y-auto border border-border/50 rounded-lg p-3">
+            {COMMEMORATIVE_DATES.filter(d => d.date.startsWith(String(importMonth + 1).padStart(2, '0'))).map((d, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm py-1">
+                <Star size={10} className="text-amber-500 flex-shrink-0" />
+                <span className="text-muted-foreground text-xs w-10 flex-shrink-0">{d.date.slice(3)}/{d.date.slice(0, 2)}</span>
+                <span className="text-foreground truncate">{d.title}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2 pt-3">
+            <Button variant="outline" onClick={() => setImportDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={() => importCommemorativeDates(importMonth)}>
+              Importar mês
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
