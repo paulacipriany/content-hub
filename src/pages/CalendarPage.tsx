@@ -41,7 +41,7 @@ interface CalTask {
 const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
-    data: { content },
+    data: { type: 'content', content },
   });
   return (
     <button
@@ -57,6 +57,36 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       {platformIcon(content.platform, 10)}
       <span className="truncate">{content.title}</span>
     </button>
+  );
+};
+
+// --- Draggable task from sidebar ---
+const DraggableTask = ({ task, onToggle }: { task: CalTask; onToggle: (id: string, done: boolean) => void }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `task-${task.id}`,
+    data: { type: 'task', task },
+  });
+  return (
+    <div
+      ref={setNodeRef} {...listeners} {...attributes}
+      className={cn(
+        "flex items-start gap-2 py-1.5 px-1 rounded-md hover:bg-secondary/50 transition-colors cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-30"
+      )}
+    >
+      <Checkbox
+        checked={task.done}
+        onCheckedChange={(checked) => { onToggle(task.id, !!checked); }}
+        onClick={(e) => e.stopPropagation()}
+        className="mt-0.5 flex-shrink-0"
+      />
+      <span className={cn(
+        "text-sm leading-snug",
+        task.done ? "line-through text-muted-foreground" : "text-foreground"
+      )}>
+        {task.text}
+      </span>
+    </div>
   );
 };
 
