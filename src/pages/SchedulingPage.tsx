@@ -138,7 +138,7 @@ const SchedulingPage = () => {
                       <div
                         key={content.id}
                         className={cn(
-                          "grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          "grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
                           exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
                         )}
                         onClick={() => setPreviewContent(content)}
