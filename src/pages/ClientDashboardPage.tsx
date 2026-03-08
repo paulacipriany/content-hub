@@ -1,4 +1,5 @@
 import TopBar from '@/components/layout/TopBar';
+import TaskListCard from '@/components/dashboard/TaskListCard';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform } from '@/data/types';
@@ -94,6 +95,8 @@ const ClientDashboardPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Task list */}
+          <TaskListCard projectId={selectedProject.id} />
           {/* Status distribution */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">Distribuição por Status</h2>
