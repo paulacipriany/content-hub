@@ -292,38 +292,72 @@ const PostReportsPage = () => {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="border border-border rounded-xl overflow-hidden bg-card">
-          <div className="grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            <div></div>
-            <div>Título do Conteúdo</div>
-            <div>Formato</div>
-            <div>{tab === 'analyzed' ? 'Métricas' : 'Status'}</div>
-          </div>
-
-          {currentList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <p className="text-sm">
-                {tab === 'analyzed'
-                  ? 'Nenhum conteúdo analisado ainda.'
-                  : 'Todos os conteúdos publicados já foram analisados!'}
-              </p>
-              {published.length === 0 && (
-                <p className="text-xs mt-1">Publique conteúdos para vê-los aqui.</p>
-              )}
+        {tab === 'analyzed' ? (
+          analyzed.length === 0 ? (
+            <div className="border border-border rounded-xl bg-card flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <p className="text-sm">Nenhum conteúdo analisado ainda.</p>
             </div>
           ) : (
-            currentList.map(content => (
-              <AnalysisRow
-                key={content.id}
-                content={content}
-                analysis={analysisMap.get(content.id) ?? null}
-                userId={user?.id ?? ''}
-                onSaved={fetchAnalyses}
-              />
-            ))
-          )}
-        </div>
+            <div className="space-y-6">
+              {([
+                { label: 'Positivo', items: positivos, color: 'border-emerald-500', dot: 'bg-emerald-500' },
+                { label: 'Negativo', items: negativos, color: 'border-red-500', dot: 'bg-red-500' },
+                { label: 'Neutro', items: neutros, color: 'border-zinc-400', dot: 'bg-zinc-400' },
+                { label: 'Sem resultado', items: semResultado, color: 'border-border', dot: 'bg-muted-foreground' },
+              ] as const).filter(g => g.items.length > 0).map(group => (
+                <div key={group.label}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn("w-2.5 h-2.5 rounded-full", group.dot)} />
+                    <h3 className="text-sm font-semibold text-foreground">{group.label}</h3>
+                    <span className="text-xs text-muted-foreground">({group.items.length})</span>
+                  </div>
+                  <div className={cn("border rounded-xl overflow-hidden bg-card border-l-[3px]", group.color)}>
+                    <div className="grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-2 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <div></div>
+                      <div>Título</div>
+                      <div>Formato</div>
+                      <div>Métricas</div>
+                    </div>
+                    {group.items.map(content => (
+                      <AnalysisRow
+                        key={content.id}
+                        content={content}
+                        analysis={analysisMap.get(content.id) ?? null}
+                        userId={user?.id ?? ''}
+                        onSaved={fetchAnalyses}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="border border-border rounded-xl overflow-hidden bg-card">
+            <div className="grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <div></div>
+              <div>Título do Conteúdo</div>
+              <div>Formato</div>
+              <div>Status</div>
+            </div>
+            {notAnalyzed.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <p className="text-sm">Todos os conteúdos publicados já foram analisados!</p>
+                {published.length === 0 && <p className="text-xs mt-1">Publique conteúdos para vê-los aqui.</p>}
+              </div>
+            ) : (
+              notAnalyzed.map(content => (
+                <AnalysisRow
+                  key={content.id}
+                  content={content}
+                  analysis={null}
+                  userId={user?.id ?? ''}
+                  onSaved={fetchAnalyses}
+                />
+              ))
+            )}
+          </div>
+        )}
 
         {published.length > 0 && (
           <p className="text-xs text-muted-foreground mt-3">
