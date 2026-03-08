@@ -145,7 +145,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Conteúdo</DialogTitle>
+          <DialogTitle>{defaultStatus === 'idea-bank' ? 'Nova Ideia' : 'Novo Conteúdo'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
