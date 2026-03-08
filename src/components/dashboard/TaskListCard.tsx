@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,6 +31,47 @@ interface MemberProfile {
 interface TaskListCardProps {
   projectId: string;
 }
+
+const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(text);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setValue(text); }, [text]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (value.trim() && value.trim() !== text) onSave(value.trim());
+    else setValue(text);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); } }}
+        className="text-sm bg-transparent border-b border-primary/40 outline-none w-full text-foreground"
+      />
+    );
+  }
+
+  return (
+    <span
+      onDoubleClick={() => setEditing(true)}
+      className={cn(
+        "text-sm block truncate transition-colors cursor-text",
+        done ? "line-through text-muted-foreground" : "text-foreground"
+      )}
+      title="Clique duplo para editar"
+    >
+      {text}
+    </span>
+  );
+};
 
 const TaskListCard = ({ projectId }: TaskListCardProps) => {
   const { user } = useAuth();
@@ -121,6 +162,13 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
   const updateAssignee = async (id: string, assigned_to: string | null) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, assigned_to } : t));
     await supabase.from('project_tasks').update({ assigned_to } as any).eq('id', id);
+  };
+
+  const updateTaskText = async (id: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, text: trimmed } : t));
+    await supabase.from('project_tasks').update({ text: trimmed }).eq('id', id);
   };
 
   const deleteTask = async (id: string) => {
@@ -249,12 +297,11 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
                 className="flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <span className={cn(
-                  "text-sm block truncate transition-colors",
-                  t.done ? "line-through text-muted-foreground" : "text-foreground"
-                )}>
-                  {t.text}
-                </span>
+                <EditableTaskText
+                  text={t.text}
+                  done={t.done}
+                  onSave={(text) => updateTaskText(t.id, text)}
+                />
                 <div className="flex items-center gap-2">
                   {t.due_date && (
                     <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
