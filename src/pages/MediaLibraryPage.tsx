@@ -45,19 +45,45 @@ const MediaLibraryPage = () => {
       .eq('project_id', selectedProject.id)
       .order('created_at', { ascending: false });
 
-    if (data) {
-      setMediaItems(data.map((m: any) => {
-        const content = m.content_id ? projectContents.find(c => c.id === m.content_id) : null;
-        return {
-          id: m.id,
-          url: m.url,
-          filename: m.filename,
-          content_id: m.content_id,
-          contentTitle: content?.title ?? null,
-          source: 'library' as const,
-        };
-      }));
-    }
+    const libraryItems: MediaItem[] = (data ?? []).map((m: any) => {
+      const content = m.content_id ? projectContents.find(c => c.id === m.content_id) : null;
+      return {
+        id: m.id,
+        url: m.url,
+        filename: m.filename,
+        content_id: m.content_id,
+        contentTitle: content?.title ?? null,
+        source: 'library' as const,
+      };
+    });
+
+    // Collect media from contents
+    const libraryUrls = new Set(libraryItems.map(i => i.url));
+    const contentItems: MediaItem[] = [];
+    projectContents.forEach(content => {
+      const urls: string[] = [];
+      if (content.media_urls && Array.isArray(content.media_urls)) {
+        (content.media_urls as string[]).forEach(u => { if (u) urls.push(u); });
+      }
+      if (content.media_url && !urls.includes(content.media_url)) {
+        urls.push(content.media_url);
+      }
+      urls.forEach(url => {
+        if (!libraryUrls.has(url)) {
+          libraryUrls.add(url);
+          contentItems.push({
+            id: `content-${content.id}-${url}`,
+            url,
+            filename: content.title,
+            content_id: content.id,
+            contentTitle: content.title,
+            source: 'content',
+          });
+        }
+      });
+    });
+
+    setMediaItems([...libraryItems, ...contentItems]);
     setLoading(false);
   }, [selectedProject?.id, projectContents]);
 
