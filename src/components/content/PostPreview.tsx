@@ -7,19 +7,28 @@ interface PostPreviewProps {
   platform: Platform;
 }
 
-const ImagePlaceholder = ({ platform }: { platform: string }) => (
-  <div className={cn(
-    "w-full flex items-center justify-center bg-gradient-to-br from-muted to-secondary",
-    platform === 'instagram' ? 'aspect-square' : 'aspect-video'
-  )}>
-    <div className="text-center space-y-2">
-      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-        <span className="text-2xl">📷</span>
+const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelations; platform: string }) => {
+  const mediaUrl = (content as any).media_url;
+  const aspectClass = platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+
+  if (mediaUrl) {
+    if (mediaUrl.match(/\.(mp4|webm|mov)$/i)) {
+      return <video src={mediaUrl} controls className={cn("w-full object-cover", aspectClass)} />;
+    }
+    return <img src={mediaUrl} alt={content.title} className={cn("w-full object-cover", aspectClass)} />;
+  }
+
+  return (
+    <div className={cn("w-full flex items-center justify-center bg-gradient-to-br from-muted to-secondary", aspectClass)}>
+      <div className="text-center space-y-2">
+        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+          <span className="text-2xl">📷</span>
+        </div>
+        <p className="text-xs text-muted-foreground">Imagem do post</p>
       </div>
-      <p className="text-xs text-muted-foreground">Imagem do post</p>
     </div>
-  </div>
-);
+  );
+};
 
 const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
   const userName = content.creator_profile?.display_name ?? 'usuario';
