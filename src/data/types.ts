@@ -58,4 +58,5 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   stories: 'Stories',
   carousel: 'Carrossel',
   video: 'Vídeo',
+  post: 'Post',
 };
