@@ -5,9 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Trash2, Pencil, Plus, UserPlus } from 'lucide-react';
+import { Trash2, Pencil, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+interface SimpleProject { id: string; name: string; color: string; }
 
 interface UserRow {
   user_id: string;
@@ -32,12 +35,14 @@ const roleBadgeVariant: Record<string, string> = {
 
 const UsersPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [projects, setProjects] = useState<SimpleProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState('');
   const [editRole, setEditRole] = useState<string>('social_media');
+  const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Add dialog
@@ -46,6 +51,7 @@ const UsersPage = () => {
   const [addPassword, setAddPassword] = useState('');
   const [addName, setAddName] = useState('');
   const [addRole, setAddRole] = useState<string>('social_media');
+  const [addProjectIds, setAddProjectIds] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
 
   const fetchUsers = async () => {
@@ -67,7 +73,12 @@ const UsersPage = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    supabase.from('projects').select('id, name, color').then(({ data }) => {
+      if (data) setProjects(data);
+    });
+  }, []);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     const { error } = await supabase
@@ -92,10 +103,13 @@ const UsersPage = () => {
     }
   };
 
-  const openEdit = (u: UserRow) => {
+  const openEdit = async (u: UserRow) => {
     setEditUser(u);
     setEditName(u.display_name ?? '');
     setEditRole(u.role);
+    // Load current project memberships
+    const { data } = await supabase.from('project_members').select('project_id').eq('user_id', u.user_id);
+    setEditProjectIds(data?.map(r => r.project_id) ?? []);
   };
 
   const handleSaveEdit = async () => {
@@ -108,6 +122,17 @@ const UsersPage = () => {
         ? supabase.from('user_roles').update({ role: editRole as any }).eq('user_id', editUser.user_id)
         : Promise.resolve({ error: null }),
     ]);
+
+    // Sync project_members for client role
+    if (editRole === 'client') {
+      // Remove all existing memberships, then re-insert selected
+      await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
+      if (editProjectIds.length > 0) {
+        await supabase.from('project_members').insert(
+          editProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
+        );
+      }
+    }
 
     if (profileRes.error || roleRes.error) {
       toast.error('Erro ao salvar alterações');
@@ -130,7 +155,7 @@ const UsersPage = () => {
     }
     setAdding(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: addEmail,
       password: addPassword,
       options: {
@@ -142,12 +167,22 @@ const UsersPage = () => {
     if (error) {
       toast.error(error.message);
     } else {
+      // If client role, add project memberships after a delay for the trigger to finish
+      if (addRole === 'client' && addProjectIds.length > 0 && signUpData.user) {
+        const userId = signUpData.user.id;
+        setTimeout(async () => {
+          await supabase.from('project_members').insert(
+            addProjectIds.map(pid => ({ project_id: pid, user_id: userId }))
+          );
+        }, 2000);
+      }
       toast.success('Usuário criado! Um e-mail de confirmação foi enviado.');
       setAddOpen(false);
       setAddEmail('');
       setAddPassword('');
       setAddName('');
       setAddRole('social_media');
+      setAddProjectIds([]);
       // Refetch after a short delay to allow trigger to create profile
       setTimeout(() => fetchUsers(), 2000);
     }
@@ -229,6 +264,27 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
+            {editRole === 'client' && (
+              <div className="space-y-1.5">
+                <Label>Clientes vinculados</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
+                  {projects.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={editProjectIds.includes(p.id)}
+                        onCheckedChange={(checked) => {
+                          setEditProjectIds(prev =>
+                            checked ? [...prev, p.id] : prev.filter(id => id !== p.id)
+                          );
+                        }}
+                      />
+                      <span className="truncate text-foreground">{p.name}</span>
+                    </label>
+                  ))}
+                  {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>Cancelar</Button>
@@ -272,6 +328,27 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
+            {addRole === 'client' && (
+              <div className="space-y-1.5">
+                <Label>Clientes vinculados</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
+                  {projects.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={addProjectIds.includes(p.id)}
+                        onCheckedChange={(checked) => {
+                          setAddProjectIds(prev =>
+                            checked ? [...prev, p.id] : prev.filter(id => id !== p.id)
+                          );
+                        }}
+                      />
+                      <span className="truncate text-foreground">{p.name}</span>
+                    </label>
+                  ))}
+                  {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
