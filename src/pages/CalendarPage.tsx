@@ -247,6 +247,14 @@ const CalendarPage = () => {
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showDates, setShowDates] = useState(true);
+  const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
+  const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
+  const [newDateTitle, setNewDateTitle] = useState('');
+  const [newDateValue, setNewDateValue] = useState<Date | undefined>(undefined);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importMonth, setImportMonth] = useState(new Date().getMonth());
+  const { toast } = useToast();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
