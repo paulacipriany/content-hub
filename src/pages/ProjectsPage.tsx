@@ -314,7 +314,7 @@ const ProjectsPage = () => {
 
                     {/* Status breakdown */}
                     <div className="flex flex-wrap gap-1.5 mt-3">
-                      {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                      {(['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
                         const count = projectContents.filter(c => c.status === s).length;
                         if (count === 0) return null;
                         return (
