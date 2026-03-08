@@ -310,9 +310,7 @@ const ContentPanel = () => {
           {selectedContent.description && (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
-              <div className="text-sm text-muted-foreground bg-secondary rounded-lg p-3 whitespace-pre-wrap">
-                {selectedContent.description}
-              </div>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{selectedContent.description}</p>
             </div>
           )}
 
