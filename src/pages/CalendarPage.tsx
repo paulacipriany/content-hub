@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye } from 'lucide-react';
 import { STATUS_COLORS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -221,6 +221,8 @@ const CalendarPage = () => {
   const [activeTask, setActiveTask] = useState<CalTask | null>(null);
   const [tasks, setTasks] = useState<CalTask[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
+  const [showContents, setShowContents] = useState(true);
+  const [showTasks, setShowTasks] = useState(true);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -347,8 +349,8 @@ const CalendarPage = () => {
 
   // --- Render day cell contents ---
   const renderDayItems = (dateStr: string) => {
-    const dayContents = getContentsForDate(dateStr);
-    const dayTasks = getTasksForDate(dateStr);
+    const dayContents = showContents ? getContentsForDate(dateStr) : [];
+    const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
     return (
       <>
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
@@ -371,6 +373,34 @@ const CalendarPage = () => {
         {/* Sidebar: undated tasks — Google Calendar style side panel */}
         <div className="w-60 flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto">
           <div className="p-3">
+            {/* Filters */}
+            <div className="mb-4 space-y-1">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Filtros</h3>
+              <button
+                onClick={() => setShowContents(prev => !prev)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors",
+                  showContents ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <LayoutGrid size={13} />
+                Conteúdos
+                <Eye size={12} className={cn("ml-auto", !showContents && "opacity-30")} />
+              </button>
+              <button
+                onClick={() => setShowTasks(prev => !prev)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors",
+                  showTasks ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <CheckSquare size={13} />
+                Tarefas
+                <Eye size={12} className={cn("ml-auto", !showTasks && "opacity-30")} />
+              </button>
+            </div>
+
+            <div className="border-t border-border/50 pt-3">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
               <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
@@ -406,6 +436,7 @@ const CalendarPage = () => {
                 <Plus size={14} />
               </Button>
             </form>
+            </div>
           </div>
         </div>
 
