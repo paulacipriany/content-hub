@@ -383,6 +383,7 @@ const CalendarPage = () => {
   return (
     <>
       <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-[calc(100vh-130px)]">
         {/* Sidebar: undated tasks */}
         <div className={cn(
