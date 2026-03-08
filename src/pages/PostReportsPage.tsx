@@ -252,6 +252,11 @@ const PostReportsPage = () => {
   const analyzed = published.filter(c => analysisMap.has(c.id));
   const notAnalyzed = published.filter(c => !analysisMap.has(c.id));
 
+  const positivos = analyzed.filter(c => analysisMap.get(c.id)?.result === 'positivo');
+  const negativos = analyzed.filter(c => analysisMap.get(c.id)?.result === 'negativo');
+  const neutros = analyzed.filter(c => analysisMap.get(c.id)?.result === 'neutro');
+  const semResultado = analyzed.filter(c => !analysisMap.get(c.id)?.result);
+
   const currentList = tab === 'analyzed' ? analyzed : notAnalyzed;
 
   return (
