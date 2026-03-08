@@ -14,6 +14,164 @@ export type Database = {
   }
   public: {
     Tables: {
+      approvals: {
+        Row: {
+          comment: string | null
+          content_id: string
+          created_at: string
+          decision: string
+          id: string
+          reviewer_id: string
+        }
+        Insert: {
+          comment?: string | null
+          content_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          reviewer_id: string
+        }
+        Update: {
+          comment?: string | null
+          content_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_items: {
+        Row: {
+          content_id: string
+          created_at: string
+          done: boolean
+          id: string
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          sort_order?: number
+          text: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          sort_order?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contents: {
+        Row: {
+          assignee_id: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string
+          created_by: string
+          description: string | null
+          hashtags: string[] | null
+          id: string
+          platform: Database["public"]["Enums"]["platform"]
+          project_id: string
+          publish_date: string | null
+          status: Database["public"]["Enums"]["workflow_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          created_by: string
+          description?: string | null
+          hashtags?: string[] | null
+          id?: string
+          platform?: Database["public"]["Enums"]["platform"]
+          project_id: string
+          publish_date?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          hashtags?: string[] | null
+          id?: string
+          platform?: Database["public"]["Enums"]["platform"]
+          project_id?: string
+          publish_date?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -40,6 +198,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      status_history: {
+        Row: {
+          changed_by: string
+          content_id: string
+          created_at: string
+          from_status: Database["public"]["Enums"]["workflow_status"] | null
+          id: string
+          to_status: Database["public"]["Enums"]["workflow_status"]
+        }
+        Insert: {
+          changed_by: string
+          content_id: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["workflow_status"] | null
+          id?: string
+          to_status: Database["public"]["Enums"]["workflow_status"]
+        }
+        Update: {
+          changed_by?: string
+          content_id?: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["workflow_status"] | null
+          id?: string
+          to_status?: Database["public"]["Enums"]["workflow_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_history_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -78,6 +298,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "social_media" | "client"
+      content_type: "feed" | "reels" | "stories" | "carousel" | "video"
+      platform: "instagram" | "facebook" | "linkedin" | "tiktok" | "youtube"
+      workflow_status:
+        | "idea"
+        | "production"
+        | "review"
+        | "approval-internal"
+        | "approval-client"
+        | "scheduled"
+        | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -206,6 +436,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "social_media", "client"],
+      content_type: ["feed", "reels", "stories", "carousel", "video"],
+      platform: ["instagram", "facebook", "linkedin", "tiktok", "youtube"],
+      workflow_status: [
+        "idea",
+        "production",
+        "review",
+        "approval-internal",
+        "approval-client",
+        "scheduled",
+        "published",
+      ],
     },
   },
 } as const

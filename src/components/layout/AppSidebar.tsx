@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockProjects } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -20,7 +19,7 @@ const navItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { sidebarCollapsed, setSidebarCollapsed, projects } = useApp();
   const { profile, role, signOut } = useAuth();
 
   const roleLabels: Record<string, string> = {
@@ -84,7 +83,7 @@ const AppSidebar = () => {
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Projetos</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" />
             </div>
-            {mockProjects.map(project => (
+            {projects.map(project => (
               <button
                 key={project.id}
                 onClick={() => navigate(`/projects/${project.id}`)}

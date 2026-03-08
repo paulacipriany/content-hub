@@ -1,10 +1,10 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
-import { mockProjects, STATUS_LABELS } from '@/data/mockData';
-import { BarChart3, Clock, Users, FileText } from 'lucide-react';
+import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
+import { BarChart3, Clock, FileText } from 'lucide-react';
 
 const ReportsPage = () => {
-  const { contents } = useApp();
+  const { contents, projects } = useApp();
 
   const published = contents.filter(c => c.status === 'published').length;
   const inProgress = contents.filter(c => !['published', 'idea'].includes(c.status)).length;
@@ -37,7 +37,6 @@ const ReportsPage = () => {
           </div>
         </div>
 
-        {/* Status distribution */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">Distribuição por Status</h2>
           <div className="space-y-3">
@@ -57,12 +56,11 @@ const ReportsPage = () => {
           </div>
         </div>
 
-        {/* By project */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">Conteúdos por Projeto</h2>
           <div className="space-y-3">
-            {mockProjects.map(p => {
-              const count = contents.filter(c => c.projectId === p.id).length;
+            {projects.map(p => {
+              const count = contents.filter(c => c.project_id === p.id).length;
               return (
                 <div key={p.id} className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
@@ -78,6 +76,9 @@ const ReportsPage = () => {
                 </div>
               );
             })}
+            {projects.length === 0 && (
+              <p className="text-sm text-muted-foreground">Nenhum projeto criado ainda.</p>
+            )}
           </div>
         </div>
       </div>

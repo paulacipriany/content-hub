@@ -1,0 +1,60 @@
+import { Tables } from '@/integrations/supabase/types';
+
+// DB-backed types
+export type DbProject = Tables<'projects'>;
+export type DbContent = Tables<'contents'>;
+export type DbComment = Tables<'comments'>;
+export type DbChecklistItem = Tables<'checklist_items'>;
+export type DbApproval = Tables<'approvals'>;
+export type DbProfile = Tables<'profiles'>;
+export type DbStatusHistory = Tables<'status_history'>;
+
+// Extended content with relations
+export type ContentWithRelations = DbContent & {
+  assignee_profile?: DbProfile | null;
+  creator_profile?: DbProfile | null;
+  project?: DbProject | null;
+  comments?: (DbComment & { profile?: DbProfile | null })[];
+  checklist_items?: DbChecklistItem[];
+};
+
+// Keep label/color maps for UI
+export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube';
+export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video';
+export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
+
+export const STATUS_LABELS: Record<WorkflowStatus, string> = {
+  'idea': 'Ideia',
+  'production': 'Produção',
+  'review': 'Revisão',
+  'approval-internal': 'Aprovação Interna',
+  'approval-client': 'Aprovação Cliente',
+  'scheduled': 'Agendado',
+  'published': 'Publicado',
+};
+
+export const STATUS_COLORS: Record<WorkflowStatus, string> = {
+  'idea': 'bg-status-idea',
+  'production': 'bg-status-production',
+  'review': 'bg-status-review',
+  'approval-internal': 'bg-status-approval',
+  'approval-client': 'bg-status-approval',
+  'scheduled': 'bg-status-scheduled',
+  'published': 'bg-status-published',
+};
+
+export const PLATFORM_LABELS: Record<Platform, string> = {
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  linkedin: 'LinkedIn',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+};
+
+export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
+  feed: 'Feed',
+  reels: 'Reels',
+  stories: 'Stories',
+  carousel: 'Carrossel',
+  video: 'Vídeo',
+};
