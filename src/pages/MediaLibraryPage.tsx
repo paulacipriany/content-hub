@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Image, Search, ExternalLink, Trash2 } from 'lucide-react';
+import { Image, Search, ExternalLink, Trash2, Download } from 'lucide-react';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -83,7 +83,7 @@ const MediaLibraryPage = () => {
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                   <p className="text-white text-xs font-medium truncate">{item.contentTitle}</p>
-                  <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center gap-2 mt-1">
                     <a
                       href={item.url}
                       target="_blank"
@@ -91,8 +91,28 @@ const MediaLibraryPage = () => {
                       className="inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
                       onClick={e => e.stopPropagation()}
                     >
-                      <ExternalLink size={10} /> Abrir original
+                      <ExternalLink size={10} /> Abrir
                     </a>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const res = await fetch(item.url);
+                          const blob = await res.blob();
+                          const a = document.createElement('a');
+                          a.href = URL.createObjectURL(blob);
+                          const ext = item.url.split('.').pop()?.split('?')[0] || 'jpg';
+                          a.download = `${item.contentTitle.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
+                          a.click();
+                          URL.revokeObjectURL(a.href);
+                        } catch { window.open(item.url, '_blank'); }
+                      }}
+                      className="inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
+                      title="Download"
+                    >
+                      <Download size={10} /> Download
+                    </button>
+                    <div className="ml-auto flex items-center gap-1">
                     {canDelete && (
                       <button
                         onClick={async (e) => {
@@ -113,6 +133,7 @@ const MediaLibraryPage = () => {
                         <Trash2 size={12} className="text-white" />
                       </button>
                     )}
+                    </div>
                   </div>
                 </div>
               </div>
