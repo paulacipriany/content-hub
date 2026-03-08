@@ -43,20 +43,31 @@ const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
   );
 };
 
+const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
+  'idea': '--status-idea',
+  'production': '--status-production',
+  'review': '--status-review',
+  'approval-internal': '--status-approval',
+  'approval-client': '--status-approval-client',
+  'scheduled': '--status-scheduled',
+  'published': '--status-published',
+};
+
 const DroppableColumn = ({ status, children }: { status: WorkflowStatus; children: React.ReactNode }) => {
   const { isOver, setNodeRef } = useDroppable({ id: status });
+  const cssVar = STATUS_CSS_VARS[status];
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "w-72 rounded-xl border-t-2 flex flex-col transition-colors",
+        "w-72 rounded-xl border-t-[3px] flex flex-col transition-colors",
         isOver && "ring-2 ring-inset"
       )}
       style={{
-        backgroundColor: isOver ? 'var(--client-50, hsl(var(--secondary) / 0.5))' : 'hsl(var(--secondary) / 0.5)',
-        borderTopColor: 'var(--client-500, hsl(var(--primary)))',
-        ...(isOver ? { ringColor: 'var(--client-300)' } : {}),
+        backgroundColor: isOver ? `hsl(${`var(${cssVar})`} / 0.08)` : 'hsl(var(--secondary) / 0.5)',
+        borderTopColor: `hsl(var(${cssVar}))`,
+        ...(isOver ? { ringColor: `hsl(var(${cssVar}) / 0.3)` } : {}),
       }}
     >
       {children}
