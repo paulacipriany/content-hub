@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { contrastText, generatePalette } from '@/lib/clientPalette';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
