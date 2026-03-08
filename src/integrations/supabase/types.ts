@@ -190,6 +190,53 @@ export type Database = {
           },
         ]
       }
+      post_analyses: {
+        Row: {
+          analysis_text: string | null
+          comments_count: number | null
+          content_id: string
+          created_at: string
+          created_by: string
+          id: string
+          likes: number | null
+          shares: number | null
+          updated_at: string
+          views: number | null
+        }
+        Insert: {
+          analysis_text?: string | null
+          comments_count?: number | null
+          content_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          likes?: number | null
+          shares?: number | null
+          updated_at?: string
+          views?: number | null
+        }
+        Update: {
+          analysis_text?: string | null
+          comments_count?: number | null
+          content_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          likes?: number | null
+          shares?: number | null
+          updated_at?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_analyses_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
