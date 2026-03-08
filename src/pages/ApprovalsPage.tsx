@@ -54,17 +54,6 @@ const ApprovalsPage = () => {
                   <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
                     <MessageSquare size={14} /> Revisar
                   </Button>
-                  <Button
-                    size="sm"
-                    className="gap-1 text-xs"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
-                    onClick={() => updateContentStatus(c.id, 'scheduled')}
-                  >
-                    <CheckCircle size={14} /> Aprovar
-                  </Button>
-                  <Button size="sm" variant="outline" className="gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => updateContentStatus(c.id, 'review')}>
-                    <XCircle size={14} /> Rejeitar
-                  </Button>
                 </div>
               </div>
             ))}
