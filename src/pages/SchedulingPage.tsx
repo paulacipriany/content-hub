@@ -123,7 +123,7 @@ const SchedulingPage = () => {
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
                 <div className="border border-border rounded-xl overflow-hidden bg-card">
-                  <div className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <div></div>
                     <div>Título</div>
                     <div>Formato</div>
@@ -138,7 +138,7 @@ const SchedulingPage = () => {
                       <div
                         key={content.id}
                         className={cn(
-                          "grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          "grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
                           exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
                         )}
                         onClick={() => setPreviewContent(content)}
@@ -162,7 +162,7 @@ const SchedulingPage = () => {
                             {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
                           {platforms.map(p => (
                             <label key={p} className="flex items-center gap-1.5 cursor-pointer">
                               <Checkbox
@@ -177,7 +177,7 @@ const SchedulingPage = () => {
                                     [content.id]: updated,
                                   }));
                                   // Check if all platforms are now checked
-                                  const allChecked = platforms.every(pl => updated[pl]);
+                                  const allChecked = platforms.length > 0 && platforms.every(pl => !!updated[pl]);
                                   if (allChecked) {
                                     setExitingIds(prev => new Set(prev).add(content.id));
                                     toast.success(`"${content.title}" movido para Programado`);
