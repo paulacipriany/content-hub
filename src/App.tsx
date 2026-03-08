@@ -22,6 +22,7 @@ import ClientMembersPage from "@/pages/ClientMembersPage";
 import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
+import PostReportsPage from "@/pages/PostReportsPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
