@@ -137,7 +137,10 @@ const SchedulingPage = () => {
                     return (
                       <div
                         key={content.id}
-                        className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        className={cn(
+                          "grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
+                        )}
                         onClick={() => setPreviewContent(content)}
                       >
                         <div className="flex items-center justify-center">
