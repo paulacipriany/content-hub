@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
 import { toast } from '@/hooks/use-toast';
 
+export type NotificationType = 'status_change' | 'new_comment' | 'assignee_change';
+
 export interface Notification {
   id: string;
   type: 'status_change' | 'new_comment';
