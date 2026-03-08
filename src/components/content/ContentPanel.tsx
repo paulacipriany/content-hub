@@ -174,299 +174,285 @@ const ContentPanel = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-card overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 h-14 border-b border-border flex-shrink-0">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {platformIcon(selectedContent.platform, 16)}
+      <div className="flex items-center justify-between px-6 h-14 border-b border-border bg-card flex-shrink-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <button
+            onClick={() => setSelectedContent(null)}
+            className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          >
+            <X size={18} />
+          </button>
+          {platformIcon(selectedContent.platform, 18)}
           <input
             value={editTitle}
             onChange={e => setEditTitle(e.target.value)}
-            className="font-semibold text-sm text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-1 -ml-1 transition-colors"
+            className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
             placeholder="Título do conteúdo"
           />
+          <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+            {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+          </span>
         </div>
-        <button onClick={() => setSelectedContent(null)} className="text-muted-foreground hover:text-foreground transition-colors ml-2">
-          <X size={18} />
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-border flex-shrink-0">
-        <button
-          onClick={() => setActiveTab('edit')}
-          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
-            activeTab === 'edit' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Pencil size={12} /> Editar
-        </button>
-        <button
-          onClick={() => setActiveTab('preview')}
-          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
-            activeTab === 'preview' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Eye size={12} /> Preview
-        </button>
-      </div>
-
-      {/* Content */}
-      {activeTab === 'edit' ? (
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-5">
-        {/* Status */}
-        <div>
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
-          <div className="flex flex-wrap gap-1.5">
-            {allStatuses.map(s => (
-              <button
-                key={s}
-                onClick={() => updateContentStatus(selectedContent.id, s)}
-                className={cn(
-                  "px-2.5 py-1 rounded-full text-xs font-medium transition-all",
-                  selectedContent.status === s
-                    ? cn(STATUS_COLORS[s], "text-primary-foreground")
-                    : "bg-secondary text-muted-foreground hover:bg-accent"
-                )}
-              >
-                {STATUS_LABELS[s]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Editable Details */}
-        <div className="space-y-3">
-          {/* Platform */}
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
-            <PlatformSelector
-              selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
-              onChange={handlePlatformChange}
-              size={28}
-            />
-          </div>
-
-          {/* Content Type */}
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
-            <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
-              <SelectTrigger className="h-8 text-xs flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {allContentTypes.map(t => (
-                  <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Publish Date */}
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground w-24 flex-shrink-0">Publicação</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
-                  <CalIcon size={12} className="text-muted-foreground" />
-                  {selectedContent.publish_date
-                    ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
-                    : 'Selecionar data'}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
-                  onSelect={handleDateChange}
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Assignee (read-only for now) */}
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
-            <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
-              <User size={12} className="text-muted-foreground" />
-              <span>{assigneeName}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Descrição / Copy</label>
-          <textarea
-            value={editDescription}
-            onChange={e => setEditDescription(e.target.value)}
-            rows={4}
-            placeholder="Adicione a descrição ou copy do conteúdo..."
-            className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
-          />
-        </div>
-
-        {/* Media Upload */}
-        <div>
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <ImagePlus size={12} />Mídia
-          </label>
-          {(selectedContent as any).media_url ? (
-            <div className="relative group rounded-lg overflow-hidden border border-border">
-              {(selectedContent as any).media_url.match(/\.(mp4|webm|mov)$/i) ? (
-                <video src={(selectedContent as any).media_url} controls className="w-full max-h-48 object-cover" />
-              ) : (
-                <img src={(selectedContent as any).media_url} alt="Mídia do conteúdo" className="w-full max-h-48 object-cover" />
-              )}
-              <button
-                onClick={handleRemoveMedia}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-            >
-              {uploading ? (
-                <Loader2 size={20} className="animate-spin text-primary" />
-              ) : (
-                <>
-                  <ImagePlus size={20} />
-                  <span className="text-xs">Clique para enviar imagem ou vídeo</span>
-                </>
-              )}
-            </button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-        </div>
-
-        {/* Hashtags */}
-        <div>
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <Hash size={12} />Hashtags
-          </label>
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {editHashtags.map(h => (
-              <button
-                key={h}
-                onClick={() => handleRemoveHashtag(h)}
-                className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-destructive/20 hover:text-destructive transition-colors group"
-                title="Clique para remover"
-              >
-                {h} <span className="opacity-0 group-hover:opacity-100 ml-0.5">×</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              value={editHashtagInput}
-              onChange={e => setEditHashtagInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddHashtag())}
-              placeholder="#novahashtag"
-              className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
-            />
-            <button onClick={handleAddHashtag} className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity">
-              Adicionar
-            </button>
-          </div>
-        </div>
-
-        {/* Checklist */}
-        {checklist.length > 0 && (
-          <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
-            <div className="space-y-1.5">
-              {checklist.map(item => (
-                <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
-                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
-                    item.done ? "bg-status-published border-status-published" : "border-border"
-                  )}>
-                    {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
-                  </div>
-                  <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Comments */}
-        <div>
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
-          <div className="space-y-2.5">
-            {comments.map(c => (
-              <div key={c.id} className="bg-secondary rounded-lg p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
-                  <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{c.text}</p>
-              </div>
-            ))}
-            {comments.length === 0 && (
-              <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
-            )}
-          </div>
-
-          <div className="flex gap-2 mt-3">
-            <input
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-              placeholder="Adicionar comentário..."
-              className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
-            />
-            <button onClick={handleAddComment} className="w-8 h-8 rounded-md bg-primary flex items-center justify-center hover:opacity-90 transition-opacity">
-              <Send size={14} className="text-primary-foreground" />
-            </button>
-          </div>
-        </div>
-      </div>
-      ) : (
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
-        {/* Platform selector for preview */}
-        <div className="flex gap-1.5 justify-center">
-          {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
-            <button
-              key={p}
-              onClick={() => setPreviewPlatform(p)}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                previewPlatform === p
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground hover:bg-accent"
-              )}
-            >
-              {PLATFORM_LABELS[p]}
-            </button>
-          ))}
-        </div>
-        <PostPreview content={selectedContent} platform={previewPlatform} />
-      </div>
-      )}
-
-      {/* Footer */}
-      {canAdvance && (
-        <div className="p-4 border-t border-border flex-shrink-0">
+        {canAdvance && (
           <Button
-            className="w-full"
+            size="sm"
+            className="ml-4"
+            style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
             onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
           >
             Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
           </Button>
+        )}
+      </div>
+
+      {/* Two-column layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left column — Edit */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5 max-w-2xl">
+          {/* Status */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
+            <div className="flex flex-wrap gap-1.5">
+              {allStatuses.map(s => (
+                <button
+                  key={s}
+                  onClick={() => updateContentStatus(selectedContent.id, s)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-xs font-medium transition-all",
+                    selectedContent.status === s
+                      ? cn(STATUS_COLORS[s], "text-primary-foreground")
+                      : "bg-secondary text-muted-foreground hover:bg-accent"
+                  )}
+                >
+                  {STATUS_LABELS[s]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
+              <PlatformSelector
+                selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
+                onChange={handlePlatformChange}
+                size={28}
+              />
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
+              <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
+                <SelectTrigger className="h-8 text-xs flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {allContentTypes.map(t => (
+                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Publicação</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
+                    <CalIcon size={12} className="text-muted-foreground" />
+                    {selectedContent.publish_date
+                      ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                      : 'Selecionar data'}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
+                    onSelect={handleDateChange}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
+              <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
+                <User size={12} className="text-muted-foreground" />
+                <span>{assigneeName}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Descrição / Copy</label>
+            <textarea
+              value={editDescription}
+              onChange={e => setEditDescription(e.target.value)}
+              rows={5}
+              placeholder="Adicione a descrição ou copy do conteúdo..."
+              className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
+            />
+          </div>
+
+          {/* Media Upload */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <ImagePlus size={12} />Mídia
+            </label>
+            {(selectedContent as any).media_url ? (
+              <div className="relative group rounded-lg overflow-hidden border border-border max-w-sm">
+                {(selectedContent as any).media_url.match(/\.(mp4|webm|mov)$/i) ? (
+                  <video src={(selectedContent as any).media_url} controls className="w-full max-h-48 object-cover" />
+                ) : (
+                  <img src={(selectedContent as any).media_url} alt="Mídia do conteúdo" className="w-full max-h-48 object-cover" />
+                )}
+                <button
+                  onClick={handleRemoveMedia}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full max-w-sm h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+              >
+                {uploading ? (
+                  <Loader2 size={20} className="animate-spin text-primary" />
+                ) : (
+                  <>
+                    <ImagePlus size={20} />
+                    <span className="text-xs">Clique para enviar imagem ou vídeo</span>
+                  </>
+                )}
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
+
+          {/* Hashtags */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Hash size={12} />Hashtags
+            </label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {editHashtags.map(h => (
+                <button
+                  key={h}
+                  onClick={() => handleRemoveHashtag(h)}
+                  className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-destructive/20 hover:text-destructive transition-colors group"
+                  title="Clique para remover"
+                >
+                  {h} <span className="opacity-0 group-hover:opacity-100 ml-0.5">×</span>
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 max-w-sm">
+              <input
+                value={editHashtagInput}
+                onChange={e => setEditHashtagInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddHashtag())}
+                placeholder="#novahashtag"
+                className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+              />
+              <button onClick={handleAddHashtag} className="h-8 px-3 rounded-md text-xs font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}>
+                Adicionar
+              </button>
+            </div>
+          </div>
+
+          {/* Checklist */}
+          {checklist.length > 0 && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
+              <div className="space-y-1.5">
+                {checklist.map(item => (
+                  <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
+                    <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
+                      item.done ? "bg-status-published border-status-published" : "border-border"
+                    )}>
+                      {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
+                    </div>
+                    <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Right column — Preview & Comments */}
+        <div className="w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card">
+          {/* Preview */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
+            <div className="flex gap-1.5 justify-center">
+              {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPreviewPlatform(p)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                    previewPlatform === p
+                      ? "text-primary-foreground"
+                      : "bg-secondary text-muted-foreground hover:bg-accent"
+                  )}
+                  style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                >
+                  {PLATFORM_LABELS[p]}
+                </button>
+              ))}
+            </div>
+            <PostPreview content={selectedContent} platform={previewPlatform} />
+          </div>
+
+          {/* Comments */}
+          <div className="border-t border-border p-5 max-h-[40%] flex flex-col">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
+            <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
+              {comments.map(c => (
+                <div key={c.id} className="bg-secondary rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{c.text}</p>
+                </div>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddComment()}
+                placeholder="Adicionar comentário..."
+                className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+              />
+              <button
+                onClick={handleAddComment}
+                className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+              >
+                <Send size={14} className="text-primary-foreground" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
