@@ -1,7 +1,9 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
-import { STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
+import PostPreview from '@/components/content/PostPreview';
+import { STATUS_LABELS, STATUS_COLORS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +20,8 @@ import {
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
 import { useState } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { X, Calendar, User } from 'lucide-react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'];
 
@@ -62,10 +66,11 @@ const DroppableColumn = ({ status, children }: { status: WorkflowStatus; childre
 
 const WorkflowPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus } = useApp();
+  const { projectContents, updateContentStatus, setSelectedContent } = useApp();
   const { role } = useAuth();
   const isClient = role === 'client';
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -91,6 +96,14 @@ const WorkflowPage = () => {
     }
   };
 
+  const handleClientCardClick = (content: ContentWithRelations) => {
+    setPreviewContent(content);
+  };
+
+  const previewPlatform = previewContent?.platform
+    ? (Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform)
+    : null;
+
   return (
     <>
       <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} />
@@ -113,7 +126,11 @@ const WorkflowPage = () => {
                   <div className="px-3 pb-3 space-y-2.5 flex-1 min-h-[100px]">
                     {items.map(item => (
                       isClient
-                        ? <div key={item.id}><ContentCard content={item} hideStatus /></div>
+                        ? (
+                          <div key={item.id} onClick={() => handleClientCardClick(item)} className="cursor-pointer">
+                            <ContentCard content={item} hideStatus />
+                          </div>
+                        )
                         : <DraggableCard key={item.id} content={item} />
                     ))}
                     {items.length === 0 && (
@@ -136,6 +153,87 @@ const WorkflowPage = () => {
           </DragOverlay>
         </DndContext>
       </div>
+
+      {/* Client preview sheet */}
+      <Sheet open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+          {previewContent && (
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="px-6 pt-6 pb-4 border-b border-border">
+                <SheetTitle className="text-lg font-semibold text-foreground mb-3">
+                  {previewContent.title}
+                </SheetTitle>
+                <div className="flex flex-wrap gap-2">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground",
+                    STATUS_COLORS[previewContent.status as WorkflowStatus]
+                  )}>
+                    {STATUS_LABELS[previewContent.status as WorkflowStatus]}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                    {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                    {platformIcon(previewContent.platform, 12)}
+                    {Array.isArray(previewContent.platform)
+                      ? previewContent.platform.join(', ')
+                      : previewContent.platform}
+                  </span>
+                </div>
+              </div>
+
+              {/* Meta info */}
+              <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                {previewContent.publish_date && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar size={12} />
+                    <span>
+                      {new Date(previewContent.publish_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      {previewContent.publish_time && ` às ${previewContent.publish_time}`}
+                    </span>
+                  </div>
+                )}
+                {previewContent.assignee_profile && (
+                  <div className="flex items-center gap-1.5">
+                    <User size={12} />
+                    <span>{previewContent.assignee_profile.display_name}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {previewContent.description && (
+                <div className="px-6 py-4 border-b border-border/50">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                </div>
+              )}
+
+              {/* Post Preview */}
+              <div className="px-6 py-4 flex-1">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
+                {previewPlatform ? (
+                  <PostPreview content={previewContent} platform={previewPlatform as Platform} />
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
+                )}
+              </div>
+
+              {/* Hashtags */}
+              {previewContent.hashtags && previewContent.hashtags.length > 0 && (
+                <div className="px-6 py-3 border-t border-border/50">
+                  <div className="flex flex-wrap gap-1.5">
+                    {previewContent.hashtags.map((tag, i) => (
+                      <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
