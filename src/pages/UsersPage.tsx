@@ -35,12 +35,14 @@ const roleBadgeVariant: Record<string, string> = {
 
 const UsersPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [projects, setProjects] = useState<SimpleProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState('');
   const [editRole, setEditRole] = useState<string>('social_media');
+  const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Add dialog
@@ -49,6 +51,7 @@ const UsersPage = () => {
   const [addPassword, setAddPassword] = useState('');
   const [addName, setAddName] = useState('');
   const [addRole, setAddRole] = useState<string>('social_media');
+  const [addProjectIds, setAddProjectIds] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
 
   const fetchUsers = async () => {
