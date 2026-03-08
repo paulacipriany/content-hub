@@ -620,13 +620,25 @@ const ContentPanel = () => {
                     <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
                     <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">{c.text}</p>
+                  {c.text && <p className="text-xs text-muted-foreground">{c.text}</p>}
+                  {c.image_url && (
+                    <img src={c.image_url} alt="Anexo" className="mt-2 rounded-md max-h-40 object-cover cursor-pointer" onClick={() => window.open(c.image_url, '_blank')} />
+                  )}
                 </div>
               ))}
               {comments.length === 0 && (
                 <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
               )}
             </div>
+            {commentImageUrl && (
+              <div className="relative mb-2 inline-block">
+                <img src={commentImageUrl} alt="Preview" className="h-16 rounded-md object-cover" />
+                <button
+                  onClick={() => setCommentImageUrl(null)}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]"
+                >✕</button>
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 value={newComment}
@@ -635,6 +647,15 @@ const ContentPanel = () => {
                 placeholder="Adicionar comentário..."
                 className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
               />
+              <button
+                onClick={() => commentFileRef.current?.click()}
+                disabled={commentUploading}
+                className="w-8 h-8 rounded-md flex items-center justify-center bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                title="Anexar imagem"
+              >
+                {commentUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+              </button>
+              <input ref={commentFileRef} type="file" accept="image/*" onChange={handleCommentImageUpload} className="hidden" />
               <button
                 onClick={handleAddComment}
                 className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
