@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { contrastText, generatePalette } from '@/lib/clientPalette';
+import { useTheme } from 'next-themes';
+import { Switch } from '@/components/ui/switch';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -28,6 +30,8 @@ const AppSidebar = () => {
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
   const { profile, role, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   const isClient = role === 'client';
 
@@ -239,6 +243,31 @@ const AppSidebar = () => {
           </div>
         )}
       </nav>
+
+      {/* Theme toggle */}
+      <div className={cn("px-3 py-2 border-t border-sidebar-border-custom", sidebarCollapsed && "flex justify-center")}>
+        {sidebarCollapsed ? (
+          <button
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className="w-8 h-8 rounded-md flex items-center justify-center text-sidebar-fg hover:text-sidebar-fg-active hover:bg-sidebar-hover transition-colors"
+            title={isDark ? 'Modo claro' : 'Modo escuro'}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sidebar-fg">
+              {isDark ? <Moon size={14} /> : <Sun size={14} />}
+              <span className="text-xs">{isDark ? 'Escuro' : 'Claro'}</span>
+            </div>
+            <Switch
+              checked={isDark}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              className="h-4 w-8 data-[state=checked]:bg-primary"
+            />
+          </div>
+        )}
+      </div>
 
       <div className="px-3 py-3 border-t border-sidebar-border-custom">
         <div className={cn("flex items-center gap-2.5", sidebarCollapsed && "justify-center")}>
