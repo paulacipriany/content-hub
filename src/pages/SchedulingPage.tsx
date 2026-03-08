@@ -5,7 +5,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check, Download, Loader2, Copy } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2, Copy, Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -13,6 +13,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import PostPreview from '@/components/content/PostPreview';
 import JSZip from 'jszip';
+
+const platformIcons: Partial<Record<Platform, React.ElementType>> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  youtube: Youtube,
+};
+
+const contentTypeBadgeColors: Record<string, string> = {
+  stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  post: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  feed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  reels: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  carousel: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  video: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+  shorts: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+  image: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+};
 
 const SchedulingPage = () => {
   useClientFromUrl();
@@ -103,23 +121,44 @@ const SchedulingPage = () => {
                   </h3>
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
-                <div className="space-y-2">
+                <div className="border border-border rounded-xl overflow-hidden bg-card">
+                  <div className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div></div>
+                    <div>Título</div>
+                    <div>Formato</div>
+                    <div>Agendamento</div>
+                  </div>
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
                     const checked = checkedPlatforms[content.id] ?? {};
+                    const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
 
                     return (
                       <div
                         key={content.id}
-                        className="w-full px-4 py-3 rounded-lg bg-card border border-border hover:shadow-sm transition-all flex items-center gap-4"
+                        className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        onClick={() => setPreviewContent(content)}
                       >
-                        <button
-                          onClick={() => setPreviewContent(content)}
-                          className="flex-1 min-w-0 text-left"
-                        >
-                          <h4 className="text-sm font-medium text-foreground truncate">{content.title}</h4>
-                        </button>
-                        <div className="flex items-center gap-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-center">
+                          {PlatformIcon && <PlatformIcon size={16} className="text-muted-foreground" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
+                          {content.publish_time && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <Clock size={10} /> {content.publish_time}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <span className={cn(
+                            "text-xs font-medium px-2 py-0.5 rounded-md",
+                            contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
+                          )}>
+                            {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                           {platforms.map(p => (
                             <label key={p} className="flex items-center gap-1.5 cursor-pointer">
                               <Checkbox
