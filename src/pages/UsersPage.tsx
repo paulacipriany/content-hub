@@ -108,8 +108,9 @@ const UsersPage = () => {
   const openEdit = async (u: UserRow) => {
     setEditUser(u);
     setEditName(u.display_name ?? '');
+    setEditEmail('');
+    setEditPassword('');
     setEditRole(u.role);
-    // Load current project memberships
     const { data } = await supabase.from('project_members').select('project_id').eq('user_id', u.user_id);
     setEditProjectIds(data?.map(r => r.project_id) ?? []);
   };
