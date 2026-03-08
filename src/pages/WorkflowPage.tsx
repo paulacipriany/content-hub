@@ -45,6 +45,7 @@ const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
 
 const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   'idea': '--status-idea',
+  'idea-bank': '--status-idea',
   'production': '--status-production',
   'review': '--status-review',
   'approval-internal': '--status-approval',
