@@ -10,6 +10,7 @@ interface AppContextType {
   setSelectedContent: (content: ContentWithRelations | null) => void;
   updateContentStatus: (id: string, status: WorkflowStatus) => Promise<void>;
   updateContentDate: (id: string, date: string | null) => Promise<void>;
+  updateContentFields: (id: string, fields: Partial<Pick<ContentWithRelations, 'title' | 'description' | 'platform' | 'content_type' | 'publish_date' | 'hashtags'>>) => Promise<void>;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   loading: boolean;
@@ -99,10 +100,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateContentFields = async (id: string, fields: Partial<Pick<ContentWithRelations, 'title' | 'description' | 'platform' | 'content_type' | 'publish_date' | 'hashtags'>>) => {
+    if (!user) return;
+    await supabase.from('contents').update(fields).eq('id', id);
+    setContents(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
+    if (selectedContent?.id === id) {
+      setSelectedContent(prev => prev ? { ...prev, ...fields } : null);
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       contents, projects, selectedContent, setSelectedContent,
-      updateContentStatus, updateContentDate, sidebarCollapsed, setSidebarCollapsed,
+      updateContentStatus, updateContentDate, updateContentFields, sidebarCollapsed, setSidebarCollapsed,
       loading, refetch: fetchData,
     }}>
       {children}
