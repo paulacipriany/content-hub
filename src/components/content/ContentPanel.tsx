@@ -832,7 +832,7 @@ const ContentPanel = () => {
               </div>
               <PostPreview content={selectedContent} platform={previewPlatform} />
 
-              {/* Checklist — only for idea/production */}
+              {/* Checklist */}
               {(selectedContent.status === 'idea' || selectedContent.status === 'production') && (
                 <div>
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
