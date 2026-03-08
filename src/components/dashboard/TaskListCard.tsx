@@ -123,6 +123,13 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
     await supabase.from('project_tasks').update({ assigned_to } as any).eq('id', id);
   };
 
+  const updateTaskText = async (id: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, text: trimmed } : t));
+    await supabase.from('project_tasks').update({ text: trimmed }).eq('id', id);
+  };
+
   const deleteTask = async (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
     await supabase.from('project_tasks').delete().eq('id', id);
