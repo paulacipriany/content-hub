@@ -9,7 +9,7 @@ interface ContentCardProps {
   hideStatus?: boolean;
 }
 
-const ContentCard = ({ content, compact }: ContentCardProps) => {
+const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
   const { setSelectedContent } = useApp();
   const assigneeName = content.assignee_profile?.display_name ?? 'Sem responsável';
   const initials = assigneeName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
