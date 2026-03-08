@@ -41,7 +41,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
     setTitle('');
     setBriefing('');
     setPlatforms([]);
-    setContentType('feed');
+    setContentType('post');
     setProjectId(defaultProjectId ?? '');
     setAssigneeEmail('');
     setSelectedFiles([]);
