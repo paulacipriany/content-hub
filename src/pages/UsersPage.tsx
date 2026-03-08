@@ -341,7 +341,10 @@ const UsersPage = () => {
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={addRole} onValueChange={setAddRole}>
+              <Select value={addRole} onValueChange={(val) => {
+                setAddRole(val);
+                if (val === 'admin') setAddProjectIds(projects.map(p => p.id));
+              }}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -353,9 +356,11 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            {addRole === 'client' && (
-              <div className="space-y-1.5">
-                <Label>Clientes vinculados</Label>
+            <div className="space-y-1.5">
+              <Label>Clientes vinculados</Label>
+              {addRole === 'admin' ? (
+                <p className="text-xs text-muted-foreground">Admins têm acesso a todos os clientes automaticamente.</p>
+              ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
                   {projects.map(p => (
                     <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -372,8 +377,8 @@ const UsersPage = () => {
                   ))}
                   {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
