@@ -60,7 +60,7 @@ const ReportsPage = () => {
                       backgroundColor: 'var(--client-500, hsl(var(--primary)))',
                     }}
                   >
-                    <span className="text-[10px] font-medium" style={{ color: 'var(--client-50, hsl(var(--primary-foreground)))' }}>{item.count}</span>
+                    <span className="text-[10px] font-medium" style={{ color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}>{item.count}</span>
                   </div>
                 </div>
               </div>

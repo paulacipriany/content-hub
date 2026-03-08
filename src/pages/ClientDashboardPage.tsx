@@ -158,7 +158,7 @@ const ClientDashboardPage = () => {
                           backgroundColor: 'var(--client-500)',
                         }}
                       >
-                        <span className="text-[10px] font-medium" style={{ color: 'var(--client-50)' }}>{item.count}</span>
+                        <span className="text-[10px] font-medium" style={{ color: 'var(--client-500-contrast)' }}>{item.count}</span>
                       </div>
                     </div>
                   </div>

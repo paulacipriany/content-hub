@@ -275,7 +275,7 @@ const ContentPanel = () => {
                 {canAdvance && (
                   <Button
                     size="sm"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                     onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
                   >
                     Aprovar
@@ -308,7 +308,7 @@ const ContentPanel = () => {
               {isIdeaBank ? (
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                   onClick={() => {
                     updateContentStatus(selectedContent.id, 'idea');
                     setSelectedContent(null);
@@ -319,7 +319,7 @@ const ContentPanel = () => {
               ) : canAdvance && (
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                   onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
                 >
                   Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
@@ -529,7 +529,7 @@ const ContentPanel = () => {
                         ? "text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
-                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
                   >
                     {PLATFORM_LABELS[p]}
                   </button>
@@ -690,7 +690,7 @@ const ContentPanel = () => {
                         ? "text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
-                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
                   >
                     {PLATFORM_LABELS[p]}
                   </button>

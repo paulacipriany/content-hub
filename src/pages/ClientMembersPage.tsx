@@ -147,7 +147,7 @@ const ClientMembersPage = () => {
               <Button
                 onClick={handleAdd}
                 disabled={adding || !email.trim()}
-                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
               >
                 {adding ? 'Adicionando...' : 'Adicionar'}
               </Button>
