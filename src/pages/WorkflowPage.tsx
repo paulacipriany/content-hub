@@ -125,7 +125,7 @@ const WorkflowPage = () => {
           <DragOverlay>
             {activeContent ? (
               <div className="opacity-90 rotate-2 scale-105 shadow-xl">
-                <ContentCard content={activeContent} />
+                <ContentCard content={activeContent} hideStatus />
               </div>
             ) : null}
           </DragOverlay>
