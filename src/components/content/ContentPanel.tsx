@@ -41,6 +41,8 @@ const ContentPanel = () => {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
 
   // Editable local state
   const [editTitle, setEditTitle] = useState('');
