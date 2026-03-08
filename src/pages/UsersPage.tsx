@@ -155,7 +155,7 @@ const UsersPage = () => {
     }
     setAdding(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: addEmail,
       password: addPassword,
       options: {
@@ -167,12 +167,22 @@ const UsersPage = () => {
     if (error) {
       toast.error(error.message);
     } else {
+      // If client role, add project memberships after a delay for the trigger to finish
+      if (addRole === 'client' && addProjectIds.length > 0 && signUpData.user) {
+        const userId = signUpData.user.id;
+        setTimeout(async () => {
+          await supabase.from('project_members').insert(
+            addProjectIds.map(pid => ({ project_id: pid, user_id: userId }))
+          );
+        }, 2000);
+      }
       toast.success('Usuário criado! Um e-mail de confirmação foi enviado.');
       setAddOpen(false);
       setAddEmail('');
       setAddPassword('');
       setAddName('');
       setAddRole('social_media');
+      setAddProjectIds([]);
       // Refetch after a short delay to allow trigger to create profile
       setTimeout(() => fetchUsers(), 2000);
     }
