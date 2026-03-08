@@ -103,23 +103,44 @@ const SchedulingPage = () => {
                   </h3>
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
-                <div className="space-y-2">
+                <div className="border border-border rounded-xl overflow-hidden bg-card">
+                  <div className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div></div>
+                    <div>Título</div>
+                    <div>Formato</div>
+                    <div>Agendamento</div>
+                  </div>
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
                     const checked = checkedPlatforms[content.id] ?? {};
+                    const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
 
                     return (
                       <div
                         key={content.id}
-                        className="w-full px-4 py-3 rounded-lg bg-card border border-border hover:shadow-sm transition-all flex items-center gap-4"
+                        className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        onClick={() => setPreviewContent(content)}
                       >
-                        <button
-                          onClick={() => setPreviewContent(content)}
-                          className="flex-1 min-w-0 text-left"
-                        >
-                          <h4 className="text-sm font-medium text-foreground truncate">{content.title}</h4>
-                        </button>
-                        <div className="flex items-center gap-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-center">
+                          {PlatformIcon && <PlatformIcon size={16} className="text-muted-foreground" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
+                          {content.publish_time && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <Clock size={10} /> {content.publish_time}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <span className={cn(
+                            "text-xs font-medium px-2 py-0.5 rounded-md",
+                            contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
+                          )}>
+                            {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                           {platforms.map(p => (
                             <label key={p} className="flex items-center gap-1.5 cursor-pointer">
                               <Checkbox
