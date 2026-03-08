@@ -128,11 +128,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const deleteContent = async (id: string) => {
+    if (!user) return;
+    await supabase.from('contents').delete().eq('id', id);
+    setContents(prev => prev.filter(c => c.id !== id));
+    if (selectedContent?.id === id) {
+      setSelectedContent(null);
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       contents, projects, selectedProject, setSelectedProject, projectContents,
       selectedContent, setSelectedContent,
-      updateContentStatus, updateContentDate, updateContentFields,
+      updateContentStatus, updateContentDate, updateContentFields, deleteContent,
       sidebarCollapsed, setSidebarCollapsed,
       loading, refetch: fetchData,
     }}>
