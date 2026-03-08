@@ -82,7 +82,11 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
   );
 };
 
-const getDisplayText = (content: ContentWithRelations) => {
+const getDisplayText = (content: ContentWithRelations, platform?: string) => {
+  const copyTexts = (content as any).copy_texts;
+  if (platform && copyTexts && typeof copyTexts === 'object' && copyTexts[platform]) {
+    return copyTexts[platform];
+  }
   const copyText = (content as any).copy_text;
   return copyText || content.description || content.title;
 };
@@ -120,7 +124,7 @@ const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
         <p className="text-xs font-semibold text-foreground mb-1">128 curtidas</p>
         <div className="text-xs text-foreground">
           <span className="font-semibold">{userName.toLowerCase().replace(/\s+/g, '.')} </span>
-          <span className="whitespace-pre-wrap">{getDisplayText(content)}</span>
+          <span className="whitespace-pre-wrap">{getDisplayText(content, 'instagram')}</span>
         </div>
       </div>
     </div>
@@ -147,7 +151,7 @@ const FacebookPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       <div className="px-3 pb-2">
-        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content)}</p>
+        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content, 'facebook')}</p>
       </div>
 
       <MediaOrPlaceholder content={content} platform="facebook" />
@@ -188,7 +192,7 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       <div className="px-3 pb-2">
-        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content)}</p>
+        <p className="text-sm text-foreground whitespace-pre-wrap">{getDisplayText(content, 'linkedin')}</p>
       </div>
 
       <MediaOrPlaceholder content={content} platform="linkedin" />
