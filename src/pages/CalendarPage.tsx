@@ -271,6 +271,70 @@ const CalendarPage = () => {
     fetchTasks();
   }, [selectedProject, user]);
 
+  // Fetch custom commemorative dates
+  useEffect(() => {
+    if (!selectedProject || !user) { setCustomDates([]); return; }
+    supabase
+      .from('commemorative_dates')
+      .select('id, date, title')
+      .eq('project_id', selectedProject.id)
+      .then(({ data }) => setCustomDates((data ?? []).map(d => ({ id: d.id, date: d.date, title: d.title }))));
+  }, [selectedProject, user]);
+
+  const addCommemorativeDate = async () => {
+    if (!newDateTitle.trim() || !newDateValue || !user || !selectedProject) return;
+    const dateStr = format(newDateValue, 'yyyy-MM-dd');
+    const { data } = await supabase
+      .from('commemorative_dates')
+      .insert({ project_id: selectedProject.id, title: newDateTitle.trim(), date: dateStr, created_by: user.id } as any)
+      .select('id, date, title')
+      .single();
+    if (data) setCustomDates(prev => [...prev, { id: data.id, date: data.date, title: data.title }]);
+    setNewDateTitle('');
+    setNewDateValue(undefined);
+    setAddDateDialogOpen(false);
+    toast({ title: 'Data comemorativa adicionada!' });
+  };
+
+  const removeCommemorativeDate = async (id: string) => {
+    await supabase.from('commemorative_dates').delete().eq('id', id);
+    setCustomDates(prev => prev.filter(d => d.id !== id));
+  };
+
+  const importCommemorativeDates = async (month: number) => {
+    if (!user || !selectedProject) return;
+    const mm = String(month + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+    const datesToImport = COMMEMORATIVE_DATES.filter(d => d.date.startsWith(mm));
+    const existing = new Set(customDates.map(d => `${d.date}|${d.title}`));
+    const newDates = datesToImport.filter(d => {
+      const fullDate = `${year}-${d.date}`;
+      return !existing.has(`${fullDate}|${d.title}`);
+    });
+    if (newDates.length === 0) {
+      toast({ title: 'Todas as datas deste mês já foram importadas.' });
+      return;
+    }
+    const inserts = newDates.map(d => ({
+      project_id: selectedProject.id,
+      title: d.title,
+      date: `${year}-${d.date}`,
+      created_by: user.id,
+    }));
+    const { data } = await supabase.from('commemorative_dates').insert(inserts as any).select('id, date, title');
+    if (data) setCustomDates(prev => [...prev, ...data.map(d => ({ id: d.id, date: d.date, title: d.title }))]);
+    setImportDialogOpen(false);
+    toast({ title: `${data?.length ?? 0} datas importadas!` });
+  };
+
+  const getCommemorativesForDate = (dateStr: string) => {
+    const preset = getCommemorativeDatesForDay(dateStr);
+    const custom = customDates.filter(d => d.date === dateStr).map(d => d.title);
+    // Merge unique
+    const all = [...new Set([...preset, ...custom])];
+    return all;
+  };
+
   const toggleTask = async (id: string, done: boolean) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done } : t));
     await supabase.from('project_tasks').update({ done }).eq('id', id);
