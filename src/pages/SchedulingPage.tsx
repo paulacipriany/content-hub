@@ -38,6 +38,7 @@ const SchedulingPage = () => {
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
+  const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState(false);
 
   const getContentMediaUrls = (content: ContentWithRelations): string[] => {
