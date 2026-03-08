@@ -34,7 +34,7 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const SchedulingPage = () => {
   useClientFromUrl();
-  const { projectContents } = useApp();
+  const { projectContents, updateContentStatus } = useApp();
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
