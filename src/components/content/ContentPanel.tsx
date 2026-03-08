@@ -408,26 +408,28 @@ const ContentPanel = () => {
                 </Popover>
               )}
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
-              {isClient ? (
-                <span className="text-foreground text-xs flex items-center gap-2">
-                  <Clock size={12} className="text-muted-foreground" />
-                  {editPublishTime || 'Não definido'}
-                </span>
-              ) : (
-                <div className="relative flex-1">
-                  <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="time"
-                    value={editPublishTime}
-                    onChange={e => handleTimeChange(e.target.value)}
-                    className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
-                  />
-                </div>
-              )}
-            </div>
-            {!isClient && (
+            {!isIdeaBank && (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
+                {isClient ? (
+                  <span className="text-foreground text-xs flex items-center gap-2">
+                    <Clock size={12} className="text-muted-foreground" />
+                    {editPublishTime || 'Não definido'}
+                  </span>
+                ) : (
+                  <div className="relative flex-1">
+                    <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="time"
+                      value={editPublishTime}
+                      onChange={e => handleTimeChange(e.target.value)}
+                      className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {!isClient && !isIdeaBank && (
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
                 <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
