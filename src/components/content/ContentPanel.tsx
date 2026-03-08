@@ -207,16 +207,33 @@ const ContentPanel = () => {
             {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
           </span>
         </div>
-        {canAdvance && (
+        <div className="flex items-center gap-2 ml-4">
           <Button
             size="sm"
-            className="ml-4"
-            style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
-            onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+            variant="outline"
+            onClick={() => {
+              updateContentFields(selectedContent.id, {
+                title: editTitle,
+                copy_text: editCopyText,
+                copy_texts: editCopyTexts,
+                publish_time: editPublishTime || null,
+                media_url: mediaUrls[0] ?? null,
+                media_urls: mediaUrls,
+              });
+            }}
           >
-            Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
+            Salvar rascunho
           </Button>
-        )}
+          {canAdvance && (
+            <Button
+              size="sm"
+              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+              onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+            >
+              Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Two-column layout */}
