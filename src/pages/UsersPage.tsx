@@ -123,6 +123,17 @@ const UsersPage = () => {
         : Promise.resolve({ error: null }),
     ]);
 
+    // Sync project_members for client role
+    if (editRole === 'client') {
+      // Remove all existing memberships, then re-insert selected
+      await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
+      if (editProjectIds.length > 0) {
+        await supabase.from('project_members').insert(
+          editProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
+        );
+      }
+    }
+
     if (profileRes.error || roleRes.error) {
       toast.error('Erro ao salvar alterações');
     } else {
