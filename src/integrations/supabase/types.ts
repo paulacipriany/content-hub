@@ -342,7 +342,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "social_media" | "client"
-      content_type: "feed" | "reels" | "stories" | "carousel" | "video"
+      content_type: "feed" | "reels" | "stories" | "carousel" | "video" | "post"
       platform: "instagram" | "facebook" | "linkedin" | "tiktok" | "youtube"
       workflow_status:
         | "idea"
@@ -480,7 +480,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "social_media", "client"],
-      content_type: ["feed", "reels", "stories", "carousel", "video"],
+      content_type: ["feed", "reels", "stories", "carousel", "video", "post"],
       platform: ["instagram", "facebook", "linkedin", "tiktok", "youtube"],
       workflow_status: [
         "idea",
