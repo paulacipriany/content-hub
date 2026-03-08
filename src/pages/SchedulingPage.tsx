@@ -5,7 +5,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check, Download, Loader2, Copy } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2, Copy, Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -13,6 +13,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import PostPreview from '@/components/content/PostPreview';
 import JSZip from 'jszip';
+
+const platformIcons: Partial<Record<Platform, React.ElementType>> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  youtube: Youtube,
+};
+
+const contentTypeBadgeColors: Record<string, string> = {
+  stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  post: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  feed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  reels: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  carousel: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  video: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+  shorts: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+  image: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+};
 
 const SchedulingPage = () => {
   useClientFromUrl();
