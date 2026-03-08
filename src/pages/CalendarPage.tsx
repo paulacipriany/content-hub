@@ -538,7 +538,6 @@ const CalendarPage = () => {
 
           {/* Calendar grid */}
             <div className="flex-1 overflow-y-auto">
-            <div className="flex-1 overflow-y-auto">
               {/* Day name headers */}
               <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
                 {viewMode === 'week'
