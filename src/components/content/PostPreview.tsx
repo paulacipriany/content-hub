@@ -107,7 +107,7 @@ const FacebookPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       {/* Image */}
-      <ImagePlaceholder platform="facebook" />
+      <MediaOrPlaceholder content={content} platform="facebook" />
 
       {/* Reactions bar */}
       <div className="px-3 py-2 border-t border-border">
