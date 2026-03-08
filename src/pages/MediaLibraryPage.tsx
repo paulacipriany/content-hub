@@ -17,7 +17,7 @@ interface MediaItem {
   filename: string;
   content_id: string | null;
   contentTitle: string | null;
-  source: 'library';
+  source: 'library' | 'content';
 }
 
 const MediaLibraryPage = () => {
