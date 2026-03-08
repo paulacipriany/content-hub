@@ -46,7 +46,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea': 'Ideia',
   'production': 'Produção',
   'review': 'Revisão',
-  'approval-internal': 'Aprovação Interna',
+  
   'approval-client': 'Aprovação Cliente',
   'scheduled': 'Agendado',
   'published': 'Publicado',
