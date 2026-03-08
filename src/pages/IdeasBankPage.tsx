@@ -140,6 +140,7 @@ const IdeasBankPage = () => {
           )}
         </div>
       </div>
+      <ConfirmDialog />
     </>
   );
 };

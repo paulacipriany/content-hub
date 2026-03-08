@@ -390,6 +390,7 @@ const UsersPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog />
     </>
   );
 };

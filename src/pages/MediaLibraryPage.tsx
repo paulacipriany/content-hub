@@ -271,6 +271,7 @@ const MediaLibraryPage = () => {
         )}
       </div>
 
+      <ConfirmDialog />
     </>
   );
 };
