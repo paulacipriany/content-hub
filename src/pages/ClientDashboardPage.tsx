@@ -22,6 +22,7 @@ const ClientDashboardPage = () => {
   const total = projectContents.length;
   const published = projectContents.filter(c => c.status === 'published').length;
   const inApproval = projectContents.filter(c => c.status.startsWith('approval')).length;
+  const inReview = projectContents.filter(c => c.status === 'review').length;
   const inProduction = projectContents.filter(c => c.status === 'production').length;
   const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
 
