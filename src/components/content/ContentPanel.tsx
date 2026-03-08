@@ -38,7 +38,8 @@ function useAutoSave(contentId: string | undefined, field: string, value: string
 
 const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
-  const { user, profile } = useAuth();
+  const { user, profile, role } = useAuth();
+  const isClient = role === 'client';
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
