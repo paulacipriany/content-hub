@@ -177,7 +177,6 @@ const AppSidebar = () => {
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
                 {projects.filter(p => p.id !== selectedProject.id).map(project => {
-                  const pal = generatePalette(project.color);
                   return (
                     <button
                       key={project.id}
@@ -189,7 +188,7 @@ const AppSidebar = () => {
                     >
                       <span
                         className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
-                        style={{ backgroundColor: pal[800], color: pal[300] }}
+                        style={{ backgroundColor: project.color, color: contrastText(project.color) }}
                       >
                         {project.name}
                       </span>
