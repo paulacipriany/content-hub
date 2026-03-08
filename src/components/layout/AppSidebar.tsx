@@ -19,6 +19,7 @@ const clientNavItems = [
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: BarChart3, label: 'Relatórios', path: '/reports' },
+  { icon: Users, label: 'Usuários', path: '/members' },
 ];
 
 const AppSidebar = () => {
