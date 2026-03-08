@@ -122,6 +122,7 @@ export type Database = {
       contents: {
         Row: {
           assignee_id: string | null
+          briefing_images: string[] | null
           content_type: Database["public"]["Enums"]["content_type"]
           copy_text: string | null
           copy_texts: Json | null
@@ -142,6 +143,7 @@ export type Database = {
         }
         Insert: {
           assignee_id?: string | null
+          briefing_images?: string[] | null
           content_type?: Database["public"]["Enums"]["content_type"]
           copy_text?: string | null
           copy_texts?: Json | null
@@ -162,6 +164,7 @@ export type Database = {
         }
         Update: {
           assignee_id?: string | null
+          briefing_images?: string[] | null
           content_type?: Database["public"]["Enums"]["content_type"]
           copy_text?: string | null
           copy_texts?: Json | null
