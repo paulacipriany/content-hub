@@ -230,7 +230,9 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
 const CalendarPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentDate, selectedProject } = useApp();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isClient = role === 'client';
+  const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
