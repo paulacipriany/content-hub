@@ -248,6 +248,7 @@ export type Database = {
           logo_url: string | null
           name: string
           owner_id: string
+          platforms: Database["public"]["Enums"]["platform"][]
           updated_at: string
         }
         Insert: {
@@ -257,6 +258,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           owner_id: string
+          platforms?: Database["public"]["Enums"]["platform"][]
           updated_at?: string
         }
         Update: {
@@ -266,6 +268,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           owner_id?: string
+          platforms?: Database["public"]["Enums"]["platform"][]
           updated_at?: string
         }
         Relationships: []
@@ -358,6 +361,8 @@ export type Database = {
         | "tiktok"
         | "youtube"
         | "pinterest"
+        | "twitter"
+        | "google_business"
       workflow_status:
         | "idea"
         | "production"
@@ -511,6 +516,8 @@ export const Constants = {
         "tiktok",
         "youtube",
         "pinterest",
+        "twitter",
+        "google_business",
       ],
       workflow_status: [
         "idea",

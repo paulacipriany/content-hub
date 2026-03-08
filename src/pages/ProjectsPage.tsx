@@ -3,12 +3,13 @@ import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, Platform } from '@/data/types';
 import { cn } from '@/lib/utils';
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { PlatformSelector, platformIcon } from '@/components/content/PlatformIcons';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,6 +65,7 @@ const ProjectsPage = () => {
   const [newColor, setNewColor] = useState(COLORS[0]);
   const [newLogoUrl, setNewLogoUrl] = useState<string | null>(null);
   const [uploadingNew, setUploadingNew] = useState(false);
+  const [newPlatforms, setNewPlatforms] = useState<Platform[]>([]);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -71,6 +73,7 @@ const ProjectsPage = () => {
   const [editColor, setEditColor] = useState('');
   const [editLogoUrl, setEditLogoUrl] = useState<string | null>(null);
   const [uploadingEdit, setUploadingEdit] = useState(false);
+  const [editPlatforms, setEditPlatforms] = useState<Platform[]>([]);
 
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -90,22 +93,25 @@ const ProjectsPage = () => {
       color: newColor,
       owner_id: user.id,
       logo_url: newLogoUrl,
+      platforms: newPlatforms.length > 0 ? newPlatforms : ['instagram'],
     } as any);
     if (error) {
       toast({ title: 'Erro ao criar cliente', description: error.message, variant: 'destructive' });
     } else {
       setNewName('');
       setNewLogoUrl(null);
+      setNewPlatforms([]);
       setShowCreate(false);
       await refetch();
     }
   };
 
-  const startEdit = (project: { id: string; name: string; color: string; logo_url?: string | null }) => {
+  const startEdit = (project: any) => {
     setEditingId(project.id);
     setEditName(project.name);
     setEditColor(project.color);
     setEditLogoUrl(project.logo_url ?? null);
+    setEditPlatforms(project.platforms ?? []);
   };
 
   const handleEditLogoUpload = async (file: File) => {
@@ -122,6 +128,7 @@ const ProjectsPage = () => {
       name: editName.trim(),
       color: editColor,
       logo_url: editLogoUrl,
+      platforms: editPlatforms.length > 0 ? editPlatforms : ['instagram'],
     } as any).eq('id', editingId);
     if (error) {
       toast({ title: 'Erro ao atualizar', description: error.message, variant: 'destructive' });
@@ -171,6 +178,10 @@ const ProjectsPage = () => {
                   style={{ backgroundColor: c, borderColor: newColor === c ? 'var(--foreground)' : 'transparent' }}
                 />
               ))}
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
+              <PlatformSelector selected={newPlatforms} onChange={setNewPlatforms} size={36} />
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate}>Criar</Button>
@@ -226,6 +237,10 @@ const ProjectsPage = () => {
                         />
                       ))}
                     </div>
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
+                      <PlatformSelector selected={editPlatforms} onChange={setEditPlatforms} size={32} />
+                    </div>
                     <div className="flex gap-2">
                       <Button size="sm" className="gap-1" onClick={handleUpdate}>
                         <Check size={14} /> Salvar
@@ -253,6 +268,13 @@ const ProjectsPage = () => {
                         <p className="text-xs text-muted-foreground">{projectContents.length} conteúdos</p>
                       </div>
                     </div>
+
+                    {/* Platform icons */}
+                    {(project as any).platforms && (project as any).platforms.length > 0 && (
+                      <div className="mb-3">
+                        {platformIcon((project as any).platforms as Platform[], 16)}
+                      </div>
+                    )}
 
                     {/* Status breakdown */}
                     <div className="flex flex-wrap gap-1.5 mt-3">
