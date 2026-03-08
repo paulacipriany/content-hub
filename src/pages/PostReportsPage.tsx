@@ -50,11 +50,13 @@ const AnalysisRow = ({
   analysis,
   userId,
   onSaved,
+  readOnly = false,
 }: {
   content: ContentWithRelations;
   analysis: PostAnalysis | null;
   userId: string;
   onSaved: () => void;
+  readOnly?: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [views, setViews] = useState(analysis?.views ?? 0);
@@ -134,92 +136,90 @@ const AnalysisRow = ({
 
       {expanded && (
         <div className="px-6 pb-4 pt-2 bg-secondary/10 border-t border-border/50">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">
-                <Eye size={11} /> Visualizações
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={views}
-                onChange={e => setViews(Number(e.target.value))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">
-                <Heart size={11} /> Likes
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={likes}
-                onChange={e => setLikes(Number(e.target.value))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">
-                <MessageCircle size={11} /> Comentários
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={commentsCount}
-                onChange={e => setCommentsCount(Number(e.target.value))}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">
-                <Share2 size={11} /> Compartilhamentos
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={shares}
-                onChange={e => setShares(Number(e.target.value))}
-                className="h-8 text-sm"
-              />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">
-              Análise pós-publicação
-            </label>
-            <Textarea
-              value={analysisText}
-              onChange={e => setAnalysisText(e.target.value)}
-              placeholder="Escreva sua análise sobre o desempenho deste conteúdo..."
-              className="text-sm min-h-[80px]"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">
-              Resultado
-            </label>
-            <div className="flex gap-2">
-              {resultOptions.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setResult(result === opt.value ? null : opt.value)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                    result === opt.value
-                      ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
-                      : "border-border text-muted-foreground hover:bg-secondary"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
-          </Button>
+          {readOnly && analysis ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
+                  <p className="text-sm font-medium text-foreground">{analysis.views.toLocaleString('pt-BR')}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
+                  <p className="text-sm font-medium text-foreground">{analysis.likes.toLocaleString('pt-BR')}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
+                  <p className="text-sm font-medium text-foreground">{analysis.comments_count.toLocaleString('pt-BR')}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
+                  <p className="text-sm font-medium text-foreground">{analysis.shares.toLocaleString('pt-BR')}</p>
+                </div>
+              </div>
+              {analysis.analysis_text && (
+                <div className="mb-3">
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{analysis.analysis_text}</p>
+                </div>
+              )}
+              {analysis.result && (
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
+                  <span className={cn("px-3 py-1.5 rounded-full text-xs font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
+                    {resultOptions.find(o => o.value === analysis.result)?.label}
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
+                  <Input type="number" min={0} value={views} onChange={e => setViews(Number(e.target.value))} className="h-8 text-sm" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
+                  <Input type="number" min={0} value={likes} onChange={e => setLikes(Number(e.target.value))} className="h-8 text-sm" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
+                  <Input type="number" min={0} value={commentsCount} onChange={e => setCommentsCount(Number(e.target.value))} className="h-8 text-sm" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
+                  <Input type="number" min={0} value={shares} onChange={e => setShares(Number(e.target.value))} className="h-8 text-sm" />
+                </div>
+              </div>
+              <div className="mb-3">
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
+                <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+              </div>
+              <div className="mb-3">
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
+                <div className="flex gap-2">
+                  {resultOptions.map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setResult(result === opt.value ? null : opt.value)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                        result === opt.value
+                          ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
+                          : "border-border text-muted-foreground hover:bg-secondary"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
+                {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
+              </Button>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -325,6 +325,7 @@ const PostReportsPage = () => {
                         analysis={analysisMap.get(content.id) ?? null}
                         userId={user?.id ?? ''}
                         onSaved={fetchAnalyses}
+                        readOnly
                       />
                     ))}
                   </div>
