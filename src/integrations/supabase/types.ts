@@ -207,6 +207,7 @@ export type Database = {
           created_at: string
           created_by: string
           done: boolean
+          due_date: string | null
           id: string
           project_id: string
           sort_order: number
@@ -216,6 +217,7 @@ export type Database = {
           created_at?: string
           created_by: string
           done?: boolean
+          due_date?: string | null
           id?: string
           project_id: string
           sort_order?: number
@@ -225,6 +227,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           done?: boolean
+          due_date?: string | null
           id?: string
           project_id?: string
           sort_order?: number
