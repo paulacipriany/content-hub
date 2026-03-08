@@ -3,7 +3,7 @@ import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, Ba
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { contrastText } from '@/lib/clientPalette';
+import { contrastText, generatePalette } from '@/lib/clientPalette';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -89,23 +89,29 @@ const AppSidebar = () => {
         {/* Client sections - only when a client is selected */}
         {selectedProject && (
           <>
-            {!sidebarCollapsed && (
-              <div className="pt-4 pb-1 px-3">
-                <span
-                  className="text-xs uppercase tracking-wider font-medium truncate px-2 py-0.5 rounded"
-                  style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}
-                >
-                  {selectedProject.name}
-                </span>
-              </div>
-            )}
-            {sidebarCollapsed && (
-              <div className="pt-3 pb-1 flex justify-center">
-                <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}>
-                  {selectedProject.name.charAt(0)}
+            {!sidebarCollapsed && (() => {
+              const pal = generatePalette(selectedProject.color);
+              return (
+                <div className="pt-4 pb-1 px-3">
+                  <span
+                    className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
+                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                  >
+                    {selectedProject.name}
+                  </span>
                 </div>
-              </div>
-            )}
+              );
+            })()}
+            {sidebarCollapsed && (() => {
+              const pal = generatePalette(selectedProject.color);
+              return (
+                <div className="pt-3 pb-1 flex justify-center">
+                  <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: pal[800], color: pal[300] }}>
+                    {selectedProject.name.charAt(0)}
+                  </div>
+                </div>
+              );
+            })()}
             {clientNavItems.map(item => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
@@ -133,23 +139,26 @@ const AppSidebar = () => {
                 <div className="px-4 mb-1">
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
-                {projects.filter(p => p.id !== selectedProject.id).map(project => (
-                  <button
-                    key={project.id}
-                    onClick={() => {
-                      setSelectedProject(project);
-                      navigate(`/clients/${project.id}/dashboard`);
-                    }}
-                    className="w-full px-4 py-1.5 text-sm font-medium truncate text-left transition-all hover:brightness-125 active:scale-[0.98]"
-                  >
-                    <span
-                      className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-medium"
-                      style={{ backgroundColor: project.color + '25', color: project.color }}
+                {projects.filter(p => p.id !== selectedProject.id).map(project => {
+                  const pal = generatePalette(project.color);
+                  return (
+                    <button
+                      key={project.id}
+                      onClick={() => {
+                        setSelectedProject(project);
+                        navigate(`/clients/${project.id}/dashboard`);
+                      }}
+                      className="w-full px-4 py-1.5 text-sm font-medium truncate text-left transition-all hover:brightness-125 active:scale-[0.98]"
                     >
-                      {project.name}
-                    </span>
-                  </button>
-                ))}
+                      <span
+                        className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
+                        style={{ backgroundColor: pal[800], color: pal[300] }}
+                      >
+                        {project.name}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
             {sidebarCollapsed && projects.filter(p => p.id !== selectedProject.id).length > 0 && (
@@ -185,19 +194,26 @@ const AppSidebar = () => {
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
-            {projects.map(project => (
-              <button
-                key={project.id}
-                onClick={() => {
-                  setSelectedProject(project);
-                  navigate(`/clients/${project.id}/dashboard`);
-                }}
-                className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
-                style={{ backgroundColor: project.color, color: contrastText(project.color) }}
-              >
-                {project.name}
-              </button>
-            ))}
+            {projects.map(project => {
+              const pal = generatePalette(project.color);
+              return (
+                <button
+                  key={project.id}
+                  onClick={() => {
+                    setSelectedProject(project);
+                    navigate(`/clients/${project.id}/dashboard`);
+                  }}
+                  className="w-full px-4 py-2 text-sm font-semibold truncate text-left transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
+                >
+                  <span
+                    className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
+                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                  >
+                    {project.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </nav>
