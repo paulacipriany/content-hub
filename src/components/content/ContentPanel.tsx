@@ -429,7 +429,7 @@ const ContentPanel = () => {
                   style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                   onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
                 >
-                  {allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
+                  {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
                 </Button>
               )}
             </>
