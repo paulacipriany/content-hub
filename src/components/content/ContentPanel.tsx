@@ -45,6 +45,8 @@ const ContentPanel = () => {
   const [commentUploading, setCommentUploading] = useState(false);
   const commentFileRef = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState<any[]>([]);
+  const [showAdjustPrompt, setShowAdjustPrompt] = useState(false);
+  const [adjustComment, setAdjustComment] = useState('');
   const [checklist, setChecklist] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
