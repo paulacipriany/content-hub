@@ -72,6 +72,71 @@
     --sidebar-border: 0 0% 12%;
     --sidebar-ring: 220 100% 50%;
   }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
+
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 92%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 92%;
+
+    --primary: 220 100% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 10% 15%;
+    --secondary-foreground: 0 0% 92%;
+
+    --muted: 220 10% 15%;
+    --muted-foreground: 220 8% 55%;
+
+    --accent: 330 100% 64%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 10% 18%;
+    --input: 220 10% 18%;
+    --ring: 220 100% 55%;
+
+    /* Sidebar — slightly lighter than bg */
+    --sidebar-bg: 0 0% 5%;
+    --sidebar-fg: 0 0% 65%;
+    --sidebar-fg-active: 0 0% 100%;
+    --sidebar-hover: 0 0% 12%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-accent: 220 100% 55%;
+
+    /* Status colors — same hues, adjusted for dark */
+    --status-idea: 220 10% 55%;
+    --status-production: 210 100% 55%;
+    --status-review: 0 80% 58%;
+    --status-approval: 35 95% 58%;
+    --status-approval-client: 280 70% 62%;
+    --status-scheduled: 145 70% 48%;
+    --status-published: 160 85% 40%;
+    --status-rejected: 0 72% 50%;
+
+    /* Platform brand colors */
+    --platform-instagram: 330 70% 55%;
+    --platform-facebook: 220 70% 55%;
+    --platform-linkedin: 210 80% 48%;
+    --platform-tiktok: 0 0% 90%;
+    --platform-youtube: 0 72% 55%;
+
+    /* Shadcn sidebar tokens */
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 220 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 220 100% 55%;
+  }
 }
 
 @layer base {
