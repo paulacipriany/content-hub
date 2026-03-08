@@ -363,6 +363,28 @@ const ContentPanel = () => {
           </div>
         </div>
       </div>
+      ) : (
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
+        {/* Platform selector for preview */}
+        <div className="flex gap-1.5 justify-center">
+          {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+            <button
+              key={p}
+              onClick={() => setPreviewPlatform(p)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                previewPlatform === p
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:bg-accent"
+              )}
+            >
+              {PLATFORM_LABELS[p]}
+            </button>
+          ))}
+        </div>
+        <PostPreview content={selectedContent} platform={previewPlatform} />
+      </div>
+      )}
 
       {/* Footer */}
       {canAdvance && (
