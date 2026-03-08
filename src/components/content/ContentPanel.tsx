@@ -1,5 +1,6 @@
 import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
+import AssigneeSelector from './AssigneeSelector';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
@@ -96,7 +97,7 @@ const ContentPanel = () => {
       .from('comments')
       .select('*')
       .eq('content_id', selectedContent.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .then(async ({ data }) => {
         if (!data) return setComments([]);
         const userIds = [...new Set(data.map(c => c.user_id))];
@@ -336,28 +337,7 @@ const ContentPanel = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left column — Edit (or Preview for client) */}
         <div className={cn("flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5", isClient ? "max-w-xl" : "max-w-2xl")}>
-          {/* Status — hidden for client and idea-bank */}
-          {!isClient && !isIdeaBank && (
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
-              <div className="flex flex-wrap gap-1.5">
-                {allStatuses.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => updateContentStatus(selectedContent.id, s)}
-                    className={cn(
-                      "px-2.5 py-1 rounded-full text-xs font-medium transition-all",
-                      selectedContent.status === s
-                        ? cn(STATUS_COLORS[s], "text-primary-foreground")
-                        : "bg-secondary text-muted-foreground hover:bg-accent"
-                    )}
-                  >
-                    {STATUS_LABELS[s]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Status — hidden always (managed via workflow buttons) */}
 
           {/* Details */}
           <div className="space-y-3">
@@ -442,13 +422,23 @@ const ContentPanel = () => {
                 )}
               </div>
             )}
-            {!isClient && !isIdeaBank && (
+            {!isIdeaBank && (
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
-                <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
-                  <User size={12} className="text-muted-foreground" />
-                  <span>{assigneeName}</span>
-                </div>
+                {(role === 'admin' || role === 'moderator') ? (
+                  <AssigneeSelector
+                    currentAssigneeId={selectedContent.assignee_id}
+                    assigneeName={assigneeName}
+                    onChangeAssignee={async (userId) => {
+                      await updateContentFields(selectedContent.id, { assignee_id: userId });
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground flex-1">
+                    <User size={12} className="text-muted-foreground" />
+                    <span>{assigneeName}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
