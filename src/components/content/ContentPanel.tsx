@@ -298,58 +298,82 @@ const ContentPanel = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
-              <PlatformSelector
-                selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
-                onChange={handlePlatformChange}
-                size={28}
-              />
+              {isClient ? (
+                <div className="flex items-center gap-1">{platformIcon(selectedContent.platform, 22)}</div>
+              ) : (
+                <PlatformSelector
+                  selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
+                  onChange={handlePlatformChange}
+                  size={28}
+                />
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
-              <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
-                <SelectTrigger className="h-8 text-xs flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {allContentTypes.map(t => (
-                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isClient ? (
+                <span className="text-foreground text-xs">{CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}</span>
+              ) : (
+                <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allContentTypes.map(t => (
+                      <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Publicação</span>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
-                    <CalIcon size={12} className="text-muted-foreground" />
-                    {selectedContent.publish_date
-                      ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
-                      : 'Selecionar data'}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
-                    onSelect={handleDateChange}
-                    locale={ptBR}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              {isClient ? (
+                <span className="text-foreground text-xs flex items-center gap-2">
+                  <CalIcon size={12} className="text-muted-foreground" />
+                  {selectedContent.publish_date
+                    ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                    : 'Não definida'}
+                </span>
+              ) : (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
+                      <CalIcon size={12} className="text-muted-foreground" />
+                      {selectedContent.publish_date
+                        ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                        : 'Selecionar data'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
+                      onSelect={handleDateChange}
+                      locale={ptBR}
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
-              <div className="relative flex-1">
-                <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="time"
-                  value={editPublishTime}
-                  onChange={e => handleTimeChange(e.target.value)}
-                  className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
-                />
-              </div>
+              {isClient ? (
+                <span className="text-foreground text-xs flex items-center gap-2">
+                  <Clock size={12} className="text-muted-foreground" />
+                  {editPublishTime || 'Não definido'}
+                </span>
+              ) : (
+                <div className="relative flex-1">
+                  <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="time"
+                    value={editPublishTime}
+                    onChange={e => handleTimeChange(e.target.value)}
+                    className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
