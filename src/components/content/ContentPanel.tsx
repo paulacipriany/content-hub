@@ -241,7 +241,7 @@ const ContentPanel = () => {
               placeholder="Título do conteúdo"
             />
           )}
-          {!isClient && (
+          {!isClient && !isIdeaBank && (
             <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
               {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
             </span>
