@@ -496,33 +496,34 @@ const ContentPanel = () => {
           )}
         </div>
 
-        {/* Right column — Preview & Comments */}
-        <div className="w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card">
-          {/* Preview */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
-            <div className="flex gap-1.5 justify-center">
-              {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setPreviewPlatform(p)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                    previewPlatform === p
-                      ? "text-primary-foreground"
-                      : "bg-secondary text-muted-foreground hover:bg-accent"
-                  )}
-                  style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
-                >
-                  {PLATFORM_LABELS[p]}
-                </button>
-              ))}
+        {/* Right column — Preview & Comments (hidden for client, who sees preview inline) */}
+        <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
+          {!isClient && (
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
+              <div className="flex gap-1.5 justify-center">
+                {(['instagram', 'facebook', 'linkedin'] as Platform[]).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                      previewPlatform === p
+                        ? "text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:bg-accent"
+                    )}
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                  >
+                    {PLATFORM_LABELS[p]}
+                  </button>
+                ))}
+              </div>
+              <PostPreview content={selectedContent} platform={previewPlatform} />
             </div>
-            <PostPreview content={selectedContent} platform={previewPlatform} />
-          </div>
+          )}
 
           {/* Comments */}
-          <div className="border-t border-border p-5 max-h-[40%] flex flex-col">
+          <div className={cn("border-t border-border p-5 flex flex-col", isClient ? "flex-1" : "max-h-[40%]")}>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
             <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
               {comments.map(c => (
