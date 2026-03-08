@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 interface CreateContentDialogProps {
   trigger?: React.ReactNode;
   defaultProjectId?: string;
+  defaultStatus?: string;
 }
 
 const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogProps) => {
