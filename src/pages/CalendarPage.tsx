@@ -231,7 +231,7 @@ const CalendarPage = () => {
   const getMonthWeeks = () => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    let startDay = firstDay.getDay() - 1;
+    let startDay = firstDay.getDay();
     if (startDay < 0) startDay = 6;
     const daysInMonth = lastDay.getDate();
     const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
