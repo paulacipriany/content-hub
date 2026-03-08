@@ -89,6 +89,7 @@ export type Database = {
           content_id: string
           created_at: string
           id: string
+          image_url: string | null
           text: string
           user_id: string
         }
@@ -96,6 +97,7 @@ export type Database = {
           content_id: string
           created_at?: string
           id?: string
+          image_url?: string | null
           text: string
           user_id: string
         }
@@ -103,6 +105,7 @@ export type Database = {
           content_id?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           text?: string
           user_id?: string
         }

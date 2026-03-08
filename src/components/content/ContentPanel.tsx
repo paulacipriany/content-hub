@@ -41,6 +41,9 @@ const ContentPanel = () => {
   const { user, profile, role } = useAuth();
   const isClient = role === 'client';
   const [newComment, setNewComment] = useState('');
+  const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
+  const [commentUploading, setCommentUploading] = useState(false);
+  const commentFileRef = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
@@ -108,21 +111,45 @@ const ContentPanel = () => {
   const assigneeName = selectedContent.assignee_profile?.display_name ?? 'Sem responsável';
 
   const handleAddComment = async () => {
-    if (!newComment.trim() || !user) return;
-    await supabase.from('comments').insert({
+    if ((!newComment.trim() && !commentImageUrl) || !user) return;
+    const insertData: any = {
       content_id: selectedContent.id,
       user_id: user.id,
-      text: newComment.trim(),
-    });
+      text: newComment.trim() || '',
+    };
+    if (commentImageUrl) insertData.image_url = commentImageUrl;
+    await supabase.from('comments').insert(insertData);
     setComments(prev => [...prev, {
       id: crypto.randomUUID(),
       content_id: selectedContent.id,
       user_id: user.id,
-      text: newComment.trim(),
+      text: newComment.trim() || '',
+      image_url: commentImageUrl,
       created_at: new Date().toISOString(),
       profile: { display_name: profile?.display_name },
     }]);
     setNewComment('');
+    setCommentImageUrl(null);
+  };
+
+  const handleCommentImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedContent) return;
+    setCommentUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${selectedContent.id}/comments/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file);
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+        setCommentImageUrl(publicUrl);
+      }
+    } catch (err) {
+      console.error('Comment image upload error:', err);
+    } finally {
+      setCommentUploading(false);
+      if (commentFileRef.current) commentFileRef.current.value = '';
+    }
   };
 
   const toggleCheckItem = async (itemId: string, done: boolean) => {
@@ -593,13 +620,25 @@ const ContentPanel = () => {
                     <span className="text-xs font-medium text-foreground">{c.profile?.display_name ?? 'Usuário'}</span>
                     <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">{c.text}</p>
+                  {c.text && <p className="text-xs text-muted-foreground">{c.text}</p>}
+                  {c.image_url && (
+                    <img src={c.image_url} alt="Anexo" className="mt-2 rounded-md max-h-40 object-cover cursor-pointer" onClick={() => window.open(c.image_url, '_blank')} />
+                  )}
                 </div>
               ))}
               {comments.length === 0 && (
                 <p className="text-xs text-muted-foreground italic">Nenhum comentário ainda.</p>
               )}
             </div>
+            {commentImageUrl && (
+              <div className="relative mb-2 inline-block">
+                <img src={commentImageUrl} alt="Preview" className="h-16 rounded-md object-cover" />
+                <button
+                  onClick={() => setCommentImageUrl(null)}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]"
+                >✕</button>
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 value={newComment}
@@ -608,6 +647,15 @@ const ContentPanel = () => {
                 placeholder="Adicionar comentário..."
                 className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
               />
+              <button
+                onClick={() => commentFileRef.current?.click()}
+                disabled={commentUploading}
+                className="w-8 h-8 rounded-md flex items-center justify-center bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                title="Anexar imagem"
+              >
+                {commentUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+              </button>
+              <input ref={commentFileRef} type="file" accept="image/*" onChange={handleCommentImageUpload} className="hidden" />
               <button
                 onClick={handleAddComment}
                 className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
