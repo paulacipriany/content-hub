@@ -16,6 +16,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const allStatuses: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'];
 const allPlatforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
@@ -68,6 +78,21 @@ const ContentPanel = () => {
   const briefingFileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(true);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const savedSnapshotRef = useRef<string>('');
+
+  // Helper to get current draft fingerprint
+  const getDraftFingerprint = useCallback(() => {
+    return JSON.stringify({ editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing });
+  }, [editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing]);
+
+  // Mark dirty when fields change
+  useEffect(() => {
+    if (savedSnapshotRef.current && getDraftFingerprint() !== savedSnapshotRef.current) {
+      setDraftSaved(false);
+    }
+  }, [getDraftFingerprint]);
 
   // Sync local state when selected content changes
   useEffect(() => {
@@ -90,6 +115,19 @@ const ContentPanel = () => {
     }
     const bImages = (selectedContent as any).briefing_images;
     setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
+    setDraftSaved(true);
+    // Set snapshot after a tick so state is updated
+    setTimeout(() => {
+      savedSnapshotRef.current = JSON.stringify({
+        editTitle: selectedContent.title,
+        editCopyText: (selectedContent as any).copy_text ?? '',
+        editCopyTexts: (texts && typeof texts === 'object' ? texts : {}),
+        editPublishTime: (selectedContent as any).publish_time ?? '',
+        mediaUrls: urls && Array.isArray(urls) && urls.length > 0 ? urls : selectedContent.media_url ? [selectedContent.media_url] : [],
+        briefingImages: bImages && Array.isArray(bImages) ? bImages : [],
+        editBriefing: selectedContent.description ?? '',
+      });
+    }, 0);
   }, [selectedContent?.id]);
 
   // Auto-save title
@@ -259,13 +297,46 @@ const ContentPanel = () => {
     await updateContentFields(selectedContent.id, { briefing_images: updated });
   };
 
+  const handleSaveDraft = async () => {
+    await updateContentFields(selectedContent.id, {
+      title: editTitle,
+      copy_text: editCopyText,
+      copy_texts: editCopyTexts,
+      publish_time: editPublishTime || null,
+      media_url: mediaUrls[0] ?? null,
+      media_urls: mediaUrls,
+      briefing_images: briefingImages,
+    });
+    savedSnapshotRef.current = getDraftFingerprint();
+    setDraftSaved(true);
+  };
+
+  const handleClose = () => {
+    if (!draftSaved && !isClient) {
+      setShowUnsavedDialog(true);
+    } else {
+      setSelectedContent(null);
+    }
+  };
+
+  const handleSaveAndClose = async () => {
+    await handleSaveDraft();
+    setShowUnsavedDialog(false);
+    setSelectedContent(null);
+  };
+
+  const handleDiscardAndClose = () => {
+    setShowUnsavedDialog(false);
+    setSelectedContent(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-6 h-14 border-b border-border bg-card flex-shrink-0">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
-            onClick={() => setSelectedContent(null)}
+            onClick={handleClose}
             className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <X size={18} />
@@ -332,19 +403,14 @@ const ContentPanel = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  updateContentFields(selectedContent.id, {
-                    title: editTitle,
-                    copy_text: editCopyText,
-                    copy_texts: editCopyTexts,
-                    publish_time: editPublishTime || null,
-                    media_url: mediaUrls[0] ?? null,
-                    media_urls: mediaUrls,
-                    briefing_images: briefingImages,
-                  });
-                }}
+                disabled={draftSaved}
+                onClick={handleSaveDraft}
               >
-                Salvar rascunho
+                {draftSaved ? (
+                  <><Check size={14} className="mr-1" /> Salvo</>
+                ) : (
+                  'Salvar rascunho'
+                )}
               </Button>
               {isIdeaBank ? (
                 <Button
@@ -868,6 +934,21 @@ const ContentPanel = () => {
           />
         </div>
       )}
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você tem alterações que não foram salvas. Deseja salvar antes de sair?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDiscardAndClose}>Sair sem salvar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveAndClose}>Salvar e sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
