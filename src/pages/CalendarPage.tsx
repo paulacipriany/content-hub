@@ -43,6 +43,7 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
     id: content.id,
     data: { type: 'content', content },
   });
+  const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
   return (
     <div
       ref={setNodeRef} {...listeners} {...attributes}
@@ -53,27 +54,23 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
         isDragging && "opacity-30"
       )}
     >
-      {/* Title row with platform icon */}
-      <div className="flex items-center gap-1.5 mb-1.5">
-        {platformIcon(content.platform, 12)}
-        <span className="text-[12px] font-semibold text-foreground truncate">{content.title}</span>
+      {/* Platform icons */}
+      <div className="flex items-center gap-1 mb-1">
+        {platforms.map((p, i) => (
+          <span key={i}>{platformIcon([p] as any, 13)}</span>
+        ))}
       </div>
-      {/* Status */}
-      <div className="flex items-center gap-1.5 mb-1.5">
+      {/* Title */}
+      <p className="text-[12px] font-semibold text-foreground truncate mb-1.5">{content.title}</p>
+      {/* Status label */}
+      <div className="flex items-center gap-1.5 mb-1">
         <span className={cn("w-2 h-2 rounded-full flex-shrink-0", STATUS_COLORS[content.status as WorkflowStatus])} />
         <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
       </div>
-      {/* Tags: publish_date + content_type */}
-      <div className="flex flex-wrap gap-1">
-        {content.publish_date && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
-            {format(new Date(content.publish_date + 'T12:00:00'), "d MMM", { locale: ptBR })}
-          </span>
-        )}
-        <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
-          {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
-        </span>
-      </div>
+      {/* Content type tag */}
+      <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-medium">
+        {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+      </span>
     </div>
   );
 };
