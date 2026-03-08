@@ -6,11 +6,14 @@ import { ContentWithRelations, DbProject, WorkflowStatus } from '@/data/types';
 interface AppContextType {
   contents: ContentWithRelations[];
   projects: DbProject[];
+  selectedProject: DbProject | null;
+  setSelectedProject: (project: DbProject | null) => void;
+  projectContents: ContentWithRelations[];
   selectedContent: ContentWithRelations | null;
   setSelectedContent: (content: ContentWithRelations | null) => void;
   updateContentStatus: (id: string, status: WorkflowStatus) => Promise<void>;
   updateContentDate: (id: string, date: string | null) => Promise<void>;
-  updateContentFields: (id: string, fields: Partial<Pick<ContentWithRelations, 'title' | 'description' | 'platform' | 'content_type' | 'publish_date' | 'hashtags'>>) => Promise<void>;
+  updateContentFields: (id: string, fields: Partial<Pick<ContentWithRelations, 'title' | 'description' | 'platform' | 'content_type' | 'publish_date' | 'hashtags' | 'media_url'>>) => Promise<void>;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   loading: boolean;
@@ -23,9 +26,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { user } = useAuth();
   const [contents, setContents] = useState<ContentWithRelations[]>([]);
   const [projects, setProjects] = useState<DbProject[]>([]);
+  const [selectedProject, setSelectedProject] = useState<DbProject | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const projectContents = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id)
+    : contents;
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -39,7 +47,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const projectsList = (projectsRes.data ?? []) as DbProject[];
     const contentsList = (contentsRes.data ?? []) as ContentWithRelations[];
 
-    // Fetch profiles for assignees and creators
     const userIds = new Set<string>();
     contentsList.forEach(c => {
       if (c.assignee_id) userIds.add(c.assignee_id);
@@ -63,6 +70,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setProjects(projectsList);
     setContents(contentsList);
+
+    // Keep selectedProject in sync
+    if (selectedProject) {
+      const updated = projectsList.find(p => p.id === selectedProject.id);
+      if (updated) setSelectedProject(updated);
+      else setSelectedProject(null);
+    }
+
     setLoading(false);
   }, [user]);
 
@@ -75,8 +90,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!content || !user) return;
 
     await supabase.from('contents').update({ status }).eq('id', id);
-
-    // Record status change
     await supabase.from('status_history').insert({
       content_id: id,
       from_status: content.status,
@@ -84,7 +97,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       changed_by: user.id,
     });
 
-    // Update local state
     setContents(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     if (selectedContent?.id === id) {
       setSelectedContent(prev => prev ? { ...prev, status } : null);
@@ -111,8 +123,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      contents, projects, selectedContent, setSelectedContent,
-      updateContentStatus, updateContentDate, updateContentFields, sidebarCollapsed, setSidebarCollapsed,
+      contents, projects, selectedProject, setSelectedProject, projectContents,
+      selectedContent, setSelectedContent,
+      updateContentStatus, updateContentDate, updateContentFields,
+      sidebarCollapsed, setSidebarCollapsed,
       loading, refetch: fetchData,
     }}>
       {children}

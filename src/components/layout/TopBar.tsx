@@ -1,4 +1,4 @@
-import { Search, Bell, MessageSquare, ArrowRightLeft, CheckCheck } from 'lucide-react';
+import { Search, Bell, ArrowRightLeft, MessageSquare, CheckCheck, ChevronDown } from 'lucide-react';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -6,6 +6,7 @@ import { useNotifications } from '@/components/layout/AppLayout';
 import { useApp } from '@/contexts/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 interface TopBarProps {
   title?: string;
@@ -14,18 +15,65 @@ interface TopBarProps {
 
 const TopBar = ({ title, subtitle }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const { contents, setSelectedContent } = useApp();
+  const { contents, setSelectedContent, projects, selectedProject, setSelectedProject } = useApp();
+  const navigate = useNavigate();
 
   const handleNotificationClick = (contentId: string) => {
     const content = contents.find(c => c.id === contentId);
     if (content) setSelectedContent(content);
   };
 
+  const handleSelectClient = (project: typeof projects[number]) => {
+    setSelectedProject(project);
+    navigate(`/clients/${project.id}/contents`);
+  };
+
   return (
     <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0">
-      <div>
-        {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      <div className="flex items-center gap-4">
+        {/* Client selector */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-2 h-9 px-3 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm font-medium text-foreground">
+              {selectedProject ? (
+                <>
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
+                  <span className="max-w-[140px] truncate">{selectedProject.name}</span>
+                </>
+              ) : (
+                <span className="text-muted-foreground">Selecionar cliente</span>
+              )}
+              <ChevronDown size={14} className="text-muted-foreground" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-1" align="start">
+            {projects.map(p => (
+              <button
+                key={p.id}
+                onClick={() => handleSelectClient(p)}
+                className={cn(
+                  "flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm transition-colors",
+                  selectedProject?.id === p.id
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground hover:bg-secondary"
+                )}
+              >
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                <span className="truncate">{p.name}</span>
+              </button>
+            ))}
+            {projects.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-3">Nenhum cliente criado</p>
+            )}
+          </PopoverContent>
+        </Popover>
+
+        <div className="border-l border-border h-6" />
+
+        <div>
+          {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
+          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -105,7 +153,7 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
           </PopoverContent>
         </Popover>
 
-        <CreateContentDialog />
+        {selectedProject && <CreateContentDialog defaultProjectId={selectedProject.id} />}
       </div>
     </header>
   );
