@@ -84,6 +84,41 @@ export type Database = {
           },
         ]
       }
+      commemorative_dates: {
+        Row: {
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          project_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          project_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commemorative_dates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content_id: string
