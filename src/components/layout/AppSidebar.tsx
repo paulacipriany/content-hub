@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ const clientNavItems = [
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: BarChart3, label: 'Relatórios', path: '/reports' },
+  { icon: Users, label: 'Usuários', path: '/members' },
 ];
 
 const AppSidebar = () => {
@@ -26,6 +27,8 @@ const AppSidebar = () => {
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject } = useApp();
   const { profile, role, signOut } = useAuth();
+
+  const isClient = role === 'client';
 
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
@@ -66,7 +69,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {globalNavItems.map(item => {
+        {!isClient && globalNavItems.map(item => {
           const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
             <button
@@ -112,7 +115,13 @@ const AppSidebar = () => {
                 </div>
               );
             })()}
-            {clientNavItems.map(item => {
+            {clientNavItems
+              .filter(item => {
+                // Hide management items from client role
+                if (isClient && ['/members', '/reports'].includes(item.path)) return false;
+                return true;
+              })
+              .map(item => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
               return (
