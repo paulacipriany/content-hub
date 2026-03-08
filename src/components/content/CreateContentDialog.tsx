@@ -183,7 +183,23 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           {/* Platforms */}
           <div className="space-y-2">
             <Label>Plataformas *</Label>
-            <PlatformSelector selected={platforms} onChange={setPlatforms} size={40} />
+            <PlatformSelector
+              selected={platforms}
+              onChange={(newPlatforms) => {
+                const isBlogSelected = newPlatforms.includes('blog');
+                const wasBlog = platforms.includes('blog');
+                if (isBlogSelected && !wasBlog) {
+                  setPlatforms(['blog']);
+                  setContentType('post');
+                } else if (isBlogSelected && newPlatforms.length > 1) {
+                  setPlatforms(newPlatforms.filter(p => p !== 'blog'));
+                } else {
+                  setPlatforms(newPlatforms);
+                }
+              }}
+              size={40}
+              disabledPlatforms={platforms.includes('blog') ? (['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest', 'twitter', 'google_business'] as Platform[]) : undefined}
+            />
             {platforms.length === 0 && (
               <p className="text-[11px] text-muted-foreground">Selecione ao menos uma plataforma.</p>
             )}
@@ -192,7 +208,11 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           {/* Content Type — universal, always visible */}
           <div className="space-y-1.5">
             <Label>Tipo de conteúdo</Label>
-            <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
+            <Select
+              value={contentType}
+              onValueChange={v => setContentType(v as ContentType)}
+              disabled={platforms.includes('blog')}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
