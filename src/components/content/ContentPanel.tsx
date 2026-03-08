@@ -308,7 +308,7 @@ const ContentPanel = () => {
               {isIdeaBank ? (
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                   onClick={() => {
                     updateContentStatus(selectedContent.id, 'idea');
                     setSelectedContent(null);
