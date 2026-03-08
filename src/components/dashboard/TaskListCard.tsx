@@ -287,7 +287,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         ) : tasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma tarefa ainda.</p>
         ) : (
-          tasks.map(t => (
+          tasks.filter(t => !(hideDone && t.done)).map(t => (
             <div
               key={t.id}
               className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-secondary/50 transition-colors group"
