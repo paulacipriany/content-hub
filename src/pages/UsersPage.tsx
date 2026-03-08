@@ -41,6 +41,8 @@ const UsersPage = () => {
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
   const [editRole, setEditRole] = useState<string>('social_media');
   const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -106,8 +108,9 @@ const UsersPage = () => {
   const openEdit = async (u: UserRow) => {
     setEditUser(u);
     setEditName(u.display_name ?? '');
+    setEditEmail('');
+    setEditPassword('');
     setEditRole(u.role);
-    // Load current project memberships
     const { data } = await supabase.from('project_members').select('project_id').eq('user_id', u.user_id);
     setEditProjectIds(data?.map(r => r.project_id) ?? []);
   };
@@ -123,15 +126,24 @@ const UsersPage = () => {
         : Promise.resolve({ error: null }),
     ]);
 
-    // Sync project_members for client role
-    if (editRole === 'client') {
-      // Remove all existing memberships, then re-insert selected
-      await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
-      if (editProjectIds.length > 0) {
-        await supabase.from('project_members').insert(
-          editProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
-        );
+    // Update email/password via edge function if changed
+    if (editEmail || editPassword) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (token) {
+        await supabase.functions.invoke('admin-update-user', {
+          body: { user_id: editUser.user_id, email: editEmail || undefined, password: editPassword || undefined },
+        });
       }
+    }
+
+    // Sync project_members: auto-select all for admin
+    const finalProjectIds = editRole === 'admin' ? projects.map(p => p.id) : editProjectIds;
+    await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
+    if (finalProjectIds.length > 0) {
+      await supabase.from('project_members').insert(
+        finalProjectIds.map(pid => ({ project_id: pid, user_id: editUser.user_id }))
+      );
     }
 
     if (profileRes.error || roleRes.error) {
@@ -251,8 +263,19 @@ const UsersPage = () => {
               <Input id="edit-name" value={editName} onChange={e => setEditName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="edit-email">E-mail</Label>
+              <Input id="edit-email" type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Deixe vazio para manter o atual" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-password">Nova senha</Label>
+              <Input id="edit-password" type="password" value={editPassword} onChange={e => setEditPassword(e.target.value)} placeholder="Deixe vazio para manter a atual" />
+            </div>
+            <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={editRole} onValueChange={setEditRole}>
+              <Select value={editRole} onValueChange={(val) => {
+                setEditRole(val);
+                if (val === 'admin') setEditProjectIds(projects.map(p => p.id));
+              }}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -264,9 +287,11 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            {editRole === 'client' && (
-              <div className="space-y-1.5">
-                <Label>Clientes vinculados</Label>
+            <div className="space-y-1.5">
+              <Label>Clientes vinculados</Label>
+              {editRole === 'admin' ? (
+                <p className="text-xs text-muted-foreground">Admins têm acesso a todos os clientes automaticamente.</p>
+              ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
                   {projects.map(p => (
                     <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -283,8 +308,8 @@ const UsersPage = () => {
                   ))}
                   {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>Cancelar</Button>
@@ -316,7 +341,10 @@ const UsersPage = () => {
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={addRole} onValueChange={setAddRole}>
+              <Select value={addRole} onValueChange={(val) => {
+                setAddRole(val);
+                if (val === 'admin') setAddProjectIds(projects.map(p => p.id));
+              }}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -328,9 +356,11 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            {addRole === 'client' && (
-              <div className="space-y-1.5">
-                <Label>Clientes vinculados</Label>
+            <div className="space-y-1.5">
+              <Label>Clientes vinculados</Label>
+              {addRole === 'admin' ? (
+                <p className="text-xs text-muted-foreground">Admins têm acesso a todos os clientes automaticamente.</p>
+              ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
                   {projects.map(p => (
                     <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -347,8 +377,8 @@ const UsersPage = () => {
                   ))}
                   {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
