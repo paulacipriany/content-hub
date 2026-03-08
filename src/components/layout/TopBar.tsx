@@ -12,9 +12,10 @@ import { useNavigate } from 'react-router-dom';
 interface TopBarProps {
   title?: string;
   subtitle?: string;
+  actions?: React.ReactNode;
 }
 
-const TopBar = ({ title, subtitle }: TopBarProps) => {
+const TopBar = ({ title, subtitle, actions }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject } = useApp();
   const { role } = useAuth();
