@@ -16,6 +16,7 @@ const SchedulingPage = () => {
   const { projectContents } = useApp();
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
+  const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
 
   const scheduled = projectContents
     .filter(c => c.status === 'scheduled')
