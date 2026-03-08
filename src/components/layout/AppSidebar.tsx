@@ -137,7 +137,7 @@ const AppSidebar = () => {
                   key={item.path}
                   onClick={() => navigate(fullPath)}
                   className={cn(
-                    "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm transition-colors",
+                    "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
                     isActive
                       ? "bg-sidebar-hover text-sidebar-fg-active"
                       : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
