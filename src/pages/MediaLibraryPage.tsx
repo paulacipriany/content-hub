@@ -9,8 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 
 const MediaLibraryPage = () => {
   useClientFromUrl();
-  const { projectContents, selectedProject } = useApp();
+  const { projectContents, selectedProject, updateContentFields } = useApp();
+  const { role } = useAuth();
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
+  const canDelete = role === 'admin' || role === 'moderator';
 
   // Collect all media URLs from project contents with metadata
   const mediaItems = useMemo(() => {
