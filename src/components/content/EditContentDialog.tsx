@@ -181,8 +181,6 @@ const EditContentDialog = ({ content, open, onOpenChange }: EditContentDialogPro
             <div className="space-y-1.5">
               <Label>Briefing</Label>
               <p className="text-sm text-foreground whitespace-pre-wrap">{content.description}</p>
-                {content.description}
-              </div>
             </div>
           )}
 

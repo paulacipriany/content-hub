@@ -311,8 +311,6 @@ const ContentPanel = () => {
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
               <p className="text-sm text-foreground whitespace-pre-wrap">{selectedContent.description}</p>
-                {selectedContent.description}
-              </div>
             </div>
           )}
 
