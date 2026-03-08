@@ -35,6 +35,21 @@ const AppSidebar = () => {
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Load saved theme from profile
+  useEffect(() => {
+    if (profile?.theme) {
+      setTheme(profile.theme);
+    }
+  }, [profile?.theme]);
+
+  const handleThemeChange = async (dark: boolean) => {
+    const newTheme = dark ? 'dark' : 'light';
+    setTheme(newTheme);
+    if (profile) {
+      await supabase.from('profiles').update({ theme: newTheme } as any).eq('id', profile.id);
+    }
+  };
+
   const isClient = role === 'client';
 
   // Count posts pending approval for selected project
