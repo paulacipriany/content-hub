@@ -190,6 +190,28 @@ const AnalysisRow = ({
               className="text-sm min-h-[80px]"
             />
           </div>
+          <div className="mb-3">
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">
+              Resultado
+            </label>
+            <div className="flex gap-2">
+              {resultOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setResult(result === opt.value ? null : opt.value)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                    result === opt.value
+                      ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
+                      : "border-border text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Button size="sm" onClick={handleSave} disabled={saving}>
             {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
           </Button>
