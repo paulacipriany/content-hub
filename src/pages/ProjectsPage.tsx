@@ -249,10 +249,6 @@ const ProjectsPage = () => {
                           style={{ backgroundColor: c, borderColor: editColor === c ? 'var(--foreground)' : 'transparent' }}
                         />
                       ))}
-                      <label className="relative w-5 h-5 rounded-full border-2 border-dashed border-border cursor-pointer overflow-hidden hover:border-primary/40 transition-colors" title="Escolher cor">
-                        <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
-                        <span className="w-full h-full block rounded-full" style={{ backgroundColor: editColor }} />
-                      </label>
                       <div className="flex items-center gap-1.5 ml-1">
                         <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: editColor }} />
                         <input
