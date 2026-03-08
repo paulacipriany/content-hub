@@ -20,16 +20,6 @@ import { useState } from 'react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'];
 
-const columnColors: Record<WorkflowStatus, string> = {
-  'idea': 'border-t-status-idea',
-  'production': 'border-t-status-production',
-  'review': 'border-t-status-review',
-  'approval-internal': 'border-t-status-approval',
-  'approval-client': 'border-t-status-approval',
-  'scheduled': 'border-t-status-scheduled',
-  'published': 'border-t-status-published',
-};
-
 const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: content.id,
@@ -55,10 +45,14 @@ const DroppableColumn = ({ status, children }: { status: WorkflowStatus; childre
     <div
       ref={setNodeRef}
       className={cn(
-        "w-72 bg-secondary/50 rounded-xl border-t-2 flex flex-col transition-colors",
-        columnColors[status],
-        isOver && "bg-primary/10 ring-2 ring-primary/30"
+        "w-72 rounded-xl border-t-2 flex flex-col transition-colors",
+        isOver && "ring-2 ring-inset"
       )}
+      style={{
+        backgroundColor: isOver ? 'var(--client-50, hsl(var(--secondary) / 0.5))' : 'hsl(var(--secondary) / 0.5)',
+        borderTopColor: 'var(--client-500, hsl(var(--primary)))',
+        ...(isOver ? { ringColor: 'var(--client-300)' } : {}),
+      }}
     >
       {children}
     </div>
@@ -106,7 +100,12 @@ const WorkflowPage = () => {
                 <DroppableColumn key={status} status={status}>
                   <div className="px-4 py-3 flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">{STATUS_LABELS[status]}</span>
-                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">{items.length}</span>
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--muted-foreground)))' }}
+                    >
+                      {items.length}
+                    </span>
                   </div>
                   <div className="px-3 pb-3 space-y-2.5 flex-1 min-h-[100px]">
                     {items.map(item => (

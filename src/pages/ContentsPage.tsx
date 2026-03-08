@@ -28,7 +28,8 @@ const ContentsPage = () => {
           <select
             value={filterPlatform}
             onChange={e => setFilterPlatform(e.target.value as Platform | 'all')}
-            className="h-8 px-3 rounded-md bg-secondary text-sm text-foreground border-none outline-none cursor-pointer"
+            className="h-8 px-3 rounded-md text-sm text-foreground border-none outline-none cursor-pointer"
+            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
           >
             <option value="all">Todas plataformas</option>
             {Object.entries(PLATFORM_LABELS).map(([k, v]) => (
@@ -38,14 +39,15 @@ const ContentsPage = () => {
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value as WorkflowStatus | 'all')}
-            className="h-8 px-3 rounded-md bg-secondary text-sm text-foreground border-none outline-none cursor-pointer"
+            className="h-8 px-3 rounded-md text-sm text-foreground border-none outline-none cursor-pointer"
+            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
           >
             <option value="all">Todos os status</option>
             {Object.entries(STATUS_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
-          <span className="text-xs text-muted-foreground ml-auto">{filtered.length} conteúdos</span>
+          <span className="text-xs ml-auto" style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }}>{filtered.length} conteúdos</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
