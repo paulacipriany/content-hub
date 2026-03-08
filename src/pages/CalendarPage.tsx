@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import PostPreview from '@/components/content/PostPreview';
+import { getCommemorativeDatesForDay, COMMEMORATIVE_DATES } from '@/data/commemorativeDates';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -242,6 +247,14 @@ const CalendarPage = () => {
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showDates, setShowDates] = useState(true);
+  const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
+  const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
+  const [newDateTitle, setNewDateTitle] = useState('');
+  const [newDateValue, setNewDateValue] = useState<Date | undefined>(undefined);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importMonth, setImportMonth] = useState(new Date().getMonth());
+  const { toast } = useToast();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -257,6 +270,70 @@ const CalendarPage = () => {
     };
     fetchTasks();
   }, [selectedProject, user]);
+
+  // Fetch custom commemorative dates
+  useEffect(() => {
+    if (!selectedProject || !user) { setCustomDates([]); return; }
+    supabase
+      .from('commemorative_dates')
+      .select('id, date, title')
+      .eq('project_id', selectedProject.id)
+      .then(({ data }) => setCustomDates((data ?? []).map(d => ({ id: d.id, date: d.date, title: d.title }))));
+  }, [selectedProject, user]);
+
+  const addCommemorativeDate = async () => {
+    if (!newDateTitle.trim() || !newDateValue || !user || !selectedProject) return;
+    const dateStr = format(newDateValue, 'yyyy-MM-dd');
+    const { data } = await supabase
+      .from('commemorative_dates')
+      .insert({ project_id: selectedProject.id, title: newDateTitle.trim(), date: dateStr, created_by: user.id } as any)
+      .select('id, date, title')
+      .single();
+    if (data) setCustomDates(prev => [...prev, { id: data.id, date: data.date, title: data.title }]);
+    setNewDateTitle('');
+    setNewDateValue(undefined);
+    setAddDateDialogOpen(false);
+    toast({ title: 'Data comemorativa adicionada!' });
+  };
+
+  const removeCommemorativeDate = async (id: string) => {
+    await supabase.from('commemorative_dates').delete().eq('id', id);
+    setCustomDates(prev => prev.filter(d => d.id !== id));
+  };
+
+  const importCommemorativeDates = async (month: number) => {
+    if (!user || !selectedProject) return;
+    const mm = String(month + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+    const datesToImport = COMMEMORATIVE_DATES.filter(d => d.date.startsWith(mm));
+    const existing = new Set(customDates.map(d => `${d.date}|${d.title}`));
+    const newDates = datesToImport.filter(d => {
+      const fullDate = `${year}-${d.date}`;
+      return !existing.has(`${fullDate}|${d.title}`);
+    });
+    if (newDates.length === 0) {
+      toast({ title: 'Todas as datas deste mês já foram importadas.' });
+      return;
+    }
+    const inserts = newDates.map(d => ({
+      project_id: selectedProject.id,
+      title: d.title,
+      date: `${year}-${d.date}`,
+      created_by: user.id,
+    }));
+    const { data } = await supabase.from('commemorative_dates').insert(inserts as any).select('id, date, title');
+    if (data) setCustomDates(prev => [...prev, ...data.map(d => ({ id: d.id, date: d.date, title: d.title }))]);
+    setImportDialogOpen(false);
+    toast({ title: `${data?.length ?? 0} datas importadas!` });
+  };
+
+  const getCommemorativesForDate = (dateStr: string) => {
+    const preset = getCommemorativeDatesForDay(dateStr);
+    const custom = customDates.filter(d => d.date === dateStr).map(d => d.title);
+    // Merge unique
+    const all = [...new Set([...preset, ...custom])];
+    return all;
+  };
 
   const toggleTask = async (id: string, done: boolean) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done } : t));
@@ -369,8 +446,22 @@ const CalendarPage = () => {
   const renderDayItems = (dateStr: string) => {
     const dayContents = showContents ? getContentsForDate(dateStr) : [];
     const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
+    const commemoratives = showDates ? getCommemorativesForDate(dateStr) : [];
     return (
       <>
+        {commemoratives.length > 0 && (
+          <div className="space-y-0.5 mb-1">
+            {commemoratives.slice(0, viewMode === 'week' ? 5 : 2).map((title, i) => (
+              <div key={i} className="flex items-center gap-1 px-1.5 py-[1px] rounded-[4px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+                <Star size={8} className="flex-shrink-0" />
+                <span className="truncate">{title}</span>
+              </div>
+            ))}
+            {commemoratives.length > (viewMode === 'week' ? 5 : 2) && (
+              <span className="text-[9px] text-amber-600/60 pl-1">+{commemoratives.length - (viewMode === 'week' ? 5 : 2)} mais</span>
+            )}
+          </div>
+        )}
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
           <DraggableContent key={c.id} content={c} onClick={() => isClient ? setPreviewContent(c) : setSelectedContent(c)} />
         ))}
@@ -490,6 +581,35 @@ const CalendarPage = () => {
                   Tarefas
                   {showTasks ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
                 </button>
+                <button
+                  onClick={() => setShowDates(prev => !prev)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                    showDates
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                      : "text-muted-foreground border-border hover:bg-muted"
+                  )}
+                >
+                  <Star size={11} />
+                  Datas
+                  {showDates ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
+                </button>
+                {!isClient && (
+                  <>
+                    <button
+                      onClick={() => setAddDateDialogOpen(true)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-muted-foreground border border-dashed border-border hover:bg-muted transition-colors"
+                    >
+                      <Plus size={10} /> Data
+                    </button>
+                    <button
+                      onClick={() => setImportDialogOpen(true)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-muted-foreground border border-dashed border-border hover:bg-muted transition-colors"
+                    >
+                      <PartyPopper size={10} /> Importar
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* View mode toggle */}
@@ -699,6 +819,95 @@ const CalendarPage = () => {
           })()}
         </SheetContent>
       </Sheet>
+
+      {/* Add commemorative date dialog */}
+      <Dialog open={addDateDialogOpen} onOpenChange={setAddDateDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar Data Comemorativa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Nome da data *</label>
+              <Input
+                value={newDateTitle}
+                onChange={e => setNewDateTitle(e.target.value)}
+                placeholder="Ex: Dia do Cliente"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Data *</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newDateValue && "text-muted-foreground")}>
+                    <CalIcon className="mr-2 h-4 w-4" />
+                    {newDateValue ? format(newDateValue, 'dd MMM yyyy', { locale: ptBR }) : 'Selecionar data'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newDateValue}
+                    onSelect={setNewDateValue}
+                    locale={ptBR}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddDateDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={addCommemorativeDate} disabled={!newDateTitle.trim() || !newDateValue}>Adicionar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import commemorative dates dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Importar Datas Comemorativas</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-3">
+            Selecione um mês para importar as datas comemorativas mais relevantes para o seu calendário.
+            <br />
+            <span className="text-[11px]">Fonte: datascomemorativas.me</span>
+          </p>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((m, i) => (
+              <button
+                key={i}
+                onClick={() => setImportMonth(i)}
+                className={cn(
+                  "px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+                  importMonth === i
+                    ? "bg-primary/10 text-primary border-primary/20"
+                    : "text-muted-foreground border-border hover:bg-muted"
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+          {/* Preview dates for selected month */}
+          <div className="space-y-1 max-h-60 overflow-y-auto border border-border/50 rounded-lg p-3">
+            {COMMEMORATIVE_DATES.filter(d => d.date.startsWith(String(importMonth + 1).padStart(2, '0'))).map((d, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm py-1">
+                <Star size={10} className="text-amber-500 flex-shrink-0" />
+                <span className="text-muted-foreground text-xs w-10 flex-shrink-0">{d.date.slice(3)}/{d.date.slice(0, 2)}</span>
+                <span className="text-foreground truncate">{d.title}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2 pt-3">
+            <Button variant="outline" onClick={() => setImportDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={() => importCommemorativeDates(importMonth)}>
+              Importar mês
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
