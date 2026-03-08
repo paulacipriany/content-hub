@@ -33,7 +33,7 @@ const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing">
-      <ContentCard content={content} />
+      <ContentCard content={content} hideStatus />
     </div>
   );
 };
@@ -125,7 +125,7 @@ const WorkflowPage = () => {
           <DragOverlay>
             {activeContent ? (
               <div className="opacity-90 rotate-2 scale-105 shadow-xl">
-                <ContentCard content={activeContent} />
+                <ContentCard content={activeContent} hideStatus />
               </div>
             ) : null}
           </DragOverlay>

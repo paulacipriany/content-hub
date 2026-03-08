@@ -6,9 +6,10 @@ import { platformIcon } from './PlatformIcons';
 interface ContentCardProps {
   content: ContentWithRelations;
   compact?: boolean;
+  hideStatus?: boolean;
 }
 
-const ContentCard = ({ content, compact }: ContentCardProps) => {
+const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
   const { setSelectedContent } = useApp();
   const assigneeName = content.assignee_profile?.display_name ?? 'Sem responsável';
   const initials = assigneeName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -43,9 +44,11 @@ const ContentCard = ({ content, compact }: ContentCardProps) => {
           {platformIcon(content.platform)}
           <span className="text-xs font-medium text-muted-foreground">{CONTENT_TYPE_LABELS[content.content_type as ContentType]}</span>
         </div>
-        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[content.status as WorkflowStatus])}>
-          {STATUS_LABELS[content.status as WorkflowStatus]}
-        </span>
+        {!hideStatus && (
+          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[content.status as WorkflowStatus])}>
+            {STATUS_LABELS[content.status as WorkflowStatus]}
+          </span>
+        )}
       </div>
       <h3 className="text-sm font-medium text-foreground mb-1.5 transition-colors" style={{ '--hover-color': 'var(--client-500)' } as React.CSSProperties}>{content.title}</h3>
       <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{content.description}</p>
