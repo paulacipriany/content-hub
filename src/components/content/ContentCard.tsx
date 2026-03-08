@@ -59,7 +59,7 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: Conten
   return (
     <>
       <button
-        onClick={() => setSelectedContent(content)}
+        onClick={() => onClick ? onClick() : setSelectedContent(content)}
         className="w-full text-left p-3 rounded-lg bg-card border hover:shadow-md transition-all group relative"
         style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
       >
