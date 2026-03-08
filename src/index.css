@@ -102,12 +102,12 @@
     --input: 220 12% 22%;
     --ring: 220 100% 58%;
 
-    /* Sidebar — darker than bg for depth */
-    --sidebar-bg: 220 15% 5%;
-    --sidebar-fg: 220 5% 60%;
-    --sidebar-fg-active: 0 0% 100%;
-    --sidebar-hover: 220 12% 12%;
-    --sidebar-border: 220 12% 14%;
+    /* Sidebar — black */
+    --sidebar-bg: 0 0% 0%;
+    --sidebar-fg: 270 13% 85%;
+    --sidebar-fg-active: 270 13% 97%;
+    --sidebar-hover: 0 0% 8%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-accent: 220 100% 58%;
 
     /* Status colors — brighter for dark bg */
