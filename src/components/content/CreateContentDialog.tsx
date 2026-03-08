@@ -100,7 +100,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     let assigneeId: string | null = null;
     const { data: inserted, error } = await supabase.from('contents').insert({
       title: title.trim(),
-      description: briefing.trim(),
+      description: briefing,
       platform: platforms,
       content_type: contentType,
       project_id: projectId,
