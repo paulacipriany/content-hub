@@ -4,8 +4,10 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform } from '@/data/types';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
+import { Instagram, Facebook, Linkedin, Youtube, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import CreateContentDialog from '@/components/content/CreateContentDialog';
 
 const platformIcons: Partial<Record<Platform, React.ElementType>> = {
   instagram: Instagram,
