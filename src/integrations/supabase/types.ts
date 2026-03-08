@@ -121,6 +121,7 @@ export type Database = {
           assignee_id: string | null
           content_type: Database["public"]["Enums"]["content_type"]
           copy_text: string | null
+          copy_texts: Json | null
           created_at: string
           created_by: string
           description: string | null
@@ -140,6 +141,7 @@ export type Database = {
           assignee_id?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
           copy_text?: string | null
+          copy_texts?: Json | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -159,6 +161,7 @@ export type Database = {
           assignee_id?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
           copy_text?: string | null
+          copy_texts?: Json | null
           created_at?: string
           created_by?: string
           description?: string | null
