@@ -62,7 +62,10 @@ const ContentPanel = () => {
   const [editPublishTime, setEditPublishTime] = useState('');
   const [uploading, setUploading] = useState(false);
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [briefingImages, setBriefingImages] = useState<string[]>([]);
+  const [briefingUploading, setBriefingUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const briefingFileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
@@ -85,6 +88,8 @@ const ContentPanel = () => {
     } else {
       setMediaUrls([]);
     }
+    const bImages = (selectedContent as any).briefing_images;
+    setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
   }, [selectedContent?.id]);
 
   // Auto-save title
@@ -222,6 +227,38 @@ const ContentPanel = () => {
     });
   };
 
+  const handleBriefingImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !user || !selectedContent) return;
+    setBriefingUploading(true);
+    try {
+      const newUrls: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `${selectedContent.id}/briefing/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from('content-media').upload(path, file);
+        if (!error) {
+          const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+          newUrls.push(publicUrl);
+        }
+      }
+      const updated = [...briefingImages, ...newUrls];
+      setBriefingImages(updated);
+      await updateContentFields(selectedContent.id, { briefing_images: updated });
+    } catch (err) {
+      console.error('Briefing image upload error:', err);
+    } finally {
+      setBriefingUploading(false);
+      if (briefingFileInputRef.current) briefingFileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveBriefingImage = async (index: number) => {
+    const updated = briefingImages.filter((_, i) => i !== index);
+    setBriefingImages(updated);
+    await updateContentFields(selectedContent.id, { briefing_images: updated });
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
@@ -303,6 +340,7 @@ const ContentPanel = () => {
                     publish_time: editPublishTime || null,
                     media_url: mediaUrls[0] ?? null,
                     media_urls: mediaUrls,
+                    briefing_images: briefingImages,
                   });
                 }}
               >
@@ -445,61 +483,15 @@ const ContentPanel = () => {
 
           {/* Briefing — rich editor for idea-bank, read-only otherwise */}
           {isIdeaBank ? (
-            <>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
-                <RichTextEditor
-                  key={selectedContent.id}
-                  content={selectedContent.description ?? ''}
-                  onChange={setEditBriefing}
-                  contentId={selectedContent.id}
-                />
-              </div>
-
-              {/* Images for idea-bank */}
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <ImagePlus size={12} />Imagens de referência
-                </label>
-                {mediaUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {mediaUrls.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
-                        <button
-                          onClick={() => handleRemoveMedia(i)}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={10} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-                >
-                  {uploading ? (
-                    <Loader2 size={18} className="animate-spin text-primary" />
-                  ) : (
-                    <>
-                      <ImagePlus size={18} />
-                      <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
-                    </>
-                  )}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </div>
-            </>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
+              <RichTextEditor
+                key={selectedContent.id}
+                content={selectedContent.description ?? ''}
+                onChange={setEditBriefing}
+                contentId={selectedContent.id}
+              />
+            </div>
           ) : selectedContent.description ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
@@ -509,6 +501,52 @@ const ContentPanel = () => {
               />
             </div>
           ) : null}
+
+          {/* Briefing images — below briefing, for all modes */}
+          {!isClient && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <ImagePlus size={12} />Imagens do briefing
+              </label>
+              {briefingImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {briefingImages.map((url, i) => (
+                    <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                      <img src={url} alt={`Briefing ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
+                      <button
+                        onClick={() => handleRemoveBriefingImage(i)}
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => briefingFileInputRef.current?.click()}
+                disabled={briefingUploading}
+                className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+              >
+                {briefingUploading ? (
+                  <Loader2 size={18} className="animate-spin text-primary" />
+                ) : (
+                  <>
+                    <ImagePlus size={18} />
+                    <span className="text-xs">{briefingImages.length === 0 ? 'Anexar imagens ao briefing' : 'Adicionar mais imagens'}</span>
+                  </>
+                )}
+              </button>
+              <input
+                ref={briefingFileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleBriefingImageUpload}
+                className="hidden"
+              />
+            </div>
+          )}
 
           {/* Client view: show preview inline instead of copy/media */}
           {isIdeaBank ? null : isClient ? (
