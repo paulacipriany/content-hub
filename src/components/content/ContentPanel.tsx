@@ -690,7 +690,7 @@ const ContentPanel = () => {
                         ? "text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
-                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))' } : undefined}
+                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
                   >
                     {PLATFORM_LABELS[p]}
                   </button>
