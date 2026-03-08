@@ -30,6 +30,13 @@ const AppLayout = () => {
   const navigate = useNavigate();
   const notifs = useRealtimeNotifications();
 
+  // Close content panel on route change
+  useEffect(() => {
+    if (selectedContent) {
+      setSelectedContent(null);
+    }
+  }, [location.pathname]);
+
   // Redirect client-role users from home to their first project dashboard
   useEffect(() => {
     if (role === 'client' && location.pathname === '/' && !loading && projects.length > 0) {
