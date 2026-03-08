@@ -28,6 +28,8 @@ const AppSidebar = () => {
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject } = useApp();
   const { profile, role, signOut } = useAuth();
 
+  const isClient = role === 'client';
+
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Gestor',
