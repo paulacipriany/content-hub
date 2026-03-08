@@ -5,7 +5,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform } from '@/data/types';
 import {
   FileText, Calendar, GitBranch, CheckCircle, Image, BarChart3,
-  TrendingUp, Clock, ArrowRight,
+  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,7 @@ const ClientDashboardPage = () => {
   const total = projectContents.length;
   const published = projectContents.filter(c => c.status === 'published').length;
   const inApproval = projectContents.filter(c => c.status.startsWith('approval')).length;
+  const inReview = projectContents.filter(c => c.status === 'review').length;
   const inProduction = projectContents.filter(c => c.status === 'production').length;
   const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
 
@@ -67,6 +68,33 @@ const ClientDashboardPage = () => {
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
       <div className="p-6 space-y-6">
+        {/* Alert banners for review & approval */}
+        {inReview > 0 && (
+          <button
+            onClick={() => navigate(`${basePath}/review`)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
+            style={{ backgroundColor: '#fff3e0', borderColor: '#ffe0b2' }}
+          >
+            <AlertTriangle size={18} style={{ color: '#e65100' }} />
+            <span className="text-sm font-medium" style={{ color: '#e65100' }}>
+              {inReview} conteúdo{inReview > 1 ? 's' : ''} aguardando revisão
+            </span>
+            <ArrowRight size={14} className="ml-auto" style={{ color: '#e65100' }} />
+          </button>
+        )}
+        {inApproval > 0 && (
+          <button
+            onClick={() => navigate(`${basePath}/approvals`)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
+            style={{ backgroundColor: '#fce4ec', borderColor: '#f8bbd0' }}
+          >
+            <AlertTriangle size={18} style={{ color: '#c62828' }} />
+            <span className="text-sm font-medium" style={{ color: '#c62828' }}>
+              {inApproval} conteúdo{inApproval > 1 ? 's' : ''} aguardando aprovação
+            </span>
+            <ArrowRight size={14} className="ml-auto" style={{ color: '#c62828' }} />
+          </button>
+        )}
         {/* Stats — client palette accent */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(s => (
