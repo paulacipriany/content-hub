@@ -227,6 +227,38 @@ const ContentPanel = () => {
     });
   };
 
+  const handleBriefingImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !user || !selectedContent) return;
+    setBriefingUploading(true);
+    try {
+      const newUrls: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `${selectedContent.id}/briefing/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from('content-media').upload(path, file);
+        if (!error) {
+          const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+          newUrls.push(publicUrl);
+        }
+      }
+      const updated = [...briefingImages, ...newUrls];
+      setBriefingImages(updated);
+      await updateContentFields(selectedContent.id, { briefing_images: updated });
+    } catch (err) {
+      console.error('Briefing image upload error:', err);
+    } finally {
+      setBriefingUploading(false);
+      if (briefingFileInputRef.current) briefingFileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveBriefingImage = async (index: number) => {
+    const updated = briefingImages.filter((_, i) => i !== index);
+    setBriefingImages(updated);
+    await updateContentFields(selectedContent.id, { briefing_images: updated });
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
