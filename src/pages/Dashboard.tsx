@@ -17,7 +17,7 @@ const Dashboard = () => {
     { label: 'Em Produção', value: contents.filter(c => c.status === 'production').length, icon: TrendingUp, color: 'text-status-production' },
   ];
 
-  const pendingApprovals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+  const pendingApprovals = contents.filter(c => c.status === 'approval-client');
   const inProduction = contents.filter(c => c.status === 'production');
 
   const handleClientClick = (project: typeof projects[number]) => {
@@ -73,7 +73,7 @@ const Dashboard = () => {
                         <span className="text-xs text-muted-foreground">{pContents.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                        {(['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
                           const count = pContents.filter(c => c.status === s).length;
                           if (count === 0) return null;
                           return (

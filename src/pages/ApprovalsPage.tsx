@@ -10,7 +10,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 const ApprovalsPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentStatus } = useApp();
-  const approvals = projectContents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+  const approvals = projectContents.filter(c => c.status === 'approval-client');
 
   return (
     <>

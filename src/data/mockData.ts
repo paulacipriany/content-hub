@@ -1,6 +1,6 @@
 export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video';
-export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
+export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'published';
 export type UserRole = 'admin' | 'manager' | 'social-media' | 'client';
 
 export interface User {
@@ -46,7 +46,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea': 'Ideia',
   'production': 'Produção',
   'review': 'Revisão',
-  'approval-internal': 'Aprovação Interna',
+  
   'approval-client': 'Aprovação Cliente',
   'scheduled': 'Agendado',
   'published': 'Publicado',
@@ -56,7 +56,7 @@ export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   'idea': 'bg-status-idea',
   'production': 'bg-status-production',
   'review': 'bg-status-review',
-  'approval-internal': 'bg-status-approval',
+  
   'approval-client': 'bg-status-approval',
   'scheduled': 'bg-status-scheduled',
   'published': 'bg-status-published',
@@ -122,7 +122,7 @@ export const mockContents: ContentItem[] = [
     checklist: [{ id: 'ck17', text: 'Copy', done: true }, { id: 'ck18', text: 'Design', done: true }],
   },
   {
-    id: 'c8', title: 'Stories #2: Enquete', description: 'Stories interativos com enquete.', platform: 'instagram', contentType: 'stories', status: 'approval-internal', assignee: users[1], publishDate: '2026-03-14', hashtags: ['#enquete'], comments: [], projectId: 'p2', createdAt: '2026-03-06',
+    id: 'c8', title: 'Stories #2: Enquete', description: 'Stories interativos com enquete.', platform: 'instagram', contentType: 'stories', status: 'approval-client', assignee: users[1], publishDate: '2026-03-14', hashtags: ['#enquete'], comments: [], projectId: 'p2', createdAt: '2026-03-06',
     checklist: [{ id: 'ck19', text: 'Criar enquete', done: true }, { id: 'ck20', text: 'Design', done: true }],
   },
   {
