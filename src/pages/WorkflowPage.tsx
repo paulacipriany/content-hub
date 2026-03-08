@@ -66,7 +66,6 @@ const WorkflowPage = () => {
   const { role } = useAuth();
   const isClient = role === 'client';
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
