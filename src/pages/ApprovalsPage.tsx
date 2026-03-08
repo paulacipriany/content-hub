@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
-import { platformIcon } from '@/components/content/ContentCard';
+import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
-import { platformIcon } from '@/components/content/ContentCard';
+import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import {

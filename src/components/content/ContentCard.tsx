@@ -1,18 +1,7 @@
-import { ContentWithRelations, STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
+import { ContentWithRelations, STATUS_LABELS, STATUS_COLORS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType } from '@/data/types';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
-import { Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
-
-const platformIcon = (platform: string, size = 14) => {
-  switch (platform) {
-    case 'instagram': return <Instagram size={size} className="text-platform-instagram" />;
-    case 'facebook': return <Facebook size={size} className="text-platform-facebook" />;
-    case 'linkedin': return <Linkedin size={size} className="text-platform-linkedin" />;
-    case 'youtube': return <Youtube size={size} className="text-platform-youtube" />;
-    case 'tiktok': return <span className="text-xs font-bold" style={{ fontSize: size - 2 }}>TT</span>;
-    default: return null;
-  }
-};
+import { platformIcon } from './PlatformIcons';
 
 interface ContentCardProps {
   content: ContentWithRelations;
@@ -75,5 +64,4 @@ const ContentCard = ({ content, compact }: ContentCardProps) => {
   );
 };
 
-export { platformIcon };
 export default ContentCard;
