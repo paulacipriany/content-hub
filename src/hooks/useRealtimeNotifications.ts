@@ -48,11 +48,36 @@ export function useRealtimeNotifications() {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'contents' },
         async (payload) => {
-          const oldStatus = (payload.old as any).status as WorkflowStatus;
-          const newStatus = (payload.new as any).status as WorkflowStatus;
+          const oldData = payload.old as any;
+          const newData = payload.new as any;
+          const oldStatus = oldData.status as WorkflowStatus;
+          const newStatus = newData.status as WorkflowStatus;
+          const contentTitle = newData.title ?? 'Conteúdo';
+
+          // Assignee change notification
+          const oldAssignee = oldData.assignee_id;
+          const newAssignee = newData.assignee_id;
+          if (newAssignee && newAssignee !== oldAssignee && newAssignee === user.id) {
+            const assignerName = await getDisplayName(oldData.created_by ?? newData.created_by);
+            const notification: Notification = {
+              id: crypto.randomUUID(),
+              type: 'assignee_change',
+              title: 'Você foi atribuído',
+              message: `${assignerName} atribuiu você ao conteúdo "${contentTitle}"`,
+              contentId: newData.id,
+              createdAt: new Date().toISOString(),
+              read: false,
+            };
+            setNotifications(prev => [notification, ...prev].slice(0, 50));
+            toast({
+              title: '👤 Nova atribuição',
+              description: notification.message,
+            });
+          }
+
+          // Status change notification
           if (oldStatus === newStatus) return;
 
-          const contentTitle = (payload.new as any).title ?? 'Conteúdo';
           const fromLabel = STATUS_LABELS[oldStatus] ?? oldStatus;
           const toLabel = STATUS_LABELS[newStatus] ?? newStatus;
 
@@ -61,7 +86,7 @@ export function useRealtimeNotifications() {
             type: 'status_change',
             title: 'Status atualizado',
             message: `"${contentTitle}" movido de ${fromLabel} → ${toLabel}`,
-            contentId: (payload.new as any).id,
+            contentId: newData.id,
             createdAt: new Date().toISOString(),
             read: false,
           };
