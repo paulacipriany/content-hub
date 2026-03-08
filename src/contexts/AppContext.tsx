@@ -46,8 +46,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       supabase.from('contents').select('*').order('created_at', { ascending: false }),
     ]);
 
-    const projectsList = (projectsRes.data ?? []) as DbProject[];
-    const contentsList = (contentsRes.data ?? []) as ContentWithRelations[];
+    let projectsList = (projectsRes.data ?? []) as DbProject[];
+    let contentsList = (contentsRes.data ?? []) as ContentWithRelations[];
+
+    // For client-role users, only show projects they are members of
+    if (role === 'client') {
+      const { data: memberships } = await supabase
+        .from('project_members')
+        .select('project_id')
+        .eq('user_id', user.id);
+      const allowedIds = new Set((memberships ?? []).map(m => m.project_id));
+      projectsList = projectsList.filter(p => allowedIds.has(p.id));
+      contentsList = contentsList.filter(c => allowedIds.has(c.project_id));
+    }
 
     const userIds = new Set<string>();
     contentsList.forEach(c => {
@@ -81,7 +92,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setLoading(false);
-  }, [user]);
+  }, [user, role]);
 
   useEffect(() => {
     fetchData();
