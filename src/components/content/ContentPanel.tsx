@@ -312,6 +312,50 @@ const ContentPanel = () => {
           />
         </div>
 
+        {/* Media Upload */}
+        <div>
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <ImagePlus size={12} />Mídia
+          </label>
+          {(selectedContent as any).media_url ? (
+            <div className="relative group rounded-lg overflow-hidden border border-border">
+              {(selectedContent as any).media_url.match(/\.(mp4|webm|mov)$/i) ? (
+                <video src={(selectedContent as any).media_url} controls className="w-full max-h-48 object-cover" />
+              ) : (
+                <img src={(selectedContent as any).media_url} alt="Mídia do conteúdo" className="w-full max-h-48 object-cover" />
+              )}
+              <button
+                onClick={handleRemoveMedia}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+            >
+              {uploading ? (
+                <Loader2 size={20} className="animate-spin text-primary" />
+              ) : (
+                <>
+                  <ImagePlus size={20} />
+                  <span className="text-xs">Clique para enviar imagem ou vídeo</span>
+                </>
+              )}
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+        </div>
+
         {/* Hashtags */}
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
