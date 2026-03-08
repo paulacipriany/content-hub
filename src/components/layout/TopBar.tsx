@@ -17,6 +17,7 @@ interface TopBarProps {
 const TopBar = ({ title, subtitle }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject } = useApp();
+  const { role } = useAuth();
   const navigate = useNavigate();
 
   const handleNotificationClick = (contentId: string) => {
