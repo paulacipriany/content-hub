@@ -125,7 +125,7 @@ const IdeasBankPage = () => {
                     selected.has(idea.id) && "bg-primary/5"
                   )}
                 >
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center" onClick={e => e.stopPropagation()}>
                     <Checkbox
                       checked={selected.has(idea.id)}
                       onCheckedChange={() => toggleSelect(idea.id)}
