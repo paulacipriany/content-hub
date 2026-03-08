@@ -1,5 +1,5 @@
-import { Search, Bell, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, Bell } from 'lucide-react';
+import CreateContentDialog from '@/components/content/CreateContentDialog';
 
 interface TopBarProps {
   title?: string;
@@ -15,7 +15,6 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Search */}
         <div className="relative hidden md:flex items-center">
           <Search size={16} className="absolute left-3 text-muted-foreground" />
           <input
@@ -25,17 +24,12 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
           />
         </div>
 
-        {/* Notifications */}
         <button className="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
           <Bell size={18} className="text-muted-foreground" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
         </button>
 
-        {/* Create */}
-        <Button size="sm" className="gap-1.5 h-9">
-          <Plus size={16} />
-          <span className="hidden sm:inline">Criar conteúdo</span>
-        </Button>
+        <CreateContentDialog />
       </div>
     </header>
   );
