@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import ContentsPage from "@/pages/ContentsPage";
+import ClientDashboardPage from "@/pages/ClientDashboardPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import CalendarPage from "@/pages/CalendarPage";
 import WorkflowPage from "@/pages/WorkflowPage";
