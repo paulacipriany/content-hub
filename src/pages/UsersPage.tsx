@@ -254,6 +254,27 @@ const UsersPage = () => {
                 </SelectContent>
               </Select>
             </div>
+            {editRole === 'client' && (
+              <div className="space-y-1.5">
+                <Label>Clientes vinculados</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
+                  {projects.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={editProjectIds.includes(p.id)}
+                        onCheckedChange={(checked) => {
+                          setEditProjectIds(prev =>
+                            checked ? [...prev, p.id] : prev.filter(id => id !== p.id)
+                          );
+                        }}
+                      />
+                      <span className="truncate text-foreground">{p.name}</span>
+                    </label>
+                  ))}
+                  {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>Cancelar</Button>
