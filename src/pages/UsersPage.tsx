@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { supabase } from '@/integrations/supabase/client';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil, Plus, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface UserRow {
@@ -31,6 +33,20 @@ const roleBadgeVariant: Record<string, string> = {
 const UsersPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit dialog
+  const [editUser, setEditUser] = useState<UserRow | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editRole, setEditRole] = useState<string>('social_media');
+  const [saving, setSaving] = useState(false);
+
+  // Add dialog
+  const [addOpen, setAddOpen] = useState(false);
+  const [addEmail, setAddEmail] = useState('');
+  const [addPassword, setAddPassword] = useState('');
+  const [addName, setAddName] = useState('');
+  const [addRole, setAddRole] = useState<string>('social_media');
+  const [adding, setAdding] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -76,6 +92,68 @@ const UsersPage = () => {
     }
   };
 
+  const openEdit = (u: UserRow) => {
+    setEditUser(u);
+    setEditName(u.display_name ?? '');
+    setEditRole(u.role);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editUser) return;
+    setSaving(true);
+
+    const [profileRes, roleRes] = await Promise.all([
+      supabase.from('profiles').update({ display_name: editName }).eq('user_id', editUser.user_id),
+      editRole !== editUser.role
+        ? supabase.from('user_roles').update({ role: editRole as any }).eq('user_id', editUser.user_id)
+        : Promise.resolve({ error: null }),
+    ]);
+
+    if (profileRes.error || roleRes.error) {
+      toast.error('Erro ao salvar alterações');
+    } else {
+      toast.success('Usuário atualizado');
+      setUsers(prev => prev.map(u =>
+        u.user_id === editUser.user_id
+          ? { ...u, display_name: editName, role: editRole as UserRow['role'] }
+          : u
+      ));
+      setEditUser(null);
+    }
+    setSaving(false);
+  };
+
+  const handleAddUser = async () => {
+    if (!addEmail || !addPassword || !addName) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    setAdding(true);
+
+    const { error } = await supabase.auth.signUp({
+      email: addEmail,
+      password: addPassword,
+      options: {
+        data: { display_name: addName, role: addRole },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Usuário criado! Um e-mail de confirmação foi enviado.');
+      setAddOpen(false);
+      setAddEmail('');
+      setAddPassword('');
+      setAddName('');
+      setAddRole('social_media');
+      // Refetch after a short delay to allow trigger to create profile
+      setTimeout(() => fetchUsers(), 2000);
+    }
+    setAdding(false);
+  };
+
   const initials = (name: string | null) =>
     name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
 
@@ -83,6 +161,13 @@ const UsersPage = () => {
     <>
       <TopBar title="Usuários" subtitle="Gerencie todos os usuários da plataforma" />
       <div className="p-6 max-w-3xl">
+        <div className="flex justify-end mb-4">
+          <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5">
+            <UserPlus size={15} />
+            Novo usuário
+          </Button>
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -104,17 +189,9 @@ const UsersPage = () => {
                     {roleLabels[u.role]}
                   </span>
                 </div>
-                <Select value={u.role} onValueChange={(val) => handleRoleChange(u.user_id, val)}>
-                  <SelectTrigger className="w-36 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="moderator">Gestor</SelectItem>
-                    <SelectItem value="social_media">Social Media</SelectItem>
-                    <SelectItem value="client">Cliente</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
+                  <Pencil size={14} />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(u.user_id)}>
                   <Trash2 size={14} />
                 </Button>
@@ -126,6 +203,84 @@ const UsersPage = () => {
           </div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-name">Nome</Label>
+              <Input id="edit-name" value={editName} onChange={e => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Role</Label>
+              <Select value={editRole} onValueChange={setEditRole}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="moderator">Gestor</SelectItem>
+                  <SelectItem value="social_media">Social Media</SelectItem>
+                  <SelectItem value="client">Cliente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUser(null)}>Cancelar</Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="add-name">Nome</Label>
+              <Input id="add-name" value={addName} onChange={e => setAddName(e.target.value)} placeholder="Nome completo" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="add-email">E-mail</Label>
+              <Input id="add-email" type="email" value={addEmail} onChange={e => setAddEmail(e.target.value)} placeholder="email@exemplo.com" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="add-password">Senha</Label>
+              <Input id="add-password" type="password" value={addPassword} onChange={e => setAddPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Role</Label>
+              <Select value={addRole} onValueChange={setAddRole}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="moderator">Gestor</SelectItem>
+                  <SelectItem value="social_media">Social Media</SelectItem>
+                  <SelectItem value="client">Cliente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAddUser} disabled={adding}>
+              {adding ? 'Criando...' : 'Criar usuário'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
