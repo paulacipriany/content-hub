@@ -196,34 +196,24 @@ const AppSidebar = () => {
 
         {/* Quick client list */}
         {!selectedProject && !sidebarCollapsed && (
-          <div className="pt-4">
-            <div className="flex items-center justify-between px-3 mb-1">
+          <div className="pt-4 -mx-2 space-y-0.5">
+            <div className="flex items-center justify-between px-4 mb-1">
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
-            {projects.map(project => {
-              // Determine contrasting text color based on luminance
-              const hex = project.color.replace('#', '');
-              const r = parseInt(hex.substring(0, 2), 16) / 255;
-              const g = parseInt(hex.substring(2, 4), 16) / 255;
-              const b = parseInt(hex.substring(4, 6), 16) / 255;
-              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-              const textColor = luminance > 0.55 ? '#1a1a1a' : '#ffffff';
-
-              return (
-                <button
-                  key={project.id}
-                  onClick={() => {
-                    setSelectedProject(project);
-                    navigate(`/clients/${project.id}/dashboard`);
-                  }}
-                  className="w-full px-3 py-2 rounded-lg text-sm font-medium truncate text-left transition-all duration-200 hover:scale-[1.03] hover:shadow-md hover:brightness-110 active:scale-[0.98]"
-                  style={{ backgroundColor: project.color, color: textColor }}
-                >
-                  {project.name}
-                </button>
-              );
-            })}
+            {projects.map(project => (
+              <button
+                key={project.id}
+                onClick={() => {
+                  setSelectedProject(project);
+                  navigate(`/clients/${project.id}/dashboard`);
+                }}
+                className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+                style={{ backgroundColor: project.color, color: getTextColor(project.color) }}
+              >
+                {project.name}
+              </button>
+            ))}
           </div>
         )}
       </nav>
