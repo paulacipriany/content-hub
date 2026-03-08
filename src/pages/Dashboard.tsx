@@ -139,7 +139,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        </div>
 
         {/* Recent Activity */}
         <div className="bg-card border border-border rounded-xl p-5">
