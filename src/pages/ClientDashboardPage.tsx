@@ -227,8 +227,134 @@ const ClientDashboardPage = () => {
             )}
           </div>
         </div>
+
+        {/* Post Reports Section */}
+        <PostReportsSection contents={projectContents} basePath={basePath} />
       </div>
     </>
+  );
+};
+
+/* ---- Post Reports Section ---- */
+
+interface PostAnalysisSummary {
+  content_id: string;
+  views: number;
+  likes: number;
+  comments_count: number;
+  shares: number;
+  analysis_text: string;
+  result: string | null;
+}
+
+const resultConfig = [
+  { value: 'positivo', label: 'Positivo', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+  { value: 'negativo', label: 'Negativo', dot: 'bg-red-500', badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  { value: 'neutro', label: 'Neutro', dot: 'bg-zinc-400', badge: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800/40 dark:text-zinc-300' },
+];
+
+const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelations[]; basePath: string }) => {
+  const navigate = useNavigate();
+  const [analyses, setAnalyses] = useState<PostAnalysisSummary[]>([]);
+
+  const published = contents.filter(c => c.status === 'published');
+
+  const fetchAnalyses = useCallback(async () => {
+    const ids = published.map(c => c.id);
+    if (ids.length === 0) { setAnalyses([]); return; }
+    const { data } = await supabase.from('post_analyses').select('*').in('content_id', ids);
+    setAnalyses((data as PostAnalysisSummary[]) ?? []);
+  }, [published.map(c => c.id).join(',')]);
+
+  useEffect(() => { fetchAnalyses(); }, [fetchAnalyses]);
+
+  const analysisMap = new Map(analyses.map(a => [a.content_id, a]));
+  const analyzed = published.filter(c => analysisMap.has(c.id));
+
+  if (published.length === 0) return null;
+
+  // Totals
+  const totalViews = analyses.reduce((s, a) => s + (a.views ?? 0), 0);
+  const totalLikes = analyses.reduce((s, a) => s + (a.likes ?? 0), 0);
+  const totalComments = analyses.reduce((s, a) => s + (a.comments_count ?? 0), 0);
+  const totalShares = analyses.reduce((s, a) => s + (a.shares ?? 0), 0);
+
+  const grouped = resultConfig.map(r => ({
+    ...r,
+    items: analyzed.filter(c => analysisMap.get(c.id)?.result === r.value),
+  }));
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-foreground">Relatório de Postagens</h2>
+        <button
+          onClick={() => navigate(`${basePath}/post-reports`)}
+          className="text-xs hover:underline flex items-center gap-1"
+          style={{ color: 'var(--client-500)' }}
+        >
+          Ver completo <ArrowRight size={12} />
+        </button>
+      </div>
+
+      {/* Aggregate metrics */}
+      {analyses.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {[
+            { icon: Eye, label: 'Visualizações', value: totalViews },
+            { icon: Heart, label: 'Likes', value: totalLikes },
+            { icon: MessageCircle, label: 'Comentários', value: totalComments },
+            { icon: Share2, label: 'Compartilhamentos', value: totalShares },
+          ].map(m => (
+            <div key={m.label} className="rounded-lg p-3 border" style={{ backgroundColor: 'var(--client-50)', borderColor: 'var(--client-100)' }}>
+              <m.icon size={14} className="mb-1" style={{ color: 'var(--client-500)' }} />
+              <p className="text-lg font-bold text-foreground">{m.value.toLocaleString('pt-BR')}</p>
+              <p className="text-[10px] text-muted-foreground">{m.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Result distribution */}
+      <div className="flex items-center gap-4 mb-4">
+        {grouped.map(g => (
+          <div key={g.value} className="flex items-center gap-1.5">
+            <div className={cn("w-2 h-2 rounded-full", g.dot)} />
+            <span className="text-xs text-muted-foreground">{g.label}</span>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-medium", g.badge)}>{g.items.length}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Analyzed posts list (latest 5) */}
+      <div className="space-y-2">
+        {analyzed.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">Nenhum conteúdo analisado ainda.</p>
+        ) : (
+          analyzed.slice(0, 5).map(c => {
+            const a = analysisMap.get(c.id)!;
+            const resultCfg = resultConfig.find(r => r.value === a.result);
+            return (
+              <div key={c.id} className="flex items-center gap-3 text-sm py-1.5">
+                {resultCfg ? (
+                  <div className={cn("w-2 h-2 rounded-full flex-shrink-0", resultCfg.dot)} />
+                ) : (
+                  <div className="w-2 h-2 rounded-full flex-shrink-0 bg-muted-foreground/30" />
+                )}
+                <span className="text-foreground font-medium truncate flex-1">{c.title}</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1"><Eye size={11} /> {a.views}</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1"><Heart size={11} /> {a.likes}</span>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Footer summary */}
+      <p className="text-[10px] text-muted-foreground mt-3 pt-2 border-t border-border/50">
+        {published.length} publicado(s) · {analyzed.length} analisado(s) · {published.length - analyzed.length} pendente(s)
+      </p>
+    </div>
   );
 };
 
