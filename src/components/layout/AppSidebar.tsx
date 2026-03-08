@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { mockProjects } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,18 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { profile, role, signOut } = useAuth();
+
+  const roleLabels: Record<string, string> = {
+    admin: 'Admin',
+    moderator: 'Gestor',
+    social_media: 'Social Media',
+    client: 'Cliente',
+  };
+
+  const initials = profile?.display_name
+    ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   return (
     <aside className={cn(
@@ -85,17 +98,21 @@ const AppSidebar = () => {
         )}
       </nav>
 
-      {/* Bottom user */}
       <div className="px-3 py-3 border-t border-sidebar-border-custom">
         <div className={cn("flex items-center gap-2.5", sidebarCollapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary text-xs font-semibold">AS</span>
+            <span className="text-primary text-xs font-semibold">{initials}</span>
           </div>
           {!sidebarCollapsed && (
-            <div className="min-w-0">
-              <p className="text-sm text-sidebar-fg-active font-medium truncate">Ana Silva</p>
-              <p className="text-xs text-sidebar-fg/60 truncate">Admin</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
+              <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
             </div>
+          )}
+          {!sidebarCollapsed && (
+            <button onClick={signOut} className="text-sidebar-fg hover:text-sidebar-fg-active transition-colors" title="Sair">
+              <LogOut size={16} />
+            </button>
           )}
         </div>
       </div>
