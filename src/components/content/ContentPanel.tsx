@@ -1,4 +1,4 @@
-import { X, MessageSquare, CheckSquare, Hash, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2 } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PostPreview from './PostPreview';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -46,24 +47,32 @@ const ContentPanel = () => {
 
   // Editable local state
   const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editHashtagInput, setEditHashtagInput] = useState('');
-  const [editHashtags, setEditHashtags] = useState<string[]>([]);
+  const [editCopyText, setEditCopyText] = useState('');
+  const [editPublishTime, setEditPublishTime] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync local state when selected content changes
   useEffect(() => {
     if (!selectedContent) return;
     setEditTitle(selectedContent.title);
-    setEditDescription(selectedContent.description ?? '');
-    setEditHashtags(selectedContent.hashtags ?? []);
-    setEditHashtagInput('');
+    setEditCopyText((selectedContent as any).copy_text ?? '');
+    setEditPublishTime((selectedContent as any).publish_time ?? '');
+    // Load media_urls or fallback to single media_url
+    const urls = (selectedContent as any).media_urls;
+    if (urls && Array.isArray(urls) && urls.length > 0) {
+      setMediaUrls(urls);
+    } else if (selectedContent.media_url) {
+      setMediaUrls([selectedContent.media_url]);
+    } else {
+      setMediaUrls([]);
+    }
   }, [selectedContent?.id]);
 
-  // Auto-save title & description
+  // Auto-save title & copy_text
   useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
-  useAutoSave(selectedContent?.id, 'description', editDescription, updateContentFields);
+  useAutoSave(selectedContent?.id, 'copy_text', editCopyText, updateContentFields);
 
   useEffect(() => {
     if (!selectedContent) return;
@@ -117,7 +126,7 @@ const ContentPanel = () => {
   };
 
   const handlePlatformChange = (platforms: Platform[]) => {
-    updateContentFields(selectedContent.id, { platform: platforms } as any);
+    updateContentFields(selectedContent.id, { platform: platforms });
   };
 
   const handleTypeChange = (value: string) => {
@@ -129,32 +138,32 @@ const ContentPanel = () => {
     updateContentFields(selectedContent.id, { publish_date: dateStr });
   };
 
-  const handleAddHashtag = () => {
-    const tag = editHashtagInput.trim().replace(/^#/, '');
-    if (!tag || editHashtags.includes(`#${tag}`)) return;
-    const newTags = [...editHashtags, `#${tag}`];
-    setEditHashtags(newTags);
-    setEditHashtagInput('');
-    updateContentFields(selectedContent.id, { hashtags: newTags });
-  };
-
-  const handleRemoveHashtag = (tag: string) => {
-    const newTags = editHashtags.filter(h => h !== tag);
-    setEditHashtags(newTags);
-    updateContentFields(selectedContent.id, { hashtags: newTags });
+  const handleTimeChange = (time: string) => {
+    setEditPublishTime(time);
+    updateContentFields(selectedContent.id, { publish_time: time || null });
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user || !selectedContent) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !user || !selectedContent) return;
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${user.id}/${selectedContent.id}.${ext}`;
-      const { error } = await supabase.storage.from('content-media').upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
-      await updateContentFields(selectedContent.id, { media_url: publicUrl } as any);
+      const newUrls: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `${selectedContent.id}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from('content-media').upload(path, file);
+        if (!error) {
+          const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+          newUrls.push(publicUrl);
+        }
+      }
+      const updatedUrls = [...mediaUrls, ...newUrls];
+      setMediaUrls(updatedUrls);
+      await updateContentFields(selectedContent.id, {
+        media_url: updatedUrls[0] ?? null,
+        media_urls: updatedUrls,
+      });
     } catch (err) {
       console.error('Upload error:', err);
     } finally {
@@ -163,14 +172,13 @@ const ContentPanel = () => {
     }
   };
 
-  const handleRemoveMedia = async () => {
-    if (!selectedContent || !user) return;
-    const { data: files } = await supabase.storage.from('content-media').list(user.id);
-    const match = files?.find(f => f.name.startsWith(selectedContent.id));
-    if (match) {
-      await supabase.storage.from('content-media').remove([`${user.id}/${match.name}`]);
-    }
-    await updateContentFields(selectedContent.id, { media_url: null } as any);
+  const handleRemoveMedia = async (index: number) => {
+    const updatedUrls = mediaUrls.filter((_, i) => i !== index);
+    setMediaUrls(updatedUrls);
+    await updateContentFields(selectedContent.id, {
+      media_url: updatedUrls[0] ?? null,
+      media_urls: updatedUrls,
+    });
   };
 
   return (
@@ -272,9 +280,22 @@ const ContentPanel = () => {
                     selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
                     onSelect={handleDateChange}
                     locale={ptBR}
+                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
+              <div className="relative flex-1">
+                <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="time"
+                  value={editPublishTime}
+                  onChange={e => handleTimeChange(e.target.value)}
+                  className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
@@ -285,91 +306,74 @@ const ContentPanel = () => {
             </div>
           </div>
 
-          {/* Description */}
+          {/* Briefing (read-only) */}
+          {selectedContent.description && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
+              <div className="text-sm text-muted-foreground bg-secondary rounded-lg p-3 whitespace-pre-wrap">
+                {selectedContent.description}
+              </div>
+            </div>
+          )}
+
+          {/* Copy text (editable) */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Descrição / Copy</label>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Copy</label>
             <textarea
-              value={editDescription}
-              onChange={e => setEditDescription(e.target.value)}
+              value={editCopyText}
+              onChange={e => setEditCopyText(e.target.value)}
               rows={5}
-              placeholder="Adicione a descrição ou copy do conteúdo..."
+              placeholder="Escreva a copy da postagem..."
               className="w-full text-sm text-foreground bg-secondary rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-ring/20 hover:bg-secondary/80 transition-colors"
             />
           </div>
 
-          {/* Media Upload */}
+          {/* Media Upload — multiple images */}
           <div>
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <ImagePlus size={12} />Mídia
             </label>
-            {(selectedContent as any).media_url ? (
-              <div className="relative group rounded-lg overflow-hidden border border-border max-w-sm">
-                {(selectedContent as any).media_url.match(/\.(mp4|webm|mov)$/i) ? (
-                  <video src={(selectedContent as any).media_url} controls className="w-full max-h-48 object-cover" />
-                ) : (
-                  <img src={(selectedContent as any).media_url} alt="Mídia do conteúdo" className="w-full max-h-48 object-cover" />
-                )}
-                <button
-                  onClick={handleRemoveMedia}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 size={12} />
-                </button>
+            {mediaUrls.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {mediaUrls.map((url, i) => (
+                  <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                    {url.match(/\.(mp4|webm|mov)$/i) ? (
+                      <video src={url} controls className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover" />
+                    )}
+                    <button
+                      onClick={() => handleRemoveMedia(i)}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={10} />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="w-full max-w-sm h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-              >
-                {uploading ? (
-                  <Loader2 size={20} className="animate-spin text-primary" />
-                ) : (
-                  <>
-                    <ImagePlus size={20} />
-                    <span className="text-xs">Clique para enviar imagem ou vídeo</span>
-                  </>
-                )}
-              </button>
             )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+            >
+              {uploading ? (
+                <Loader2 size={18} className="animate-spin text-primary" />
+              ) : (
+                <>
+                  <ImagePlus size={18} />
+                  <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
+                </>
+              )}
+            </button>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
+              multiple
               onChange={handleFileUpload}
               className="hidden"
             />
-          </div>
-
-          {/* Hashtags */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Hash size={12} />Hashtags
-            </label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {editHashtags.map(h => (
-                <button
-                  key={h}
-                  onClick={() => handleRemoveHashtag(h)}
-                  className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-destructive/20 hover:text-destructive transition-colors group"
-                  title="Clique para remover"
-                >
-                  {h} <span className="opacity-0 group-hover:opacity-100 ml-0.5">×</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2 max-w-sm">
-              <input
-                value={editHashtagInput}
-                onChange={e => setEditHashtagInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddHashtag())}
-                placeholder="#novahashtag"
-                className="flex-1 h-8 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
-              />
-              <button onClick={handleAddHashtag} className="h-8 px-3 rounded-md text-xs font-medium hover:opacity-90 transition-opacity" style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}>
-                Adicionar
-              </button>
-            </div>
           </div>
 
           {/* Checklist */}

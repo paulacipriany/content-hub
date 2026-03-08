@@ -120,15 +120,18 @@ export type Database = {
         Row: {
           assignee_id: string | null
           content_type: Database["public"]["Enums"]["content_type"]
+          copy_text: string | null
           created_at: string
           created_by: string
           description: string | null
           hashtags: string[] | null
           id: string
           media_url: string | null
+          media_urls: string[] | null
           platform: Database["public"]["Enums"]["platform"][]
           project_id: string
           publish_date: string | null
+          publish_time: string | null
           status: Database["public"]["Enums"]["workflow_status"]
           title: string
           updated_at: string
@@ -136,15 +139,18 @@ export type Database = {
         Insert: {
           assignee_id?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
+          copy_text?: string | null
           created_at?: string
           created_by: string
           description?: string | null
           hashtags?: string[] | null
           id?: string
           media_url?: string | null
+          media_urls?: string[] | null
           platform?: Database["public"]["Enums"]["platform"][]
           project_id: string
           publish_date?: string | null
+          publish_time?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
           title: string
           updated_at?: string
@@ -152,15 +158,18 @@ export type Database = {
         Update: {
           assignee_id?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
+          copy_text?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
           hashtags?: string[] | null
           id?: string
           media_url?: string | null
+          media_urls?: string[] | null
           platform?: Database["public"]["Enums"]["platform"][]
           project_id?: string
           publish_date?: string | null
+          publish_time?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
           title?: string
           updated_at?: string
