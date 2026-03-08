@@ -48,9 +48,6 @@ const ReviewPage = () => {
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
                     <span className="text-sm font-medium text-foreground">{c.title}</span>
-                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[c.status as WorkflowStatus])}>
-                      {STATUS_LABELS[c.status as WorkflowStatus]}
-                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{c.description}</p>
                   <p className="text-xs text-muted-foreground mt-1">
