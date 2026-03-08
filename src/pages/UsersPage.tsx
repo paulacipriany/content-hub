@@ -38,6 +38,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [projects, setProjects] = useState<SimpleProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
