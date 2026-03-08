@@ -202,6 +202,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_tasks: {
+        Row: {
+          created_at: string
+          created_by: string
+          done: boolean
+          id: string
+          project_id: string
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          done?: boolean
+          id?: string
+          project_id: string
+          sort_order?: number
+          text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          id?: string
+          project_id?: string
+          sort_order?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           color: string
