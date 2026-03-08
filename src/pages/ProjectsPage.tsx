@@ -93,12 +93,14 @@ const ProjectsPage = () => {
       color: newColor,
       owner_id: user.id,
       logo_url: newLogoUrl,
+      platforms: newPlatforms.length > 0 ? newPlatforms : ['instagram'],
     } as any);
     if (error) {
       toast({ title: 'Erro ao criar cliente', description: error.message, variant: 'destructive' });
     } else {
       setNewName('');
       setNewLogoUrl(null);
+      setNewPlatforms([]);
       setShowCreate(false);
       await refetch();
     }
