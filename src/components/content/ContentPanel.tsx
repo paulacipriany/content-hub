@@ -160,7 +160,28 @@ const ContentPanel = () => {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-border flex-shrink-0">
+        <button
+          onClick={() => setActiveTab('edit')}
+          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
+            activeTab === 'edit' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Pencil size={12} /> Editar
+        </button>
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={cn("flex-1 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
+            activeTab === 'preview' ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Eye size={12} /> Preview
+        </button>
+      </div>
+
       {/* Content */}
+      {activeTab === 'edit' ? (
       <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-5">
         {/* Status */}
         <div>
