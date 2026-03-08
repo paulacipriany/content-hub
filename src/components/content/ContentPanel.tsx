@@ -86,6 +86,7 @@ const ContentPanel = () => {
 
   // Auto-save title
   useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
+  useAutoSave(selectedContent?.id, 'description', editBriefing, updateContentFields);
 
   useEffect(() => {
     if (!selectedContent) return;
