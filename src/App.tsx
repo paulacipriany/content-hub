@@ -24,6 +24,7 @@ import TasksPage from "@/pages/TasksPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
 import PostReportsPage from "@/pages/PostReportsPage";
 import ReviewPage from "@/pages/ReviewPage";
+import SchedulingPage from "@/pages/SchedulingPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/clients/:id/ideas" element={<IdeasBankPage />} />
               <Route path="/clients/:id/post-reports" element={<PostReportsPage />} />
               <Route path="/clients/:id/review" element={<ReviewPage />} />
+              <Route path="/clients/:id/scheduling" element={<SchedulingPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
