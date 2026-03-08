@@ -158,18 +158,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label htmlFor="content-title">Título *</Label>
-            <Input
-              id="content-title"
-              placeholder="Ex: Post sobre lançamento..."
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-          </div>
-
-          {/* Project */}
+          {/* Project — moved to top */}
           <div className="space-y-1.5">
             <Label>Cliente *</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -189,6 +178,17 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             </Select>
           </div>
 
+          {/* Title */}
+          <div className="space-y-1.5">
+            <Label htmlFor="content-title">Título *</Label>
+            <Input
+              id="content-title"
+              placeholder="Ex: Post sobre lançamento..."
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </div>
+
           {/* Platforms */}
           <div className="space-y-2">
             <Label>Plataformas *</Label>
@@ -198,22 +198,20 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             )}
           </div>
 
-          {/* Content Type - only shows after platform selection */}
-          {platforms.length > 0 && (
-            <div className="space-y-1.5">
-              <Label>Tipo de conteúdo</Label>
-              <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableContentTypes.map(t => (
-                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {/* Content Type — universal, always visible */}
+          <div className="space-y-1.5">
+            <Label>Tipo de conteúdo</Label>
+            <Select value={contentType} onValueChange={v => setContentType(v as ContentType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {universalContentTypes.map(t => (
+                  <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Briefing */}
           <div className="space-y-2">
