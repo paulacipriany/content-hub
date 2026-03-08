@@ -179,7 +179,12 @@ const ProjectsPage = () => {
                 />
               ))}
               <div className="flex items-center gap-1.5 ml-1">
-                <div className="w-5 h-5 rounded border border-border" style={{ backgroundColor: newColor }} />
+                <input
+                  type="color"
+                  value={newColor.length === 7 ? newColor : '#000000'}
+                  onChange={e => setNewColor(e.target.value.toUpperCase())}
+                  className="w-7 h-7 rounded border border-border cursor-pointer bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded"
+                />
                 <input
                   value={newColor}
                   onChange={e => {
@@ -250,7 +255,12 @@ const ProjectsPage = () => {
                         />
                       ))}
                       <div className="flex items-center gap-1.5 ml-1">
-                        <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: editColor }} />
+                        <input
+                          type="color"
+                          value={editColor.length === 7 ? editColor : '#000000'}
+                          onChange={e => setEditColor(e.target.value.toUpperCase())}
+                          className="w-7 h-7 rounded border border-border cursor-pointer bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded"
+                        />
                         <input
                           value={editColor}
                           onChange={e => {
