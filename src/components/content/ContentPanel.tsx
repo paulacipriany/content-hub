@@ -111,21 +111,45 @@ const ContentPanel = () => {
   const assigneeName = selectedContent.assignee_profile?.display_name ?? 'Sem responsável';
 
   const handleAddComment = async () => {
-    if (!newComment.trim() || !user) return;
-    await supabase.from('comments').insert({
+    if ((!newComment.trim() && !commentImageUrl) || !user) return;
+    const insertData: any = {
       content_id: selectedContent.id,
       user_id: user.id,
-      text: newComment.trim(),
-    });
+      text: newComment.trim() || '',
+    };
+    if (commentImageUrl) insertData.image_url = commentImageUrl;
+    await supabase.from('comments').insert(insertData);
     setComments(prev => [...prev, {
       id: crypto.randomUUID(),
       content_id: selectedContent.id,
       user_id: user.id,
-      text: newComment.trim(),
+      text: newComment.trim() || '',
+      image_url: commentImageUrl,
       created_at: new Date().toISOString(),
       profile: { display_name: profile?.display_name },
     }]);
     setNewComment('');
+    setCommentImageUrl(null);
+  };
+
+  const handleCommentImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedContent) return;
+    setCommentUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${selectedContent.id}/comments/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file);
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+        setCommentImageUrl(publicUrl);
+      }
+    } catch (err) {
+      console.error('Comment image upload error:', err);
+    } finally {
+      setCommentUploading(false);
+      if (commentFileRef.current) commentFileRef.current.value = '';
+    }
   };
 
   const toggleCheckItem = async (itemId: string, done: boolean) => {
