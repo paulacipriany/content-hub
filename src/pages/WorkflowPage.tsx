@@ -4,6 +4,7 @@ import ContentCard from '@/components/content/ContentCard';
 import { STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DndContext,
   DragOverlay,
