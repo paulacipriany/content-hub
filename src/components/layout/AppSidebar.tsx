@@ -11,6 +11,7 @@ const globalNavItems = [
 ];
 
 const clientNavItems = [
+  { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
