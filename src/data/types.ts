@@ -60,7 +60,9 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   carousel: 'Carrossel',
   video: 'Vídeo',
   post: 'Post',
+  shorts: 'Shorts',
+  image: 'Imagem',
 };
 
 // Content types visible in UI (carousel merged into feed)
-export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post'];
+export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post', 'shorts', 'image'];

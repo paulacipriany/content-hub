@@ -111,7 +111,7 @@ interface PlatformSelectorProps {
 }
 
 export const PlatformSelector = ({ selected, onChange, size = 32 }: PlatformSelectorProps) => {
-  const platforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
+  const platforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest'];
   
   const toggle = (p: Platform) => {
     if (selected.includes(p)) {
