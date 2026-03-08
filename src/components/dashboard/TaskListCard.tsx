@@ -255,11 +255,12 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
                 onCheckedChange={(checked) => toggleTask(t.id, !!checked)}
                 className="flex-shrink-0"
               />
-              <EditableTaskText
-                text={t.text}
-                done={t.done}
-                onSave={(text) => updateTaskText(t.id, text)}
-              />
+              <div className="flex-1 min-w-0">
+                <EditableTaskText
+                  text={t.text}
+                  done={t.done}
+                  onSave={(text) => updateTaskText(t.id, text)}
+                />
                 <div className="flex items-center gap-2">
                   {t.due_date && (
                     <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
