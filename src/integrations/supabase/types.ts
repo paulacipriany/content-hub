@@ -248,6 +248,7 @@ export type Database = {
       }
       project_tasks: {
         Row: {
+          assigned_to: string | null
           created_at: string
           created_by: string
           done: boolean
@@ -258,6 +259,7 @@ export type Database = {
           text: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           created_by: string
           done?: boolean
@@ -268,6 +270,7 @@ export type Database = {
           text: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           created_by?: string
           done?: boolean

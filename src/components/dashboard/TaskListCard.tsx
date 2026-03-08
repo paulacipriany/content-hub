@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2, ListTodo, CalendarIcon, X } from 'lucide-react';
+import { Plus, Trash2, ListTodo, CalendarIcon, X, UserPlus, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Task {
   id: string;
@@ -17,6 +18,14 @@ interface Task {
   done: boolean;
   sort_order: number;
   due_date: string | null;
+  assigned_to: string | null;
+  created_by: string;
+}
+
+interface MemberProfile {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
 }
 
 interface TaskListCardProps {
@@ -28,19 +37,48 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
   const [newDueDate, setNewDueDate] = useState<Date | undefined>();
+  const [newAssignee, setNewAssignee] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [members, setMembers] = useState<MemberProfile[]>([]);
 
   useEffect(() => {
     fetchTasks();
+    fetchMembers();
   }, [projectId, user]);
+
+  const fetchMembers = async () => {
+    // Get all project members
+    const { data: memberRows } = await supabase
+      .from('project_members')
+      .select('user_id')
+      .eq('project_id', projectId);
+
+    // Also get the project owner
+    const { data: project } = await supabase
+      .from('projects')
+      .select('owner_id')
+      .eq('id', projectId)
+      .single();
+
+    const userIds = new Set<string>();
+    (memberRows ?? []).forEach(m => userIds.add(m.user_id));
+    if (project?.owner_id) userIds.add(project.owner_id);
+
+    if (userIds.size > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', Array.from(userIds));
+      setMembers((profiles as MemberProfile[]) ?? []);
+    }
+  };
 
   const fetchTasks = async () => {
     if (!user) return;
     const { data } = await supabase
       .from('project_tasks')
-      .select('id, text, done, sort_order, due_date')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
       .eq('project_id', projectId)
-      .eq('created_by', user.id)
       .order('sort_order')
       .order('created_at');
     setTasks((data as Task[]) ?? []);
@@ -59,12 +97,14 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
         created_by: user.id,
         sort_order: nextOrder,
         due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
+        assigned_to: newAssignee,
       } as any)
-      .select('id, text, done, sort_order, due_date')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
       .single();
     if (data) setTasks(prev => [...prev, data as Task]);
     setNewText('');
     setNewDueDate(undefined);
+    setNewAssignee(null);
   };
 
   const toggleTask = async (id: string, done: boolean) => {
@@ -76,6 +116,11 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
     const due_date = date ? format(date, 'yyyy-MM-dd') : null;
     setTasks(prev => prev.map(t => t.id === id ? { ...t, due_date } : t));
     await supabase.from('project_tasks').update({ due_date } as any).eq('id', id);
+  };
+
+  const updateAssignee = async (id: string, assigned_to: string | null) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, assigned_to } : t));
+    await supabase.from('project_tasks').update({ assigned_to } as any).eq('id', id);
   };
 
   const deleteTask = async (id: string) => {
@@ -92,6 +137,81 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
     if (isPast(date)) return 'text-destructive';
     return 'text-muted-foreground';
   };
+
+  const getMemberName = (userId: string | null) => {
+    if (!userId) return null;
+    const m = members.find(p => p.user_id === userId);
+    return m?.display_name || 'Usuário';
+  };
+
+  const getMemberInitials = (userId: string | null) => {
+    const name = getMemberName(userId);
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const AssigneeSelector = ({ value, onChange, size = 'sm' }: { value: string | null; onChange: (v: string | null) => void; size?: 'sm' | 'md' }) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        {value ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={cn(
+                  "rounded-full flex items-center justify-center flex-shrink-0 font-bold text-primary-foreground",
+                  size === 'sm' ? "w-5 h-5 text-[8px]" : "w-6 h-6 text-[9px]"
+                )}
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+              >
+                {getMemberInitials(value)}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">{getMemberName(value)}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <button
+            className={cn(
+              "flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-all",
+              size === 'md' && "opacity-100"
+            )}
+            title="Atribuir responsável"
+          >
+            <UserPlus size={size === 'sm' ? 13 : 14} />
+          </button>
+        )}
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-1" align="end">
+        <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
+        {value && (
+          <button
+            onClick={() => onChange(null)}
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground"
+          >
+            <X size={14} />
+            <span>Remover</span>
+          </button>
+        )}
+        {members.map(m => (
+          <button
+            key={m.user_id}
+            onClick={() => onChange(m.user_id)}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors",
+              value === m.user_id && "bg-secondary"
+            )}
+          >
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
+              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+            >
+              {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+            </div>
+            <span className="truncate">{m.display_name || 'Usuário'}</span>
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
 
   return (
     <div className="bg-card border border-border rounded-xl p-5">
@@ -135,12 +255,28 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
                 )}>
                   {t.text}
                 </span>
-                {t.due_date && (
-                  <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
-                    {format(new Date(t.due_date + 'T00:00:00'), "dd MMM", { locale: ptBR })}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {t.due_date && (
+                    <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
+                      {format(new Date(t.due_date + 'T00:00:00'), "dd MMM", { locale: ptBR })}
+                    </span>
+                  )}
+                  {t.assigned_to && t.assigned_to !== user?.id && (
+                    <span className="text-[10px] text-muted-foreground">
+                      → {getMemberName(t.assigned_to)}
+                    </span>
+                  )}
+                  {t.created_by !== user?.id && (
+                    <span className="text-[10px] text-muted-foreground italic">
+                      de {getMemberName(t.created_by)}
+                    </span>
+                  )}
+                </div>
               </div>
+              <AssigneeSelector
+                value={t.assigned_to}
+                onChange={(v) => updateAssignee(t.id, v)}
+              />
               <Popover>
                 <PopoverTrigger asChild>
                   <button
@@ -204,6 +340,60 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
               type="button"
               size="sm"
               variant="outline"
+              className={cn("h-8 px-2 flex-shrink-0", newAssignee && "border-primary/50")}
+              title="Atribuir responsável"
+            >
+              {newAssignee ? (
+                <div
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold text-primary-foreground"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                >
+                  {getMemberInitials(newAssignee)}
+                </div>
+              ) : (
+                <User size={14} />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-1" align="end">
+            <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
+            {newAssignee && (
+              <button
+                type="button"
+                onClick={() => setNewAssignee(null)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground"
+              >
+                <X size={14} />
+                <span>Remover</span>
+              </button>
+            )}
+            {members.map(m => (
+              <button
+                type="button"
+                key={m.user_id}
+                onClick={() => setNewAssignee(m.user_id)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors",
+                  newAssignee === m.user_id && "bg-secondary"
+                )}
+              >
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                >
+                  {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+                <span className="truncate">{m.display_name || 'Usuário'}</span>
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
               className={cn("h-8 px-2 flex-shrink-0", newDueDate && "text-primary")}
               title="Definir data"
             >
@@ -224,14 +414,28 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
           <Plus size={14} />
         </Button>
       </form>
-      {newDueDate && (
-        <div className="flex items-center gap-1 mt-1.5">
-          <span className="text-[10px] text-muted-foreground">
-            Data: {format(newDueDate, "dd 'de' MMM, yyyy", { locale: ptBR })}
-          </span>
-          <button onClick={() => setNewDueDate(undefined)} className="text-muted-foreground hover:text-destructive">
-            <X size={10} />
-          </button>
+      {(newDueDate || newAssignee) && (
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          {newDueDate && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">
+                Data: {format(newDueDate, "dd 'de' MMM, yyyy", { locale: ptBR })}
+              </span>
+              <button onClick={() => setNewDueDate(undefined)} className="text-muted-foreground hover:text-destructive">
+                <X size={10} />
+              </button>
+            </div>
+          )}
+          {newAssignee && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">
+                Para: {getMemberName(newAssignee)}
+              </span>
+              <button onClick={() => setNewAssignee(null)} className="text-muted-foreground hover:text-destructive">
+                <X size={10} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
