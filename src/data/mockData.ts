@@ -122,7 +122,7 @@ export const mockContents: ContentItem[] = [
     checklist: [{ id: 'ck17', text: 'Copy', done: true }, { id: 'ck18', text: 'Design', done: true }],
   },
   {
-    id: 'c8', title: 'Stories #2: Enquete', description: 'Stories interativos com enquete.', platform: 'instagram', contentType: 'stories', status: 'approval-internal', assignee: users[1], publishDate: '2026-03-14', hashtags: ['#enquete'], comments: [], projectId: 'p2', createdAt: '2026-03-06',
+    id: 'c8', title: 'Stories #2: Enquete', description: 'Stories interativos com enquete.', platform: 'instagram', contentType: 'stories', status: 'approval-client', assignee: users[1], publishDate: '2026-03-14', hashtags: ['#enquete'], comments: [], projectId: 'p2', createdAt: '2026-03-06',
     checklist: [{ id: 'ck19', text: 'Criar enquete', done: true }, { id: 'ck20', text: 'Design', done: true }],
   },
   {

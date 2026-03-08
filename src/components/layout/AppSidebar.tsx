@@ -58,7 +58,7 @@ const AppSidebar = () => {
 
   // Count posts pending approval for selected project
   const approvalCount = selectedProject
-    ? contents.filter(c => c.project_id === selectedProject.id && ['approval-internal', 'approval-client'].includes(c.status)).length
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'approval-client').length
     : 0;
 
   // Count posts pending review for selected project
