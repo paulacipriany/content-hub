@@ -1,11 +1,11 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { FolderOpen, Plus, Pencil, Trash2, X, Check } from 'lucide-react';
+import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +22,38 @@ import {
 
 const COLORS = ['#F97316', '#8B5CF6', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#14B8A6', '#F59E0B'];
 
+const uploadLogo = async (projectId: string, file: File): Promise<string | null> => {
+  const ext = file.name.split('.').pop();
+  const path = `${projectId}.${ext}`;
+  const { error } = await supabase.storage.from('client-logos').upload(path, file, { upsert: true });
+  if (error) return null;
+  const { data: { publicUrl } } = supabase.storage.from('client-logos').getPublicUrl(path);
+  return publicUrl;
+};
+
+const LogoUploadButton = ({ logoUrl, onUpload, uploading }: { logoUrl?: string | null; onUpload: (file: File) => void; uploading: boolean }) => {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        className="w-14 h-14 rounded-xl border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary/40 transition-colors flex-shrink-0"
+      >
+        {uploading ? (
+          <Loader2 size={18} className="animate-spin text-primary" />
+        ) : logoUrl ? (
+          <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+        ) : (
+          <ImagePlus size={18} className="text-muted-foreground" />
+        )}
+      </button>
+      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = ''; }} />
+      <span className="text-xs text-muted-foreground">{logoUrl ? 'Clique para trocar' : 'Adicionar logo'}</span>
+    </div>
+  );
+};
+
 const ProjectsPage = () => {
   const { contents, projects, refetch, setSelectedProject } = useApp();
   const { user } = useAuth();
@@ -30,14 +62,26 @@ const ProjectsPage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(COLORS[0]);
+  const [newLogoUrl, setNewLogoUrl] = useState<string | null>(null);
+  const [uploadingNew, setUploadingNew] = useState(false);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
+  const [editLogoUrl, setEditLogoUrl] = useState<string | null>(null);
+  const [uploadingEdit, setUploadingEdit] = useState(false);
 
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const handleNewLogoUpload = async (file: File) => {
+    setUploadingNew(true);
+    const tempId = crypto.randomUUID();
+    const url = await uploadLogo(tempId, file);
+    if (url) setNewLogoUrl(url);
+    setUploadingNew(false);
+  };
 
   const handleCreate = async () => {
     if (!newName.trim() || !user) return;
@@ -45,25 +89,40 @@ const ProjectsPage = () => {
       name: newName.trim(),
       color: newColor,
       owner_id: user.id,
-    });
+      logo_url: newLogoUrl,
+    } as any);
     if (error) {
       toast({ title: 'Erro ao criar cliente', description: error.message, variant: 'destructive' });
     } else {
       setNewName('');
+      setNewLogoUrl(null);
       setShowCreate(false);
       await refetch();
     }
   };
 
-  const startEdit = (project: { id: string; name: string; color: string }) => {
+  const startEdit = (project: { id: string; name: string; color: string; logo_url?: string | null }) => {
     setEditingId(project.id);
     setEditName(project.name);
     setEditColor(project.color);
+    setEditLogoUrl(project.logo_url ?? null);
+  };
+
+  const handleEditLogoUpload = async (file: File) => {
+    if (!editingId) return;
+    setUploadingEdit(true);
+    const url = await uploadLogo(editingId, file);
+    if (url) setEditLogoUrl(url);
+    setUploadingEdit(false);
   };
 
   const handleUpdate = async () => {
     if (!editingId || !editName.trim()) return;
-    const { error } = await supabase.from('projects').update({ name: editName.trim(), color: editColor }).eq('id', editingId);
+    const { error } = await supabase.from('projects').update({
+      name: editName.trim(),
+      color: editColor,
+      logo_url: editLogoUrl,
+    } as any).eq('id', editingId);
     if (error) {
       toast({ title: 'Erro ao atualizar', description: error.message, variant: 'destructive' });
     } else {
@@ -95,6 +154,7 @@ const ProjectsPage = () => {
 
         {showCreate && (
           <div className="bg-card border border-border rounded-xl p-5 mb-4 space-y-3">
+            <LogoUploadButton logoUrl={newLogoUrl} onUpload={handleNewLogoUpload} uploading={uploadingNew} />
             <input
               value={newName}
               onChange={e => setNewName(e.target.value)}
@@ -114,7 +174,7 @@ const ProjectsPage = () => {
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate}>Criar</Button>
-              <Button size="sm" variant="outline" onClick={() => setShowCreate(false)}>Cancelar</Button>
+              <Button size="sm" variant="outline" onClick={() => { setShowCreate(false); setNewLogoUrl(null); }}>Cancelar</Button>
             </div>
           </div>
         )}
@@ -122,7 +182,6 @@ const ProjectsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map(project => {
             const projectContents = contents.filter(c => c.project_id === project.id);
-            const published = projectContents.filter(c => c.status === 'published').length;
             const isEditing = editingId === project.id;
 
             return (
@@ -131,7 +190,7 @@ const ProjectsPage = () => {
                 className="bg-card border border-border rounded-xl p-5 text-left hover:shadow-md hover:border-primary/20 transition-all group relative"
               >
                 {/* Action buttons */}
-                <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button
                     onClick={(e) => { e.stopPropagation(); startEdit(project); }}
                     className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -150,6 +209,7 @@ const ProjectsPage = () => {
 
                 {isEditing ? (
                   <div className="space-y-3" onClick={e => e.stopPropagation()}>
+                    <LogoUploadButton logoUrl={editLogoUrl} onUpload={handleEditLogoUpload} uploading={uploadingEdit} />
                     <input
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
@@ -181,14 +241,19 @@ const ProjectsPage = () => {
                     className="w-full text-left"
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: project.color + '20' }}>
-                        <FolderOpen size={20} style={{ color: project.color }} />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" style={{ backgroundColor: project.color + '20' }}>
+                        {(project as any).logo_url ? (
+                          <img src={(project as any).logo_url} alt={project.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <FolderOpen size={20} style={{ color: project.color }} />
+                        )}
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{project.name}</h3>
                         <p className="text-xs text-muted-foreground">{projectContents.length} conteúdos</p>
                       </div>
                     </div>
+
                     {/* Status breakdown */}
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
