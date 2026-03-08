@@ -12,9 +12,9 @@ const globalNavItems = [
 
 const clientNavItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
+  { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
-  { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: BarChart3, label: 'Relatórios', path: '/reports' },
