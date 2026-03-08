@@ -57,12 +57,19 @@ const DroppableDay = ({ dateStr, day, isToday: todayFlag, children }: {
     <div
       ref={setNodeRef}
       className={cn(
-        "min-h-[120px] p-2 border-r border-border last:border-r-0 transition-colors hover:bg-secondary/20",
-        isOver && "bg-primary/10 ring-2 ring-primary/30 ring-inset"
+        "min-h-[120px] p-2 border-r border-border last:border-r-0 transition-colors",
+        isOver && "ring-2 ring-inset"
       )}
+      style={{
+        backgroundColor: isOver ? 'var(--client-50, hsl(var(--primary) / 0.1))' : undefined,
+        ...(isOver ? { ringColor: 'var(--client-300)' } : {}),
+      }}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <span className={cn("text-sm font-medium", todayFlag ? "w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center" : "text-foreground")}>
+        <span
+          className={cn("text-sm font-medium", todayFlag ? "w-7 h-7 rounded-full flex items-center justify-center" : "text-foreground")}
+          style={todayFlag ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' } : undefined}
+        >
           {day}
         </span>
       </div>
@@ -145,14 +152,26 @@ const CalendarPage = () => {
       <TopBar title="Calendário" subtitle="Planejamento mensal de conteúdos" />
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
-            <ChevronLeft size={18} className="text-muted-foreground" />
+          <button
+            onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
+          >
+            <ChevronLeft size={18} style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }} />
           </button>
-          <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 text-xs font-medium rounded-md bg-secondary hover:bg-accent transition-colors text-foreground">
+          <button
+            onClick={() => setCurrentDate(new Date())}
+            className="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+            style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--foreground)))' }}
+          >
             Hoje
           </button>
-          <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
-            <ChevronRight size={18} className="text-muted-foreground" />
+          <button
+            onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+            style={{ backgroundColor: 'var(--client-50, hsl(var(--secondary)))' }}
+          >
+            <ChevronRight size={18} style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }} />
           </button>
           <span className="text-lg font-semibold text-foreground capitalize">{monthName}</span>
         </div>

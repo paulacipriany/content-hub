@@ -18,14 +18,23 @@ const ApprovalsPage = () => {
       <div className="p-6">
         {approvals.length === 0 ? (
           <div className="text-center py-20">
-            <CheckCircle size={48} className="mx-auto text-status-published mb-4" />
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))' }}
+            >
+              <CheckCircle size={32} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
+            </div>
             <h2 className="text-lg font-semibold text-foreground mb-1">Tudo aprovado!</h2>
             <p className="text-sm text-muted-foreground">Não há conteúdos aguardando aprovação.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {approvals.map(c => (
-              <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+              <div
+                key={c.id}
+                className="bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
+              >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
@@ -43,7 +52,12 @@ const ApprovalsPage = () => {
                   <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
                     <MessageSquare size={14} /> Revisar
                   </Button>
-                  <Button size="sm" className="gap-1 text-xs bg-status-published hover:bg-status-published/90" onClick={() => updateContentStatus(c.id, 'scheduled')}>
+                  <Button
+                    size="sm"
+                    className="gap-1 text-xs"
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                    onClick={() => updateContentStatus(c.id, 'scheduled')}
+                  >
                     <CheckCircle size={14} /> Aprovar
                   </Button>
                   <Button size="sm" variant="outline" className="gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => updateContentStatus(c.id, 'review')}>

@@ -94,7 +94,7 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
   return (
     <div className="bg-card border border-border rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
-        <ListTodo size={16} className="text-primary" />
+        <ListTodo size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
         <h2 className="text-sm font-semibold text-foreground">Tarefas</h2>
         {tasks.length > 0 && (
           <span className="ml-auto text-xs text-muted-foreground">{doneCount}/{tasks.length}</span>
@@ -102,10 +102,10 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
       </div>
 
       {tasks.length > 0 && (
-        <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-4">
+        <div className="h-1.5 rounded-full overflow-hidden mb-4" style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))' }}>
           <div
-            className="h-full bg-primary rounded-full transition-all"
-            style={{ width: `${(doneCount / tasks.length) * 100}%` }}
+            className="h-full rounded-full transition-all"
+            style={{ width: `${(doneCount / tasks.length) * 100}%`, backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
           />
         </div>
       )}

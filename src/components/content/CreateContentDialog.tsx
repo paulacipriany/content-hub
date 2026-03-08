@@ -146,7 +146,11 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button size="sm" className="gap-1.5 h-9">
+          <Button
+            size="sm"
+            className="gap-1.5 h-9"
+            style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+          >
             <Plus size={16} />
             <span className="hidden sm:inline">Criar conteúdo</span>
           </Button>
