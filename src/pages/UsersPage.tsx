@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Trash2, Pencil, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
 interface SimpleProject { id: string; name: string; color: string; }
 

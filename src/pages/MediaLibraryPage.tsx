@@ -255,7 +255,7 @@ const MediaLibraryPage = () => {
                     <div className="ml-auto">
                       {canDelete && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                          onClick={(e) => { e.stopPropagation(); confirmDelete(() => handleDelete(item), `"${item.filename}"`); }}
                           className="w-7 h-7 rounded-full bg-destructive/80 hover:bg-destructive flex items-center justify-center transition-colors"
                           title="Excluir"
                         >

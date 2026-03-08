@@ -32,13 +32,17 @@ const IdeasBankPage = () => {
   useClientFromUrl();
   const { projectContents, selectedProject, setSelectedContent, deleteContent } = useApp();
   const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
   const ideas = projectContents.filter(c => c.status === 'idea-bank');
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    await deleteContent(id);
-    toast({ title: 'Ideia excluída' });
+    const idea = ideas.find(i => i.id === id);
+    confirmDelete(async () => {
+      await deleteContent(id);
+      toast({ title: 'Ideia excluída' });
+    }, idea ? `"${idea.title}"` : 'esta ideia');
   };
 
   return (
