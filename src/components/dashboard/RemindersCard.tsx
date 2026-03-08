@@ -75,7 +75,7 @@ const RemindersCard = () => {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
+    <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 ring-1 ring-primary/10">
       <div className="flex items-center gap-2 mb-4">
         <Bell size={16} className="text-amber-500" />
         <h2 className="text-sm font-semibold text-foreground">Avisos e Lembretes</h2>
