@@ -87,17 +87,19 @@ const AppSidebar = () => {
           <>
             {!sidebarCollapsed && (
               <div className="pt-4 pb-1 px-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
-                  <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium truncate">
-                    {selectedProject.name}
-                  </span>
-                </div>
+                <span
+                  className="text-xs uppercase tracking-wider font-medium truncate px-2 py-0.5 rounded"
+                  style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}
+                >
+                  {selectedProject.name}
+                </span>
               </div>
             )}
             {sidebarCollapsed && (
               <div className="pt-3 pb-1 flex justify-center">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedProject.color }} />
+                <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}>
+                  {selectedProject.name.charAt(0)}
+                </div>
               </div>
             )}
             {clientNavItems.map(item => {
@@ -142,7 +144,12 @@ const AppSidebar = () => {
                 {(project as any).logo_url ? (
                   <img src={(project as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{ backgroundColor: project.color + '25', color: project.color }}
+                  >
+                    {project.name.charAt(0)}
+                  </span>
                 )}
                 <span className="truncate">{project.name}</span>
               </button>
