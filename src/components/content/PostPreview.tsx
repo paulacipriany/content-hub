@@ -82,7 +82,11 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
   );
 };
 
-const getDisplayText = (content: ContentWithRelations) => {
+const getDisplayText = (content: ContentWithRelations, platform?: string) => {
+  const copyTexts = (content as any).copy_texts;
+  if (platform && copyTexts && typeof copyTexts === 'object' && copyTexts[platform]) {
+    return copyTexts[platform];
+  }
   const copyText = (content as any).copy_text;
   return copyText || content.description || content.title;
 };
