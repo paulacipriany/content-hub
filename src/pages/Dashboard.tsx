@@ -49,18 +49,31 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">Nenhum cliente ainda. Crie seu primeiro cliente!</p>
               ) : (
                 projects.map(p => {
-                  const count = contents.filter(c => c.project_id === p.id).length;
+                  const pContents = contents.filter(c => c.project_id === p.id);
                   return (
                     <button
                       key={p.id}
                       onClick={() => handleClientClick(p)}
-                      className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-secondary transition-colors"
+                      className="w-full p-3 rounded-lg hover:bg-secondary transition-colors text-left"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
-                        <span className="text-sm font-medium text-foreground">{p.name}</span>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
+                          <span className="text-sm font-medium text-foreground">{p.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{pContents.length}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{count} conteúdos</span>
+                      <div className="flex flex-wrap gap-1">
+                        {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                          const count = pContents.filter(c => c.status === s).length;
+                          if (count === 0) return null;
+                          return (
+                            <span key={s} className={cn("px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-primary-foreground", STATUS_COLORS[s])}>
+                              {count}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </button>
                   );
                 })
