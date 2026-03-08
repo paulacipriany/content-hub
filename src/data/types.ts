@@ -26,6 +26,7 @@ export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'a
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea': 'Rascunho',
+  'idea-bank': 'Banco de Ideias',
   'production': 'Produção',
   'review': 'Revisão',
   'approval-internal': 'Aprovação Interna',
