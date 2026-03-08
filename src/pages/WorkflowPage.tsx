@@ -218,7 +218,7 @@ const WorkflowPage = () => {
               {previewContent.description && (
                 <div className="px-6 py-4 border-b border-border/50">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description.replace(/<[^>]*>/g, '')}</p>
                 </div>
               )}
 
