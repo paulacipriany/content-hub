@@ -223,7 +223,7 @@ const CalendarPage = () => {
 
   // --- Week view data ---
   const getWeekDays = () => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const start = startOfWeek(currentDate, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
