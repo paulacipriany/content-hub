@@ -74,68 +74,68 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 92%;
+    --background: 220 15% 8%;
+    --foreground: 220 5% 93%;
 
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 92%;
+    --card: 220 12% 12%;
+    --card-foreground: 220 5% 93%;
 
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 92%;
+    --popover: 220 12% 12%;
+    --popover-foreground: 220 5% 93%;
 
-    --primary: 220 100% 55%;
+    --primary: 220 100% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 18%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 220 12% 17%;
+    --secondary-foreground: 220 5% 90%;
 
-    --muted: 220 10% 16%;
-    --muted-foreground: 220 8% 58%;
+    --muted: 220 12% 15%;
+    --muted-foreground: 220 8% 62%;
 
-    --accent: 220 15% 22%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 220 15% 20%;
+    --accent-foreground: 220 5% 93%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 10% 22%;
-    --input: 220 10% 24%;
-    --ring: 220 100% 55%;
+    --border: 220 12% 20%;
+    --input: 220 12% 22%;
+    --ring: 220 100% 58%;
 
-    /* Sidebar — slightly lighter than bg */
-    --sidebar-bg: 0 0% 5%;
-    --sidebar-fg: 0 0% 65%;
+    /* Sidebar — darker than bg for depth */
+    --sidebar-bg: 220 15% 5%;
+    --sidebar-fg: 220 5% 60%;
     --sidebar-fg-active: 0 0% 100%;
-    --sidebar-hover: 0 0% 12%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-accent: 220 100% 55%;
+    --sidebar-hover: 220 12% 12%;
+    --sidebar-border: 220 12% 14%;
+    --sidebar-accent: 220 100% 58%;
 
-    /* Status colors — same hues, adjusted for dark */
-    --status-idea: 220 10% 55%;
-    --status-production: 210 100% 55%;
-    --status-review: 0 80% 58%;
-    --status-approval: 35 95% 58%;
-    --status-approval-client: 280 70% 62%;
-    --status-scheduled: 145 70% 48%;
-    --status-published: 160 85% 40%;
-    --status-rejected: 0 72% 50%;
+    /* Status colors — brighter for dark bg */
+    --status-idea: 220 12% 58%;
+    --status-production: 210 100% 60%;
+    --status-review: 0 80% 60%;
+    --status-approval: 35 95% 62%;
+    --status-approval-client: 280 70% 65%;
+    --status-scheduled: 145 70% 52%;
+    --status-published: 160 85% 45%;
+    --status-rejected: 0 72% 55%;
 
     /* Platform brand colors */
-    --platform-instagram: 330 70% 55%;
-    --platform-facebook: 220 70% 55%;
-    --platform-linkedin: 210 80% 48%;
+    --platform-instagram: 330 70% 60%;
+    --platform-facebook: 220 70% 60%;
+    --platform-linkedin: 210 80% 52%;
     --platform-tiktok: 0 0% 90%;
-    --platform-youtube: 0 72% 55%;
+    --platform-youtube: 0 72% 60%;
 
     /* Shadcn sidebar tokens */
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 65%;
-    --sidebar-primary: 220 100% 55%;
+    --sidebar-background: 220 15% 5%;
+    --sidebar-foreground: 220 5% 60%;
+    --sidebar-primary: 220 100% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent: 220 12% 12%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 220 100% 55%;
+    --sidebar-border: 220 12% 14%;
+    --sidebar-ring: 220 100% 58%;
   }
 }
 
