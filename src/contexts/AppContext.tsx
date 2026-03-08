@@ -9,6 +9,7 @@ interface AppContextType {
   selectedContent: ContentWithRelations | null;
   setSelectedContent: (content: ContentWithRelations | null) => void;
   updateContentStatus: (id: string, status: WorkflowStatus) => Promise<void>;
+  updateContentDate: (id: string, date: string | null) => Promise<void>;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   loading: boolean;
@@ -89,10 +90,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateContentDate = async (id: string, date: string | null) => {
+    if (!user) return;
+    await supabase.from('contents').update({ publish_date: date }).eq('id', id);
+    setContents(prev => prev.map(c => c.id === id ? { ...c, publish_date: date } : c));
+    if (selectedContent?.id === id) {
+      setSelectedContent(prev => prev ? { ...prev, publish_date: date } : null);
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       contents, projects, selectedContent, setSelectedContent,
-      updateContentStatus, sidebarCollapsed, setSidebarCollapsed,
+      updateContentStatus, updateContentDate, sidebarCollapsed, setSidebarCollapsed,
       loading, refetch: fetchData,
     }}>
       {children}
