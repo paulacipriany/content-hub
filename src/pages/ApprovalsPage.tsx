@@ -1,6 +1,6 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
-import { STATUS_LABELS, STATUS_COLORS } from '@/data/mockData';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/ContentCard';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle, MessageSquare } from 'lucide-react';
@@ -28,37 +28,23 @@ const ApprovalsPage = () => {
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
                     <span className="text-sm font-medium text-foreground">{c.title}</span>
-                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[c.status])}>
-                      {STATUS_LABELS[c.status]}
+                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[c.status as WorkflowStatus])}>
+                      {STATUS_LABELS[c.status as WorkflowStatus]}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{c.description}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Por {c.assignee.name} · {new Date(c.publishDate).toLocaleDateString('pt-BR')}
+                    Por {c.assignee_profile?.display_name ?? 'N/A'} · {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1 text-xs"
-                    onClick={() => setSelectedContent(c)}
-                  >
+                  <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
                     <MessageSquare size={14} /> Revisar
                   </Button>
-                  <Button
-                    size="sm"
-                    className="gap-1 text-xs bg-status-published hover:bg-status-published/90"
-                    onClick={() => updateContentStatus(c.id, 'scheduled')}
-                  >
+                  <Button size="sm" className="gap-1 text-xs bg-status-published hover:bg-status-published/90" onClick={() => updateContentStatus(c.id, 'scheduled')}>
                     <CheckCircle size={14} /> Aprovar
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10"
-                    onClick={() => updateContentStatus(c.id, 'review')}
-                  >
+                  <Button size="sm" variant="outline" className="gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => updateContentStatus(c.id, 'review')}>
                     <XCircle size={14} /> Rejeitar
                   </Button>
                 </div>

@@ -2,7 +2,7 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
 import { useState } from 'react';
-import { Platform, WorkflowStatus, PLATFORM_LABELS, STATUS_LABELS } from '@/data/mockData';
+import { Platform, WorkflowStatus, PLATFORM_LABELS, STATUS_LABELS } from '@/data/types';
 
 const ContentsPage = () => {
   const { contents } = useApp();
@@ -19,7 +19,6 @@ const ContentsPage = () => {
     <>
       <TopBar title="Meus Conteúdos" subtitle="Todos os conteúdos em um só lugar" />
       <div className="p-6">
-        {/* Filters */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <select
             value={filterPlatform}
@@ -48,6 +47,12 @@ const ContentsPage = () => {
           {filtered.map(c => (
             <ContentCard key={c.id} content={c} />
           ))}
+          {filtered.length === 0 && (
+            <div className="col-span-full text-center py-20 text-muted-foreground">
+              <p className="text-sm">Nenhum conteúdo encontrado.</p>
+              <p className="text-xs mt-1">Crie seu primeiro conteúdo para começar!</p>
+            </div>
+          )}
         </div>
       </div>
     </>

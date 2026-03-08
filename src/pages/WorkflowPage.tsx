@@ -1,9 +1,8 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
-import { STATUS_LABELS, WorkflowStatus } from '@/data/mockData';
+import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'];
 
