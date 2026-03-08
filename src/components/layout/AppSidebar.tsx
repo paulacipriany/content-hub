@@ -189,7 +189,7 @@ const AppSidebar = () => {
                   navigate(`/clients/${project.id}/dashboard`);
                 }}
                 className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
-                style={{ backgroundColor: project.color, color: getTextColor(project.color) }}
+                style={{ backgroundColor: project.color, color: contrastText(project.color) }}
               >
                 {project.name}
               </button>
