@@ -74,7 +74,7 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
   );
 };
 
-const TaskListCard = ({ projectId }: TaskListCardProps) => {
+const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
