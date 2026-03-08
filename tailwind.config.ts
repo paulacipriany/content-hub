@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +60,28 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "sidebar-bg": "hsl(var(--sidebar-bg))",
+        "sidebar-fg": "hsl(var(--sidebar-fg))",
+        "sidebar-fg-active": "hsl(var(--sidebar-fg-active))",
+        "sidebar-hover": "hsl(var(--sidebar-hover))",
+        "sidebar-border-custom": "hsl(var(--sidebar-border))",
+        "sidebar-accent-custom": "hsl(var(--sidebar-accent))",
+        status: {
+          idea: "hsl(var(--status-idea))",
+          production: "hsl(var(--status-production))",
+          review: "hsl(var(--status-review))",
+          approval: "hsl(var(--status-approval))",
+          scheduled: "hsl(var(--status-scheduled))",
+          published: "hsl(var(--status-published))",
+          rejected: "hsl(var(--status-rejected))",
+        },
+        platform: {
+          instagram: "hsl(var(--platform-instagram))",
+          facebook: "hsl(var(--platform-facebook))",
+          linkedin: "hsl(var(--platform-linkedin))",
+          tiktok: "hsl(var(--platform-tiktok))",
+          youtube: "hsl(var(--platform-youtube))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +90,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slide-in-right": "slide-in-right 0.3s ease-out",
+        "fade-in": "fade-in 0.2s ease-out",
       },
     },
   },
