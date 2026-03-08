@@ -128,12 +128,14 @@ interface PlatformSelectorProps {
   selected: Platform[];
   onChange: (platforms: Platform[]) => void;
   size?: number;
+  disabledPlatforms?: Platform[];
 }
 
-export const PlatformSelector = ({ selected, onChange, size = 32 }: PlatformSelectorProps) => {
+export const PlatformSelector = ({ selected, onChange, size = 32, disabledPlatforms }: PlatformSelectorProps) => {
   const platforms: Platform[] = ['instagram', 'facebook', 'youtube', 'pinterest', 'tiktok', 'twitter', 'google_business', 'linkedin', 'blog'];
   
   const toggle = (p: Platform) => {
+    if (disabledPlatforms?.includes(p)) return;
     if (selected.includes(p)) {
       onChange(selected.filter(s => s !== p));
     } else {
@@ -146,16 +148,20 @@ export const PlatformSelector = ({ selected, onChange, size = 32 }: PlatformSele
       {platforms.map(p => {
         const Icon = PLATFORM_ICONS[p];
         const isSelected = selected.includes(p);
+        const isDisabled = disabledPlatforms?.includes(p);
         return (
           <button
             key={p}
             type="button"
             onClick={() => toggle(p)}
+            disabled={isDisabled}
             className={cn(
               "rounded-full flex items-center justify-center transition-all border-2",
-              isSelected
-                ? "border-primary bg-card shadow-sm scale-110"
-                : "border-transparent bg-secondary/60 opacity-50 hover:opacity-80"
+              isDisabled
+                ? "border-transparent bg-secondary/30 opacity-25 cursor-not-allowed"
+                : isSelected
+                  ? "border-primary bg-card shadow-sm scale-110"
+                  : "border-transparent bg-secondary/60 opacity-50 hover:opacity-80"
             )}
             style={{ width: size, height: size }}
             title={p.charAt(0).toUpperCase() + p.slice(1)}
