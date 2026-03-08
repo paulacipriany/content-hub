@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface PostPreviewProps {
   content: ContentWithRelations;
   platform: Platform;
+  compact?: boolean;
 }
 
 const CarouselMedia = ({ urls, platform }: { urls: string[]; platform: string }) => {
@@ -82,13 +83,19 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
   );
 };
 
-const getDisplayText = (content: ContentWithRelations, platform?: string) => {
+const getDisplayText = (content: ContentWithRelations, platform?: string, maxChars?: number) => {
   const copyTexts = (content as any).copy_texts;
+  let text = '';
   if (platform && copyTexts && typeof copyTexts === 'object' && copyTexts[platform]) {
-    return copyTexts[platform];
+    text = copyTexts[platform];
+  } else {
+    const copyText = (content as any).copy_text;
+    text = copyText || content.description || content.title;
   }
-  const copyText = (content as any).copy_text;
-  return copyText || content.description || content.title;
+  if (maxChars && text.length > maxChars) {
+    return text.slice(0, maxChars) + '...';
+  }
+  return text;
 };
 
 const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
@@ -213,14 +220,20 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
   );
 };
 
-const PostPreview = ({ content, platform }: PostPreviewProps) => {
+const PostPreview = ({ content, platform, compact }: PostPreviewProps) => {
+  const displayContent = compact ? {
+    ...content,
+    copy_text: truncateStr((content as any).copy_text, 120),
+    description: truncateStr(content.description, 120),
+  } as ContentWithRelations : content;
+
   switch (platform) {
     case 'instagram':
-      return <InstagramPreview content={content} />;
+      return <InstagramPreview content={displayContent} />;
     case 'facebook':
-      return <FacebookPreview content={content} />;
+      return <FacebookPreview content={displayContent} />;
     case 'linkedin':
-      return <LinkedInPreview content={content} />;
+      return <LinkedInPreview content={displayContent} />;
     default:
       return (
         <div className="text-center py-8 text-muted-foreground text-sm">
@@ -229,5 +242,10 @@ const PostPreview = ({ content, platform }: PostPreviewProps) => {
       );
   }
 };
+
+function truncateStr(str: string | null | undefined, max: number): string {
+  if (!str) return '';
+  return str.length > max ? str.slice(0, max) + '…' : str;
+}
 
 export default PostPreview;

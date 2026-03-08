@@ -230,11 +230,45 @@ const SchedulingPage = () => {
               <div className="px-6 py-4 flex-1">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
                 {previewPlatform ? (
-                  <PostPreview content={previewContent} platform={previewPlatform as Platform} />
+                  <PostPreview content={previewContent} platform={previewPlatform as Platform} compact />
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
                 )}
               </div>
+
+              {/* Action buttons side by side */}
+              {(previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
+                <div className="px-6 py-3 border-t border-border/50 flex gap-2">
+                  {previewContent.copy_text && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      onClick={() => {
+                        navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                        toast.success('Texto copiado!');
+                      }}
+                    >
+                      <Copy size={14} /> Copiar texto
+                    </Button>
+                  )}
+                  {getContentMediaUrls(previewContent).length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      disabled={downloading}
+                      onClick={() => handleDownloadZip(previewContent)}
+                    >
+                      {downloading ? (
+                        <><Loader2 size={14} className="animate-spin" /> Baixando...</>
+                      ) : (
+                        <><Download size={14} /> Baixar mídias</>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {previewContent.hashtags && previewContent.hashtags.length > 0 && (
                 <div className="px-6 py-3 border-t border-border/50">
@@ -251,7 +285,7 @@ const SchedulingPage = () => {
                 const platforms = Array.isArray(previewContent.platform) ? previewContent.platform : [previewContent.platform];
                 const checked = checkedPlatforms[previewContent.id] ?? {};
                 return (
-                  <div className="px-6 py-4 border-b border-border/50">
+                  <div className="px-6 py-4 border-t border-border/50">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Checklist de agendamento</h4>
                     <div className="space-y-2.5">
                       {platforms.map(p => {
@@ -293,42 +327,6 @@ const SchedulingPage = () => {
                   </div>
                 );
               })()}
-
-
-              {getContentMediaUrls(previewContent).length > 0 && (
-                <div className="px-6 py-4 border-t border-border/50">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={downloading}
-                    onClick={() => handleDownloadZip(previewContent)}
-                  >
-                    {downloading ? (
-                      <><Loader2 size={14} className="mr-2 animate-spin" /> Baixando...</>
-                    ) : (
-                      <><Download size={14} className="mr-2" /> Baixar mídias (.zip)</>
-                    )}
-                  </Button>
-                </div>
-              )}
-
-              {/* Copy text */}
-              {previewContent.copy_text && (
-                <div className="px-6 py-4 border-t border-border/50">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      navigator.clipboard.writeText(previewContent.copy_text ?? '');
-                      toast.success('Texto copiado!');
-                    }}
-                  >
-                    <Copy size={14} className="mr-2" /> Copiar texto do post
-                  </Button>
-                </div>
-              )}
             </div>
           )}
         </SheetContent>
