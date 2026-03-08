@@ -40,14 +40,14 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/contents" element={<ContentsPage />} />
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/projects/:id" element={<ProjectsPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/workflow" element={<WorkflowPage />} />
-              <Route path="/approvals" element={<ApprovalsPage />} />
-              <Route path="/media" element={<MediaLibraryPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/clients" element={<ProjectsPage />} />
+              {/* Client-scoped routes */}
+              <Route path="/clients/:id/contents" element={<ContentsPage />} />
+              <Route path="/clients/:id/calendar" element={<CalendarPage />} />
+              <Route path="/clients/:id/workflow" element={<WorkflowPage />} />
+              <Route path="/clients/:id/approvals" element={<ApprovalsPage />} />
+              <Route path="/clients/:id/media" element={<MediaLibraryPage />} />
+              <Route path="/clients/:id/reports" element={<ReportsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

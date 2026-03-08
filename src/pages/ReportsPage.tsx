@@ -2,17 +2,19 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
 import { BarChart3, Clock, FileText } from 'lucide-react';
+import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ReportsPage = () => {
-  const { contents, projects } = useApp();
+  useClientFromUrl();
+  const { projectContents, selectedProject } = useApp();
 
-  const published = contents.filter(c => c.status === 'published').length;
-  const inProgress = contents.filter(c => !['published', 'idea'].includes(c.status)).length;
+  const published = projectContents.filter(c => c.status === 'published').length;
+  const inProgress = projectContents.filter(c => !['published', 'idea'].includes(c.status)).length;
 
   const byStatus = Object.entries(STATUS_LABELS).map(([key, label]) => ({
     status: key,
     label,
-    count: contents.filter(c => c.status === key).length,
+    count: projectContents.filter(c => c.status === key).length,
   }));
 
   return (
@@ -22,7 +24,7 @@ const ReportsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-card border border-border rounded-xl p-5">
             <FileText size={20} className="text-primary mb-2" />
-            <p className="text-2xl font-bold text-foreground">{contents.length}</p>
+            <p className="text-2xl font-bold text-foreground">{projectContents.length}</p>
             <p className="text-xs text-muted-foreground">Total de conteúdos</p>
           </div>
           <div className="bg-card border border-border rounded-xl p-5">
@@ -46,39 +48,13 @@ const ReportsPage = () => {
                 <div className="flex-1 h-6 bg-secondary rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all flex items-center justify-end pr-2"
-                    style={{ width: `${contents.length > 0 ? Math.max((item.count / contents.length) * 100, 8) : 0}%` }}
+                    style={{ width: `${projectContents.length > 0 ? Math.max((item.count / projectContents.length) * 100, 8) : 0}%` }}
                   >
                     <span className="text-[10px] font-medium text-primary-foreground">{item.count}</span>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Conteúdos por Projeto</h2>
-          <div className="space-y-3">
-            {projects.map(p => {
-              const count = contents.filter(c => c.project_id === p.id).length;
-              return (
-                <div key={p.id} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                  <span className="text-sm text-foreground flex-shrink-0 w-40">{p.name}</span>
-                  <div className="flex-1 h-6 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all flex items-center justify-end pr-2"
-                      style={{ width: `${contents.length > 0 ? Math.max((count / contents.length) * 100, 8) : 0}%`, backgroundColor: p.color }}
-                    >
-                      <span className="text-[10px] font-medium text-primary-foreground">{count}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {projects.length === 0 && (
-              <p className="text-sm text-muted-foreground">Nenhum projeto criado ainda.</p>
-            )}
           </div>
         </div>
       </div>

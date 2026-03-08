@@ -3,6 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
 import { STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { cn } from '@/lib/utils';
+import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import {
   DndContext,
   DragOverlay,
@@ -15,7 +16,6 @@ import {
   useDroppable,
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'];
@@ -66,14 +66,15 @@ const DroppableColumn = ({ status, children }: { status: WorkflowStatus; childre
 };
 
 const WorkflowPage = () => {
-  const { contents, updateContentStatus } = useApp();
+  useClientFromUrl();
+  const { projectContents, updateContentStatus } = useApp();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const activeContent = activeId ? contents.find(c => c.id === activeId) : null;
+  const activeContent = activeId ? projectContents.find(c => c.id === activeId) : null;
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -86,7 +87,7 @@ const WorkflowPage = () => {
 
     const contentId = active.id as string;
     const newStatus = over.id as WorkflowStatus;
-    const content = contents.find(c => c.id === contentId);
+    const content = projectContents.find(c => c.id === contentId);
 
     if (content && content.status !== newStatus) {
       updateContentStatus(contentId, newStatus);
@@ -100,7 +101,7 @@ const WorkflowPage = () => {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max">
             {statusOrder.map(status => {
-              const items = contents.filter(c => c.status === status);
+              const items = projectContents.filter(c => c.status === status);
               return (
                 <DroppableColumn key={status} status={status}>
                   <div className="px-4 py-3 flex items-center justify-between">

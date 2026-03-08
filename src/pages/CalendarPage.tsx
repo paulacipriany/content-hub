@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/ContentCard';
 import { cn } from '@/lib/utils';
+import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import {
   DndContext,
   DragOverlay,
@@ -82,7 +83,8 @@ const ContentOverlay = ({ content }: { content: ContentWithRelations }) => (
 );
 
 const CalendarPage = () => {
-  const { contents, setSelectedContent, updateContentDate } = useApp();
+  useClientFromUrl();
+  const { projectContents, setSelectedContent, updateContentDate } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
 
@@ -114,7 +116,7 @@ const CalendarPage = () => {
     `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
   const getContentsForDay = (day: number) =>
-    contents.filter(c => c.publish_date === getDateStr(day));
+    projectContents.filter(c => c.publish_date === getDateStr(day));
 
   const today = new Date();
   const isTodayFn = (day: number) => day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
@@ -132,7 +134,7 @@ const CalendarPage = () => {
 
     const contentId = active.id as string;
     const newDate = over.id as string;
-    const content = contents.find(c => c.id === contentId);
+    const content = projectContents.find(c => c.id === contentId);
     if (!content || content.publish_date === newDate) return;
 
     updateContentDate(contentId, newDate);

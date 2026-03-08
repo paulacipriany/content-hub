@@ -4,22 +4,25 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
-const navItems = [
+const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
-  { icon: FileText, label: 'Meus Conteúdos', path: '/contents' },
-  { icon: FolderOpen, label: 'Clientes', path: '/projects' },
+  { icon: FolderOpen, label: 'Clientes', path: '/clients' },
+  { icon: Settings, label: 'Configurações', path: '/settings' },
+];
+
+const clientNavItems = [
+  { icon: FileText, label: 'Conteúdos', path: '/contents' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: BarChart3, label: 'Relatórios', path: '/reports' },
-  { icon: Settings, label: 'Configurações', path: '/settings' },
 ];
 
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, setSidebarCollapsed, projects } = useApp();
+  const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject } = useApp();
   const { profile, role, signOut } = useAuth();
 
   const roleLabels: Record<string, string> = {
@@ -32,6 +35,8 @@ const AppSidebar = () => {
   const initials = profile?.display_name
     ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??';
+
+  const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
 
   return (
     <aside className={cn(
@@ -56,7 +61,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {navItems.map(item => {
+        {globalNavItems.map(item => {
           const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
             <button
@@ -76,17 +81,61 @@ const AppSidebar = () => {
           );
         })}
 
-        {/* Projects section */}
-        {!sidebarCollapsed && (
+        {/* Client sections - only when a client is selected */}
+        {selectedProject && (
+          <>
+            {!sidebarCollapsed && (
+              <div className="pt-4 pb-1 px-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
+                  <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium truncate">
+                    {selectedProject.name}
+                  </span>
+                </div>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <div className="pt-3 pb-1 flex justify-center">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedProject.color }} />
+              </div>
+            )}
+            {clientNavItems.map(item => {
+              const fullPath = `${clientBasePath}${item.path}`;
+              const isActive = location.pathname === fullPath;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(fullPath)}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm transition-colors",
+                    isActive
+                      ? "bg-sidebar-hover text-sidebar-fg-active"
+                      : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
+                  )}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <item.icon size={18} className="flex-shrink-0" />
+                  {!sidebarCollapsed && <span>{item.label}</span>}
+                </button>
+              );
+            })}
+          </>
+        )}
+
+        {/* Quick client list */}
+        {!selectedProject && !sidebarCollapsed && (
           <div className="pt-4">
             <div className="flex items-center justify-between px-3 mb-1">
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
-              <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" />
+              <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
             {projects.map(project => (
               <button
                 key={project.id}
-                onClick={() => navigate(`/projects/${project.id}`)}
+                onClick={() => {
+                  setSelectedProject(project);
+                  navigate(`/clients/${project.id}/contents`);
+                }}
                 className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
               >
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />

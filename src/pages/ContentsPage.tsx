@@ -3,13 +3,15 @@ import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
 import { useState } from 'react';
 import { Platform, WorkflowStatus, PLATFORM_LABELS, STATUS_LABELS } from '@/data/types';
+import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ContentsPage = () => {
-  const { contents } = useApp();
+  useClientFromUrl();
+  const { projectContents } = useApp();
   const [filterPlatform, setFilterPlatform] = useState<Platform | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<WorkflowStatus | 'all'>('all');
 
-  const filtered = contents.filter(c => {
+  const filtered = projectContents.filter(c => {
     if (filterPlatform !== 'all' && c.platform !== filterPlatform) return false;
     if (filterStatus !== 'all' && c.status !== filterStatus) return false;
     return true;
@@ -17,7 +19,7 @@ const ContentsPage = () => {
 
   return (
     <>
-      <TopBar title="Meus Conteúdos" subtitle="Todos os conteúdos em um só lugar" />
+      <TopBar title="Conteúdos" subtitle="Todos os conteúdos deste cliente" />
       <div className="p-6">
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <select

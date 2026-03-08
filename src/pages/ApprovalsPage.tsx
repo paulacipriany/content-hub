@@ -5,10 +5,12 @@ import { platformIcon } from '@/components/content/ContentCard';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ApprovalsPage = () => {
-  const { contents, setSelectedContent, updateContentStatus } = useApp();
-  const approvals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+  useClientFromUrl();
+  const { projectContents, setSelectedContent, updateContentStatus } = useApp();
+  const approvals = projectContents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
 
   return (
     <>

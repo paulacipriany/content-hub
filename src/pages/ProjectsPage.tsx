@@ -21,7 +21,7 @@ import {
 const COLORS = ['#F97316', '#8B5CF6', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#14B8A6', '#F59E0B'];
 
 const ProjectsPage = () => {
-  const { contents, projects, refetch } = useApp();
+  const { contents, projects, refetch, setSelectedProject } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -175,7 +175,7 @@ const ProjectsPage = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => navigate(`/projects/${project.id}`)}
+                    onClick={() => { setSelectedProject(project); navigate(`/clients/${project.id}/contents`); }}
                     className="w-full text-left"
                   >
                     <div className="flex items-center gap-3 mb-4">
