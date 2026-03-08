@@ -188,19 +188,26 @@ const AppSidebar = () => {
               <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Clientes</span>
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
-            {projects.map(project => (
-              <button
-                key={project.id}
-                onClick={() => {
-                  setSelectedProject(project);
-                  navigate(`/clients/${project.id}/dashboard`);
-                }}
-                className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
-                style={{ backgroundColor: project.color, color: contrastText(project.color) }}
-              >
-                {project.name}
-              </button>
-            ))}
+            {projects.map(project => {
+              const pal = generatePalette(project.color);
+              return (
+                <button
+                  key={project.id}
+                  onClick={() => {
+                    setSelectedProject(project);
+                    navigate(`/clients/${project.id}/dashboard`);
+                  }}
+                  className="w-full px-4 py-2 text-sm font-semibold truncate text-left transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
+                >
+                  <span
+                    className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
+                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                  >
+                    {project.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </nav>
