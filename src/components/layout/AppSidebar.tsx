@@ -115,7 +115,13 @@ const AppSidebar = () => {
                 </div>
               );
             })()}
-            {clientNavItems.map(item => {
+            {clientNavItems
+              .filter(item => {
+                // Hide management items from client role
+                if (isClient && ['/members', '/reports'].includes(item.path)) return false;
+                return true;
+              })
+              .map(item => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
               return (
