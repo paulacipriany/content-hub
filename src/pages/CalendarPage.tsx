@@ -41,7 +41,7 @@ interface CalTask {
 const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
-    data: { content },
+    data: { type: 'content', content },
   });
   return (
     <button
@@ -57,6 +57,36 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       {platformIcon(content.platform, 10)}
       <span className="truncate">{content.title}</span>
     </button>
+  );
+};
+
+// --- Draggable task from sidebar ---
+const DraggableTask = ({ task, onToggle }: { task: CalTask; onToggle: (id: string, done: boolean) => void }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `task-${task.id}`,
+    data: { type: 'task', task },
+  });
+  return (
+    <div
+      ref={setNodeRef} {...listeners} {...attributes}
+      className={cn(
+        "flex items-start gap-2 py-1.5 px-1 rounded-md hover:bg-secondary/50 transition-colors cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-30"
+      )}
+    >
+      <Checkbox
+        checked={task.done}
+        onCheckedChange={(checked) => { onToggle(task.id, !!checked); }}
+        onClick={(e) => e.stopPropagation()}
+        className="mt-0.5 flex-shrink-0"
+      />
+      <span className={cn(
+        "text-sm leading-snug",
+        task.done ? "line-through text-muted-foreground" : "text-foreground"
+      )}>
+        {task.text}
+      </span>
+    </div>
   );
 };
 
@@ -163,6 +193,7 @@ const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
+  const [activeTask, setActiveTask] = useState<CalTask | null>(null);
   const [tasks, setTasks] = useState<CalTask[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
 
@@ -267,17 +298,29 @@ const CalendarPage = () => {
 
   // --- DnD ---
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveContent(event.active.data.current?.content ?? null);
+    const data = event.active.data.current;
+    if (data?.type === 'content') setActiveContent(data.content);
+    else if (data?.type === 'task') setActiveTask(data.task);
   };
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveContent(null);
+    setActiveTask(null);
     if (!over) return;
-    const contentId = active.id as string;
+    const data = active.data.current;
     const newDate = over.id as string;
-    const content = projectContents.find(c => c.id === contentId);
-    if (!content || content.publish_date === newDate) return;
-    updateContentDate(contentId, newDate);
+
+    if (data?.type === 'content') {
+      const content = projectContents.find(c => c.id === active.id);
+      if (!content || content.publish_date === newDate) return;
+      updateContentDate(active.id as string, newDate);
+    } else if (data?.type === 'task') {
+      const taskId = (active.id as string).replace('task-', '');
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || task.due_date === newDate) return;
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, due_date: newDate } : t));
+      await supabase.from('project_tasks').update({ due_date: newDate } as any).eq('id', taskId);
+    }
   };
 
   // --- Render day cell contents ---
@@ -365,19 +408,7 @@ const CalendarPage = () => {
               ) : (
                 <div className="space-y-1 mb-3">
                   {undatedTasks.map(t => (
-                    <div key={t.id} className="flex items-start gap-2 py-1.5 px-1 rounded-md hover:bg-secondary/50 transition-colors">
-                      <Checkbox
-                        checked={t.done}
-                        onCheckedChange={(checked) => toggleTask(t.id, !!checked)}
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <span className={cn(
-                        "text-sm leading-snug",
-                        t.done ? "line-through text-muted-foreground" : "text-foreground"
-                      )}>
-                        {t.text}
-                      </span>
-                    </div>
+                    <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
                   ))}
                 </div>
               )}
@@ -447,6 +478,11 @@ const CalendarPage = () => {
 
               <DragOverlay>
                 {activeContent && <ContentOverlay content={activeContent} />}
+                {activeTask && (
+                  <div className="px-2 py-1 rounded text-xs font-medium bg-card border border-border shadow-lg w-48 truncate">
+                    {activeTask.text}
+                  </div>
+                )}
               </DragOverlay>
             </DndContext>
           </div>
