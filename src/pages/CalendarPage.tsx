@@ -436,6 +436,7 @@ const CalendarPage = () => {
                 <Plus size={14} />
               </Button>
             </form>
+            </div>
           </div>
         </div>
 
