@@ -116,7 +116,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       project_id: projectId,
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
-      status: 'idea',
+      status: defaultStatus || 'idea',
     } as any).select('id').single();
 
     if (error) {

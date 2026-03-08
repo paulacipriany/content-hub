@@ -58,7 +58,26 @@ const IdeasBankPage = () => {
 
   return (
     <>
-      <TopBar title="Banco de Ideias" subtitle="Ideias de conteúdo para produção" />
+      <TopBar
+        title="Banco de Ideias"
+        subtitle="Ideias de conteúdo para produção"
+        actions={
+          <CreateContentDialog
+            defaultProjectId={selectedProject?.id}
+            defaultStatus="idea-bank"
+            trigger={
+              <Button
+                size="sm"
+                className="gap-1.5 h-9"
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Adicionar ideia</span>
+              </Button>
+            }
+          />
+        }
+      />
       <div className="p-6">
         {selected.size > 0 && (
           <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
