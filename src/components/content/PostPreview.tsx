@@ -51,7 +51,7 @@ const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       {/* Image */}
-      <ImagePlaceholder platform="instagram" />
+      <MediaOrPlaceholder content={content} platform="instagram" />
 
       {/* Actions */}
       <div className="px-3 py-2.5">
