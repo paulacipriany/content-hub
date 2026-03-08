@@ -408,19 +408,7 @@ const CalendarPage = () => {
               ) : (
                 <div className="space-y-1 mb-3">
                   {undatedTasks.map(t => (
-                    <div key={t.id} className="flex items-start gap-2 py-1.5 px-1 rounded-md hover:bg-secondary/50 transition-colors">
-                      <Checkbox
-                        checked={t.done}
-                        onCheckedChange={(checked) => toggleTask(t.id, !!checked)}
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <span className={cn(
-                        "text-sm leading-snug",
-                        t.done ? "line-through text-muted-foreground" : "text-foreground"
-                      )}>
-                        {t.text}
-                      </span>
-                    </div>
+                    <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
                   ))}
                 </div>
               )}
