@@ -17,7 +17,7 @@ const Dashboard = () => {
     { label: 'Em Produção', value: contents.filter(c => c.status === 'production').length, icon: TrendingUp, color: 'text-status-production' },
   ];
 
-  const pendingApprovals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+  const pendingApprovals = contents.filter(c => c.status === 'approval-client');
   const inProduction = contents.filter(c => c.status === 'production');
 
   const handleClientClick = (project: typeof projects[number]) => {
