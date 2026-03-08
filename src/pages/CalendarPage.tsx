@@ -349,8 +349,8 @@ const CalendarPage = () => {
 
   // --- Render day cell contents ---
   const renderDayItems = (dateStr: string) => {
-    const dayContents = getContentsForDate(dateStr);
-    const dayTasks = getTasksForDate(dateStr);
+    const dayContents = showContents ? getContentsForDate(dateStr) : [];
+    const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
     return (
       <>
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
