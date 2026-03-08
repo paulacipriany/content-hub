@@ -30,6 +30,7 @@ interface MemberProfile {
 
 interface TaskListCardProps {
   projectId: string;
+  hideDone?: boolean;
 }
 
 const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
@@ -73,7 +74,7 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
   );
 };
 
-const TaskListCard = ({ projectId }: TaskListCardProps) => {
+const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
@@ -286,7 +287,7 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
         ) : tasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma tarefa ainda.</p>
         ) : (
-          tasks.map(t => (
+          tasks.filter(t => !(hideDone && t.done)).map(t => (
             <div
               key={t.id}
               className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-secondary/50 transition-colors group"

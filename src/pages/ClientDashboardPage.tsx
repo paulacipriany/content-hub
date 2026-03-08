@@ -111,7 +111,7 @@ const ClientDashboardPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Task list */}
-          <TaskListCard projectId={selectedProject.id} />
+          <TaskListCard projectId={selectedProject.id} hideDone />
           {/* Status distribution */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">Distribuição por Status</h2>
