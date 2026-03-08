@@ -340,6 +340,7 @@ const ContentPanel = () => {
                     publish_time: editPublishTime || null,
                     media_url: mediaUrls[0] ?? null,
                     media_urls: mediaUrls,
+                    briefing_images: briefingImages,
                   });
                 }}
               >
