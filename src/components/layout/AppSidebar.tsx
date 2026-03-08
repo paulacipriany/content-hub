@@ -11,9 +11,9 @@ const getDarkShade = (hex: string): string => {
   const g = parseInt(c.substring(2, 4), 16) / 255;
   const b = parseInt(c.substring(4, 6), 16) / 255;
   // darken by mixing with black at 85%
-  const dr = Math.round(r * 0.15 * 255);
-  const dg = Math.round(g * 0.15 * 255);
-  const db = Math.round(b * 0.15 * 255);
+  const dr = Math.round(r * 0.3 * 255);
+  const dg = Math.round(g * 0.3 * 255);
+  const db = Math.round(b * 0.3 * 255);
   return `rgb(${dr}, ${dg}, ${db})`;
 };
 
