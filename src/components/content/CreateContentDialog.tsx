@@ -251,17 +251,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </Button>
           </div>
 
-          {/* Assignee */}
-          <div className="space-y-1.5">
-            <Label htmlFor="content-assignee">Responsável (nome)</Label>
-            <Input
-              id="content-assignee"
-              placeholder="Buscar por nome..."
-              value={assigneeEmail}
-              onChange={e => setAssigneeEmail(e.target.value)}
-            />
-            <p className="text-[11px] text-muted-foreground">Deixe em branco para atribuir a você mesmo.</p>
-          </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
