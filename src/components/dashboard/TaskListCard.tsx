@@ -94,7 +94,7 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
   return (
     <div className="bg-card border border-border rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
-        <ListTodo size={16} className="text-primary" />
+        <ListTodo size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
         <h2 className="text-sm font-semibold text-foreground">Tarefas</h2>
         {tasks.length > 0 && (
           <span className="ml-auto text-xs text-muted-foreground">{doneCount}/{tasks.length}</span>
