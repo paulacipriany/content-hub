@@ -221,7 +221,10 @@ const ContentPanel = () => {
                 size="sm"
                 variant="outline"
                 className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                onClick={() => updateContentStatus(selectedContent.id, 'review')}
+                onClick={async () => {
+                  await updateContentStatus(selectedContent.id, 'review');
+                  setSelectedContent(null);
+                }}
               >
                 Enviar para ajustes
               </Button>
