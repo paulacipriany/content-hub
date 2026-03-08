@@ -21,6 +21,7 @@ const clientNavItems = [
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
   { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
+  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true },
   { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
