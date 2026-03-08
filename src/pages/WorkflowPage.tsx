@@ -168,7 +168,7 @@ const WorkflowPage = () => {
                                 <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
                               </div>
                             )
-                            : <DraggableCard key={item.id} content={item} />
+                            : <DraggableCard key={item.id} content={item} onPreviewClick={handleClientCardClick} />
                         ))}
                       </div>
                     </>
