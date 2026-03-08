@@ -8,6 +8,7 @@ import { contrastText, generatePalette } from '@/lib/clientPalette';
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
   { icon: FolderOpen, label: 'Clientes', path: '/clients' },
+  { icon: Users, label: 'Usuários', path: '/users', adminOnly: true },
   { icon: Settings, label: 'Configurações', path: '/settings' },
 ];
 
