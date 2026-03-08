@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
   { icon: FileText, label: 'Meus Conteúdos', path: '/contents' },
-  { icon: FolderOpen, label: 'Projetos', path: '/projects' },
+  { icon: FolderOpen, label: 'Clientes', path: '/projects' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
