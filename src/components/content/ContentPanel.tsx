@@ -244,38 +244,44 @@ const ContentPanel = () => {
         </div>
         <div className="flex items-center gap-2 ml-4">
           {isClient ? (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                disabled={!newComment.trim() && !commentImageUrl && comments.length === 0}
-                title={!newComment.trim() && !commentImageUrl && comments.length === 0 ? 'Adicione um comentário antes de enviar para ajustes' : ''}
-                onClick={async () => {
-                  if (!user) return;
-                  if (newComment.trim() || commentImageUrl) {
-                    const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
-                    if (commentImageUrl) insertData.image_url = commentImageUrl;
-                    await supabase.from('comments').insert(insertData);
-                  }
-                  await updateContentStatus(selectedContent.id, 'review');
-                  setNewComment('');
-                  setCommentImageUrl(null);
-                  setSelectedContent(null);
-                }}
-              >
-                Enviar para ajustes
-              </Button>
-              {canAdvance && (
+            isClientApproval ? (
+              <>
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
-                  onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                  variant="outline"
+                  className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+                  disabled={!newComment.trim() && !commentImageUrl && comments.length === 0}
+                  title={!newComment.trim() && !commentImageUrl && comments.length === 0 ? 'Adicione um comentário antes de enviar para ajustes' : ''}
+                  onClick={async () => {
+                    if (!user) return;
+                    if (newComment.trim() || commentImageUrl) {
+                      const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
+                      if (commentImageUrl) insertData.image_url = commentImageUrl;
+                      await supabase.from('comments').insert(insertData);
+                    }
+                    await updateContentStatus(selectedContent.id, 'review');
+                    setNewComment('');
+                    setCommentImageUrl(null);
+                    setSelectedContent(null);
+                  }}
                 >
-                  Aprovar
+                  Enviar para ajustes
                 </Button>
-              )}
-            </>
+                {canAdvance && (
+                  <Button
+                    size="sm"
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                    onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                  >
+                    Aprovar
+                  </Button>
+                )}
+              </>
+            ) : (
+              <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+                {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+              </span>
+            )
           ) : (
             <>
               <Button
