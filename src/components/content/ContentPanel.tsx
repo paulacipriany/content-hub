@@ -88,6 +88,8 @@ const ContentPanel = () => {
     } else {
       setMediaUrls([]);
     }
+    const bImages = (selectedContent as any).briefing_images;
+    setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
   }, [selectedContent?.id]);
 
   // Auto-save title
