@@ -1,8 +1,8 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType, ContentWithRelations } from '@/data/types';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User } from 'lucide-react';
+import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
@@ -24,6 +24,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import PostPreview from '@/components/content/PostPreview';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -228,7 +230,9 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
 const CalendarPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentDate, selectedProject } = useApp();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isClient = role === 'client';
+  const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
@@ -368,7 +372,7 @@ const CalendarPage = () => {
     return (
       <>
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => setSelectedContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => isClient ? setPreviewContent(c) : setSelectedContent(c)} />
         ))}
         {viewMode === 'month' && dayContents.length > 3 && (
           <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
@@ -618,6 +622,83 @@ const CalendarPage = () => {
         </div>
       </div>
       </DndContext>
+
+      {/* Client preview sheet */}
+      <Sheet open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+          {previewContent && (() => {
+            const previewPlatform = Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform;
+            return (
+              <div className="flex flex-col h-full">
+                <div className="px-6 pt-6 pb-4 border-b border-border">
+                  <SheetTitle className="text-lg font-semibold text-foreground mb-3">
+                    {previewContent.title}
+                  </SheetTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground",
+                      STATUS_COLORS[previewContent.status as WorkflowStatus]
+                    )}>
+                      {STATUS_LABELS[previewContent.status as WorkflowStatus]}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                      {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                      {platformIcon(previewContent.platform, 12)}
+                      {Array.isArray(previewContent.platform) ? previewContent.platform.join(', ') : previewContent.platform}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  {previewContent.publish_date && (
+                    <div className="flex items-center gap-1.5">
+                      <CalIcon size={12} />
+                      <span>
+                        {new Date(previewContent.publish_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        {(previewContent as any).publish_time && ` às ${(previewContent as any).publish_time}`}
+                      </span>
+                    </div>
+                  )}
+                  {previewContent.assignee_profile && (
+                    <div className="flex items-center gap-1.5">
+                      <User size={12} />
+                      <span>{previewContent.assignee_profile.display_name}</span>
+                    </div>
+                  )}
+                </div>
+
+                {previewContent.description && (
+                  <div className="px-6 py-4 border-b border-border/50">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                  </div>
+                )}
+
+                <div className="px-6 py-4 flex-1">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
+                  {previewPlatform ? (
+                    <PostPreview content={previewContent} platform={previewPlatform as Platform} />
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
+                  )}
+                </div>
+
+                {previewContent.hashtags && previewContent.hashtags.length > 0 && (
+                  <div className="px-6 py-3 border-t border-border/50">
+                    <div className="flex flex-wrap gap-1.5">
+                      {previewContent.hashtags.map((tag, i) => (
+                        <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
