@@ -49,6 +49,8 @@ const ContentPanel = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editHashtagInput, setEditHashtagInput] = useState('');
   const [editHashtags, setEditHashtags] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync local state when selected content changes
   useEffect(() => {
