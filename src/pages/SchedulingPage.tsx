@@ -122,38 +122,11 @@ const SchedulingPage = () => {
       <Sheet open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
           {previewContent && (
-            <div className="flex flex-col h-full">
+             <div className="flex flex-col h-full">
               <div className="px-6 pt-6 pb-4 border-b border-border">
-                <SheetTitle className="text-lg font-semibold text-foreground mb-3">
+                <SheetTitle className="text-lg font-semibold text-foreground">
                   {previewContent.title}
                 </SheetTitle>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                    {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType]}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                    {platformIcon(previewContent.platform, 12)}
-                    {Array.isArray(previewContent.platform) ? previewContent.platform.join(', ') : previewContent.platform}
-                  </span>
-                </div>
-              </div>
-
-              <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                {previewContent.publish_date && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar size={12} />
-                    <span>
-                      {new Date(previewContent.publish_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                      {previewContent.publish_time && ` às ${previewContent.publish_time}`}
-                    </span>
-                  </div>
-                )}
-                {previewContent.assignee_profile && (
-                  <div className="flex items-center gap-1.5">
-                    <User size={12} />
-                    <span>{previewContent.assignee_profile.display_name}</span>
-                  </div>
-                )}
               </div>
 
               {/* Platform checklist */}
@@ -161,11 +134,11 @@ const SchedulingPage = () => {
                 const platforms = Array.isArray(previewContent.platform) ? previewContent.platform : [previewContent.platform];
                 if (platforms.length === 0) return null;
                 return (
-                  <div className="px-6 py-4 border-b border-border/50">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Redes Sociais</h4>
-                    <div className="space-y-2.5">
+                  <div className="px-6 py-5">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Redes Sociais</h4>
+                    <div className="space-y-3">
                       {platforms.map(p => (
-                        <label key={p} className="flex items-center gap-3 cursor-pointer group">
+                        <label key={p} className="flex items-center gap-3 cursor-pointer">
                           <Checkbox
                             checked={checkedPlatforms[previewContent.id]?.[p] ?? false}
                             onCheckedChange={(checked) => {
@@ -189,39 +162,13 @@ const SchedulingPage = () => {
                       ))}
                     </div>
                     {platforms.length > 1 && (
-                      <p className="text-[10px] text-muted-foreground mt-2">
+                      <p className="text-xs text-muted-foreground mt-3">
                         {Object.values(checkedPlatforms[previewContent.id] ?? {}).filter(Boolean).length} de {platforms.length} agendada(s)
                       </p>
                     )}
                   </div>
                 );
               })()}
-
-              {previewContent.description && (
-                <div className="px-6 py-4 border-b border-border/50">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description.replace(/<[^>]*>/g, '')}</p>
-                </div>
-              )}
-
-              <div className="px-6 py-4 flex-1">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
-                {previewPlatform ? (
-                  <PostPreview content={previewContent} platform={previewPlatform as Platform} />
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
-                )}
-              </div>
-
-              {previewContent.hashtags && previewContent.hashtags.length > 0 && (
-                <div className="px-6 py-3 border-t border-border/50">
-                  <div className="flex flex-wrap gap-1.5">
-                    {previewContent.hashtags.map((tag, i) => (
-                      <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </SheetContent>
