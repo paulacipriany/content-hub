@@ -358,6 +358,8 @@ export type Database = {
         | "tiktok"
         | "youtube"
         | "pinterest"
+        | "twitter"
+        | "google_business"
       workflow_status:
         | "idea"
         | "production"
@@ -511,6 +513,8 @@ export const Constants = {
         "tiktok",
         "youtube",
         "pinterest",
+        "twitter",
+        "google_business",
       ],
       workflow_status: [
         "idea",
