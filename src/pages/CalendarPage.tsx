@@ -44,6 +44,17 @@ interface CalTask {
   sort_order: number;
 }
 
+const STATUS_CSS_VAR: Record<string, string> = {
+  'idea': '--status-idea',
+  'idea-bank': '--status-idea',
+  'production': '--status-production',
+  'review': '--status-review',
+  'approval-client': '--status-approval-client',
+  'scheduled': '--status-scheduled',
+  'programmed': '--status-programmed',
+  'published': '--status-published',
+};
+
 // --- Expanded content card for calendar (like reference image) ---
 const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -51,15 +62,17 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
     data: { type: 'content', content },
   });
   const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
+  const borderColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
   return (
     <div
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left p-2 rounded-lg bg-card border border-border/60 shadow-sm",
+        "w-full text-left p-2 rounded-lg bg-card border border-border/60 shadow-sm border-l-[3px]",
         "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
+      style={{ borderLeftColor: borderColor }}
     >
       {/* Platform icons */}
       <div className="flex items-center gap-1 mb-1">
@@ -70,14 +83,13 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       {/* Title */}
       <p className="text-[12px] font-semibold text-foreground truncate mb-1.5">{content.title}</p>
       {/* Status label */}
-      <div className="flex items-center gap-1.5 mb-1">
-        <span className={cn("w-2 h-2 rounded-full flex-shrink-0", STATUS_COLORS[content.status as WorkflowStatus])} />
-        <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
-      </div>
+      <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
       {/* Content type tag */}
-      <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-medium">
-        {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
-      </span>
+      <div className="mt-1">
+        <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-medium">
+          {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+        </span>
+      </div>
     </div>
   );
 };
