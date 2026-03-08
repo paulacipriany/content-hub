@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo } from 'lucide-react';
+import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -20,12 +20,13 @@ const clientNavItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
+  { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
   { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
-  { icon: BarChart3, label: 'Relatórios', path: '/reports' },
-  { icon: Users, label: 'Usuários', path: '/members' },
+  { icon: BarChart3, label: 'Relatórios', path: '/reports', hideFromClient: true },
+  { icon: Users, label: 'Usuários', path: '/members', hideFromClient: true },
 ];
 
 const AppSidebar = () => {
@@ -141,8 +142,7 @@ const AppSidebar = () => {
             )}
             {clientNavItems
               .filter(item => {
-                // Hide management items from client role
-                if (isClient && ['/members', '/reports'].includes(item.path)) return false;
+                if (isClient && (item as any).hideFromClient) return false;
                 return true;
               })
               .map(item => {
