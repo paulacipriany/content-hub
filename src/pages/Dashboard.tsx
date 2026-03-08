@@ -58,7 +58,11 @@ const Dashboard = () => {
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
+                          {(p as any).logo_url ? (
+                            <img src={(p as any).logo_url} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
+                          )}
                           <span className="text-sm font-medium text-foreground">{p.name}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">{pContents.length}</span>

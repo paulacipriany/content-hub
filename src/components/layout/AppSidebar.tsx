@@ -139,7 +139,11 @@ const AppSidebar = () => {
                 }}
                 className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-sm text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active transition-colors"
               >
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                {(project as any).logo_url ? (
+                  <img src={(project as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                )}
                 <span className="truncate">{project.name}</span>
               </button>
             ))}

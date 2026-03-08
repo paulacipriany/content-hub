@@ -37,7 +37,10 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
             <button className="flex items-center gap-2 h-9 px-3 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm font-medium text-foreground">
               {selectedProject ? (
                 <>
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
+                  {(selectedProject as any).logo_url
+                    ? <img src={(selectedProject as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                    : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
+                  }
                   <span className="max-w-[140px] truncate">{selectedProject.name}</span>
                 </>
               ) : (
@@ -58,7 +61,10 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
                     : "text-foreground hover:bg-secondary"
                 )}
               >
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                {(p as any).logo_url
+                  ? <img src={(p as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                }
                 <span className="truncate">{p.name}</span>
               </button>
             ))}
