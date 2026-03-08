@@ -2,7 +2,7 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp, Wrench } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -17,6 +17,7 @@ const Dashboard = () => {
   ];
 
   const pendingApprovals = contents.filter(c => c.status === 'approval-internal' || c.status === 'approval-client');
+  const inProduction = contents.filter(c => c.status === 'production');
 
   const handleClientClick = (project: typeof projects[number]) => {
     setSelectedProject(project);
@@ -40,7 +41,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Clients */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">Clientes</h2>
@@ -85,11 +86,41 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* In Production */}
+          <div className="bg-card border border-border rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Wrench size={16} className="text-status-production" />
+              <h2 className="text-sm font-semibold text-foreground">Em Produção</h2>
+              <span className="ml-auto text-xs font-semibold text-muted-foreground">{inProduction.length}</span>
+            </div>
+            <div className="space-y-2.5">
+              {inProduction.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum conteúdo em produção.</p>
+              ) : (
+                inProduction.map(c => {
+                  const project = projects.find(p => p.id === c.project_id);
+                  return (
+                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{project?.name ?? ''}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                        {c.assignee_profile?.display_name?.split(' ')[0] ?? ''}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
           {/* Pending Approvals */}
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle size={16} className="text-status-approval" />
               <h2 className="text-sm font-semibold text-foreground">Aguardando Aprovação</h2>
+              <span className="ml-auto text-xs font-semibold text-muted-foreground">{pendingApprovals.length}</span>
             </div>
             <div className="space-y-2.5">
               {pendingApprovals.length === 0 ? (
