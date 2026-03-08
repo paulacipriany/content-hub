@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
 const platformIcons: Partial<Record<Platform, React.ElementType>> = {
   instagram: Instagram,
