@@ -383,6 +383,7 @@ const CalendarPage = () => {
   return (
     <>
       <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex h-[calc(100vh-130px)]">
         {/* Sidebar: undated tasks */}
         <div className={cn(
@@ -536,7 +537,6 @@ const CalendarPage = () => {
           </div>
 
           {/* Calendar grid */}
-          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex-1 overflow-y-auto">
               {/* Day name headers */}
               <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
@@ -615,9 +615,9 @@ const CalendarPage = () => {
                 </div>
               )}
             </DragOverlay>
-          </DndContext>
         </div>
       </div>
+      </DndContext>
     </>
   );
 };
