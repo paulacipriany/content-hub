@@ -68,7 +68,7 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left p-2 rounded-lg bg-card border border-border/60 shadow-sm border-l-[3px]",
+        "w-full text-left p-2 bg-card border border-border/60 shadow-sm border-l-[3px]",
         "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
