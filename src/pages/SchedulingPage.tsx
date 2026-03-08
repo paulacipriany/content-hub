@@ -137,14 +137,11 @@ const SchedulingPage = () => {
                       <div
                         key={content.id}
                         className={cn(
-                          "grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          "grid grid-cols-[1fr_140px_120px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
                           exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
                         )}
                         onClick={() => setPreviewContent(content)}
                       >
-                        <div className="flex items-center justify-center">
-                          {PlatformIcon && <PlatformIcon size={16} className="text-muted-foreground" />}
-                        </div>
                         <div className="min-w-0">
                           <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
                           {content.publish_time && (
@@ -161,44 +158,21 @@ const SchedulingPage = () => {
                             {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
-                          {platforms.map(p => (
-                            <label key={p} className="flex items-center gap-1.5 cursor-pointer">
-                              <Checkbox
-                                checked={checked[p] ?? false}
-                                onCheckedChange={(val) => {
-                                  const updated = {
-                                    ...checked,
-                                    [p]: !!val,
-                                  };
-                                  setCheckedPlatforms(prev => ({
-                                    ...prev,
-                                    [content.id]: updated,
-                                  }));
-                                  // Check if all platforms are now checked
-                                  const allChecked = platforms.length > 0 && platforms.every(pl => !!updated[pl]);
-                                  if (allChecked) {
-                                    setExitingIds(prev => new Set(prev).add(content.id));
-                                    toast.success(`"${content.title}" movido para Programado`);
-                                    setTimeout(() => {
-                                      updateContentStatus(content.id, 'programmed');
-                                      setExitingIds(prev => {
-                                        const next = new Set(prev);
-                                        next.delete(content.id);
-                                        return next;
-                                      });
-                                    }, 600);
-                                  }
-                                }}
+                        <div className="flex items-center gap-2">
+                          {platforms.map(p => {
+                            const Icon = platformIcons[p as Platform];
+                            const isChecked = checked[p] ?? false;
+                            return Icon ? (
+                              <Icon
+                                key={p}
+                                size={16}
+                                className={cn(
+                                  "transition-colors",
+                                  isChecked ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                )}
                               />
-                              <span className={cn(
-                                "text-[10px] font-medium",
-                                checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
-                              )}>
-                                {PLATFORM_LABELS[p as Platform] ?? p}
-                              </span>
-                            </label>
-                          ))}
+                            ) : null;
+                          })}
                         </div>
                       </div>
                     );
