@@ -94,7 +94,7 @@ const WorkflowPage = () => {
 
   return (
     <>
-      <TopBar title="Workflow" subtitle="Arraste os cards entre colunas para mudar o status" />
+      <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} />
       <div className="p-6 overflow-x-auto">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max">
