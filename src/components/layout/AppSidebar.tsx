@@ -69,7 +69,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {globalNavItems.map(item => {
+        {!isClient && globalNavItems.map(item => {
           const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
             <button
