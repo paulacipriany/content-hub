@@ -62,6 +62,7 @@ const ContentPanel = () => {
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   // Sync local state when selected content changes
   useEffect(() => {
