@@ -91,7 +91,8 @@ export const PLATFORM_CONTENT_TYPES: Record<Platform, ContentType[]> = {
   facebook: ['feed', 'reels', 'stories', 'video'],
   linkedin: ['feed', 'video'],
   tiktok: ['video'],
-  youtube: ['video', 'post'],
+  youtube: ['video', 'post', 'shorts'],
+  pinterest: ['image', 'video'],
 };
 
 // Get available content types for a set of platforms (intersection)
