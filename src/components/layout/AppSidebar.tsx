@@ -98,17 +98,21 @@ const AppSidebar = () => {
         )}
       </nav>
 
-      {/* Bottom user */}
       <div className="px-3 py-3 border-t border-sidebar-border-custom">
         <div className={cn("flex items-center gap-2.5", sidebarCollapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary text-xs font-semibold">AS</span>
+            <span className="text-primary text-xs font-semibold">{initials}</span>
           </div>
           {!sidebarCollapsed && (
-            <div className="min-w-0">
-              <p className="text-sm text-sidebar-fg-active font-medium truncate">Ana Silva</p>
-              <p className="text-xs text-sidebar-fg/60 truncate">Admin</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
+              <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
             </div>
+          )}
+          {!sidebarCollapsed && (
+            <button onClick={signOut} className="text-sidebar-fg hover:text-sidebar-fg-active transition-colors" title="Sair">
+              <LogOut size={16} />
+            </button>
           )}
         </div>
       </div>
