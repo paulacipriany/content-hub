@@ -11,9 +11,11 @@ interface ContentCardProps {
   content: ContentWithRelations;
   compact?: boolean;
   hideStatus?: boolean;
+  readOnly?: boolean;
+  onClick?: () => void;
 }
 
-const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
+const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: ContentCardProps) => {
   const { setSelectedContent, deleteContent } = useApp();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -57,12 +59,12 @@ const ContentCard = ({ content, compact, hideStatus }: ContentCardProps) => {
   return (
     <>
       <button
-        onClick={() => setSelectedContent(content)}
+        onClick={() => onClick ? onClick() : setSelectedContent(content)}
         className="w-full text-left p-3 rounded-lg bg-card border hover:shadow-md transition-all group relative"
         style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
       >
         {/* Action icons - visible on hover */}
-        {hideStatus && (
+        {hideStatus && !readOnly && (
           <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <button
               onClick={handleEdit}
