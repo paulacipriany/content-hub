@@ -198,41 +198,71 @@ const ContentPanel = () => {
             <X size={18} />
           </button>
           {platformIcon(selectedContent.platform, 18)}
-          <input
-            value={editTitle}
-            onChange={e => setEditTitle(e.target.value)}
-            className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
-            placeholder="Título do conteúdo"
-          />
-          <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
-            {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
-          </span>
+          {isClient ? (
+            <span className="font-semibold text-base text-foreground px-2">{editTitle}</span>
+          ) : (
+            <input
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
+              placeholder="Título do conteúdo"
+            />
+          )}
+          {!isClient && (
+            <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+              {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 ml-4">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              updateContentFields(selectedContent.id, {
-                title: editTitle,
-                copy_text: editCopyText,
-                copy_texts: editCopyTexts,
-                publish_time: editPublishTime || null,
-                media_url: mediaUrls[0] ?? null,
-                media_urls: mediaUrls,
-              });
-            }}
-          >
-            Salvar rascunho
-          </Button>
-          {canAdvance && (
-            <Button
-              size="sm"
-              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
-              onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
-            >
-              Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
-            </Button>
+          {isClient ? (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+                onClick={() => updateContentStatus(selectedContent.id, 'review')}
+              >
+                Enviar para ajustes
+              </Button>
+              {canAdvance && (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                >
+                  Aprovar
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  updateContentFields(selectedContent.id, {
+                    title: editTitle,
+                    copy_text: editCopyText,
+                    copy_texts: editCopyTexts,
+                    publish_time: editPublishTime || null,
+                    media_url: mediaUrls[0] ?? null,
+                    media_urls: mediaUrls,
+                  });
+                }}
+              >
+                Salvar rascunho
+              </Button>
+              {canAdvance && (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                >
+                  Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -241,83 +271,109 @@ const ContentPanel = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left column — Edit (or Preview for client) */}
         <div className={cn("flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5", isClient ? "max-w-xl" : "max-w-2xl")}>
-          {/* Status */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
-            <div className="flex flex-wrap gap-1.5">
-              {allStatuses.map(s => (
-                <button
-                  key={s}
-                  onClick={() => updateContentStatus(selectedContent.id, s)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-full text-xs font-medium transition-all",
-                    selectedContent.status === s
-                      ? cn(STATUS_COLORS[s], "text-primary-foreground")
-                      : "bg-secondary text-muted-foreground hover:bg-accent"
-                  )}
-                >
-                  {STATUS_LABELS[s]}
-                </button>
-              ))}
+          {/* Status — hidden for client */}
+          {!isClient && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
+              <div className="flex flex-wrap gap-1.5">
+                {allStatuses.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => updateContentStatus(selectedContent.id, s)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-full text-xs font-medium transition-all",
+                      selectedContent.status === s
+                        ? cn(STATUS_COLORS[s], "text-primary-foreground")
+                        : "bg-secondary text-muted-foreground hover:bg-accent"
+                    )}
+                  >
+                    {STATUS_LABELS[s]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Details */}
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
-              <PlatformSelector
-                selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
-                onChange={handlePlatformChange}
-                size={28}
-              />
+              {isClient ? (
+                <div className="flex items-center gap-1">{platformIcon(selectedContent.platform, 22)}</div>
+              ) : (
+                <PlatformSelector
+                  selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
+                  onChange={handlePlatformChange}
+                  size={28}
+                />
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
-              <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
-                <SelectTrigger className="h-8 text-xs flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {allContentTypes.map(t => (
-                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isClient ? (
+                <span className="text-foreground text-xs">{CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}</span>
+              ) : (
+                <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
+                  <SelectTrigger className="h-8 text-xs flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allContentTypes.map(t => (
+                      <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Publicação</span>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
-                    <CalIcon size={12} className="text-muted-foreground" />
-                    {selectedContent.publish_date
-                      ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
-                      : 'Selecionar data'}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
-                    onSelect={handleDateChange}
-                    locale={ptBR}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              {isClient ? (
+                <span className="text-foreground text-xs flex items-center gap-2">
+                  <CalIcon size={12} className="text-muted-foreground" />
+                  {selectedContent.publish_date
+                    ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                    : 'Não definida'}
+                </span>
+              ) : (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
+                      <CalIcon size={12} className="text-muted-foreground" />
+                      {selectedContent.publish_date
+                        ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                        : 'Selecionar data'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
+                      onSelect={handleDateChange}
+                      locale={ptBR}
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
-              <div className="relative flex-1">
-                <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="time"
-                  value={editPublishTime}
-                  onChange={e => handleTimeChange(e.target.value)}
-                  className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
-                />
-              </div>
+              {isClient ? (
+                <span className="text-foreground text-xs flex items-center gap-2">
+                  <Clock size={12} className="text-muted-foreground" />
+                  {editPublishTime || 'Não definido'}
+                </span>
+              ) : (
+                <div className="relative flex-1">
+                  <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="time"
+                    value={editPublishTime}
+                    onChange={e => handleTimeChange(e.target.value)}
+                    className="h-8 w-full pl-8 pr-3 text-xs rounded-md border border-input bg-background text-foreground"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Responsável</span>
