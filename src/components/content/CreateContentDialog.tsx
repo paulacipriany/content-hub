@@ -145,7 +145,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Conteúdo</DialogTitle>
+          <DialogTitle>{defaultStatus === 'idea-bank' ? 'Nova Ideia' : 'Novo Conteúdo'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
@@ -256,7 +256,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? 'Criando...' : 'Criar conteúdo'}
+              {loading ? 'Salvando...' : defaultStatus === 'idea-bank' ? 'Salvar ideia' : 'Criar conteúdo'}
             </Button>
           </div>
         </div>
