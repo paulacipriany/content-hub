@@ -33,7 +33,7 @@ const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing">
-      <ContentCard content={content} />
+      <ContentCard content={content} hideStatus />
     </div>
   );
 };
