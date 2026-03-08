@@ -126,32 +126,43 @@ const WorkflowPage = () => {
             {statusOrder.map(status => {
               const items = projectContents.filter(c => c.status === status);
               return (
-                <DroppableColumn key={status} status={status}>
-                  <div className="px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground">{STATUS_LABELS[status]}</span>
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--muted-foreground)))' }}
-                    >
-                      {items.length}
-                    </span>
-                  </div>
-                  <div className="px-3 pb-3 space-y-2.5 flex-1 min-h-[100px]">
-                    {items.map(item => (
-                      isClient
-                        ? (
-                          <div key={item.id}>
-                            <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
-                          </div>
-                        )
-                        : <DraggableCard key={item.id} content={item} />
-                    ))}
-                    {items.length === 0 && (
-                      <div className="text-center py-8 text-xs text-muted-foreground">
-                        Nenhum conteúdo
+                <DroppableColumn key={status} status={status} isEmpty={items.length === 0}>
+                  {items.length === 0 ? (
+                    <div className="px-2 py-3 flex flex-col items-center gap-1">
+                      <span className="text-[10px] font-semibold text-muted-foreground [writing-mode:vertical-lr] rotate-180 whitespace-nowrap">
+                        {STATUS_LABELS[status]}
+                      </span>
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                        style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--muted-foreground)))' }}
+                      >
+                        0
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="px-4 py-3 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-foreground">{STATUS_LABELS[status]}</span>
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))', color: 'var(--client-700, hsl(var(--muted-foreground)))' }}
+                        >
+                          {items.length}
+                        </span>
                       </div>
-                    )}
-                  </div>
+                      <div className="px-3 pb-3 space-y-2.5 flex-1 min-h-[100px]">
+                        {items.map(item => (
+                          isClient
+                            ? (
+                              <div key={item.id}>
+                                <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
+                              </div>
+                            )
+                            : <DraggableCard key={item.id} content={item} />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </DroppableColumn>
               );
             })}
