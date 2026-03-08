@@ -280,12 +280,6 @@ const MediaLibraryPage = () => {
                     >
                       <Download size={10} /> Download
                     </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setAssociateItem(item); }}
-                      className="inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
-                    >
-                      <Link2 size={10} /> Vincular
-                    </button>
                     <div className="ml-auto">
                       {canDelete && (
                         <button
