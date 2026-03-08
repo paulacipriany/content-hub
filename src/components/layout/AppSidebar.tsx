@@ -20,6 +20,7 @@ const clientNavItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: FileText, label: 'Conteúdos', path: '/contents' },
+  { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
