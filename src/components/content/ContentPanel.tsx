@@ -832,53 +832,55 @@ const ContentPanel = () => {
               </div>
               <PostPreview content={selectedContent} platform={previewPlatform} />
 
-              {/* Checklist */}
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
-                {checklist.length > 0 && (
-                  <div className="space-y-1.5 mb-2">
-                    {checklist.map(item => (
-                      <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
-                        <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
-                          item.done ? "bg-status-published border-status-published" : "border-border"
-                        )}>
-                          {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
-                        </div>
-                        <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {checklist.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic mb-2">Nenhum item na checklist.</p>
-                )}
-                {!isClient && (
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!newCheckItem.trim() || !selectedContent) return;
-                      const { data } = await supabase.from('checklist_items').insert({
-                        content_id: selectedContent.id,
-                        text: newCheckItem.trim(),
-                        sort_order: checklist.length,
-                      }).select().maybeSingle();
-                      if (data) setChecklist(prev => [...prev, data]);
-                      setNewCheckItem('');
-                    }}
-                    className="flex gap-2"
-                  >
-                    <Input
-                      value={newCheckItem}
-                      onChange={e => setNewCheckItem(e.target.value)}
-                      placeholder="Novo item..."
-                      className="h-8 text-sm"
-                    />
-                    <Button type="submit" size="sm" variant="outline" className="h-8 px-2 flex-shrink-0">
-                      <Plus size={14} />
-                    </Button>
-                  </form>
-                )}
-              </div>
+              {/* Checklist — only for idea/production */}
+              {(selectedContent.status === 'idea' || selectedContent.status === 'production') && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
+                  {checklist.length > 0 && (
+                    <div className="space-y-1.5 mb-2">
+                      {checklist.map(item => (
+                        <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
+                          <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
+                            item.done ? "bg-status-published border-status-published" : "border-border"
+                          )}>
+                            {item.done && <span className="text-primary-foreground text-[10px]">✓</span>}
+                          </div>
+                          <span className={cn(item.done && "line-through text-muted-foreground")}>{item.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {checklist.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic mb-2">Nenhum item na checklist.</p>
+                  )}
+                  {!isClient && (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!newCheckItem.trim() || !selectedContent) return;
+                        const { data } = await supabase.from('checklist_items').insert({
+                          content_id: selectedContent.id,
+                          text: newCheckItem.trim(),
+                          sort_order: checklist.length,
+                        }).select().maybeSingle();
+                        if (data) setChecklist(prev => [...prev, data]);
+                        setNewCheckItem('');
+                      }}
+                      className="flex gap-2"
+                    >
+                      <Input
+                        value={newCheckItem}
+                        onChange={e => setNewCheckItem(e.target.value)}
+                        placeholder="Novo item..."
+                        className="h-8 text-sm"
+                      />
+                      <Button type="submit" size="sm" variant="outline" className="h-8 px-2 flex-shrink-0">
+                        <Plus size={14} />
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
