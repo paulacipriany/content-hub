@@ -175,7 +175,7 @@ const ProjectsPage = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => navigate(`/projects/${project.id}`)}
+                    onClick={() => { setSelectedProject(project); navigate(`/clients/${project.id}/contents`); }}
                     className="w-full text-left"
                   >
                     <div className="flex items-center gap-3 mb-4">
