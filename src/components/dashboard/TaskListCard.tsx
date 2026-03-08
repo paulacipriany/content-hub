@@ -32,7 +32,7 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
 
   useEffect(() => {
     fetchTasks();
-  }, [projectId]);
+  }, [projectId, user]);
 
   const fetchTasks = async () => {
     if (!user) return;
