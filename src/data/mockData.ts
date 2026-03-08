@@ -1,6 +1,6 @@
 export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video';
-export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
+export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'published';
 export type UserRole = 'admin' | 'manager' | 'social-media' | 'client';
 
 export interface User {
