@@ -440,13 +440,22 @@ const ContentPanel = () => {
             )}
           </div>
 
-          {/* Briefing (read-only) */}
-          {selectedContent.description && (
+          {/* Briefing — rich editor for idea-bank, read-only otherwise */}
+          {isIdeaBank ? (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
+              <RichTextEditor
+                content={editBriefing}
+                onChange={setEditBriefing}
+                contentId={selectedContent.id}
+              />
+            </div>
+          ) : selectedContent.description ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
               <p className="text-sm text-foreground whitespace-pre-wrap">{selectedContent.description}</p>
             </div>
-          )}
+          ) : null}
 
           {/* Client view: show preview inline instead of copy/media */}
           {isClient ? (
