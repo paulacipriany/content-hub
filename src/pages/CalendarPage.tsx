@@ -68,7 +68,7 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left p-2 rounded-lg bg-card border border-border/60 shadow-sm border-l-[3px]",
+        "w-full text-left p-2 bg-card border border-border/60 shadow-sm border-l-[3px]",
         "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
@@ -464,7 +464,7 @@ const CalendarPage = () => {
         {commemoratives.length > 0 && (
           <div className="space-y-0.5 mb-1">
             {commemoratives.map((title, i) => (
-              <div key={i} className="flex items-start gap-1 px-1.5 py-[2px] rounded-[4px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+              <div key={i} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
                 <Star size={8} className="flex-shrink-0 mt-[2px]" />
                 <span className="break-words whitespace-normal leading-tight">{title}</span>
               </div>
