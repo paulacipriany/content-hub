@@ -73,6 +73,7 @@ const ProjectsPage = () => {
   const [editColor, setEditColor] = useState('');
   const [editLogoUrl, setEditLogoUrl] = useState<string | null>(null);
   const [uploadingEdit, setUploadingEdit] = useState(false);
+  const [editPlatforms, setEditPlatforms] = useState<Platform[]>([]);
 
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null);
