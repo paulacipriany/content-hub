@@ -41,6 +41,7 @@ const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
   const { user, profile, role } = useAuth();
   const isClient = role === 'client';
+  const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
   const [newComment, setNewComment] = useState('');
   const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
