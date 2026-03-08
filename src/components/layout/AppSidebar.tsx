@@ -3,7 +3,6 @@ import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, Ba
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { cn } from '@/lib/utils';
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/' },
