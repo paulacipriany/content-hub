@@ -1,8 +1,8 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye } from 'lucide-react';
-import { STATUS_COLORS, WorkflowStatus, ContentWithRelations } from '@/data/types';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff } from 'lucide-react';
+import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
@@ -37,27 +37,44 @@ interface CalTask {
   sort_order: number;
 }
 
-// --- Draggable content chip (Google-style event pill) ---
+// --- Expanded content card for calendar (like reference image) ---
 const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
     data: { type: 'content', content },
   });
   return (
-    <button
+    <div
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left px-2 py-[3px] rounded-[4px] text-[11px] font-medium truncate flex items-center gap-1.5",
-        "hover:brightness-95 transition-all cursor-grab active:cursor-grabbing",
-        STATUS_COLORS[content.status as WorkflowStatus],
-        "text-primary-foreground",
+        "w-full text-left p-2 rounded-lg bg-card border border-border/60 shadow-sm",
+        "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
     >
-      {platformIcon(content.platform, 10)}
-      <span className="truncate">{content.title}</span>
-    </button>
+      {/* Title row with platform icon */}
+      <div className="flex items-center gap-1.5 mb-1.5">
+        {platformIcon(content.platform, 12)}
+        <span className="text-[12px] font-semibold text-foreground truncate">{content.title}</span>
+      </div>
+      {/* Status */}
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span className={cn("w-2 h-2 rounded-full flex-shrink-0", STATUS_COLORS[content.status as WorkflowStatus])} />
+        <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
+      </div>
+      {/* Tags: publish_date + content_type */}
+      <div className="flex flex-wrap gap-1">
+        {content.publish_date && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
+            {format(new Date(content.publish_date + 'T12:00:00'), "d MMM", { locale: ptBR })}
+          </span>
+        )}
+        <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
+          {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+        </span>
+      </div>
+    </div>
   );
 };
 
@@ -92,7 +109,7 @@ const DraggableTask = ({ task, onToggle }: { task: CalTask; onToggle: (id: strin
   );
 };
 
-// --- Droppable day cell (Google Calendar style) ---
+// --- Droppable day cell ---
 const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentMonth, tall, children }: {
   dateStr: string;
   dayNum?: number;
@@ -107,14 +124,13 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
     <div
       ref={setNodeRef}
       className={cn(
-        "border-b border-r border-border/50 last:border-r-0 transition-colors relative",
-        tall ? "min-h-[calc(100vh-280px)]" : "min-h-[120px]",
+        "border-b border-r border-border/40 last:border-r-0 transition-colors relative",
+        tall ? "min-h-[calc(100vh-300px)]" : "min-h-[140px]",
         isOver && "bg-primary/5",
-        isCurrentMonth === false && "bg-muted/20"
+        isCurrentMonth === false && "bg-muted/15"
       )}
     >
-      {/* Day header area */}
-      <div className="flex flex-col items-center pt-2 pb-1">
+      <div className="flex flex-col items-end pt-1.5 pr-2 pb-1">
         {dayName && (
           <span className={cn(
             "text-[11px] font-medium uppercase tracking-wide mb-0.5",
@@ -130,32 +146,33 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
               todayFlag
                 ? "w-7 h-7 rounded-full bg-primary text-primary-foreground font-semibold"
                 : isCurrentMonth === false
-                  ? "text-muted-foreground/50 font-normal"
-                  : "text-foreground font-medium hover:bg-muted rounded-full w-7 h-7"
+                  ? "text-muted-foreground/40 font-normal"
+                  : "text-foreground font-medium"
             )}
           >
             {dayNum}
           </span>
         )}
       </div>
-      {/* Events area */}
-      <div className="px-1 pb-1 space-y-[2px]">{children}</div>
+      <div className="px-1.5 pb-1.5 space-y-1">{children}</div>
     </div>
   );
 };
 
 const ContentOverlay = ({ content }: { content: ContentWithRelations }) => (
-  <div className={cn(
-    "px-2.5 py-1 rounded-[4px] text-[11px] font-medium flex items-center gap-1.5 shadow-xl w-44",
-    STATUS_COLORS[content.status as WorkflowStatus],
-    "text-primary-foreground"
-  )}>
-    {platformIcon(content.platform, 10)}
-    <span className="truncate">{content.title}</span>
+  <div className="p-2 rounded-lg bg-card border border-border shadow-xl w-48">
+    <div className="flex items-center gap-1.5 mb-1">
+      {platformIcon(content.platform, 12)}
+      <span className="text-[12px] font-semibold text-foreground truncate">{content.title}</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className={cn("w-2 h-2 rounded-full", STATUS_COLORS[content.status as WorkflowStatus])} />
+      <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
+    </div>
   </div>
 );
 
-// --- Editable task in calendar (Google-style task chip) ---
+// --- Editable task in calendar ---
 const EditableCalTask = ({ task, onToggle, onUpdate }: {
   task: CalTask;
   onToggle: (id: string, done: boolean) => void;
@@ -300,7 +317,6 @@ const CalendarPage = () => {
     return weeks;
   };
 
-  // --- Navigation ---
   const goBack = () => {
     if (viewMode === 'week') setCurrentDate(prev => addDays(prev, -7));
     else setCurrentDate(new Date(year, month - 1, 1));
@@ -370,37 +386,9 @@ const CalendarPage = () => {
     <>
       <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
       <div className="flex h-[calc(100vh-130px)]">
-        {/* Sidebar: undated tasks — Google Calendar style side panel */}
+        {/* Sidebar: undated tasks */}
         <div className="w-60 flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto">
           <div className="p-3">
-            {/* Filters */}
-            <div className="mb-4 space-y-1">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Filtros</h3>
-              <button
-                onClick={() => setShowContents(prev => !prev)}
-                className={cn(
-                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors",
-                  showContents ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <LayoutGrid size={13} />
-                Conteúdos
-                <Eye size={12} className={cn("ml-auto", !showContents && "opacity-30")} />
-              </button>
-              <button
-                onClick={() => setShowTasks(prev => !prev)}
-                className={cn(
-                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors",
-                  showTasks ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <CheckSquare size={13} />
-                Tarefas
-                <Eye size={12} className={cn("ml-auto", !showTasks && "opacity-30")} />
-              </button>
-            </div>
-
-            <div className="border-t border-border/50 pt-3">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
               <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
@@ -418,7 +406,6 @@ const CalendarPage = () => {
               </div>
             )}
 
-            {/* Add new task — minimal input */}
             <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex items-center gap-1.5 mt-2">
               <Input
                 value={newTaskText}
@@ -436,55 +423,90 @@ const CalendarPage = () => {
                 <Plus size={14} />
               </Button>
             </form>
-            </div>
           </div>
         </div>
 
         {/* Main calendar area */}
         <div className="flex-1 min-w-0 flex flex-col bg-background">
-          {/* Google Calendar-style toolbar */}
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
-            <button
-              onClick={goToday}
-              className="px-4 py-1.5 text-sm font-medium rounded-md border border-border hover:bg-muted transition-colors text-foreground"
-            >
-              Hoje
-            </button>
-            <button onClick={goBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <ChevronLeft size={18} className="text-muted-foreground" />
-            </button>
-            <button onClick={goForward} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
-            <h2 className="text-[22px] font-normal text-foreground capitalize ml-2">{headerLabel}</h2>
+          {/* Toolbar */}
+          <div className="flex flex-col border-b border-border/50">
+            {/* Top row: filters + view toggle */}
+            <div className="flex items-center gap-3 px-4 pt-2.5 pb-1.5">
+              {/* Filters */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setShowContents(prev => !prev)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                    showContents
+                      ? "bg-primary/10 text-primary border-primary/20"
+                      : "text-muted-foreground border-border hover:bg-muted"
+                  )}
+                >
+                  <LayoutGrid size={11} />
+                  Conteúdos
+                  {showContents ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
+                </button>
+                <button
+                  onClick={() => setShowTasks(prev => !prev)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                    showTasks
+                      ? "bg-primary/10 text-primary border-primary/20"
+                      : "text-muted-foreground border-border hover:bg-muted"
+                  )}
+                >
+                  <CheckSquare size={11} />
+                  Tarefas
+                  {showTasks ? <Eye size={10} /> : <EyeOff size={10} className="opacity-50" />}
+                </button>
+              </div>
 
-            {/* View mode toggle — pill style */}
-            <div className="ml-auto flex items-center border border-border rounded-lg overflow-hidden">
+              {/* View mode toggle */}
+              <div className="ml-auto flex items-center border border-border rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                    viewMode === 'week'
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <CalendarRange size={13} />
+                  Semana
+                </button>
+                <div className="w-px h-5 bg-border" />
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                    viewMode === 'month'
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <CalendarDays size={13} />
+                  Mês
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom row: navigation */}
+            <div className="flex items-center gap-2 px-4 pb-2.5">
               <button
-                onClick={() => setViewMode('week')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
-                  viewMode === 'week'
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
+                onClick={goToday}
+                className="px-4 py-1.5 text-sm font-medium rounded-md border border-border hover:bg-muted transition-colors text-foreground"
               >
-                <CalendarRange size={13} />
-                Semana
+                Hoje
               </button>
-              <div className="w-px h-5 bg-border" />
-              <button
-                onClick={() => setViewMode('month')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
-                  viewMode === 'month'
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <CalendarDays size={13} />
-                Mês
+              <button onClick={goBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+                <ChevronLeft size={18} className="text-muted-foreground" />
               </button>
+              <button onClick={goForward} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+                <ChevronRight size={18} className="text-muted-foreground" />
+              </button>
+              <h2 className="text-[22px] font-normal text-foreground capitalize ml-2">{headerLabel}</h2>
             </div>
           </div>
 
@@ -492,7 +514,7 @@ const CalendarPage = () => {
           <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex-1 overflow-y-auto">
               {/* Day name headers */}
-              <div className="grid grid-cols-7 border-b border-border/50 sticky top-0 bg-background z-10">
+              <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
                 {viewMode === 'week'
                   ? getWeekDays().map((d, i) => (
                       <div key={i} className="flex flex-col items-center py-2">
@@ -541,7 +563,7 @@ const CalendarPage = () => {
                 <div key={wi} className="grid grid-cols-7">
                   {week.map((d, di) => {
                     if (!d) return (
-                      <div key={di} className="min-h-[120px] border-b border-r border-border/50 last:border-r-0 bg-muted/10" />
+                      <div key={di} className="min-h-[140px] border-b border-r border-border/40 last:border-r-0 bg-muted/10" />
                     );
                     const dateStr = fmtDateStr(d);
                     return (
