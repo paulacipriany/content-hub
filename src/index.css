@@ -37,12 +37,12 @@
 
     --radius: 0.625rem;
 
-    /* Sidebar — near-black with blue accent */
-    --sidebar-bg: 0 0% 5%;
-    --sidebar-fg: 0 0% 65%;
-    --sidebar-fg-active: 0 0% 100%;
-    --sidebar-hover: 0 0% 10%;
-    --sidebar-border: 0 0% 12%;
+    /* Sidebar — light blue */
+    --sidebar-bg: 214 78% 87%;
+    --sidebar-fg: 0 0% 15%;
+    --sidebar-fg-active: 0 0% 0%;
+    --sidebar-hover: 214 60% 80%;
+    --sidebar-border: 214 40% 78%;
     --sidebar-accent: 220 100% 50%;
 
     /* Status colors — vibrant and distinct */
