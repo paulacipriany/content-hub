@@ -93,7 +93,9 @@ const IdeasBankPage = () => {
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-foreground truncate block">{idea.title}</span>
                     {idea.description && (
-                      <span className="text-xs text-muted-foreground truncate block mt-0.5">{idea.description}</span>
+                      <span className="text-xs text-muted-foreground truncate block mt-0.5">
+                        {idea.description.replace(/<[^>]*>/g, '')}
+                      </span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1">
