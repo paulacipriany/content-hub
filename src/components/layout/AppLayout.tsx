@@ -36,10 +36,13 @@ const AppLayout = () => {
       <div className="flex h-screen overflow-hidden">
         <AppSidebar />
         <div className="flex-1 flex overflow-hidden">
-          <main className="flex-1 overflow-y-auto scrollbar-thin">
-            <Outlet context={notifs} />
-          </main>
-          {selectedContent && <ContentPanel />}
+          {selectedContent ? (
+            <ContentPanel />
+          ) : (
+            <main className="flex-1 overflow-y-auto scrollbar-thin">
+              <Outlet context={notifs} />
+            </main>
+          )}
         </div>
       </div>
     </NotificationContext.Provider>
