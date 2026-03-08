@@ -1,4 +1,5 @@
 import TopBar from '@/components/layout/TopBar';
+import RemindersCard from '@/components/dashboard/RemindersCard';
 import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
