@@ -221,6 +221,8 @@ const CalendarPage = () => {
   const [activeTask, setActiveTask] = useState<CalTask | null>(null);
   const [tasks, setTasks] = useState<CalTask[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
+  const [showContents, setShowContents] = useState(true);
+  const [showTasks, setShowTasks] = useState(true);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
