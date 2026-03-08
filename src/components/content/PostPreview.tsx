@@ -124,7 +124,7 @@ const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
         <p className="text-xs font-semibold text-foreground mb-1">128 curtidas</p>
         <div className="text-xs text-foreground">
           <span className="font-semibold">{userName.toLowerCase().replace(/\s+/g, '.')} </span>
-          <span className="whitespace-pre-wrap">{getDisplayText(content)}</span>
+          <span className="whitespace-pre-wrap">{getDisplayText(content, 'instagram')}</span>
         </div>
       </div>
     </div>
