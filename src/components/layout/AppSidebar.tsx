@@ -185,6 +185,11 @@ const AppSidebar = () => {
                       {reviewCount}
                     </span>
                   )}
+                  {item.path === '/scheduling' && schedulingCount > 0 && (
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                      {schedulingCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
