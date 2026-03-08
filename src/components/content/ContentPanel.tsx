@@ -62,6 +62,7 @@ const ContentPanel = () => {
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editBriefing, setEditBriefing] = useState('');
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   // Sync local state when selected content changes
   useEffect(() => {
@@ -472,7 +473,7 @@ const ContentPanel = () => {
                   <div className="grid grid-cols-3 gap-2 mb-2">
                     {mediaUrls.map((url, i) => (
                       <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={url} alt={`Ref ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
                         <button
                           onClick={() => handleRemoveMedia(i)}
                           className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -616,7 +617,7 @@ const ContentPanel = () => {
                         {url.match(/\.(mp4|webm|mov)$/i) ? (
                           <video src={url} controls className="w-full h-full object-cover" />
                         ) : (
-                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
                         )}
                         <button
                           onClick={() => handleRemoveMedia(i)}
@@ -761,6 +762,27 @@ const ContentPanel = () => {
           </div>
         </div>}
       </div>
+
+      {/* Lightbox modal */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X size={20} className="text-white" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Preview"
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
