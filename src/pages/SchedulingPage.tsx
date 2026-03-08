@@ -153,17 +153,19 @@ const SchedulingPage = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           {platforms.map(p => {
-                            const Icon = platformIcons[p as Platform];
+                            const Icon = PLATFORM_ICONS[p];
                             const isChecked = checked[p] ?? false;
                             return Icon ? (
-                              <Icon
+                              <span
                                 key={p}
-                                size={16}
+                                style={{ color: isChecked ? undefined : (PLATFORM_COLORS[p] || 'var(--muted-foreground)') }}
                                 className={cn(
                                   "transition-colors",
-                                  isChecked ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                  isChecked && "text-emerald-600 dark:text-emerald-400"
                                 )}
-                              />
+                              >
+                                <Icon size={16} />
+                              </span>
                             ) : null;
                           })}
                         </div>
