@@ -189,15 +189,37 @@ const ProjectsPage = () => {
                         <p className="text-xs text-muted-foreground">{projectContents.length} conteúdos</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{published} publicados</span>
-                      <span>{projectContents.length - published} em andamento</span>
+                    {/* Status breakdown */}
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                        const count = projectContents.filter(c => c.status === s).length;
+                        if (count === 0) return null;
+                        return (
+                          <span
+                            key={s}
+                            className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold text-primary-foreground", STATUS_COLORS[s])}
+                          >
+                            {STATUS_LABELS[s]} {count}
+                          </span>
+                        );
+                      })}
                     </div>
-                    <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-status-published transition-all"
-                        style={{ width: `${projectContents.length > 0 ? (published / projectContents.length) * 100 : 0}%` }}
-                      />
+
+                    {/* Progress bar */}
+                    <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden flex">
+                      {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
+                        const count = projectContents.filter(c => c.status === s).length;
+                        if (count === 0 || projectContents.length === 0) return null;
+                        const pct = (count / projectContents.length) * 100;
+                        return (
+                          <div
+                            key={s}
+                            className={cn("h-full transition-all", STATUS_COLORS[s])}
+                            style={{ width: `${pct}%` }}
+                            title={`${STATUS_LABELS[s]}: ${count}`}
+                          />
+                        );
+                      })}
                     </div>
                   </button>
                 )}
