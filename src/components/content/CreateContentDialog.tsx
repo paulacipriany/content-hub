@@ -7,7 +7,7 @@ import { PlatformSelector } from './PlatformIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from './RichTextEditor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, X, ImagePlus } from 'lucide-react';
@@ -32,7 +32,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [contentType, setContentType] = useState<ContentType>('post');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
-  const [assigneeEmail, setAssigneeEmail] = useState('');
+  
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
@@ -44,7 +44,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     setPlatforms([]);
     setContentType('post');
     setProjectId(defaultProjectId ?? '');
-    setAssigneeEmail('');
+    
     setSelectedFiles([]);
     filePreviews.forEach(url => URL.revokeObjectURL(url));
     setFilePreviews([]);
@@ -98,16 +98,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     setLoading(true);
 
     let assigneeId: string | null = null;
-    if (assigneeEmail.trim()) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .ilike('display_name', `%${assigneeEmail.trim()}%`)
-        .limit(1)
-        .single();
-      assigneeId = profile?.user_id ?? null;
-    }
-
     const { data: inserted, error } = await supabase.from('contents').insert({
       title: title.trim(),
       description: briefing.trim(),
@@ -214,15 +204,12 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </Select>
           </div>
 
-          {/* Briefing */}
+          {/* Briefing — Rich Text */}
           <div className="space-y-2">
-            <Label htmlFor="content-briefing">Briefing</Label>
-            <Textarea
-              id="content-briefing"
-              placeholder="Descreva o briefing do conteúdo..."
-              value={briefing}
-              onChange={e => setBriefing(e.target.value)}
-              rows={4}
+            <Label>Briefing</Label>
+            <RichTextEditor
+              content={briefing}
+              onChange={setBriefing}
             />
 
             {/* Image upload for briefing */}
@@ -264,17 +251,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </Button>
           </div>
 
-          {/* Assignee */}
-          <div className="space-y-1.5">
-            <Label htmlFor="content-assignee">Responsável (nome)</Label>
-            <Input
-              id="content-assignee"
-              placeholder="Buscar por nome..."
-              value={assigneeEmail}
-              onChange={e => setAssigneeEmail(e.target.value)}
-            />
-            <p className="text-[11px] text-muted-foreground">Deixe em branco para atribuir a você mesmo.</p>
-          </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
