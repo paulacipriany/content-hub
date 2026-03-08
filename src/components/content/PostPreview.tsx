@@ -166,7 +166,7 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
       </div>
 
       {/* Image */}
-      <ImagePlaceholder platform="linkedin" />
+      <MediaOrPlaceholder content={content} platform="linkedin" />
 
       {/* Reactions */}
       <div className="px-3 py-2 border-t border-border">
