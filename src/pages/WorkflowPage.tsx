@@ -63,6 +63,9 @@ const DroppableColumn = ({ status, children }: { status: WorkflowStatus; childre
 const WorkflowPage = () => {
   useClientFromUrl();
   const { projectContents, updateContentStatus } = useApp();
+  const { role } = useAuth();
+  const isClient = role === 'client';
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
