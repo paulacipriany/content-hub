@@ -204,15 +204,12 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </Select>
           </div>
 
-          {/* Briefing */}
+          {/* Briefing — Rich Text */}
           <div className="space-y-2">
-            <Label htmlFor="content-briefing">Briefing</Label>
-            <Textarea
-              id="content-briefing"
-              placeholder="Descreva o briefing do conteúdo..."
-              value={briefing}
-              onChange={e => setBriefing(e.target.value)}
-              rows={4}
+            <Label>Briefing</Label>
+            <RichTextEditor
+              content={briefing}
+              onChange={setBriefing}
             />
 
             {/* Image upload for briefing */}
