@@ -25,7 +25,9 @@ import { X, Calendar, User } from 'lucide-react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
 
-const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
+const previewOnlyStatuses: WorkflowStatus[] = ['published', 'programmed', 'scheduled'];
+
+const DraggableCard = ({ content, onPreviewClick }: { content: ContentWithRelations; onPreviewClick?: (c: ContentWithRelations) => void }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: content.id,
     data: { content },
@@ -36,9 +38,16 @@ const DraggableCard = ({ content }: { content: ContentWithRelations }) => {
     opacity: isDragging ? 0.3 : 1,
   };
 
+  const isPreviewOnly = previewOnlyStatuses.includes(content.status as WorkflowStatus);
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing">
-      <ContentCard content={content} hideStatus />
+      <ContentCard
+        content={content}
+        hideStatus
+        readOnly={isPreviewOnly}
+        onClick={isPreviewOnly && onPreviewClick ? () => onPreviewClick(content) : undefined}
+      />
     </div>
   );
 };
@@ -159,7 +168,7 @@ const WorkflowPage = () => {
                                 <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
                               </div>
                             )
-                            : <DraggableCard key={item.id} content={item} />
+                            : <DraggableCard key={item.id} content={item} onPreviewClick={handleClientCardClick} />
                         ))}
                       </div>
                     </>
