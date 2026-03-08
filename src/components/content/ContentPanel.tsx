@@ -67,6 +67,7 @@ const ContentPanel = () => {
   useEffect(() => {
     if (!selectedContent) return;
     setEditTitle(selectedContent.title);
+    setEditBriefing(selectedContent.description ?? '');
     setEditCopyText((selectedContent as any).copy_text ?? '');
     const texts = (selectedContent as any).copy_texts;
     const parsedTexts = texts && typeof texts === 'object' ? texts : {};
