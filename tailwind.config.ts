@@ -71,6 +71,7 @@ export default {
           production: "hsl(var(--status-production))",
           review: "hsl(var(--status-review))",
           approval: "hsl(var(--status-approval))",
+          "approval-client": "hsl(var(--status-approval-client))",
           scheduled: "hsl(var(--status-scheduled))",
           published: "hsl(var(--status-published))",
           rejected: "hsl(var(--status-rejected))",
