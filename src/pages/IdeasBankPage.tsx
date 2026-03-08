@@ -4,8 +4,10 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform } from '@/data/types';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
+import { Instagram, Facebook, Linkedin, Youtube, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import CreateContentDialog from '@/components/content/CreateContentDialog';
 
 const platformIcons: Partial<Record<Platform, React.ElementType>> = {
   instagram: Instagram,
@@ -27,7 +29,7 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const IdeasBankPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus } = useApp();
+  const { projectContents, updateContentStatus, selectedProject } = useApp();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Only show idea-bank items
@@ -56,7 +58,26 @@ const IdeasBankPage = () => {
 
   return (
     <>
-      <TopBar title="Banco de Ideias" subtitle="Ideias de conteúdo para produção" />
+      <TopBar
+        title="Banco de Ideias"
+        subtitle="Ideias de conteúdo para produção"
+        actions={
+          <CreateContentDialog
+            defaultProjectId={selectedProject?.id}
+            defaultStatus="idea-bank"
+            trigger={
+              <Button
+                size="sm"
+                className="gap-1.5 h-9"
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Adicionar ideia</span>
+              </Button>
+            }
+          />
+        }
+      />
       <div className="p-6">
         {selected.size > 0 && (
           <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20">

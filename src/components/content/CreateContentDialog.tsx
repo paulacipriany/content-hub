@@ -16,9 +16,10 @@ import { useToast } from '@/hooks/use-toast';
 interface CreateContentDialogProps {
   trigger?: React.ReactNode;
   defaultProjectId?: string;
+  defaultStatus?: string;
 }
 
-const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogProps) => {
+const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: CreateContentDialogProps) => {
   const { projects, refetch } = useApp();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -115,7 +116,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       project_id: projectId,
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
-      status: 'idea',
+      status: defaultStatus || 'idea',
     } as any).select('id').single();
 
     if (error) {
