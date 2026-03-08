@@ -105,6 +105,7 @@ export const PLATFORM_CONTENT_TYPES: Record<Platform, ContentType[]> = {
   pinterest: ['image', 'video'],
   twitter: ['feed'],
   google_business: ['feed', 'image'],
+  blog: ['feed', 'image'],
 };
 
 // Get available content types for a set of platforms (intersection)
