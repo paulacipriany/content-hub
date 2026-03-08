@@ -25,7 +25,7 @@ export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 
 export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
-  'idea': 'Ideia',
+  'idea': 'Rascunho',
   'production': 'Produção',
   'review': 'Revisão',
   'approval-internal': 'Aprovação Interna',
