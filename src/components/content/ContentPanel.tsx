@@ -115,6 +115,19 @@ const ContentPanel = () => {
     }
     const bImages = (selectedContent as any).briefing_images;
     setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
+    setDraftSaved(true);
+    // Set snapshot after a tick so state is updated
+    setTimeout(() => {
+      savedSnapshotRef.current = JSON.stringify({
+        editTitle: selectedContent.title,
+        editCopyText: (selectedContent as any).copy_text ?? '',
+        editCopyTexts: (texts && typeof texts === 'object' ? texts : {}),
+        editPublishTime: (selectedContent as any).publish_time ?? '',
+        mediaUrls: urls && Array.isArray(urls) && urls.length > 0 ? urls : selectedContent.media_url ? [selectedContent.media_url] : [],
+        briefingImages: bImages && Array.isArray(bImages) ? bImages : [],
+        editBriefing: selectedContent.description ?? '',
+      });
+    }, 0);
   }, [selectedContent?.id]);
 
   // Auto-save title
