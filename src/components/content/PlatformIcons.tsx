@@ -90,7 +90,7 @@ export const PLATFORM_CONTENT_TYPES: Record<Platform, ContentType[]> = {
   instagram: ['feed', 'reels', 'stories', 'carousel'],
   facebook: ['feed', 'reels', 'stories', 'carousel', 'video'],
   linkedin: ['feed', 'carousel', 'video'],
-  tiktok: ['video', 'reels'],
+  tiktok: ['video'],
   youtube: ['video', 'post'],
 };
 
