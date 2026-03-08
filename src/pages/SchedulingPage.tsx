@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import PostPreview from '@/components/content/PostPreview';
+import JSZip from 'jszip';
 
 const SchedulingPage = () => {
   useClientFromUrl();
