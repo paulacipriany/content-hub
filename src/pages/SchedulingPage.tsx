@@ -177,7 +177,6 @@ const SchedulingPage = () => {
                                     [content.id]: updated,
                                   }));
                                   // Check if all platforms are now checked
-                                  console.log('platforms:', platforms, 'updated:', updated, 'allChecked:', platforms.every(pl => updated[pl]));
                                   const allChecked = platforms.length > 0 && platforms.every(pl => !!updated[pl]);
                                   if (allChecked) {
                                     setExitingIds(prev => new Set(prev).add(content.id));
