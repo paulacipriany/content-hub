@@ -25,7 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const DAYS = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
+const DAYS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
 interface CalTask {
   id: string;
@@ -223,7 +223,7 @@ const CalendarPage = () => {
 
   // --- Week view data ---
   const getWeekDays = () => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const start = startOfWeek(currentDate, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
@@ -231,7 +231,7 @@ const CalendarPage = () => {
   const getMonthWeeks = () => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    let startDay = firstDay.getDay() - 1;
+    let startDay = firstDay.getDay();
     if (startDay < 0) startDay = 6;
     const daysInMonth = lastDay.getDate();
     const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
