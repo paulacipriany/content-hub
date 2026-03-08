@@ -89,23 +89,29 @@ const AppSidebar = () => {
         {/* Client sections - only when a client is selected */}
         {selectedProject && (
           <>
-            {!sidebarCollapsed && (
-              <div className="pt-4 pb-1 px-3">
-                <span
-                  className="text-xs uppercase tracking-wider font-medium truncate px-2 py-0.5 rounded"
-                  style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}
-                >
-                  {selectedProject.name}
-                </span>
-              </div>
-            )}
-            {sidebarCollapsed && (
-              <div className="pt-3 pb-1 flex justify-center">
-                <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: selectedProject.color + '25', color: selectedProject.color }}>
-                  {selectedProject.name.charAt(0)}
+            {!sidebarCollapsed && (() => {
+              const pal = generatePalette(selectedProject.color);
+              return (
+                <div className="pt-4 pb-1 px-3">
+                  <span
+                    className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
+                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                  >
+                    {selectedProject.name}
+                  </span>
                 </div>
-              </div>
-            )}
+              );
+            })()}
+            {sidebarCollapsed && (() => {
+              const pal = generatePalette(selectedProject.color);
+              return (
+                <div className="pt-3 pb-1 flex justify-center">
+                  <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: pal[800], color: pal[300] }}>
+                    {selectedProject.name.charAt(0)}
+                  </div>
+                </div>
+              );
+            })()}
             {clientNavItems.map(item => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
