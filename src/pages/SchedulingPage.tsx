@@ -279,7 +279,7 @@ const SchedulingPage = () => {
                                 }
                               }}
                             />
-                            {Icon && <Icon size={14} className={cn(checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")} />}
+                            {Icon && <span className={cn(checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}><Icon size={14} /></span>}
                             <span className={cn(
                               "text-sm font-medium transition-colors",
                               checked[p] ? "text-emerald-600 dark:text-emerald-400 line-through" : "text-foreground"
