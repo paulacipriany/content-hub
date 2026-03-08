@@ -248,7 +248,55 @@ const SchedulingPage = () => {
                 </div>
               )}
 
-              {/* Download images */}
+              {/* Platform checklist */}
+              {(() => {
+                const platforms = Array.isArray(previewContent.platform) ? previewContent.platform : [previewContent.platform];
+                const checked = checkedPlatforms[previewContent.id] ?? {};
+                return (
+                  <div className="px-6 py-4 border-b border-border/50">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Checklist de agendamento</h4>
+                    <div className="space-y-2.5">
+                      {platforms.map(p => {
+                        const Icon = platformIcons[p as Platform];
+                        return (
+                          <label key={p} className="flex items-center gap-2.5 cursor-pointer group">
+                            <Checkbox
+                              checked={checked[p] ?? false}
+                              onCheckedChange={(val) => {
+                                const updated = { ...checked, [p]: !!val };
+                                setCheckedPlatforms(prev => ({ ...prev, [previewContent.id]: updated }));
+                                const allChecked = platforms.length > 0 && platforms.every(pl => !!updated[pl]);
+                                if (allChecked) {
+                                  setExitingIds(prev => new Set(prev).add(previewContent.id));
+                                  toast.success(`"${previewContent.title}" movido para Programado`);
+                                  setPreviewContent(null);
+                                  setTimeout(() => {
+                                    updateContentStatus(previewContent.id, 'programmed');
+                                    setExitingIds(prev => {
+                                      const next = new Set(prev);
+                                      next.delete(previewContent.id);
+                                      return next;
+                                    });
+                                  }, 600);
+                                }
+                              }}
+                            />
+                            {Icon && <Icon size={14} className={cn(checked[p] ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")} />}
+                            <span className={cn(
+                              "text-sm font-medium transition-colors",
+                              checked[p] ? "text-emerald-600 dark:text-emerald-400 line-through" : "text-foreground"
+                            )}>
+                              {PLATFORM_LABELS[p as Platform] ?? p}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+
               {getContentMediaUrls(previewContent).length > 0 && (
                 <div className="px-6 py-4 border-t border-border/50">
                   <Button
