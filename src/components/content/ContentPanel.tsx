@@ -16,7 +16,7 @@ import { ptBR } from 'date-fns/locale';
 
 const allStatuses: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'];
 const allPlatforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
-const allContentTypes: ContentType[] = ['feed', 'reels', 'stories', 'carousel', 'video'];
+const allContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
 
 function useAutoSave(contentId: string | undefined, field: string, value: string, updateFn: (id: string, fields: any) => Promise<void>) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();

@@ -120,7 +120,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateContentFields = async (id: string, fields: Partial<Pick<ContentWithRelations, 'title' | 'description' | 'platform' | 'content_type' | 'publish_date' | 'hashtags' | 'media_url'>>) => {
     if (!user) return;
-    await supabase.from('contents').update(fields).eq('id', id);
+    await supabase.from('contents').update(fields as any).eq('id', id);
     setContents(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
     if (selectedContent?.id === id) {
       setSelectedContent(prev => prev ? { ...prev, ...fields } : null);
