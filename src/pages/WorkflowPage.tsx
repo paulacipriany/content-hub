@@ -4,6 +4,7 @@ import ContentCard from '@/components/content/ContentCard';
 import { STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DndContext,
   DragOverlay,
@@ -62,6 +63,8 @@ const DroppableColumn = ({ status, children }: { status: WorkflowStatus; childre
 const WorkflowPage = () => {
   useClientFromUrl();
   const { projectContents, updateContentStatus } = useApp();
+  const { role } = useAuth();
+  const isClient = role === 'client';
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -90,7 +93,7 @@ const WorkflowPage = () => {
 
   return (
     <>
-      <TopBar title="Workflow" subtitle="Arraste os cards entre colunas para mudar o status" />
+      <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} />
       <div className="p-6 overflow-x-auto">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max">
@@ -109,7 +112,9 @@ const WorkflowPage = () => {
                   </div>
                   <div className="px-3 pb-3 space-y-2.5 flex-1 min-h-[100px]">
                     {items.map(item => (
-                      <DraggableCard key={item.id} content={item} />
+                      isClient
+                        ? <div key={item.id}><ContentCard content={item} hideStatus /></div>
+                        : <DraggableCard key={item.id} content={item} />
                     ))}
                     {items.length === 0 && (
                       <div className="text-center py-8 text-xs text-muted-foreground">
