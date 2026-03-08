@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/components/layout/AppLayout';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +17,7 @@ interface TopBarProps {
 const TopBar = ({ title, subtitle }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject } = useApp();
+  const { role } = useAuth();
   const navigate = useNavigate();
 
   const handleNotificationClick = (contentId: string) => {
@@ -31,50 +33,54 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
   return (
     <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0">
       <div className="flex items-center gap-4">
-        {/* Client selector */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center gap-2 h-9 px-3 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm font-medium text-foreground">
-              {selectedProject ? (
-                <>
-                  {(selectedProject as any).logo_url
-                    ? <img src={(selectedProject as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
-                    : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
-                  }
-                  <span className="max-w-[140px] truncate">{selectedProject.name}</span>
-                </>
-              ) : (
-                <span className="text-muted-foreground">Selecionar cliente</span>
-              )}
-              <ChevronDown size={14} className="text-muted-foreground" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56 p-1" align="start">
-            {projects.map(p => (
-              <button
-                key={p.id}
-                onClick={() => handleSelectClient(p)}
-                className={cn(
-                  "flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm transition-colors",
-                  selectedProject?.id === p.id
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-foreground hover:bg-secondary"
+        {role !== 'client' && (
+          <>
+            {/* Client selector */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-2 h-9 px-3 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm font-medium text-foreground">
+                  {selectedProject ? (
+                    <>
+                      {(selectedProject as any).logo_url
+                        ? <img src={(selectedProject as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                        : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selectedProject.color }} />
+                      }
+                      <span className="max-w-[140px] truncate">{selectedProject.name}</span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">Selecionar cliente</span>
+                  )}
+                  <ChevronDown size={14} className="text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-1" align="start">
+                {projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectClient(p)}
+                    className={cn(
+                      "flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm transition-colors",
+                      selectedProject?.id === p.id
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {(p as any).logo_url
+                      ? <img src={(p as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                      : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                    }
+                    <span className="truncate">{p.name}</span>
+                  </button>
+                ))}
+                {projects.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-3">Nenhum cliente criado</p>
                 )}
-              >
-                {(p as any).logo_url
-                  ? <img src={(p as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
-                  : <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                }
-                <span className="truncate">{p.name}</span>
-              </button>
-            ))}
-            {projects.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-3">Nenhum cliente criado</p>
-            )}
-          </PopoverContent>
-        </Popover>
+              </PopoverContent>
+            </Popover>
 
-        <div className="border-l border-border h-6" />
+            <div className="border-l border-border h-6" />
+          </>
+        )}
 
         <div>
           {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
