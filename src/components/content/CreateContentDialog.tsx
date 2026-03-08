@@ -98,16 +98,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     setLoading(true);
 
     let assigneeId: string | null = null;
-    if (assigneeEmail.trim()) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .ilike('display_name', `%${assigneeEmail.trim()}%`)
-        .limit(1)
-        .single();
-      assigneeId = profile?.user_id ?? null;
-    }
-
     const { data: inserted, error } = await supabase.from('contents').insert({
       title: title.trim(),
       description: briefing.trim(),
