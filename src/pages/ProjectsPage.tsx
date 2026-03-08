@@ -240,11 +240,11 @@ const ProjectsPage = () => {
                           style={{ backgroundColor: c, borderColor: editColor === c ? 'var(--foreground)' : 'transparent' }}
                         />
                       ))}
+                      <label className="relative w-5 h-5 rounded-full border-2 border-dashed border-border cursor-pointer overflow-hidden hover:border-primary/40 transition-colors" title="Escolher cor">
+                        <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <span className="w-full h-full block rounded-full" style={{ backgroundColor: editColor }} />
+                      </label>
                     </div>
-                    <label className="relative w-5 h-5 rounded-full border-2 border-dashed border-border cursor-pointer overflow-hidden hover:border-primary/40 transition-colors inline-block -mt-1 ml-1" title="Escolher cor">
-                      <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      <span className="w-full h-full block rounded-full" style={{ backgroundColor: editColor }} />
-                    </label>
                     <div className="space-y-1.5">
                       <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
                       <PlatformSelector selected={editPlatforms} onChange={setEditPlatforms} size={32} />
