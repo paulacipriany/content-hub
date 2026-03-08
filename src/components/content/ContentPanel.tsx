@@ -305,7 +305,18 @@ const ContentPanel = () => {
               >
                 Salvar rascunho
               </Button>
-              {canAdvance && (
+              {isIdeaBank ? (
+                <Button
+                  size="sm"
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  onClick={() => {
+                    updateContentStatus(selectedContent.id, 'idea');
+                    setSelectedContent(null);
+                  }}
+                >
+                  Enviar para Workflow
+                </Button>
+              ) : canAdvance && (
                 <Button
                   size="sm"
                   style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
@@ -619,7 +630,7 @@ const ContentPanel = () => {
 
         {/* Right column — Preview & Comments (hidden for client, who sees preview inline) */}
         <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
-          {!isClient && (
+          {!isClient && !isIdeaBank && (
             <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
               <div className="flex gap-1.5 justify-center">
