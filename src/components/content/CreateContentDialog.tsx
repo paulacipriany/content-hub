@@ -9,13 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CalendarIcon, Plus, X, ImagePlus } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { Plus, X, ImagePlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateContentDialogProps {
@@ -32,45 +27,30 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [briefing, setBriefing] = useState('');
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [contentType, setContentType] = useState<ContentType>('feed');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
-  const [publishDate, setPublishDate] = useState<Date | undefined>();
-  const [hashtagInput, setHashtagInput] = useState('');
-  const [hashtags, setHashtags] = useState<string[]>([]);
   const [assigneeEmail, setAssigneeEmail] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
 
   const availableContentTypes = getContentTypesForPlatforms(platforms);
 
-  // Reset content type if not available for selected platforms
   if (platforms.length > 0 && !availableContentTypes.includes(contentType) && availableContentTypes.length > 0) {
     setContentType(availableContentTypes[0]);
   }
 
   const reset = () => {
     setTitle('');
-    setDescription('');
+    setBriefing('');
     setPlatforms([]);
     setContentType('feed');
     setProjectId(defaultProjectId ?? '');
-    setPublishDate(undefined);
-    setHashtagInput('');
-    setHashtags([]);
     setAssigneeEmail('');
     setSelectedFiles([]);
     filePreviews.forEach(url => URL.revokeObjectURL(url));
     setFilePreviews([]);
-  };
-
-  const addHashtag = () => {
-    const tag = hashtagInput.trim().startsWith('#') ? hashtagInput.trim() : `#${hashtagInput.trim()}`;
-    if (tag.length > 1 && !hashtags.includes(tag)) {
-      setHashtags(prev => [...prev, tag]);
-      setHashtagInput('');
-    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +67,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
     const newPreviews = imageFiles.map(f => URL.createObjectURL(f));
     setFilePreviews(prev => [...prev, ...newPreviews]);
 
-    // Reset input so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -132,17 +111,12 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       assigneeId = profile?.user_id ?? null;
     }
 
-    // Determine actual content_type: if feed + multiple photos → carousel in DB
-    const dbContentType = (contentType === 'feed' && selectedFiles.length > 1) ? 'carousel' : contentType;
-
     const { data: inserted, error } = await supabase.from('contents').insert({
       title: title.trim(),
-      description: description.trim(),
+      description: briefing.trim(),
       platform: platforms,
-      content_type: dbContentType,
+      content_type: contentType,
       project_id: projectId,
-      publish_date: publishDate ? format(publishDate, 'yyyy-MM-dd') : null,
-      hashtags,
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
       status: 'idea',
@@ -154,7 +128,6 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
       return;
     }
 
-    // Upload files if any
     if (inserted && selectedFiles.length > 0) {
       const mediaUrl = await uploadFiles(inserted.id);
       if (mediaUrl) {
@@ -242,115 +215,54 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
             </div>
           )}
 
-          {/* Photo upload - visible when content type is feed */}
-          {contentType === 'feed' && platforms.length > 0 && (
-            <div className="space-y-2">
-              <Label>Fotos</Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              
-              {selectedFiles.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {filePreviews.map((url, i) => (
-                    <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeFile(i)}
-                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full gap-2"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <ImagePlus size={16} />
-                {selectedFiles.length === 0 ? 'Selecionar fotos' : 'Adicionar mais fotos'}
-              </Button>
-              <p className="text-[11px] text-muted-foreground">
-                Selecione uma foto para post único ou várias para carrossel.
-              </p>
-            </div>
-          )}
-
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="content-desc">Descrição / Copy</Label>
+          {/* Briefing */}
+          <div className="space-y-2">
+            <Label htmlFor="content-briefing">Briefing</Label>
             <Textarea
-              id="content-desc"
-              placeholder="Escreva a copy ou descrição do conteúdo..."
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              rows={3}
+              id="content-briefing"
+              placeholder="Descreva o briefing do conteúdo..."
+              value={briefing}
+              onChange={e => setBriefing(e.target.value)}
+              rows={4}
             />
-          </div>
 
-          {/* Publish date */}
-          <div className="space-y-1.5">
-            <Label>Data de publicação</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn("w-full justify-start text-left font-normal", !publishDate && "text-muted-foreground")}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {publishDate ? format(publishDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : 'Selecionar data'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={publishDate}
-                  onSelect={setPublishDate}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+            {/* Image upload for briefing */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect}
+            />
 
-          {/* Hashtags */}
-          <div className="space-y-1.5">
-            <Label>Hashtags</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="#hashtag"
-                value={hashtagInput}
-                onChange={e => setHashtagInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addHashtag(); } }}
-              />
-              <Button type="button" variant="outline" size="sm" onClick={addHashtag} className="flex-shrink-0">
-                Adicionar
-              </Button>
-            </div>
-            {hashtags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {hashtags.map(h => (
-                  <span key={h} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">
-                    {h}
-                    <button onClick={() => setHashtags(prev => prev.filter(t => t !== h))} className="hover:text-destructive">
-                      <X size={10} />
+            {selectedFiles.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {filePreviews.map((url, i) => (
+                  <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                    <img src={url} alt={`Imagem ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={12} />
                     </button>
-                  </span>
+                  </div>
                 ))}
               </div>
             )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ImagePlus size={16} />
+              {selectedFiles.length === 0 ? 'Anexar imagens ao briefing' : 'Adicionar mais imagens'}
+            </Button>
           </div>
 
           {/* Assignee */}
