@@ -22,10 +22,11 @@ export type ContentWithRelations = DbContent & {
 // Keep label/color maps for UI
 export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image';
-export type WorkflowStatus = 'idea' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
+export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-internal' | 'approval-client' | 'scheduled' | 'published';
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea': 'Rascunho',
+  'idea-bank': 'Banco de Ideias',
   'production': 'Produção',
   'review': 'Revisão',
   'approval-internal': 'Aprovação Interna',
@@ -36,6 +37,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
 
 export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   'idea': 'bg-status-idea',
+  'idea-bank': 'bg-status-idea',
   'production': 'bg-status-production',
   'review': 'bg-status-review',
   'approval-internal': 'bg-status-approval',

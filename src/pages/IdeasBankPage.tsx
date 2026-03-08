@@ -30,8 +30,8 @@ const IdeasBankPage = () => {
   const { projectContents, updateContentStatus } = useApp();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Only show ideas (status = 'idea')
-  const ideas = projectContents.filter(c => c.status === 'idea');
+  // Only show idea-bank items
+  const ideas = projectContents.filter(c => c.status === 'idea-bank');
 
   const toggleSelect = (id: string) => {
     setSelected(prev => {
@@ -49,7 +49,7 @@ const IdeasBankPage = () => {
 
   const moveToProduction = async () => {
     for (const id of selected) {
-      await updateContentStatus(id, 'production');
+      await updateContentStatus(id, 'idea');
     }
     setSelected(new Set());
   };
@@ -65,7 +65,7 @@ const IdeasBankPage = () => {
               onClick={moveToProduction}
               className="ml-auto text-sm font-medium px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
             >
-              Mover para Produção
+              Mover para Rascunho
             </button>
           </div>
         )}
