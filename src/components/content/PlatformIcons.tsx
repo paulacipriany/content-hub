@@ -44,6 +44,12 @@ const PinterestSvg = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+const GoogleBusinessSvg = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10zm-9.988-4.71L7.586 9.203a.75.75 0 00-.293.594v4.406a.75.75 0 00.293.594l4.426 1.913a.75.75 0 00.594 0l4.426-1.913a.75.75 0 00.293-.594V9.797a.75.75 0 00-.293-.594l-4.426-1.913a.75.75 0 00-.594 0zM12 8.25l3.375 1.46L12 11.17 8.625 9.71 12 8.25zm-3.75 2.49l3.375 1.46v3.55L8.25 14.29v-3.55zm7.5 0v3.55l-3.375 1.46V12.2l3.375-1.46z"/>
+  </svg>
+);
+
 export const PLATFORM_COLORS: Record<string, string> = {
   instagram: '#E4405F',
   facebook: '#1877F2',
@@ -52,6 +58,7 @@ export const PLATFORM_COLORS: Record<string, string> = {
   youtube: '#FF0000',
   twitter: '#000000',
   pinterest: '#BD081C',
+  google_business: '#4285F4',
 };
 
 export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.Element> = {
