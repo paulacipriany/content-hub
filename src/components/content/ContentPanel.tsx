@@ -503,7 +503,10 @@ const ContentPanel = () => {
           ) : selectedContent.description ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
-              <p className="text-sm text-foreground whitespace-pre-wrap">{selectedContent.description}</p>
+              <div
+                className="text-sm text-foreground prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:max-w-full [&_img]:my-2 [&_a]:text-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: selectedContent.description }}
+              />
             </div>
           ) : null}
 
