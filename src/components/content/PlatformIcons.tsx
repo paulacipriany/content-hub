@@ -51,6 +51,12 @@ const GoogleBusinessSvg = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+const BlogSvg = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 14H6c-.55 0-1-.45-1-1s.45-1 1-1h12c.55 0 1 .45 1 1s-.45 1-1 1zm0-4H6c-.55 0-1-.45-1-1s.45-1 1-1h12c.55 0 1 .45 1 1s-.45 1-1 1zm0-4H6c-.55 0-1-.45-1-1s.45-1 1-1h12c.55 0 1 .45 1 1s-.45 1-1 1z"/>
+  </svg>
+);
+
 export const PLATFORM_COLORS: Record<string, string> = {
   instagram: '#E4405F',
   facebook: '#1877F2',
@@ -60,6 +66,7 @@ export const PLATFORM_COLORS: Record<string, string> = {
   twitter: '#000000',
   pinterest: '#BD081C',
   google_business: '#4285F4',
+  blog: '#FF6B35',
 };
 
 export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.Element> = {
@@ -71,6 +78,7 @@ export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.El
   twitter: XTwitterSvg,
   pinterest: PinterestSvg,
   google_business: GoogleBusinessSvg,
+  blog: BlogSvg,
 };
 
 export const platformIcon = (platforms: Platform | Platform[], size = 14) => {
@@ -104,6 +112,7 @@ export const PLATFORM_CONTENT_TYPES: Record<Platform, ContentType[]> = {
   pinterest: ['image', 'video'],
   twitter: ['feed'],
   google_business: ['feed', 'image'],
+  blog: ['feed', 'image'],
 };
 
 // Get available content types for a set of platforms (intersection)
@@ -122,7 +131,7 @@ interface PlatformSelectorProps {
 }
 
 export const PlatformSelector = ({ selected, onChange, size = 32 }: PlatformSelectorProps) => {
-  const platforms: Platform[] = ['instagram', 'facebook', 'youtube', 'pinterest', 'tiktok', 'twitter', 'google_business', 'linkedin'];
+  const platforms: Platform[] = ['instagram', 'facebook', 'youtube', 'pinterest', 'tiktok', 'twitter', 'google_business', 'linkedin', 'blog'];
   
   const toggle = (p: Platform) => {
     if (selected.includes(p)) {

@@ -20,7 +20,7 @@ export type ContentWithRelations = DbContent & {
 };
 
 // Keep label/color maps for UI
-export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business';
+export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business' | 'blog';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image';
 export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'programmed' | 'published';
 
@@ -57,6 +57,7 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   pinterest: 'Pinterest',
   twitter: 'X (Twitter)',
   google_business: 'Google Business',
+  blog: 'Blog',
 };
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
