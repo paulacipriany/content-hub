@@ -190,6 +190,51 @@ export type Database = {
           },
         ]
       }
+      media_library: {
+        Row: {
+          content_id: string | null
+          created_at: string
+          filename: string
+          id: string
+          project_id: string
+          uploaded_by: string
+          url: string
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string
+          filename?: string
+          id?: string
+          project_id: string
+          uploaded_by: string
+          url: string
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string
+          filename?: string
+          id?: string
+          project_id?: string
+          uploaded_by?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_library_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_library_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_analyses: {
         Row: {
           analysis_text: string | null
