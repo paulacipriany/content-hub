@@ -1,9 +1,10 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
 import ContentPanel from '@/components/content/ContentPanel';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { Notification } from '@/hooks/useRealtimeNotifications';
 
 interface NotificationContextType {
