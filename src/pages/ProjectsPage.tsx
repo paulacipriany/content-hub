@@ -269,6 +269,13 @@ const ProjectsPage = () => {
                       </div>
                     </div>
 
+                    {/* Platform icons */}
+                    {(project as any).platforms && (project as any).platforms.length > 0 && (
+                      <div className="mb-3">
+                        {platformIcon((project as any).platforms as Platform[], 16)}
+                      </div>
+                    )}
+
                     {/* Status breakdown */}
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {(['idea', 'production', 'review', 'approval-internal', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {

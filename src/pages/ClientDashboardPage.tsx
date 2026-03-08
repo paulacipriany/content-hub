@@ -33,7 +33,8 @@ const ClientDashboardPage = () => {
   ];
 
   // Platform breakdown
-  const platforms = (['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'] as Platform[]).map(p => ({
+  const clientPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
+  const platforms = clientPlatforms.map(p => ({
     platform: p,
     label: PLATFORM_LABELS[p],
     count: projectContents.filter(c => {
