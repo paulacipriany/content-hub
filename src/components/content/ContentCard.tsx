@@ -95,7 +95,7 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: Conten
           )}
         </div>
         <h3 className="text-sm font-medium text-foreground mb-1.5 transition-colors" style={{ '--hover-color': 'var(--client-500)' } as React.CSSProperties}>{content.title}</h3>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{content.description}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{content.description?.replace(/<[^>]*>/g, '')}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <div
