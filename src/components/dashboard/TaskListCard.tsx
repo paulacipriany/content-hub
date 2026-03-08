@@ -32,13 +32,15 @@ const TaskListCard = ({ projectId }: TaskListCardProps) => {
 
   useEffect(() => {
     fetchTasks();
-  }, [projectId]);
+  }, [projectId, user]);
 
   const fetchTasks = async () => {
+    if (!user) return;
     const { data } = await supabase
       .from('project_tasks')
       .select('id, text, done, sort_order, due_date')
       .eq('project_id', projectId)
+      .eq('created_by', user.id)
       .order('sort_order')
       .order('created_at');
     setTasks((data as Task[]) ?? []);
