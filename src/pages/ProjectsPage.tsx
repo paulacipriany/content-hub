@@ -308,7 +308,8 @@ const ProjectsPage = () => {
                     {/* Platform icons */}
                     {(project as any).platforms && (project as any).platforms.length > 0 && (
                       <div className="mb-3">
-                        {platformIcon((project as any).platforms as Platform[], 16)}
+                        <div className="text-xs text-muted-foreground mb-1.5">Redes sociais</div>
+                        {platformIcon((project as any).platforms as Platform[], 20, true)}
                       </div>
                     )}
 
