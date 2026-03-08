@@ -323,8 +323,8 @@ const ContentPanel = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left column — Edit (or Preview for client) */}
         <div className={cn("flex-1 overflow-y-auto scrollbar-thin p-6 space-y-5", isClient ? "max-w-xl" : "max-w-2xl")}>
-          {/* Status — hidden for client */}
-          {!isClient && (
+          {/* Status — hidden for client and idea-bank */}
+          {!isClient && !isIdeaBank && (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Status</label>
               <div className="flex flex-wrap gap-1.5">
