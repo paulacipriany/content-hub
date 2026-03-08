@@ -116,8 +116,8 @@ const ContentPanel = () => {
     setChecklist(prev => prev.map(i => i.id === itemId ? { ...i, done: !done } : i));
   };
 
-  const handlePlatformChange = (value: string) => {
-    updateContentFields(selectedContent.id, { platform: value as Platform });
+  const handlePlatformChange = (platforms: Platform[]) => {
+    updateContentFields(selectedContent.id, { platform: platforms } as any);
   };
 
   const handleTypeChange = (value: string) => {
