@@ -89,6 +89,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const updated = projectsList.find(p => p.id === selectedProject.id);
       if (updated) setSelectedProject(updated);
       else setSelectedProject(null);
+    } else if (role === 'client' && projectsList.length > 0) {
+      // Auto-select first project for client users
+      setSelectedProject(projectsList[0]);
     }
 
     setLoading(false);
