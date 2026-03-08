@@ -3,27 +3,7 @@ import { Home, FileText, FolderOpen, Calendar, GitBranch, CheckCircle, Image, Ba
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-
-/** Given a hex color, return a very dark version (10% lightness) for sidebar bg */
-const getDarkShade = (hex: string): string => {
-  const c = hex.replace('#', '');
-  const r = parseInt(c.substring(0, 2), 16) / 255;
-  const g = parseInt(c.substring(2, 4), 16) / 255;
-  const b = parseInt(c.substring(4, 6), 16) / 255;
-  // darken by mixing with black at 85%
-  const dr = Math.round(r * 0.3 * 255);
-  const dg = Math.round(g * 0.3 * 255);
-  const db = Math.round(b * 0.3 * 255);
-  return `rgb(${dr}, ${dg}, ${db})`;
-};
-
-const getTextColor = (hex: string): string => {
-  const c = hex.replace('#', '');
-  const r = parseInt(c.substring(0, 2), 16) / 255;
-  const g = parseInt(c.substring(2, 4), 16) / 255;
-  const b = parseInt(c.substring(4, 6), 16) / 255;
-  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.55 ? '#1a1a1a' : '#ffffff';
-};
+import { contrastText } from '@/lib/clientPalette';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -66,7 +46,7 @@ const AppSidebar = () => {
         "flex flex-col h-screen border-r border-sidebar-border-custom transition-all duration-300 flex-shrink-0",
         sidebarCollapsed ? "w-16" : "w-60"
       )}
-      style={{ backgroundColor: selectedProject ? getDarkShade(selectedProject.color) : 'hsl(var(--sidebar-bg))' }}
+      style={{ backgroundColor: selectedProject ? 'var(--client-950)' : 'hsl(var(--sidebar-bg))' }}
     >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border-custom">
@@ -161,7 +141,7 @@ const AppSidebar = () => {
                       navigate(`/clients/${project.id}/dashboard`);
                     }}
                     className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all hover:brightness-110 active:scale-[0.98]"
-                    style={{ backgroundColor: project.color, color: getTextColor(project.color) }}
+                    style={{ backgroundColor: project.color, color: contrastText(project.color) }}
                   >
                     {project.name}
                   </button>
@@ -209,7 +189,7 @@ const AppSidebar = () => {
                   navigate(`/clients/${project.id}/dashboard`);
                 }}
                 className="w-full px-4 py-2 text-sm font-medium truncate text-left transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
-                style={{ backgroundColor: project.color, color: getTextColor(project.color) }}
+                style={{ backgroundColor: project.color, color: contrastText(project.color) }}
               >
                 {project.name}
               </button>

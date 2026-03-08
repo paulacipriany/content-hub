@@ -26,10 +26,10 @@ const ClientDashboardPage = () => {
   const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
 
   const stats = [
-    { label: 'Total', value: total, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Publicados', value: published, icon: CheckCircle, color: 'text-status-published', bg: 'bg-status-published/10' },
-    { label: 'Em Aprovação', value: inApproval, icon: Clock, color: 'text-status-approval', bg: 'bg-status-approval/10' },
-    { label: 'Em Produção', value: inProduction, icon: TrendingUp, color: 'text-status-production', bg: 'bg-status-production/10' },
+    { label: 'Total', value: total, icon: FileText },
+    { label: 'Publicados', value: published, icon: CheckCircle },
+    { label: 'Em Aprovação', value: inApproval, icon: Clock },
+    { label: 'Em Produção', value: inProduction, icon: TrendingUp },
   ];
 
   // Platform breakdown
@@ -55,32 +55,39 @@ const ClientDashboardPage = () => {
 
   // Quick access sections
   const sections = [
-    { icon: FileText, label: 'Conteúdos', path: '/contents', desc: `${total} conteúdos`, color: 'text-primary' },
-    { icon: Calendar, label: 'Calendário', path: '/calendar', desc: 'Planejamento mensal', color: 'text-status-scheduled' },
-    { icon: GitBranch, label: 'Workflow', path: '/workflow', desc: 'Quadro kanban', color: 'text-status-production' },
-    { icon: CheckCircle, label: 'Aprovações', path: '/approvals', desc: `${inApproval} pendentes`, color: 'text-status-approval' },
-    { icon: Image, label: 'Biblioteca', path: '/media', desc: 'Mídia e templates', color: 'text-accent-foreground' },
-    { icon: BarChart3, label: 'Relatórios', path: '/reports', desc: 'Métricas', color: 'text-status-published' },
+    { icon: FileText, label: 'Conteúdos', path: '/contents', desc: `${total} conteúdos` },
+    { icon: Calendar, label: 'Calendário', path: '/calendar', desc: 'Planejamento mensal' },
+    { icon: GitBranch, label: 'Workflow', path: '/workflow', desc: 'Quadro kanban' },
+    { icon: CheckCircle, label: 'Aprovações', path: '/approvals', desc: `${inApproval} pendentes` },
+    { icon: Image, label: 'Biblioteca', path: '/media', desc: 'Mídia e templates' },
+    { icon: BarChart3, label: 'Relatórios', path: '/reports', desc: 'Métricas' },
   ];
 
   return (
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
       <div className="p-6 space-y-6">
-        {/* Stats */}
+        {/* Stats — client palette accent */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(s => (
-            <div key={s.label} className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow">
-              <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center mb-3", s.bg)}>
-                <s.icon size={18} className={s.color} />
+            <div
+              key={s.label}
+              className="rounded-xl p-4 hover:shadow-sm transition-shadow border"
+              style={{ backgroundColor: 'var(--client-50)', borderColor: 'var(--client-200)' }}
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
+                style={{ backgroundColor: 'var(--client-200)' }}
+              >
+                <s.icon size={18} style={{ color: 'var(--client-700)' }} />
               </div>
               <p className="text-2xl font-bold text-foreground">{s.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--client-600)' }}>{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Quick access */}
+        {/* Quick access — palette-tinted cards */}
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3">Acesso Rápido</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -88,10 +95,14 @@ const ClientDashboardPage = () => {
               <button
                 key={s.path}
                 onClick={() => navigate(`${basePath}${s.path}`)}
-                className="bg-card border border-border rounded-xl p-4 text-left hover:shadow-md hover:border-primary/20 transition-all group"
+                className="rounded-xl p-4 text-left transition-all group border hover:shadow-md"
+                style={{
+                  backgroundColor: 'var(--client-50)',
+                  borderColor: 'var(--client-100)',
+                }}
               >
-                <s.icon size={20} className={cn(s.color, "mb-2")} />
-                <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{s.label}</p>
+                <s.icon size={20} className="mb-2" style={{ color: 'var(--client-500)' }} />
+                <p className="text-sm font-semibold text-foreground transition-colors" style={{ '--hover-color': 'var(--client-600)' } as React.CSSProperties}>{s.label}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{s.desc}</p>
               </button>
             ))}
@@ -111,12 +122,15 @@ const ClientDashboardPage = () => {
                 byStatus.map(item => (
                   <div key={item.status} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-28 flex-shrink-0 truncate">{item.label}</span>
-                    <div className="flex-1 h-5 bg-secondary rounded-full overflow-hidden">
+                    <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--client-100)' }}>
                       <div
-                        className="h-full bg-primary rounded-full transition-all flex items-center justify-end pr-2"
-                        style={{ width: `${total > 0 ? Math.max((item.count / total) * 100, 12) : 0}%` }}
+                        className="h-full rounded-full transition-all flex items-center justify-end pr-2"
+                        style={{
+                          width: `${total > 0 ? Math.max((item.count / total) * 100, 12) : 0}%`,
+                          backgroundColor: 'var(--client-500)',
+                        }}
                       >
-                        <span className="text-[10px] font-medium text-primary-foreground">{item.count}</span>
+                        <span className="text-[10px] font-medium" style={{ color: 'var(--client-50)' }}>{item.count}</span>
                       </div>
                     </div>
                   </div>
@@ -135,12 +149,15 @@ const ClientDashboardPage = () => {
                 platforms.map(item => (
                   <div key={item.platform} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-28 flex-shrink-0">{item.label}</span>
-                    <div className="flex-1 h-5 bg-secondary rounded-full overflow-hidden">
+                    <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--client-100)' }}>
                       <div
-                        className="h-full bg-accent rounded-full transition-all flex items-center justify-end pr-2"
-                        style={{ width: `${total > 0 ? Math.max((item.count / total) * 100, 12) : 0}%` }}
+                        className="h-full rounded-full transition-all flex items-center justify-end pr-2"
+                        style={{
+                          width: `${total > 0 ? Math.max((item.count / total) * 100, 12) : 0}%`,
+                          backgroundColor: 'var(--client-300)',
+                        }}
                       >
-                        <span className="text-[10px] font-medium text-foreground">{item.count}</span>
+                        <span className="text-[10px] font-medium" style={{ color: 'var(--client-900)' }}>{item.count}</span>
                       </div>
                     </div>
                   </div>
@@ -156,7 +173,8 @@ const ClientDashboardPage = () => {
             <h2 className="text-sm font-semibold text-foreground">Atividade Recente</h2>
             <button
               onClick={() => navigate(`${basePath}/contents`)}
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="text-xs hover:underline flex items-center gap-1"
+              style={{ color: 'var(--client-500)' }}
             >
               Ver todos <ArrowRight size={12} />
             </button>
@@ -167,7 +185,7 @@ const ClientDashboardPage = () => {
             ) : (
               recent.map(c => (
                 <div key={c.id} className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--client-500)' }} />
                   <span className="text-foreground font-medium truncate">{c.title}</span>
                   <span className="text-muted-foreground">→</span>
                   <span className="text-muted-foreground text-xs">{STATUS_LABELS[c.status as WorkflowStatus]}</span>

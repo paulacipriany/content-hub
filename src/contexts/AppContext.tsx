@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ContentWithRelations, DbProject, WorkflowStatus } from '@/data/types';
+import { applyClientPalette } from '@/lib/clientPalette';
 
 interface AppContextType {
   contents: ContentWithRelations[];
@@ -84,6 +85,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Apply client palette whenever selected project changes
+  useEffect(() => {
+    applyClientPalette(selectedProject?.color ?? null);
+  }, [selectedProject?.color]);
 
   const updateContentStatus = async (id: string, status: WorkflowStatus) => {
     const content = contents.find(c => c.id === id);
