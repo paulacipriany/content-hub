@@ -73,7 +73,12 @@ const UsersPage = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    supabase.from('projects').select('id, name, color').then(({ data }) => {
+      if (data) setProjects(data);
+    });
+  }, []);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     const { error } = await supabase
