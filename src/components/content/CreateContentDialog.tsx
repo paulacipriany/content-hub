@@ -133,10 +133,10 @@ const CreateContentDialog = ({ trigger, defaultProjectId }: CreateContentDialogP
 
           {/* Project */}
           <div className="space-y-1.5">
-            <Label>Projeto *</Label>
+            <Label>Cliente *</Label>
             <Select value={projectId} onValueChange={setProjectId}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um projeto" />
+                <SelectValue placeholder="Selecione um cliente" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map(p => (
