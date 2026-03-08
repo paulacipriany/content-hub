@@ -312,38 +312,6 @@ const ProjectsPage = () => {
                       </div>
                     )}
 
-                    {/* Status breakdown */}
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {(['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
-                        const count = projectContents.filter(c => c.status === s).length;
-                        if (count === 0) return null;
-                        return (
-                          <span
-                            key={s}
-                            className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold text-primary-foreground", STATUS_COLORS[s])}
-                          >
-                            {STATUS_LABELS[s]} {count}
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden flex">
-                      {(['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'] as WorkflowStatus[]).map(s => {
-                        const count = projectContents.filter(c => c.status === s).length;
-                        if (count === 0 || projectContents.length === 0) return null;
-                        const pct = (count / projectContents.length) * 100;
-                        return (
-                          <div
-                            key={s}
-                            className={cn("h-full transition-all", STATUS_COLORS[s])}
-                            style={{ width: `${pct}%` }}
-                            title={`${STATUS_LABELS[s]}: ${count}`}
-                          />
-                        );
-                      })}
-                    </div>
                   </button>
                 )}
               </div>
