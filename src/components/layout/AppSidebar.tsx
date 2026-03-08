@@ -231,7 +231,6 @@ const AppSidebar = () => {
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
             {projects.map(project => {
-              const pal = generatePalette(project.color);
               return (
                 <button
                   key={project.id}
@@ -243,7 +242,7 @@ const AppSidebar = () => {
                 >
                   <span
                     className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
-                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                    style={{ backgroundColor: project.color, color: contrastText(project.color) }}
                   >
                     {project.name}
                   </span>
