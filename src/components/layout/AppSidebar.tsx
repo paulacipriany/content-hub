@@ -40,10 +40,13 @@ const AppSidebar = () => {
   const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
 
   return (
-    <aside className={cn(
-      "flex flex-col h-screen bg-sidebar-bg border-r border-sidebar-border-custom transition-all duration-300 flex-shrink-0",
-      sidebarCollapsed ? "w-16" : "w-60"
-    )}>
+    <aside
+      className={cn(
+        "flex flex-col h-screen border-r border-sidebar-border-custom transition-all duration-300 flex-shrink-0",
+        sidebarCollapsed ? "w-16" : "w-60"
+      )}
+      style={{ backgroundColor: selectedProject ? selectedProject.color : 'hsl(var(--sidebar-bg))' }}
+    >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border-custom">
         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
