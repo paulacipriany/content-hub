@@ -297,6 +297,39 @@ const ContentPanel = () => {
     await updateContentFields(selectedContent.id, { briefing_images: updated });
   };
 
+  const handleSaveDraft = async () => {
+    await updateContentFields(selectedContent.id, {
+      title: editTitle,
+      copy_text: editCopyText,
+      copy_texts: editCopyTexts,
+      publish_time: editPublishTime || null,
+      media_url: mediaUrls[0] ?? null,
+      media_urls: mediaUrls,
+      briefing_images: briefingImages,
+    });
+    savedSnapshotRef.current = getDraftFingerprint();
+    setDraftSaved(true);
+  };
+
+  const handleClose = () => {
+    if (!draftSaved && !isClient) {
+      setShowUnsavedDialog(true);
+    } else {
+      setSelectedContent(null);
+    }
+  };
+
+  const handleSaveAndClose = async () => {
+    await handleSaveDraft();
+    setShowUnsavedDialog(false);
+    setSelectedContent(null);
+  };
+
+  const handleDiscardAndClose = () => {
+    setShowUnsavedDialog(false);
+    setSelectedContent(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
