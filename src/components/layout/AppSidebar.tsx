@@ -21,6 +21,18 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { profile, role, signOut } = useAuth();
+
+  const roleLabels: Record<string, string> = {
+    admin: 'Admin',
+    moderator: 'Gestor',
+    social_media: 'Social Media',
+    client: 'Cliente',
+  };
+
+  const initials = profile?.display_name
+    ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   return (
     <aside className={cn(
