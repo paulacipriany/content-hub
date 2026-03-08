@@ -170,12 +170,12 @@ const AppSidebar = () => {
                   <item.icon size={18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                   {item.path === '/approvals' && approvalCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
                       {approvalCount}
                     </span>
                   )}
                   {item.path === '/review' && reviewCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
                       {reviewCount}
                     </span>
                   )}
