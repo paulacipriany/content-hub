@@ -119,8 +119,9 @@ const IdeasBankPage = () => {
               return (
                 <div
                   key={idea.id}
+                  onClick={() => setSelectedContent(idea)}
                   className={cn(
-                    "grid grid-cols-[40px_40px_1fr_180px_180px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors",
+                    "grid grid-cols-[40px_40px_1fr_180px_180px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer",
                     selected.has(idea.id) && "bg-primary/5"
                   )}
                 >
