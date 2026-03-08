@@ -616,9 +616,9 @@ const CalendarPage = () => {
                 </div>
               )}
             </DragOverlay>
-          </DndContext>
         </div>
       </div>
+      </DndContext>
     </>
   );
 };
