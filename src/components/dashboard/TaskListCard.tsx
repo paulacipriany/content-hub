@@ -30,6 +30,7 @@ interface MemberProfile {
 
 interface TaskListCardProps {
   projectId: string;
+  hideDone?: boolean;
 }
 
 const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
