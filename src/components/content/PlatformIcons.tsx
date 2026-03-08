@@ -71,6 +71,7 @@ export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.El
   twitter: XTwitterSvg,
   pinterest: PinterestSvg,
   google_business: GoogleBusinessSvg,
+  blog: BlogSvg,
 };
 
 export const platformIcon = (platforms: Platform | Platform[], size = 14) => {
