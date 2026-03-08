@@ -833,9 +833,9 @@ const ContentPanel = () => {
               <PostPreview content={selectedContent} platform={previewPlatform} />
 
               {/* Checklist */}
-              {(
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckSquare size={12} />Checklist</label>
+                {checklist.length > 0 ? (
                   <div className="space-y-1.5">
                     {checklist.map(item => (
                       <button key={item.id} onClick={() => toggleCheckItem(item.id, item.done)} className="flex items-center gap-2.5 text-sm w-full text-left">
@@ -848,8 +848,10 @@ const ContentPanel = () => {
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">Nenhum item na checklist.</p>
+                )}
+              </div>
             </div>
           )}
 
