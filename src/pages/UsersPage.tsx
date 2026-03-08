@@ -5,9 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Trash2, Pencil, Plus, UserPlus } from 'lucide-react';
+import { Trash2, Pencil, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+interface SimpleProject { id: string; name: string; color: string; }
 
 interface UserRow {
   user_id: string;
