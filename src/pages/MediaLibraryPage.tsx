@@ -142,9 +142,6 @@ const MediaLibraryPage = () => {
       )
     : mediaItems;
 
-  const filteredContents = contentSearch.trim()
-    ? projectContents.filter(c => c.title.toLowerCase().includes(contentSearch.toLowerCase()))
-    : projectContents.slice(0, 10);
 
   return (
     <>
