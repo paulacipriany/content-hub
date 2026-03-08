@@ -8,7 +8,7 @@ export type NotificationType = 'status_change' | 'new_comment' | 'assignee_chang
 
 export interface Notification {
   id: string;
-  type: 'status_change' | 'new_comment';
+  type: NotificationType;
   title: string;
   message: string;
   contentId: string;
