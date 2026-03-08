@@ -144,7 +144,12 @@ const AppSidebar = () => {
                 {(project as any).logo_url ? (
                   <img src={(project as any).logo_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{ backgroundColor: project.color + '25', color: project.color }}
+                  >
+                    {project.name.charAt(0)}
+                  </span>
                 )}
                 <span className="truncate">{project.name}</span>
               </button>
