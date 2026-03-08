@@ -169,7 +169,7 @@ const ProjectsPage = () => {
               className="w-full h-9 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
               autoFocus
             />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {COLORS.map(c => (
                 <button
                   key={c}
@@ -182,6 +182,19 @@ const ProjectsPage = () => {
                 <input type="color" value={newColor} onChange={e => setNewColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
                 <span className="w-full h-full block rounded-full" style={{ backgroundColor: newColor }} />
               </label>
+              <div className="flex items-center gap-1.5 ml-1">
+                <div className="w-5 h-5 rounded border border-border" style={{ backgroundColor: newColor }} />
+                <input
+                  value={newColor}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (/^#[0-9A-Fa-f]{0,6}$/.test(v) || v === '#') setNewColor(v);
+                  }}
+                  maxLength={7}
+                  placeholder="#000000"
+                  className="w-20 h-7 px-2 rounded-md bg-secondary text-xs text-foreground font-mono placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
               <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
@@ -231,7 +244,7 @@ const ProjectsPage = () => {
                       className="w-full h-9 px-3 rounded-md bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/20"
                       autoFocus
                     />
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {COLORS.map(c => (
                         <button
                           key={c}
@@ -244,6 +257,19 @@ const ProjectsPage = () => {
                         <input type="color" value={editColor} onChange={e => setEditColor(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
                         <span className="w-full h-full block rounded-full" style={{ backgroundColor: editColor }} />
                       </label>
+                      <div className="flex items-center gap-1.5 ml-1">
+                        <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: editColor }} />
+                        <input
+                          value={editColor}
+                          onChange={e => {
+                            const v = e.target.value;
+                            if (/^#[0-9A-Fa-f]{0,6}$/.test(v) || v === '#') setEditColor(v);
+                          }}
+                          maxLength={7}
+                          placeholder="#000000"
+                          className="w-20 h-7 px-2 rounded-md bg-secondary text-xs text-foreground font-mono placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1.5">
                       <span className="text-xs font-medium text-muted-foreground">Redes sociais</span>
