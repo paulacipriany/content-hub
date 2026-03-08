@@ -145,7 +145,7 @@ const AppSidebar = () => {
                   title={sidebarCollapsed ? item.label : undefined}
                 >
                   <item.icon size={18} className="flex-shrink-0" />
-                  {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
+                  {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                   {item.path === '/approvals' && approvalCount > 0 && (
                     <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                       {approvalCount}
