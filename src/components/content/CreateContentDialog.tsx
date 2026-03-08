@@ -256,7 +256,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? 'Criando...' : 'Criar conteúdo'}
+              {loading ? 'Salvando...' : defaultStatus === 'idea-bank' ? 'Salvar ideia' : 'Criar conteúdo'}
             </Button>
           </div>
         </div>
