@@ -96,7 +96,7 @@ const ContentPanel = () => {
       .from('comments')
       .select('*')
       .eq('content_id', selectedContent.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .then(async ({ data }) => {
         if (!data) return setComments([]);
         const userIds = [...new Set(data.map(c => c.user_id))];
