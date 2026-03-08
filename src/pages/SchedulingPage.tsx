@@ -123,7 +123,7 @@ const SchedulingPage = () => {
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
                 <div className="border border-border rounded-xl overflow-hidden bg-card">
-                  <div className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="grid grid-cols-[40px_1fr_140px_minmax(250px,auto)] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <div></div>
                     <div>Título</div>
                     <div>Formato</div>
