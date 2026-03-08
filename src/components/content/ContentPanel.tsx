@@ -319,7 +319,7 @@ const ContentPanel = () => {
               ) : canAdvance && (
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-50, hsl(var(--primary-foreground)))' }}
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                   onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
                 >
                   Avançar para {STATUS_LABELS[allStatuses[currentIdx + 1]]}
