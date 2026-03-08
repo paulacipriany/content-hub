@@ -83,15 +83,37 @@ const MediaLibraryPage = () => {
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                   <p className="text-white text-xs font-medium truncate">{item.contentTitle}</p>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <ExternalLink size={10} /> Abrir original
-                  </a>
+                  <div className="flex items-center justify-between mt-1">
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-white/80 hover:text-white text-[10px]"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} /> Abrir original
+                    </a>
+                    {canDelete && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const content = projectContents.find(c => c.id === item.contentId);
+                          if (!content) return;
+                          const currentUrls = (content.media_urls && Array.isArray(content.media_urls) ? content.media_urls : [content.media_url]).filter(Boolean) as string[];
+                          const updatedUrls = currentUrls.filter(u => u !== item.url);
+                          await updateContentFields(item.contentId, {
+                            media_url: updatedUrls[0] ?? null,
+                            media_urls: updatedUrls,
+                          });
+                          toast({ title: 'Mídia excluída' });
+                        }}
+                        className="w-7 h-7 rounded-full bg-destructive/80 hover:bg-destructive flex items-center justify-center transition-colors"
+                        title="Excluir mídia"
+                      >
+                        <Trash2 size={12} className="text-white" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
