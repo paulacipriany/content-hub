@@ -121,29 +121,23 @@ const AppSidebar = () => {
         {/* Client sections - only when a client is selected */}
         {selectedProject && (
           <>
-            {!sidebarCollapsed && (() => {
-              const pal = generatePalette(selectedProject.color);
-              return (
-                <div className="pt-4 pb-1 px-3">
-                  <span
-                    className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
-                    style={{ backgroundColor: pal[800], color: pal[300] }}
-                  >
-                    {selectedProject.name}
-                  </span>
+            {!sidebarCollapsed && (
+              <div className="pt-4 pb-1 px-3">
+                <span
+                  className="text-xs uppercase tracking-wider font-semibold truncate px-2 py-0.5 rounded"
+                  style={{ backgroundColor: selectedProject.color, color: contrastText(selectedProject.color) }}
+                >
+                  {selectedProject.name}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <div className="pt-3 pb-1 flex justify-center">
+                <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: selectedProject.color, color: contrastText(selectedProject.color) }}>
+                  {selectedProject.name.charAt(0)}
                 </div>
-              );
-            })()}
-            {sidebarCollapsed && (() => {
-              const pal = generatePalette(selectedProject.color);
-              return (
-                <div className="pt-3 pb-1 flex justify-center">
-                  <div className="w-6 h-4 rounded text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: pal[800], color: pal[300] }}>
-                    {selectedProject.name.charAt(0)}
-                  </div>
-                </div>
-              );
-            })()}
+              </div>
+            )}
             {clientNavItems
               .filter(item => {
                 // Hide management items from client role
@@ -183,7 +177,6 @@ const AppSidebar = () => {
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros clientes</span>
                 </div>
                 {projects.filter(p => p.id !== selectedProject.id).map(project => {
-                  const pal = generatePalette(project.color);
                   return (
                     <button
                       key={project.id}
@@ -195,7 +188,7 @@ const AppSidebar = () => {
                     >
                       <span
                         className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
-                        style={{ backgroundColor: pal[800], color: pal[300] }}
+                        style={{ backgroundColor: project.color, color: contrastText(project.color) }}
                       >
                         {project.name}
                       </span>
@@ -238,7 +231,6 @@ const AppSidebar = () => {
               <Plus size={14} className="text-sidebar-fg/60 hover:text-sidebar-fg-active cursor-pointer" onClick={() => navigate('/clients')} />
             </div>
             {projects.map(project => {
-              const pal = generatePalette(project.color);
               return (
                 <button
                   key={project.id}
@@ -250,7 +242,7 @@ const AppSidebar = () => {
                 >
                   <span
                     className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold"
-                    style={{ backgroundColor: pal[800], color: pal[300] }}
+                    style={{ backgroundColor: project.color, color: contrastText(project.color) }}
                   >
                     {project.name}
                   </span>
