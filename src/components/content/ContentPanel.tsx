@@ -458,7 +458,7 @@ const ContentPanel = () => {
           ) : null}
 
           {/* Client view: show preview inline instead of copy/media */}
-          {isClient ? (
+          {isIdeaBank ? null : isClient ? (
             <div className="space-y-4">
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
               <div className="flex gap-1.5">
