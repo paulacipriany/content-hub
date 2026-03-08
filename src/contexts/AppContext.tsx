@@ -86,6 +86,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, [fetchData]);
 
+  // Apply client palette whenever selected project changes
+  useEffect(() => {
+    applyClientPalette(selectedProject?.color ?? null);
+  }, [selectedProject?.color]);
+
   const updateContentStatus = async (id: string, status: WorkflowStatus) => {
     const content = contents.find(c => c.id === id);
     if (!content || !user) return;
