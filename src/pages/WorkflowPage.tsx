@@ -51,6 +51,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   
   'approval-client': '--status-approval-client',
   'scheduled': '--status-scheduled',
+  'programmed': '--status-programmed',
   'published': '--status-published',
 };
 
