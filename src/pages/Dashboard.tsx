@@ -2,7 +2,7 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp, Wrench } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
