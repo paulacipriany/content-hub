@@ -38,6 +38,7 @@ const SchedulingPage = () => {
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
+  const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState(false);
 
   const getContentMediaUrls = (content: ContentWithRelations): string[] => {
@@ -136,7 +137,10 @@ const SchedulingPage = () => {
                     return (
                       <div
                         key={content.id}
-                        className="grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        className={cn(
+                          "grid grid-cols-[40px_1fr_180px_200px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
+                        )}
                         onClick={() => setPreviewContent(content)}
                       >
                         <div className="flex items-center justify-center">
@@ -175,8 +179,16 @@ const SchedulingPage = () => {
                                   // Check if all platforms are now checked
                                   const allChecked = platforms.every(pl => updated[pl]);
                                   if (allChecked) {
-                                    updateContentStatus(content.id, 'programmed');
+                                    setExitingIds(prev => new Set(prev).add(content.id));
                                     toast.success(`"${content.title}" movido para Programado`);
+                                    setTimeout(() => {
+                                      updateContentStatus(content.id, 'programmed');
+                                      setExitingIds(prev => {
+                                        const next = new Set(prev);
+                                        next.delete(content.id);
+                                        return next;
+                                      });
+                                    }, 600);
                                   }
                                 }}
                               />
