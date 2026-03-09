@@ -388,6 +388,20 @@ const CalendarPage = () => {
   const getContentsForDate = (dateStr: string) => projectContents.filter(c => c.publish_date === dateStr);
   const getTasksForDate = (dateStr: string) => tasks.filter(t => t.due_date === dateStr);
   const undatedTasks = tasks.filter(t => !t.due_date);
+  
+  // Get contents for specific hour on a date
+  const getContentsForDateAndHour = (dateStr: string, hour: number) => {
+    return projectContents.filter(c => {
+      if (c.publish_date !== dateStr || !c.publish_time) return false;
+      const contentHour = parseInt(c.publish_time.split(':')[0]);
+      return contentHour === hour;
+    });
+  };
+  
+  // Get contents without time for a date (show at top)
+  const getContentsWithoutTime = (dateStr: string) => {
+    return projectContents.filter(c => c.publish_date === dateStr && !c.publish_time);
+  };
 
   const getWeekDays = () => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
