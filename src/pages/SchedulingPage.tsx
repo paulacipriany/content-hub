@@ -160,6 +160,19 @@ const SchedulingPage = () => {
                             Por {content.assignee_profile?.display_name ?? 'N/A'}
                           </p>
                         </div>
+                        <div className="flex-shrink-0">
+                          <Button
+                            size="sm"
+                            className="gap-1.5 text-xs font-semibold border-0"
+                            style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewContent(content);
+                            }}
+                          >
+                            <Eye size={14} /> Visualizar
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
