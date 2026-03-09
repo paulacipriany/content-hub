@@ -19,6 +19,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage";
 import ReportsPage from "@/pages/ReportsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
+import ClientSettingsPage from "@/pages/ClientSettingsPage";
 import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/clients/:id/post-reports" element={<PostReportsPage />} />
               <Route path="/clients/:id/review" element={<ReviewPage />} />
               <Route path="/clients/:id/scheduling" element={<SchedulingPage />} />
+              <Route path="/clients/:id/settings" element={<ClientSettingsPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
