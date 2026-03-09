@@ -73,6 +73,24 @@ const AppSidebar = () => {
     ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'scheduled').length
     : 0;
 
+  // Count published posts without analysis
+  const [postReportsCount, setPostReportsCount] = useState(0);
+  const publishedIds = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'published').map(c => c.id)
+    : [];
+
+  const fetchPostReportsCount = useCallback(async () => {
+    if (publishedIds.length === 0) { setPostReportsCount(publishedIds.length === 0 ? 0 : 0); return; }
+    const { data } = await supabase
+      .from('post_analyses')
+      .select('content_id')
+      .in('content_id', publishedIds);
+    const analyzedIds = new Set((data ?? []).map((d: any) => d.content_id));
+    setPostReportsCount(publishedIds.filter(id => !analyzedIds.has(id)).length);
+  }, [publishedIds.join(',')]);
+
+  useEffect(() => { fetchPostReportsCount(); }, [fetchPostReportsCount]);
+
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Gestor',
