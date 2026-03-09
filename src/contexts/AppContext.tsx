@@ -27,6 +27,7 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, role } = useAuth();
+  const location = useLocation();
   const [contents, setContents] = useState<ContentWithRelations[]>([]);
   const [projects, setProjects] = useState<DbProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null);
