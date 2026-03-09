@@ -153,7 +153,7 @@ const AnalysisRow = ({
 
     return (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
+        {!isInstagram && <Field icon={<Eye size={11} />} label="Visualizações" field="views" />}
         <Field icon={<Heart size={11} />} label="Likes" field="likes" />
         <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
         <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
@@ -163,6 +163,7 @@ const AnalysisRow = ({
             <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
             <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
             <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
+            <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
             <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
             <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
             <Field icon={<Target size={11} />} label="Contas alcançadas" field="accounts_reached" />
