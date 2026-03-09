@@ -787,18 +787,10 @@ const CalendarPage = () => {
                     <div className="border-r border-border/40 bg-muted/5" />
                     {getWeekDays().map((d, i) => {
                       const dateStr = fmtDateStr(d);
-                      const { isOver, setNodeRef } = useDroppable({ id: dateStr });
                       return (
-                        <div
-                          key={i}
-                          ref={setNodeRef}
-                          className={cn(
-                            "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
-                            isOver && "bg-primary/5"
-                          )}
-                        >
+                        <DroppableFixedCell key={i} dateStr={dateStr}>
                           {renderFixedTopSection(dateStr)}
-                        </div>
+                        </DroppableFixedCell>
                       );
                     })}
                   </div>
@@ -818,23 +810,15 @@ const CalendarPage = () => {
                         {getWeekDays().map((d, i) => {
                           const dateStr = fmtDateStr(d);
                           const hourContents = showContents ? getContentsForDateAndHour(dateStr, hour) : [];
-                          const { isOver, setNodeRef } = useDroppable({ id: `${dateStr}-${hour}` });
                           
                           return (
-                            <div
-                              key={i}
-                              ref={setNodeRef}
-                              className={cn(
-                                "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
-                                isOver && "bg-primary/5"
-                              )}
-                            >
+                            <DroppableHourCell key={i} dateStr={dateStr} hour={hour}>
                               <div className="space-y-1">
                                 {hourContents.map(c => (
                                   <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
                                 ))}
                               </div>
-                            </div>
+                            </DroppableHourCell>
                           );
                         })}
                       </div>
