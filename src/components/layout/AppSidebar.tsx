@@ -155,6 +155,7 @@ const AppSidebar = () => {
             {clientNavItems
               .filter(item => {
                 if (isClient && (item as any).hideFromClient) return false;
+                if (role === 'social_media' && (item as any).hideFromSocialMedia) return false;
                 return true;
               })
               .map(item => {

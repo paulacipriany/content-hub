@@ -18,6 +18,12 @@ const ClientSettingsPage = () => {
 
   if (!selectedProject) return null;
 
+  const canAccess = role === 'admin' || role === 'moderator';
+  if (!canAccess) {
+    navigate(`/clients/${selectedProject.id}/dashboard`);
+    return null;
+  }
+
   const isClient = role === 'client';
   const currentPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
 
