@@ -178,6 +178,38 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
   );
 };
 
+// --- Droppable fixed top cell (for week view) ---
+const DroppableFixedCell = ({ dateStr, children }: { dateStr: string; children: React.ReactNode }) => {
+  const { isOver, setNodeRef } = useDroppable({ id: dateStr });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
+        isOver && "bg-primary/5"
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
+// --- Droppable hour cell (for week view time grid) ---
+const DroppableHourCell = ({ dateStr, hour, children }: { dateStr: string; hour: number; children: React.ReactNode }) => {
+  const { isOver, setNodeRef } = useDroppable({ id: `${dateStr}-${hour}` });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
+        isOver && "bg-primary/5"
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
 const ContentOverlay = ({ content }: { content: ContentWithRelations }) => (
   <div className="p-2 rounded-lg bg-card border border-border shadow-xl w-48">
     <div className="flex items-center gap-1.5 mb-1">
