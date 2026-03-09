@@ -29,6 +29,7 @@ const clientNavItems = [
   { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
   { icon: BarChart3, label: 'Estatísticas', path: '/reports', hideFromClient: true },
   { icon: Users, label: 'Usuários', path: '/members', hideFromClient: true },
+  { icon: Settings, label: 'Configurações', path: '/settings' },
 ];
 
 const AppSidebar = () => {
