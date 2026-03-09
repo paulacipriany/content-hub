@@ -418,6 +418,15 @@ const AnalysisSheet = ({
                 <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
                 <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} />
               </div>
+            ) : isPinterest ? (
+              <div className="grid grid-cols-2 gap-3">
+                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
+                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} />
+                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} />
+                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} />
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
