@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
+import { isToday as isTodayFn, isPast as isPastFn, startOfWeek, endOfWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -30,9 +31,16 @@ interface MemberProfile {
   avatar_url: string | null;
 }
 
+interface TaskFilters {
+  statuses: TaskStatus[];
+  priorities: TaskPriority[];
+  dateFilter: 'all' | 'overdue' | 'today' | 'this_week' | 'no_date';
+}
+
 interface TaskListCardProps {
   projectId: string;
   hideDone?: boolean;
+  filters?: TaskFilters;
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
@@ -206,7 +214,7 @@ const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChang
   );
 };
 
-const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
+const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
@@ -408,7 +416,34 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     </Popover>
   );
 
-  const visibleTasks = tasks.filter(t => !(hideDone && t.done));
+  const visibleTasks = useMemo(() => {
+    let filtered = tasks.filter(t => !(hideDone && t.done));
+    if (filters) {
+      if (filters.statuses.length > 0) {
+        filtered = filtered.filter(t => filters.statuses.includes(getTaskStatus(t.done, t.status)));
+      }
+      if (filters.priorities.length > 0) {
+        filtered = filtered.filter(t => filters.priorities.includes(t.priority || 'medium'));
+      }
+      if (filters.dateFilter !== 'all') {
+        const now = new Date();
+        filtered = filtered.filter(t => {
+          switch (filters.dateFilter) {
+            case 'no_date': return !t.due_date;
+            case 'today': return t.due_date ? isTodayFn(new Date(t.due_date + 'T00:00:00')) : false;
+            case 'overdue': return t.due_date ? isPastFn(new Date(t.due_date + 'T00:00:00')) && !isTodayFn(new Date(t.due_date + 'T00:00:00')) && !t.done : false;
+            case 'this_week': {
+              if (!t.due_date) return false;
+              const d = new Date(t.due_date + 'T00:00:00');
+              return d >= startOfWeek(now, { weekStartsOn: 1 }) && d <= endOfWeek(now, { weekStartsOn: 1 });
+            }
+            default: return true;
+          }
+        });
+      }
+    }
+    return filtered;
+  }, [tasks, hideDone, filters]);
 
   return (
     <>
