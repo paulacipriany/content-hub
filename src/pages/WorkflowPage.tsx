@@ -22,6 +22,7 @@ import {
 import { useDraggable } from '@dnd-kit/core';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { X, Calendar, User } from 'lucide-react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
