@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,9 @@ import { contrastText, generatePalette } from '@/lib/clientPalette';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import UserProfileDialog from './UserProfileDialog';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
