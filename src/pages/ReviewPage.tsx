@@ -45,6 +45,9 @@ const ReviewPage = () => {
                 )}
 
                 <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
+                  </p>
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
                     <span className="text-sm font-medium text-foreground">{c.title}</span>
@@ -58,7 +61,7 @@ const ReviewPage = () => {
                     );
                   })()}
                   <p className="text-xs text-muted-foreground mt-1">
-                    Por {c.assignee_profile?.display_name ?? 'N/A'} · {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
+                    Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
