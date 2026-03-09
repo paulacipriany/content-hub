@@ -5,7 +5,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon, PLATFORM_ICONS, PLATFORM_COLORS } from '@/components/content/PlatformIcons';
-import { Calendar, Clock, User, Check, Download, Loader2, Copy } from 'lucide-react';
+import { Calendar, Clock, User, Check, Download, Loader2, Copy, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -159,6 +159,19 @@ const SchedulingPage = () => {
                           <p className="text-xs text-muted-foreground mt-1">
                             Por {content.assignee_profile?.display_name ?? 'N/A'}
                           </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <Button
+                            size="sm"
+                            className="gap-1.5 text-xs font-semibold border-0"
+                            style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewContent(content);
+                            }}
+                          >
+                            <Eye size={14} /> Visualizar
+                          </Button>
                         </div>
                       </div>
                     );
