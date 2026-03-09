@@ -4,6 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { platformIcon, PLATFORM_ICONS } from '@/components/content/PlatformIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, FileText } from 'lucide-react';
