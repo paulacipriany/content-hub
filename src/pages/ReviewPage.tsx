@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
-import { Eye, MessageSquare, Clock } from 'lucide-react';
+import { Eye, Pencil, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
@@ -66,8 +66,8 @@ const ReviewPage = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
-                    <MessageSquare size={14} /> Fazer ajustes
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
+                    <Pencil size={14} /> Fazer ajustes
                   </Button>
                 </div>
               </div>
