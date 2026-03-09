@@ -138,42 +138,39 @@ const AnalysisRow = ({
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
 
-  const MetricsFields = ({ metrics, platform, editable }: { metrics: PlatformMetrics; platform: string; editable: boolean }) => (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+  const MetricsFields = ({ metrics, platform, editable }: { metrics: PlatformMetrics; platform: string; editable: boolean }) => {
+    const isInstagram = platform === 'instagram';
+    const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
         {editable ? (
-          <Input type="number" min={0} value={metrics.views} onChange={e => updateMetric(platform, 'views', Number(e.target.value))} className="h-8 text-sm" />
+          <Input type="number" min={0} value={metrics[field] ?? 0} onChange={e => updateMetric(platform, field, Number(e.target.value))} className="h-8 text-sm" />
         ) : (
-          <p className="text-sm font-medium text-foreground">{metrics.views.toLocaleString('pt-BR')}</p>
+          <p className="text-sm font-medium text-foreground">{(metrics[field] ?? 0).toLocaleString('pt-BR')}</p>
         )}
       </div>
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
-        {editable ? (
-          <Input type="number" min={0} value={metrics.likes} onChange={e => updateMetric(platform, 'likes', Number(e.target.value))} className="h-8 text-sm" />
-        ) : (
-          <p className="text-sm font-medium text-foreground">{metrics.likes.toLocaleString('pt-BR')}</p>
+    );
+
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
+        <Field icon={<Heart size={11} />} label="Likes" field="likes" />
+        <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
+        <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
+        {isInstagram && (
+          <>
+            <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
+            <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
+            <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
+            <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
+            <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
+            <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
+            <Field icon={<Target size={11} />} label="Contas alcançadas" field="accounts_reached" />
+          </>
         )}
       </div>
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
-        {editable ? (
-          <Input type="number" min={0} value={metrics.comments_count} onChange={e => updateMetric(platform, 'comments_count', Number(e.target.value))} className="h-8 text-sm" />
-        ) : (
-          <p className="text-sm font-medium text-foreground">{metrics.comments_count.toLocaleString('pt-BR')}</p>
-        )}
-      </div>
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
-        {editable ? (
-          <Input type="number" min={0} value={metrics.shares} onChange={e => updateMetric(platform, 'shares', Number(e.target.value))} className="h-8 text-sm" />
-        ) : (
-          <p className="text-sm font-medium text-foreground">{metrics.shares.toLocaleString('pt-BR')}</p>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="border-b border-border last:border-b-0">
