@@ -83,6 +83,8 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
   );
 };
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
+
 const getDisplayText = (content: ContentWithRelations, platform?: string, maxChars?: number) => {
   const copyTexts = (content as any).copy_texts;
   let text = '';
@@ -92,6 +94,7 @@ const getDisplayText = (content: ContentWithRelations, platform?: string, maxCha
     const copyText = (content as any).copy_text;
     text = copyText || content.description || content.title;
   }
+  text = stripHtml(text);
   if (maxChars && text.length > maxChars) {
     return text.slice(0, maxChars) + '...';
   }
