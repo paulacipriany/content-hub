@@ -107,6 +107,7 @@ const AnalysisSheet = ({
     return m;
   });
   const [activePlatform, setActivePlatform] = useState(platforms[0]);
+  const [activeSection, setActiveSection] = useState<string>('Principais');
   const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
   const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
   const [saving, setSaving] = useState(false);
