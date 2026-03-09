@@ -42,7 +42,7 @@ const ClientSettingsPage = () => {
 
   return (
     <>
-      <TopBar title="Configurações" subtitle={selectedProject.name} />
+      <TopBar title="Configurações" subtitle={selectedProject.name} actions={<></>} />
       <div className="p-6 max-w-2xl">
         <div className="space-y-2">
           {sections.map(s => (

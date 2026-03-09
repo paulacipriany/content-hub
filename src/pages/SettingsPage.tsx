@@ -12,7 +12,7 @@ const sections = [
 const SettingsPage = () => {
   return (
     <>
-      <TopBar title="Configurações" subtitle="Gerencie as configurações da plataforma" />
+      <TopBar title="Configurações" subtitle="Gerencie as configurações da plataforma" actions={<></>} />
       <div className="p-6 max-w-2xl">
         <div className="space-y-2">
           {sections.map(s => (
