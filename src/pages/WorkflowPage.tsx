@@ -72,7 +72,7 @@ const DroppableColumn = ({ status, isEmpty, children }: { status: WorkflowStatus
     <div
       ref={setNodeRef}
       className={cn(
-        "rounded-xl border-t-[3px] flex flex-col transition-all",
+        "border-t-[3px] flex flex-col transition-all",
         isEmpty && !isOver ? "w-20 min-w-[5rem]" : "w-72",
         isOver && "ring-2 ring-inset"
       )}
