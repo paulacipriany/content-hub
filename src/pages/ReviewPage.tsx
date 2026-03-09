@@ -9,7 +9,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ReviewPage = () => {
   useClientFromUrl();
-  const { projectContents, setSelectedContent } = useApp();
+  const { projectContents, setSelectedContent, updateContentStatus } = useApp();
   const reviewContents = projectContents.filter(c => c.status === 'review');
 
   return (
