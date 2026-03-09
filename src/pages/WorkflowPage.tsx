@@ -7,7 +7,7 @@ import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
-import { Check } from 'lucide-react';
+import { Check, Copy, Download, Loader2 } from 'lucide-react';
 import {
   DndContext,
   DragOverlay,
@@ -20,10 +20,12 @@ import {
   useDroppable,
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { X, Calendar, User } from 'lucide-react';
+import { toast } from 'sonner';
+import JSZip from 'jszip';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
 
@@ -96,6 +98,39 @@ const WorkflowPage = () => {
   const isClient = role === 'client';
   const [activeId, setActiveId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const getContentMediaUrls = (content: ContentWithRelations): string[] => {
+    const urls: string[] = [];
+    if (content.media_urls && Array.isArray(content.media_urls)) urls.push(...content.media_urls.filter(Boolean));
+    if (content.media_url && !urls.includes(content.media_url)) urls.push(content.media_url);
+    return urls;
+  };
+
+  const handleDownloadZip = useCallback(async (content: ContentWithRelations) => {
+    const urls = getContentMediaUrls(content);
+    if (urls.length === 0) return;
+    setDownloading(true);
+    try {
+      const zip = new JSZip();
+      await Promise.all(urls.map(async (url, i) => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+        zip.file(`${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_${i + 1}.${ext}`, blob);
+      }));
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_midias.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      console.error('Erro ao baixar mídias:', e);
+    } finally {
+      setDownloading(false);
+    }
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -253,6 +288,42 @@ const WorkflowPage = () => {
                   <PostPreview content={previewContent} platform={previewPlatform as Platform} compact={previewContent.status === 'programmed'} />
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
+                )}
+
+                {/* Copy text & download buttons for published status */}
+                {previewContent.status === 'published' && (previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
+                  <div className="flex gap-2 mt-3 max-w-[350px] mx-auto">
+                    {previewContent.copy_text && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-0"
+                        style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                          toast.success('Texto copiado!');
+                        }}
+                      >
+                        <Copy size={14} /> Copiar texto
+                      </Button>
+                    )}
+                    {getContentMediaUrls(previewContent).length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-0"
+                        style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                        disabled={downloading}
+                        onClick={() => handleDownloadZip(previewContent)}
+                      >
+                        {downloading ? (
+                          <><Loader2 size={14} className="animate-spin" /> Baixando...</>
+                        ) : (
+                          <><Download size={14} /> Baixar mídias</>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
 
