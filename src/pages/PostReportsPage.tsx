@@ -395,13 +395,14 @@ const AnalysisSheet = ({
                   >
                     <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
-                        f.pct ? (
+                         f.pct ? (
                           <PercentageField
                             key={f.field}
                             icon={f.icon}
                             label={f.label}
                             value={currentMetrics[f.field] ?? 0}
                             onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                            readOnly={readOnly}
                           />
                         ) : (
                           <MetricField
@@ -410,6 +411,7 @@ const AnalysisSheet = ({
                             label={f.label}
                             value={currentMetrics[f.field] ?? 0}
                             onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                            readOnly={readOnly}
                           />
                         )
                       ))}
