@@ -270,13 +270,15 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         sort_order: nextOrder,
         due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
         assigned_to: newAssignee,
+        priority: newPriority,
       } as any)
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority')
       .single();
     if (data) setTasks(prev => [...prev, data as Task]);
     setNewText('');
     setNewDueDate(undefined);
     setNewAssignee(null);
+    setNewPriority('medium');
   };
 
   const updateTaskStatus = async (id: string, status: TaskStatus) => {
