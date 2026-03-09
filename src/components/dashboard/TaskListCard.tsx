@@ -20,6 +20,7 @@ interface Task {
   assigned_to: string | null;
   created_by: string;
   status?: TaskStatus;
+  priority?: TaskPriority;
 }
 
 interface MemberProfile {
