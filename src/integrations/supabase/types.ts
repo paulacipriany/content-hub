@@ -382,6 +382,44 @@ export type Database = {
           },
         ]
       }
+      project_platform_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          profile_url: string | null
+          project_id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          profile_url?: string | null
+          project_id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          profile_url?: string | null
+          project_id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_platform_profiles_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tasks: {
         Row: {
           assigned_to: string | null
