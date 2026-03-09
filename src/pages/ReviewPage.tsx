@@ -49,7 +49,15 @@ const ReviewPage = () => {
                     {platformIcon(c.platform, 14)}
                     <span className="text-sm font-medium text-foreground">{c.title}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{c.description}</p>
+                  {c.description ? (
+                    <p className="text-xs text-muted-foreground truncate" dangerouslySetInnerHTML={{ __html: c.description.replace(/<[^>]*>/g, (match) => {
+                      // Only allow safe inline tags, strip the rest for the list preview
+                      if (/^<\/?(b|i|em|strong|u|br\s*\/?)>$/i.test(match)) return match;
+                      return '';
+                    }) }} />
+                  ) : (
+                    <p className="text-xs text-muted-foreground truncate">Sem descrição</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     Por {c.assignee_profile?.display_name ?? 'N/A'} · {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}
                   </p>
