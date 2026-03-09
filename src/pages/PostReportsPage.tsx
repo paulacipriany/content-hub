@@ -270,7 +270,7 @@ const AnalysisSheet = ({
                 ))}
               </>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
                 <Field icon={<Heart size={11} />} label="Likes" field="likes" />
                 <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
