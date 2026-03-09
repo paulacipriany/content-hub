@@ -63,7 +63,7 @@ const ReviewPage = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
-                    <MessageSquare size={14} /> Revisar
+                    <MessageSquare size={14} /> Fazer ajustes
                   </Button>
                 </div>
               </div>
