@@ -413,11 +413,16 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         visibleTasks.map(t => (
           <div
             key={t.id}
-            className="grid grid-cols-[160px_1fr_auto] border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
+            className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
           >
             {/* Status */}
             <div className="px-4 py-3 flex items-center">
               <StatusBadge status={getTaskStatus(t.done, t.status)} onChange={(status) => updateTaskStatus(t.id, status)} />
+            </div>
+
+            {/* Priority */}
+            <div className="px-4 py-3 flex items-center">
+              <PriorityBadge priority={t.priority || 'medium'} onChange={(priority) => updatePriority(t.id, priority)} />
             </div>
 
             {/* Task text + meta */}
