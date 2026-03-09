@@ -433,7 +433,7 @@ const ContentPanel = () => {
                   onClick={async () => { 
                     try {
                       await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
-                      if (selectedContent.status === 'idea' || selectedContent.status === 'production') setSelectedContent(null); 
+                      if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
                     } catch (error) {
                       toast({ 
                         title: 'Erro', 
