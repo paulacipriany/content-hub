@@ -416,7 +416,34 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
     </Popover>
   );
 
-  const visibleTasks = tasks.filter(t => !(hideDone && t.done));
+  const visibleTasks = useMemo(() => {
+    let filtered = tasks.filter(t => !(hideDone && t.done));
+    if (filters) {
+      if (filters.statuses.length > 0) {
+        filtered = filtered.filter(t => filters.statuses.includes(getTaskStatus(t.done, t.status)));
+      }
+      if (filters.priorities.length > 0) {
+        filtered = filtered.filter(t => filters.priorities.includes(t.priority || 'medium'));
+      }
+      if (filters.dateFilter !== 'all') {
+        const now = new Date();
+        filtered = filtered.filter(t => {
+          switch (filters.dateFilter) {
+            case 'no_date': return !t.due_date;
+            case 'today': return t.due_date ? isTodayFn(new Date(t.due_date + 'T00:00:00')) : false;
+            case 'overdue': return t.due_date ? isPastFn(new Date(t.due_date + 'T00:00:00')) && !isTodayFn(new Date(t.due_date + 'T00:00:00')) && !t.done : false;
+            case 'this_week': {
+              if (!t.due_date) return false;
+              const d = new Date(t.due_date + 'T00:00:00');
+              return d >= startOfWeek(now, { weekStartsOn: 1 }) && d <= endOfWeek(now, { weekStartsOn: 1 });
+            }
+            default: return true;
+          }
+        });
+      }
+    }
+    return filtered;
+  }, [tasks, hideDone, filters]);
 
   return (
     <>
