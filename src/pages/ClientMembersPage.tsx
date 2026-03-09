@@ -159,6 +159,7 @@ const ClientMembersPage = () => {
             </p>
             <div className="flex gap-2">
               <Input
+                id="add-member-input"
                 placeholder="Nome do usuário..."
                 value={email}
                 onChange={e => setEmail(e.target.value)}
