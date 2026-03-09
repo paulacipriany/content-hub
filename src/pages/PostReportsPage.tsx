@@ -96,15 +96,19 @@ const CollapsibleSection = ({ label, children, open, onToggle }: { label: string
 };
 
 /* ── Metric Field ── */
-const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => (
+const MetricField = ({ icon, label, value, onChange, readOnly }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void; readOnly?: boolean }) => (
   <div>
     <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-    <Input type="text" value={value ?? 0} onChange={e => onChange(Number(e.target.value) || 0)} className="h-8 text-sm" />
+    {readOnly ? (
+      <p className="h-8 flex items-center text-sm text-foreground">{(value ?? 0).toLocaleString('pt-BR')}</p>
+    ) : (
+      <Input type="text" value={value ?? 0} onChange={e => onChange(Number(e.target.value) || 0)} className="h-8 text-sm" />
+    )}
   </div>
 );
 
 /* ── Percentage Field ── */
-const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => {
+const PercentageField = ({ icon, label, value, onChange, readOnly }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void; readOnly?: boolean }) => {
   const numToStr = (n: number) => (n === 0 ? '0' : n.toString().replace('.', ','));
 
   const [localValue, setLocalValue] = useState(numToStr(value ?? 0));
@@ -125,6 +129,15 @@ const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNo
     const num = parseFloat(safe.replace(',', '.')) || 0;
     onChange(num);
   };
+
+  if (readOnly) {
+    return (
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+        <p className="h-8 flex items-center text-sm text-foreground">{numToStr(value ?? 0)}%</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -151,12 +164,14 @@ const AnalysisSheet = ({
   userId,
   onSaved,
   onClose,
+  readOnly = false,
 }: {
   content: ContentWithRelations;
   analysis: PostAnalysis | null;
   userId: string;
   onSaved: () => void;
   onClose: () => void;
+  readOnly?: boolean;
 }) => {
   const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
 
@@ -240,7 +255,7 @@ const AnalysisSheet = ({
   const handleCloseAttempt = () => {
     if (saving) return;
 
-    if (hasUnsavedChanges) {
+    if (!readOnly && hasUnsavedChanges) {
       setConfirmExitOpen(true);
       return;
     }
@@ -380,13 +395,14 @@ const AnalysisSheet = ({
                   >
                     <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
-                        f.pct ? (
+                         f.pct ? (
                           <PercentageField
                             key={f.field}
                             icon={f.icon}
                             label={f.label}
                             value={currentMetrics[f.field] ?? 0}
                             onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                            readOnly={readOnly}
                           />
                         ) : (
                           <MetricField
@@ -395,6 +411,7 @@ const AnalysisSheet = ({
                             label={f.label}
                             value={currentMetrics[f.field] ?? 0}
                             onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                            readOnly={readOnly}
                           />
                         )
                       ))}
@@ -404,41 +421,45 @@ const AnalysisSheet = ({
               </>
             ) : isFacebook ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Target size={11} />} label="Alcance" value={currentMetrics.accounts_reached ?? 0} onChange={(v) => updateMetric(activePlatform, 'accounts_reached', v)} />
-                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
-                <MetricField icon={<Activity size={11} />} label="Interações" value={currentMetrics.interactions ?? 0} onChange={(v) => updateMetric(activePlatform, 'interactions', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
-                <MetricField icon={<Bookmark size={11} />} label="Salvos" value={currentMetrics.saves ?? 0} onChange={(v) => updateMetric(activePlatform, 'saves', v)} />
+                <MetricField icon={<Target size={11} />} label="Alcance" value={currentMetrics.accounts_reached ?? 0} onChange={(v) => updateMetric(activePlatform, 'accounts_reached', v)} readOnly={readOnly} />
+                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} readOnly={readOnly} />
+                <MetricField icon={<Activity size={11} />} label="Interações" value={currentMetrics.interactions ?? 0} onChange={(v) => updateMetric(activePlatform, 'interactions', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} readOnly={readOnly} />
+                <MetricField icon={<Bookmark size={11} />} label="Salvos" value={currentMetrics.saves ?? 0} onChange={(v) => updateMetric(activePlatform, 'saves', v)} readOnly={readOnly} />
               </div>
             ) : isYoutube ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} readOnly={readOnly} />
               </div>
             ) : isPinterest ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} />
-                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} />
-                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} />
+                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} readOnly={readOnly} />
+                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} readOnly={readOnly} />
+                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} readOnly={readOnly} />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
+                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} readOnly={readOnly} />
               </div>
             )}
 
             <div>
               <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
-              <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+              {readOnly ? (
+                <p className="text-sm text-foreground whitespace-pre-wrap">{analysisText || <span className="text-muted-foreground italic">Sem análise.</span>}</p>
+              ) : (
+                <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+              )}
             </div>
 
             <div>
@@ -448,12 +469,15 @@ const AnalysisSheet = ({
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setResult(result === opt.value ? null : opt.value)}
+                    onClick={() => !readOnly && setResult(result === opt.value ? null : opt.value)}
+                    disabled={readOnly}
                     className={cn(
                       "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
                       result === opt.value
                         ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
-                        : "border-border text-muted-foreground hover:bg-secondary"
+                        : "border-border text-muted-foreground",
+                      !readOnly && "hover:bg-secondary",
+                      readOnly && "cursor-default"
                     )}
                   >
                     {opt.label}
@@ -463,12 +487,14 @@ const AnalysisSheet = ({
             </div>
           </div>
 
-          {/* Save button */}
-          <div className="px-6 py-3 border-t border-border">
-            <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
-              {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
-            </Button>
-          </div>
+          {/* Save button — hidden for read-only */}
+          {!readOnly && (
+            <div className="px-6 py-3 border-t border-border">
+              <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
+                {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
+              </Button>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
@@ -560,7 +586,8 @@ const AnalysisListRow = ({
 const PostReportsPage = () => {
   useClientFromUrl();
   const { projectContents } = useApp();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isClient = role === 'client';
   const [analyses, setAnalyses] = useState<PostAnalysis[]>([]);
   const [tab, setTab] = useState<Tab>('not-analyzed');
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
@@ -700,6 +727,7 @@ const PostReportsPage = () => {
           userId={user?.id ?? ''}
           onSaved={() => { fetchAnalyses(); }}
           onClose={() => setSelectedContent(null)}
+          readOnly={isClient}
         />
       )}
     </>
