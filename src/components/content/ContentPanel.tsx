@@ -1,4 +1,5 @@
 import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
 import AssigneeSelector from './AssigneeSelector';
 import { useApp } from '@/contexts/AppContext';
