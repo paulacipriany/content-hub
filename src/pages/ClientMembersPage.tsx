@@ -123,9 +123,29 @@ const ClientMembersPage = () => {
     client: 'Cliente',
   };
 
+  const scrollToAddSection = () => {
+    document.getElementById('add-member-section')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('add-member-input')?.focus();
+  };
+
   return (
     <>
-      <TopBar title="Usuários" subtitle={`Gerenciar acessos de ${selectedProject.name}`} />
+      <TopBar 
+        title="Usuários" 
+        subtitle={`Gerenciar acessos de ${selectedProject.name}`}
+        actions={
+          canManage ? (
+            <Button 
+              onClick={scrollToAddSection}
+              size="sm"
+              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+            >
+              <UserPlus size={16} className="mr-1.5" />
+              Adicionar usuário
+            </Button>
+          ) : <></>
+        }
+      />
       <div className="p-6 max-w-2xl space-y-6">
         {/* Add member */}
         {canManage && (
