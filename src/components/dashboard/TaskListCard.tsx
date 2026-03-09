@@ -97,10 +97,16 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
 };
 
 const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (status: TaskStatus) => void }) => {
+  const [open, setOpen] = useState(false);
   const currentOption = STATUS_OPTIONS.find(s => s.value === status) ?? STATUS_OPTIONS[0];
 
+  const handleStatusChange = (newStatus: TaskStatus) => {
+    onChange(newStatus);
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           className={cn(
@@ -119,7 +125,7 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
             {STATUS_OPTIONS.filter(opt => opt.group === group.key).map(opt => (
               <button
                 key={opt.value}
-                onClick={() => onChange(opt.value)}
+                onClick={() => handleStatusChange(opt.value)}
                 className={cn(
                   "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
                   status === opt.value && "bg-secondary"
