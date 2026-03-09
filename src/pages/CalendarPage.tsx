@@ -184,7 +184,7 @@ const DroppableFixedCell = ({ dateStr, children }: { dateStr: string; children: 
     <div
       ref={setNodeRef}
       className={cn(
-        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
+        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px] min-w-0 overflow-hidden",
         isOver && "bg-primary/5"
       )}
     >
