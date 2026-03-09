@@ -211,6 +211,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const [newText, setNewText] = useState('');
   const [newDueDate, setNewDueDate] = useState<Date | undefined>();
   const [newAssignee, setNewAssignee] = useState<string | null>(null);
+  const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberProfile[]>([]);
 
