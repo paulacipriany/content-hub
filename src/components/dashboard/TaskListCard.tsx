@@ -216,9 +216,10 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     setNewAssignee(null);
   };
 
-  const toggleTask = async (id: string, done: boolean) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done } : t));
-    await supabase.from('project_tasks').update({ done }).eq('id', id);
+  const updateTaskStatus = async (id: string, status: TaskStatus) => {
+    const done = status === 'done';
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status, done } : t));
+    await supabase.from('project_tasks').update({ status, done }).eq('id', id);
   };
 
   const updateDueDate = async (id: string, date: Date | undefined) => {
