@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,6 +72,24 @@ const AppSidebar = () => {
   const schedulingCount = selectedProject
     ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'scheduled').length
     : 0;
+
+  // Count published posts without analysis
+  const [postReportsCount, setPostReportsCount] = useState(0);
+  const publishedIds = selectedProject
+    ? contents.filter(c => c.project_id === selectedProject.id && c.status === 'published').map(c => c.id)
+    : [];
+
+  const fetchPostReportsCount = useCallback(async () => {
+    if (publishedIds.length === 0) { setPostReportsCount(publishedIds.length === 0 ? 0 : 0); return; }
+    const { data } = await supabase
+      .from('post_analyses')
+      .select('content_id')
+      .in('content_id', publishedIds);
+    const analyzedIds = new Set((data ?? []).map((d: any) => d.content_id));
+    setPostReportsCount(publishedIds.filter(id => !analyzedIds.has(id)).length);
+  }, [publishedIds.join(',')]);
+
+  useEffect(() => { fetchPostReportsCount(); }, [fetchPostReportsCount]);
 
   const roleLabels: Record<string, string> = {
     admin: 'Admin',
@@ -214,6 +232,11 @@ const AppSidebar = () => {
                 >
                   <item.icon size={18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
+                  {item.path === '/post-reports' && postReportsCount > 0 && (
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                      {postReportsCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
