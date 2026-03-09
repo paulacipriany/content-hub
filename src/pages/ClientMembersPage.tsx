@@ -123,13 +123,33 @@ const ClientMembersPage = () => {
     client: 'Cliente',
   };
 
+  const scrollToAddSection = () => {
+    document.getElementById('add-member-section')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('add-member-input')?.focus();
+  };
+
   return (
     <>
-      <TopBar title="Usuários" subtitle={`Gerenciar acessos de ${selectedProject.name}`} />
+      <TopBar 
+        title="Usuários" 
+        subtitle={`Gerenciar acessos de ${selectedProject.name}`}
+        actions={
+          canManage ? (
+            <Button 
+              onClick={scrollToAddSection}
+              size="sm"
+              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+            >
+              <UserPlus size={16} className="mr-1.5" />
+              Adicionar usuário
+            </Button>
+          ) : <></>
+        }
+      />
       <div className="p-6 max-w-2xl space-y-6">
         {/* Add member */}
         {canManage && (
-          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div id="add-member-section" className="bg-card border border-border rounded-xl p-5 space-y-3">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <UserPlus size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
               Adicionar usuário
@@ -139,6 +159,7 @@ const ClientMembersPage = () => {
             </p>
             <div className="flex gap-2">
               <Input
+                id="add-member-input"
                 placeholder="Nome do usuário..."
                 value={email}
                 onChange={e => setEmail(e.target.value)}
