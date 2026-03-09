@@ -38,7 +38,8 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
-  const { profile, role, signOut } = useAuth();
+  const { profile, role, signOut, user } = useAuth();
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
