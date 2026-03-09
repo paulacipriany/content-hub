@@ -124,7 +124,7 @@ const ClientDashboardPage = () => {
               }}
             >
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center mb-3 client-icon-bg"
+                className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
                 style={{ backgroundColor: 'var(--client-200)' }}
               >
                 <s.icon size={18} style={{ color: 'var(--client-700)' }} />
