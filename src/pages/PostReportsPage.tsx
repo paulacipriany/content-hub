@@ -24,6 +24,8 @@ interface PlatformMetrics {
   reposts?: number;
   saves?: number;
   interactions?: number;
+  interactions_followers?: number;
+  interactions_non_followers?: number;
   profile_activity?: number;
   views_followers?: number;
   views_non_followers?: number;
@@ -151,24 +153,46 @@ const AnalysisRow = ({
       </div>
     );
 
+    if (isInstagram) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Principais</h5>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Field icon={<Heart size={11} />} label="Likes" field="likes" />
+              <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
+              <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
+              <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
+              <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
+            </div>
+          </div>
+          <div>
+            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Geral</h5>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
+              <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
+              <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
+              <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
+            </div>
+          </div>
+          <div>
+            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Interações</h5>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
+              <Field icon={<Users size={11} />} label="Interações seguidores" field="interactions_followers" />
+              <Field icon={<UserPlus size={11} />} label="Interações não seguidores" field="interactions_non_followers" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {!isInstagram && <Field icon={<Eye size={11} />} label="Visualizações" field="views" />}
+        <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
         <Field icon={<Heart size={11} />} label="Likes" field="likes" />
         <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
         <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
-        {isInstagram && (
-          <>
-            <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
-            <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
-            <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
-            <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
-            <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
-            <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
-            <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
-            <Field icon={<Target size={11} />} label="Contas alcançadas" field="accounts_reached" />
-          </>
-        )}
       </div>
     );
   };
