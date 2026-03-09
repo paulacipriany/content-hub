@@ -158,7 +158,7 @@ const AnalysisSheet = ({
   const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
     <div>
       <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-      <Input type="number" min={0} value={currentMetrics[field] ?? 0} onChange={e => updateMetric(activePlatform, field, Number(e.target.value))} className="h-8 text-sm" />
+      <Input type="text" value={currentMetrics[field] ?? 0} onChange={e => updateMetric(activePlatform, field, Number(e.target.value) || 0)} className="h-8 text-sm" />
     </div>
   );
 
@@ -261,7 +261,7 @@ const AnalysisSheet = ({
                     open={activeSection === section.label}
                     onToggle={() => setActiveSection(activeSection === section.label ? '' : section.label)}
                   >
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                    <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
                         <Field key={f.field} icon={f.icon} label={f.label} field={f.field} />
                       ))}
@@ -270,7 +270,7 @@ const AnalysisSheet = ({
                 ))}
               </>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
                 <Field icon={<Heart size={11} />} label="Likes" field="likes" />
                 <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
