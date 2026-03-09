@@ -6,9 +6,10 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Mail, Shield } from 'lucide-react';
+import { UserPlus, Trash2, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface MemberWithProfile {
   id: string;
@@ -29,6 +30,7 @@ const ClientMembersPage = () => {
   const [email, setEmail] = useState('');
   const [adding, setAdding] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<MemberWithProfile | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const isAdmin = currentUserRole === 'admin';
   const isOwner = selectedProject?.owner_id === user?.id;
@@ -69,7 +71,6 @@ const ClientMembersPage = () => {
     if (!email.trim() || !selectedProject || !user) return;
     setAdding(true);
 
-    // Find user by display_name or email-like match in profiles
     const { data: profileMatch } = await supabase
       .from('profiles')
       .select('user_id, display_name')
@@ -83,7 +84,6 @@ const ClientMembersPage = () => {
       return;
     }
 
-    // Check if already a member
     const exists = members.find(m => m.user_id === profileMatch.user_id);
     if (exists) {
       toast({ title: 'Já é membro', description: 'Este usuário já está vinculado a este cliente.', variant: 'destructive' });
@@ -101,6 +101,7 @@ const ClientMembersPage = () => {
     } else {
       toast({ title: 'Usuário adicionado!' });
       setEmail('');
+      setAddDialogOpen(false);
       await fetchMembers();
     }
     setAdding(false);
@@ -123,11 +124,6 @@ const ClientMembersPage = () => {
     client: 'Cliente',
   };
 
-  const scrollToAddSection = () => {
-    document.getElementById('add-member-section')?.scrollIntoView({ behavior: 'smooth' });
-    document.getElementById('add-member-input')?.focus();
-  };
-
   return (
     <>
       <TopBar 
@@ -136,7 +132,7 @@ const ClientMembersPage = () => {
         actions={
           canManage ? (
             <Button 
-              onClick={scrollToAddSection}
+              onClick={() => setAddDialogOpen(true)}
               size="sm"
               style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
             >
@@ -147,35 +143,6 @@ const ClientMembersPage = () => {
         }
       />
       <div className="p-6 max-w-2xl space-y-6">
-        {/* Add member */}
-        {canManage && (
-          <div id="add-member-section" className="bg-card border border-border rounded-xl p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <UserPlus size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
-              Adicionar usuário
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Busque pelo nome do usuário cadastrado na plataforma para vinculá-lo a este cliente.
-            </p>
-            <div className="flex gap-2">
-              <Input
-                id="add-member-input"
-                placeholder="Nome do usuário..."
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              />
-              <Button
-                onClick={handleAdd}
-                disabled={adding || !email.trim()}
-                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
-              >
-                {adding ? 'Adicionando...' : 'Adicionar'}
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Members list */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">
@@ -230,6 +197,43 @@ const ClientMembersPage = () => {
         </div>
       </div>
 
+      {/* Add Member Modal */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus size={18} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
+              Adicionar usuário
+            </DialogTitle>
+            <DialogDescription>
+              Busque pelo nome do usuário cadastrado na plataforma para vinculá-lo a este cliente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <Input
+              placeholder="Nome do usuário..."
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddDialogOpen(false)} disabled={adding}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleAdd}
+                disabled={adding || !email.trim()}
+                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+              >
+                {adding ? 'Adicionando...' : 'Adicionar'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
