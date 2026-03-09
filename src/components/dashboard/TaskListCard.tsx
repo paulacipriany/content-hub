@@ -36,12 +36,12 @@ interface TaskListCardProps {
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
-  { value: 'backlog', label: 'Backlog', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300', group: 'To-do' },
-  { value: 'planning', label: 'Planning', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300', group: 'In progress' },
-  { value: 'in_progress', label: 'In progress', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300', group: 'In progress' },
-  { value: 'paused', label: 'Paused', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300', group: 'In progress' },
-  { value: 'done', label: 'Done', color: 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300', group: 'Complete' },
-  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300', group: 'Complete' },
+  { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'To-do' },
+  { value: 'planning', label: 'Planning', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400', group: 'In progress' },
+  { value: 'in_progress', label: 'In progress', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400', group: 'In progress' },
+  { value: 'paused', label: 'Paused', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400', group: 'In progress' },
+  { value: 'done', label: 'Done', color: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400', group: 'Complete' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400', group: 'Complete' },
 ];
 
 const STATUS_GROUPS = [
