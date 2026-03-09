@@ -1,9 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { cn } from '@/lib/utils';
-import { CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { CheckCircle, Eye, MessageSquare, Clock, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
@@ -35,24 +33,42 @@ const ApprovalsPage = () => {
                 className="bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
                 style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {platformIcon(c.platform, 14)}
-                    <span className="text-sm font-medium text-foreground">{c.title}</span>
-                    {c.status !== 'approval-client' && (
-                      <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[c.status as WorkflowStatus])}>
-                        {STATUS_LABELS[c.status as WorkflowStatus]}
-                      </span>
-                    )}
+                {/* Thumbnail */}
+                {c.media_urls && c.media_urls.length > 0 ? (
+                  <img src={c.media_urls[0]} alt="" className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <Eye size={24} className="text-muted-foreground" />
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{c.description}</p>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-2" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                    <Clock size={13} />
+                    {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
+                  </span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {platformIcon(c.platform, 14, true)}
+                  </div>
+                  <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>
+                  {(() => {
+                    const copyPreview = c.copy_text ? c.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
+                    return copyPreview ? (
+                      <p className="text-xs text-muted-foreground truncate">{copyPreview}{c.copy_text && c.copy_text.replace(/<[^>]*>/g, '').length > 120 ? '…' : ''}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground truncate">Sem copy</p>
+                    );
+                  })()}
                   <p className="text-xs text-muted-foreground mt-1">
-                    Por {c.assignee_profile?.display_name ?? 'N/A'} · {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}
+                    Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
+                <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
                     <MessageSquare size={14} /> Revisar
+                  </Button>
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
+                    <Check size={14} /> Aprovar
                   </Button>
                 </div>
               </div>
