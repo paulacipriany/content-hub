@@ -6,7 +6,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform, CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
 import {
   FileText, Calendar, GitBranch, CheckCircle, Image, BarChart3,
-  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight,
+  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, CalendarClock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
