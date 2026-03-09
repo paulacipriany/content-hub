@@ -488,11 +488,35 @@ const CalendarPage = () => {
     setActiveTask(null);
     if (!over) return;
     const data = active.data.current;
-    const newDate = over.id as string;
+    const overId = over.id as string;
+    
+    // Parse drop zone ID - can be 'dateStr' or 'dateStr-hour'
+    const parts = overId.split('-');
+    let newDate: string;
+    let newHour: string | undefined;
+    
+    if (parts.length >= 4) {
+      // Format: YYYY-MM-DD-HH
+      newDate = parts.slice(0, 3).join('-');
+      newHour = parts[3] + ':00';
+    } else {
+      // Format: YYYY-MM-DD
+      newDate = overId;
+      newHour = undefined;
+    }
 
     if (data?.type === 'content') {
       const content = projectContents.find(c => c.id === active.id);
-      if (!content || content.publish_date === newDate) return;
+      if (!content || (content.publish_date === newDate && content.publish_time === newHour)) return;
+      
+      // Update content with new date and optionally time
+      const updates: any = { publish_date: newDate };
+      if (newHour !== undefined) {
+        updates.publish_time = newHour;
+      }
+      
+      await supabase.from('contents').update(updates).eq('id', active.id);
+      // Refresh the content list or update local state as needed
       updateContentDate(active.id as string, newDate);
     } else if (data?.type === 'task') {
       const taskId = (active.id as string).replace('task-', '');
