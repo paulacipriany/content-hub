@@ -98,6 +98,34 @@ const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; 
   </div>
 );
 
+/* ── Percentage Field ── */
+const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => {
+  const formatValue = (num: number) => {
+    if (num === 0) return '0';
+    return num.toString().replace('.', ',');
+  };
+
+  const parseValue = (str: string) => {
+    const cleaned = str.replace(/[^\d,]/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  };
+
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+      <div className="relative">
+        <Input
+          type="text"
+          value={formatValue(value ?? 0)}
+          onChange={e => onChange(parseValue(e.target.value))}
+          className="h-8 text-sm pr-6"
+        />
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+      </div>
+    </div>
+  );
+};
+
 /* ── Detail Sheet ── */
 const AnalysisSheet = ({
   content,
@@ -286,24 +314,24 @@ const AnalysisSheet = ({
                     fields: [
                       { icon: <Target size={11} />, label: 'Contas alcançadas', field: 'accounts_reached' as keyof PlatformMetrics },
                       { icon: <Eye size={11} />, label: 'Visualizações', field: 'views' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics },
-                      { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics, pct: true },
+                      { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
                     label: 'Interações',
                     fields: [
                       { icon: <Activity size={11} />, label: 'Interações', field: 'interactions' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
-                      { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics, pct: true },
+                      { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
                     label: 'Fonte de visualizações',
                     fields: [
-                      { icon: <UserCheck size={11} />, label: 'Perfil', field: 'views_source_profile' as keyof PlatformMetrics },
-                      { icon: <FileText size={11} />, label: 'Feed', field: 'views_source_feed' as keyof PlatformMetrics },
-                      { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics },
+                      { icon: <UserCheck size={11} />, label: 'Perfil', field: 'views_source_profile' as keyof PlatformMetrics, pct: true },
+                      { icon: <FileText size={11} />, label: 'Feed', field: 'views_source_feed' as keyof PlatformMetrics, pct: true },
+                      { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
@@ -317,12 +345,12 @@ const AnalysisSheet = ({
                   {
                     label: 'Gênero público',
                     fields: [
-                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics, pct: true },
+                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics, pct: true },
+                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics, pct: true },
                     ],
                   },
-                ]).map(section => (
+                ] as { label: string; fields: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics; pct?: boolean }[] }[]).map(section => (
                   <CollapsibleSection
                     key={section.label}
                     label={section.label}
@@ -331,13 +359,23 @@ const AnalysisSheet = ({
                   >
                     <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
-                        <MetricField
-                          key={f.field}
-                          icon={f.icon}
-                          label={f.label}
-                          value={currentMetrics[f.field] ?? 0}
-                          onChange={(v) => updateMetric(activePlatform, f.field, v)}
-                        />
+                        f.pct ? (
+                          <PercentageField
+                            key={f.field}
+                            icon={f.icon}
+                            label={f.label}
+                            value={currentMetrics[f.field] ?? 0}
+                            onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                          />
+                        ) : (
+                          <MetricField
+                            key={f.field}
+                            icon={f.icon}
+                            label={f.label}
+                            value={currentMetrics[f.field] ?? 0}
+                            onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                          />
+                        )
                       ))}
                     </div>
                   </CollapsibleSection>
