@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,9 @@ import { contrastText, generatePalette } from '@/lib/clientPalette';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import UserProfileDialog from './UserProfileDialog';
 
 const globalNavItems = [
   { icon: Home, label: 'Home', path: '/' },
@@ -35,7 +38,8 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
-  const { profile, role, signOut } = useAuth();
+  const { profile, role, signOut, user } = useAuth();
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -350,22 +354,55 @@ const AppSidebar = () => {
       </div>
 
       <div className="px-3 py-3 border-t border-sidebar-border-custom">
-        <div className={cn("flex items-center gap-2.5", sidebarCollapsed && "justify-center")}>
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary text-xs font-semibold">{initials}</span>
-          </div>
-          {!sidebarCollapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
-              <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
-            </div>
-          )}
-          {!sidebarCollapsed && (
-            <button onClick={signOut} className="text-sidebar-fg hover:text-sidebar-fg-active transition-colors" title="Sair">
-              <LogOut size={16} />
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={cn(
+                "flex items-center gap-2.5 w-full rounded-lg px-1 py-1 hover:bg-sidebar-hover transition-colors cursor-pointer",
+                sidebarCollapsed && "justify-center"
+              )}
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary text-xs font-semibold">{initials}</span>
+              </div>
+              {!sidebarCollapsed && (
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
+                  <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
+                </div>
+              )}
             </button>
-          )}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-56 p-0 rounded-xl shadow-lg">
+            {/* User info header */}
+            <div className="flex flex-col items-center gap-1 px-4 pt-4 pb-3">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-primary text-base font-semibold">{initials}</span>
+              </div>
+              <p className="text-sm font-medium text-foreground mt-1">{profile?.display_name ?? 'Usuário'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
+            <Separator />
+            {/* Menu items */}
+            <div className="p-1.5">
+              <button
+                onClick={() => setProfileDialogOpen(true)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent transition-colors"
+              >
+                <User size={16} className="text-muted-foreground" />
+                Perfil
+              </button>
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent transition-colors"
+              >
+                <LogOut size={16} className="text-muted-foreground" />
+                Sair
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       </div>
     </aside>
   );
