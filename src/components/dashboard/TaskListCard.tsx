@@ -20,6 +20,7 @@ interface Task {
   assigned_to: string | null;
   created_by: string;
   status?: TaskStatus;
+  priority?: TaskPriority;
 }
 
 interface MemberProfile {
@@ -34,6 +35,7 @@ interface TaskListCardProps {
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
   { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'A fazer' },
@@ -48,6 +50,13 @@ const STATUS_GROUPS = [
   { key: 'A fazer', label: 'A fazer' },
   { key: 'Em andamento', label: 'Em andamento' },
   { key: 'Completo', label: 'Completo' },
+];
+
+const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] = [
+  { value: 'low', label: 'Baixa', color: 'bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-400' },
+  { value: 'medium', label: 'Média', color: 'bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400' },
+  { value: 'high', label: 'Alta', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400' },
+  { value: 'urgent', label: 'Urgente', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400' },
 ];
 
 const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
@@ -149,12 +158,60 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
   );
 };
 
+const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChange: (priority: TaskPriority) => void }) => {
+  const [open, setOpen] = useState(false);
+  const currentOption = PRIORITY_OPTIONS.find(p => p.value === priority) ?? PRIORITY_OPTIONS[1]; // default to medium
+
+  const handlePriorityChange = (newPriority: TaskPriority) => {
+    onChange(newPriority);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+            currentOption.color
+          )}
+        >
+          {currentOption.label}
+          <ChevronDown size={10} className="opacity-60" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-32 p-1" align="start">
+        <div className="px-2 py-1 text-xs font-medium text-muted-foreground">Prioridade</div>
+        {PRIORITY_OPTIONS.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => handlePriorityChange(opt.value)}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
+              priority === opt.value && "bg-secondary"
+            )}
+          >
+            <span className={cn("w-2 h-2 rounded-full", 
+              opt.value === 'low' ? 'bg-slate-500' : 
+              opt.value === 'medium' ? 'bg-yellow-500' :
+              opt.value === 'high' ? 'bg-orange-500' :
+              'bg-red-500'
+            )} />
+            {opt.label}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
   const [newDueDate, setNewDueDate] = useState<Date | undefined>();
   const [newAssignee, setNewAssignee] = useState<string | null>(null);
+  const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberProfile[]>([]);
 
@@ -192,7 +249,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     if (!user) return;
     const { data } = await supabase
       .from('project_tasks')
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority')
       .eq('project_id', projectId)
       .order('sort_order')
       .order('created_at');
@@ -213,13 +270,20 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         sort_order: nextOrder,
         due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
         assigned_to: newAssignee,
+        priority: newPriority,
       } as any)
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority')
       .single();
     if (data) setTasks(prev => [...prev, data as Task]);
     setNewText('');
     setNewDueDate(undefined);
     setNewAssignee(null);
+    setNewPriority('medium');
+  };
+
+  const updatePriority = async (id: string, priority: TaskPriority) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, priority } : t));
+    await supabase.from('project_tasks').update({ priority }).eq('id', id);
   };
 
   const updateTaskStatus = async (id: string, status: TaskStatus) => {
@@ -333,8 +397,9 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       {/* Table header */}
-      <div className="grid grid-cols-[160px_1fr_auto] border-b border-border bg-secondary/40">
+      <div className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border bg-secondary/40">
         <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</div>
+        <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Prioridade</div>
         <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Tarefa</div>
         <div className="px-4 py-2.5 w-32" />
       </div>
@@ -348,11 +413,16 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         visibleTasks.map(t => (
           <div
             key={t.id}
-            className="grid grid-cols-[160px_1fr_auto] border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
+            className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
           >
             {/* Status */}
             <div className="px-4 py-3 flex items-center">
               <StatusBadge status={getTaskStatus(t.done, t.status)} onChange={(status) => updateTaskStatus(t.id, status)} />
+            </div>
+
+            {/* Priority */}
+            <div className="px-4 py-3 flex items-center">
+              <PriorityBadge priority={t.priority || 'medium'} onChange={(priority) => updatePriority(t.id, priority)} />
             </div>
 
             {/* Task text + meta */}
@@ -429,13 +499,18 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
       {/* Add new task row */}
       <form
         onSubmit={(e) => { e.preventDefault(); addTask(); }}
-        className="grid grid-cols-[160px_1fr_auto] border-t border-border bg-secondary/20 hover:bg-secondary/40 transition-colors"
+        className="grid grid-cols-[120px_120px_1fr_auto] border-t border-border bg-secondary/20 hover:bg-secondary/40 transition-colors"
       >
         {/* Status placeholder for new task */}
         <div className="px-4 py-2.5 flex items-center">
           <span className="text-xs text-muted-foreground/50 flex items-center gap-1">
             <Plus size={11} /> Nova
           </span>
+        </div>
+
+        {/* Priority selector for new task */}
+        <div className="px-4 py-2.5 flex items-center">
+          <PriorityBadge priority={newPriority} onChange={setNewPriority} />
         </div>
 
         {/* Input */}
@@ -538,8 +613,18 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         </div>
       </form>
 
-      {(newDueDate || newAssignee) && (
+      {(newDueDate || newAssignee || newPriority !== 'medium') && (
         <div className="flex items-center gap-2 px-4 py-1.5 flex-wrap bg-secondary/20 border-t border-border">
+          {newPriority !== 'medium' && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">
+                Prioridade: {PRIORITY_OPTIONS.find(p => p.value === newPriority)?.label}
+              </span>
+              <button onClick={() => setNewPriority('medium')} className="text-muted-foreground hover:text-destructive">
+                <X size={10} />
+              </button>
+            </div>
+          )}
           {newDueDate && (
             <div className="flex items-center gap-1">
               <span className="text-[10px] text-muted-foreground">

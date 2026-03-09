@@ -390,6 +390,7 @@ export type Database = {
           done: boolean
           due_date: string | null
           id: string
+          priority: string | null
           project_id: string
           sort_order: number
           status: string | null
@@ -402,6 +403,7 @@ export type Database = {
           done?: boolean
           due_date?: string | null
           id?: string
+          priority?: string | null
           project_id: string
           sort_order?: number
           status?: string | null
@@ -414,6 +416,7 @@ export type Database = {
           done?: boolean
           due_date?: string | null
           id?: string
+          priority?: string | null
           project_id?: string
           sort_order?: number
           status?: string | null
