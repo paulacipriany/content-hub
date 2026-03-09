@@ -100,14 +100,25 @@ const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; 
 
 /* ── Percentage Field ── */
 const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => {
-  const formatValue = (num: number) => {
-    if (num === 0) return '0';
-    return num.toString().replace('.', ',');
-  };
+  const numToStr = (n: number) => (n === 0 ? '0' : n.toString().replace('.', ','));
 
-  const parseValue = (str: string) => {
-    const cleaned = str.replace(/[^\d,]/g, '').replace(',', '.');
-    return parseFloat(cleaned) || 0;
+  const [localValue, setLocalValue] = useState(numToStr(value ?? 0));
+  const [focused, setFocused] = useState(false);
+
+  // Sync from outside only when not focused
+  useEffect(() => {
+    if (!focused) setLocalValue(numToStr(value ?? 0));
+  }, [value, focused]);
+
+  const handleChange = (raw: string) => {
+    // Allow digits and a single comma
+    const cleaned = raw.replace(/[^\d,]/g, '');
+    // Prevent multiple commas
+    const parts = cleaned.split(',');
+    const safe = parts.length > 2 ? parts[0] + ',' + parts.slice(1).join('') : cleaned;
+    setLocalValue(safe);
+    const num = parseFloat(safe.replace(',', '.')) || 0;
+    onChange(num);
   };
 
   return (
@@ -116,8 +127,10 @@ const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNo
       <div className="relative">
         <Input
           type="text"
-          value={formatValue(value ?? 0)}
-          onChange={e => onChange(parseValue(e.target.value))}
+          value={localValue}
+          onChange={e => handleChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           className="h-8 text-sm pr-6"
         />
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
