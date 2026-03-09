@@ -3,7 +3,8 @@ import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
-import { Eye } from 'lucide-react';
+import { Eye, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ReviewPage = () => {
@@ -29,10 +30,9 @@ const ReviewPage = () => {
         ) : (
           <div className="space-y-3">
             {reviewContents.map(c => (
-              <button
+              <div
                 key={c.id}
-                onClick={() => setSelectedContent(c)}
-                className="w-full bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow text-left"
+                className="bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
                 style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
               >
                 {/* Thumbnail */}
@@ -61,7 +61,12 @@ const ReviewPage = () => {
                     Por {c.assignee_profile?.display_name ?? 'N/A'} · {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </p>
                 </div>
-              </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setSelectedContent(c)}>
+                    <MessageSquare size={14} /> Revisar
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         )}
