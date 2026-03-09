@@ -248,6 +248,7 @@ const AnalysisSheet = ({
 
   const isInstagram = activePlatform === 'instagram';
   const isFacebook = activePlatform === 'facebook';
+  const isYoutube = activePlatform === 'youtube';
 
   return (
     <>
