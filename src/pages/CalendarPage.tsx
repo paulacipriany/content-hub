@@ -245,7 +245,7 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
 
   return (
     <div className={cn(
-      "flex items-center gap-1 px-1.5 py-[2px] rounded-[4px] text-[11px] group/task border-l-2 transition-colors",
+      "flex items-center gap-1 px-1.5 py-[2px] rounded-[4px] text-[11px] group/task border-l-2 transition-colors min-w-0 overflow-hidden",
       isOverdue ? "border-l-destructive bg-destructive/5" : "border-l-muted-foreground/30 hover:bg-muted/40"
     )}>
       <Checkbox
@@ -266,7 +266,7 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
         <span
           onClick={() => setEditing(true)}
           className={cn(
-            "truncate cursor-text",
+            "truncate cursor-text min-w-0",
             task.done ? "line-through text-muted-foreground" : isOverdue ? "text-destructive" : "text-foreground"
           )}
         >
