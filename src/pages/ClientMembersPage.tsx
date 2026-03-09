@@ -15,8 +15,9 @@ interface MemberWithProfile {
   id: string;
   user_id: string;
   created_at: string;
-  profile?: { display_name: string | null; user_id: string } | null;
+  profile?: { display_name: string | null; user_id: string; avatar_url?: string | null } | null;
   role?: string | null;
+  isOwner?: boolean;
 }
 
 const ClientMembersPage = () => {
