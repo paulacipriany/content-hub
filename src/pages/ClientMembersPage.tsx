@@ -251,7 +251,7 @@ const ClientMembersPage = () => {
               </Button>
               <Button
                 onClick={handleAdd}
-                disabled={adding || !email.trim()}
+                disabled={adding || (!searchName.trim() && !searchEmail.trim())}
                 style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
               >
                 {adding ? 'Adicionando...' : 'Adicionar'}
