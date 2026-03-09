@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activit
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 
@@ -118,16 +119,32 @@ const AnalysisSheet = ({
     return saved ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
   };
 
-  const [platformMetrics, setPlatformMetrics] = useState<Record<string, PlatformMetrics>>(() => {
+  const initialPlatformMetrics = useMemo(() => {
     const m: Record<string, PlatformMetrics> = {};
-    platforms.forEach(p => { m[p] = initMetrics(p); });
+    platforms.forEach((p) => {
+      m[p] = initMetrics(p);
+    });
     return m;
-  });
+  }, [platforms, analysis?.platform_metrics]);
+
+  const initialAnalysisText = analysis?.analysis_text ?? '';
+  const initialResult = analysis?.result ?? null;
+
+  const [platformMetrics, setPlatformMetrics] = useState<Record<string, PlatformMetrics>>(initialPlatformMetrics);
   const [activePlatform, setActivePlatform] = useState(platforms[0]);
   const [activeSection, setActiveSection] = useState<string>('Principais');
-  const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
-  const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
+  const [analysisText, setAnalysisText] = useState(initialAnalysisText);
+  const [result, setResult] = useState<AnalysisResult | null>(initialResult);
   const [saving, setSaving] = useState(false);
+  const [confirmExitOpen, setConfirmExitOpen] = useState(false);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return (
+      JSON.stringify(platformMetrics) !== JSON.stringify(initialPlatformMetrics) ||
+      analysisText !== initialAnalysisText ||
+      result !== initialResult
+    );
+  }, [platformMetrics, initialPlatformMetrics, analysisText, initialAnalysisText, result, initialResult]);
 
   const updateMetric = (platform: string, field: keyof PlatformMetrics, value: number) => {
     setPlatformMetrics(prev => ({
@@ -146,7 +163,7 @@ const AnalysisSheet = ({
     { views: 0, likes: 0, comments_count: 0, shares: 0 }
   );
 
-  const handleSave = async () => {
+  const handleSave = async (closeAfterSave = false) => {
     setSaving(true);
     const data = {
       content_id: content.id,
@@ -168,6 +185,21 @@ const AnalysisSheet = ({
     setSaving(false);
     toast.success('Análise salva!');
     onSaved();
+
+    if (closeAfterSave) {
+      onClose();
+    }
+  };
+
+  const handleCloseAttempt = () => {
+    if (saving) return;
+
+    if (hasUnsavedChanges) {
+      setConfirmExitOpen(true);
+      return;
+    }
+
+    onClose();
   };
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
@@ -175,7 +207,8 @@ const AnalysisSheet = ({
   const isInstagram = activePlatform === 'instagram';
 
   return (
-    <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
+    <>
+      <Sheet open onOpenChange={(open) => { if (!open) handleCloseAttempt(); }}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -348,13 +381,47 @@ const AnalysisSheet = ({
 
           {/* Save button */}
           <div className="px-6 py-3 border-t border-border">
-            <Button className="w-full" onClick={handleSave} disabled={saving}>
+            <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
               {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
             </Button>
           </div>
         </div>
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={confirmExitOpen} onOpenChange={setConfirmExitOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Salvar antes de sair?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Você fez alterações neste relatório. Deseja salvar antes de fechar?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setConfirmExitOpen(false);
+              onClose();
+            }}
+          >
+            Sair sem salvar
+          </Button>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirmExitOpen(false);
+              handleSave(true);
+            }}
+          >
+            Salvar e sair
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 
