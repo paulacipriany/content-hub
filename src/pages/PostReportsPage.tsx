@@ -33,6 +33,9 @@ interface PlatformMetrics {
   views_source_profile?: number;
   views_source_feed?: number;
   views_source_stories?: number;
+  link_clicks?: number;
+  profile_visits?: number;
+  followers_gained?: number;
 }
 
 interface PostAnalysis {
