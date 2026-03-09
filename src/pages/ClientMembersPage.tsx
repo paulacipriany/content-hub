@@ -107,7 +107,11 @@ const ClientMembersPage = () => {
       toast({ title: 'Erro ao adicionar', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Usuário adicionado!' });
-      setEmail('');
+      setSearchName('');
+      setSearchEmail('');
+      setAddDialogOpen(false);
+      await fetchMembers();
+    }
       setAddDialogOpen(false);
       await fetchMembers();
     }
