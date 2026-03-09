@@ -89,6 +89,14 @@ const CollapsibleSection = ({ label, children, open, onToggle }: { label: string
   );
 };
 
+/* ── Metric Field ── */
+const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => (
+  <div>
+    <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+    <Input type="text" value={value ?? 0} onChange={e => onChange(Number(e.target.value) || 0)} className="h-8 text-sm" />
+  </div>
+);
+
 /* ── Detail Sheet ── */
 const AnalysisSheet = ({
   content,
@@ -163,13 +171,6 @@ const AnalysisSheet = ({
   };
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
-
-  const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
-    <div>
-      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-      <Input type="text" value={currentMetrics[field] ?? 0} onChange={e => updateMetric(activePlatform, field, Number(e.target.value) || 0)} className="h-8 text-sm" />
-    </div>
-  );
 
   const isInstagram = activePlatform === 'instagram';
 
@@ -297,7 +298,13 @@ const AnalysisSheet = ({
                   >
                     <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
-                        <Field key={f.field} icon={f.icon} label={f.label} field={f.field} />
+                        <MetricField
+                          key={f.field}
+                          icon={f.icon}
+                          label={f.label}
+                          value={currentMetrics[f.field] ?? 0}
+                          onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                        />
                       ))}
                     </div>
                   </CollapsibleSection>
@@ -305,10 +312,10 @@ const AnalysisSheet = ({
               </>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
-                <Field icon={<Heart size={11} />} label="Likes" field="likes" />
-                <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
-                <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
+                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
+                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
               </div>
             )}
 
