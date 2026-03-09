@@ -32,15 +32,27 @@ interface TaskListCardProps {
   hideDone?: boolean;
 }
 
-type TaskStatus = 'todo' | 'in_progress' | 'done';
+type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
-  { value: 'todo', label: 'À fazer', color: 'bg-muted-foreground/30 text-muted-foreground' },
-  { value: 'in_progress', label: 'Em andamento', color: 'bg-amber-500/20 text-amber-600' },
-  { value: 'done', label: 'Concluído', color: 'bg-emerald-500/20 text-emerald-600' },
+const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
+  { value: 'backlog', label: 'Backlog', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300', group: 'To-do' },
+  { value: 'planning', label: 'Planning', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300', group: 'In progress' },
+  { value: 'in_progress', label: 'In progress', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300', group: 'In progress' },
+  { value: 'paused', label: 'Paused', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300', group: 'In progress' },
+  { value: 'done', label: 'Done', color: 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300', group: 'Complete' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300', group: 'Complete' },
 ];
 
-const getTaskStatus = (done: boolean): TaskStatus => done ? 'done' : 'todo';
+const STATUS_GROUPS = [
+  { key: 'To-do', label: 'To-do' },
+  { key: 'In progress', label: 'In progress' },
+  { key: 'Complete', label: 'Complete' },
+];
+
+const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
+  if (status) return status;
+  return done ? 'done' : 'backlog';
+};
 
 const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
   const [editing, setEditing] = useState(false);
