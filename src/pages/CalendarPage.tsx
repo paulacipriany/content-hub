@@ -472,7 +472,7 @@ const CalendarPage = () => {
           </div>
         )}
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => isClient ? setPreviewContent(c) : setSelectedContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => setSelectedContent(c)} />
         ))}
         {viewMode === 'month' && dayContents.length > 3 && (
           <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
