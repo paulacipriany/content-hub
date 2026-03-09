@@ -251,7 +251,7 @@ const PostReportsPage = () => {
       .from('post_analyses')
       .select('*')
       .in('content_id', contentIds);
-    setAnalyses((data as PostAnalysis[]) ?? []);
+    setAnalyses((data as unknown as PostAnalysis[]) ?? []);
   }, [published.map(c => c.id).join(',')]);
 
   useEffect(() => { fetchAnalyses(); }, [fetchAnalyses]);
