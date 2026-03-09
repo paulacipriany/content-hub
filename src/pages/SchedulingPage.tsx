@@ -225,7 +225,8 @@ const SchedulingPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 gap-1.5"
+                        className="flex-1 gap-1.5 border-0"
+                        style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
                         onClick={() => {
                           navigator.clipboard.writeText(previewContent.copy_text ?? '');
                           toast.success('Texto copiado!');
