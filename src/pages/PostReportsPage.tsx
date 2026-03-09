@@ -381,13 +381,47 @@ const AnalysisSheet = ({
 
           {/* Save button */}
           <div className="px-6 py-3 border-t border-border">
-            <Button className="w-full" onClick={handleSave} disabled={saving}>
+            <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
               {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
             </Button>
           </div>
         </div>
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={confirmExitOpen} onOpenChange={setConfirmExitOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Salvar antes de sair?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Você fez alterações neste relatório. Deseja salvar antes de fechar?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setConfirmExitOpen(false);
+              onClose();
+            }}
+          >
+            Sair sem salvar
+          </Button>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              setConfirmExitOpen(false);
+              handleSave(true);
+            }}
+          >
+            Salvar e sair
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 
