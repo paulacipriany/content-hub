@@ -1,4 +1,5 @@
 import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
 import AssigneeSelector from './AssigneeSelector';
 import { useApp } from '@/contexts/AppContext';
@@ -51,6 +52,7 @@ function useAutoSave(contentId: string | undefined, field: string, value: string
 const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
   const { user, profile, role } = useAuth();
+  const { toast } = useToast();
   const isClient = role === 'client';
   const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
@@ -427,7 +429,18 @@ const ContentPanel = () => {
                 <Button
                   size="sm"
                   style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
-                  onClick={async () => { await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); if (selectedContent.status === 'idea' || selectedContent.status === 'production') setSelectedContent(null); }}
+                  onClick={async () => { 
+                    try {
+                      await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
+                      if (selectedContent.status === 'idea' || selectedContent.status === 'production') setSelectedContent(null); 
+                    } catch (error) {
+                      toast({ 
+                        title: 'Erro', 
+                        description: error instanceof Error ? error.message : 'Erro ao atualizar status', 
+                        variant: 'destructive' 
+                      });
+                    }
+                  }}
                 >
                   {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
                 </Button>
