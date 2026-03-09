@@ -1,7 +1,7 @@
 /**
  * Generates a full palette of shades from a hex color and applies
  * them as CSS custom properties on :root for dynamic client branding.
- * Supports both light and dark mode.
+ * Automatically adapts to dark mode.
  */
 
 function hexToHSL(hex: string): [number, number, number] {
@@ -39,22 +39,12 @@ function hslToHex(h: number, s: number, l: number): string {
 }
 
 export interface ClientPalette {
-  50: string;
-  100: string;
-  200: string;
-  300: string;
-  400: string;
-  500: string;
-  600: string;
-  700: string;
-  800: string;
-  900: string;
-  950: string;
+  50: string; 100: string; 200: string; 300: string; 400: string;
+  500: string; 600: string; 700: string; 800: string; 900: string; 950: string;
 }
 
 export function generatePalette(hex: string): ClientPalette {
   const [h, s] = hexToHSL(hex);
-
   return {
     50:  hslToHex(h, Math.min(s, 100), 97),
     100: hslToHex(h, Math.min(s, 96), 93),
@@ -70,52 +60,70 @@ export function generatePalette(hex: string): ClientPalette {
   };
 }
 
-/** Generate dark-mode-friendly palette (inverted lightness for backgrounds) */
+/** Dark-mode palette: lighter accents, darker backgrounds */
 export function generateDarkPalette(hex: string): ClientPalette {
   const [h, s] = hexToHSL(hex);
-
   return {
-    50:  hslToHex(h, Math.min(s, 30), 10),   // very dark bg
-    100: hslToHex(h, Math.min(s, 35), 14),
-    200: hslToHex(h, Math.min(s, 40), 18),
-    300: hslToHex(h, Math.min(s, 50), 28),
-    400: hslToHex(h, Math.min(s, 65), 42),
-    500: hslToHex(h, s, 55),                  // base — brighter for dark
-    600: hslToHex(h, s, 65),
-    700: hslToHex(h, Math.min(s, 90), 75),
-    800: hslToHex(h, Math.min(s, 85), 82),
-    900: hslToHex(h, Math.min(s, 80), 90),
-    950: hslToHex(h, Math.min(s, 75), 95),
+    50:  hslToHex(h, Math.min(s, 30), 10),
+    100: hslToHex(h, Math.min(s, 35), 15),
+    200: hslToHex(h, Math.min(s, 40), 20),
+    300: hslToHex(h, Math.min(s, 55), 30),
+    400: hslToHex(h, Math.min(s, 70), 45),
+    500: hslToHex(h, Math.min(s, 85), 58),
+    600: hslToHex(h, Math.min(s, 80), 68),
+    700: hslToHex(h, Math.min(s, 75), 78),
+    800: hslToHex(h, Math.min(s, 70), 85),
+    900: hslToHex(h, Math.min(s, 65), 90),
+    950: hslToHex(h, Math.min(s, 60), 95),
   };
 }
 
-/** Apply palette as --client-* CSS custom properties on :root */
-export function applyClientPalette(hex: string | null) {
+const SHADES = ['50','100','200','300','400','500','600','700','800','900','950'] as const;
+
+let _currentHex: string | null = null;
+let _observer: MutationObserver | null = null;
+
+function isDark() {
+  return document.documentElement.classList.contains('dark');
+}
+
+function applyVars(hex: string) {
   const root = document.documentElement;
+  const palette = isDark() ? generateDarkPalette(hex) : generatePalette(hex);
+
+  root.style.setProperty('--client-base', hex);
+  SHADES.forEach(shade => {
+    root.style.setProperty(`--client-${shade}`, palette[shade]);
+  });
+  root.style.setProperty('--client-500-contrast', contrastText(palette['500']));
+}
+
+function clearVars() {
+  const root = document.documentElement;
+  SHADES.forEach(s => root.style.removeProperty(`--client-${s}`));
+  root.style.removeProperty('--client-base');
+  root.style.removeProperty('--client-500-contrast');
+}
+
+/** Apply palette as --client-* CSS custom properties, auto-adapting to dark mode */
+export function applyClientPalette(hex: string | null) {
+  // Clean up previous observer
+  if (_observer) { _observer.disconnect(); _observer = null; }
 
   if (!hex) {
-    const shades = ['50','100','200','300','400','500','600','700','800','900','950'];
-    shades.forEach(s => root.style.removeProperty(`--client-${s}`));
-    shades.forEach(s => root.style.removeProperty(`--client-dark-${s}`));
-    root.style.removeProperty('--client-base');
-    root.style.removeProperty('--client-500-contrast');
+    _currentHex = null;
+    clearVars();
     return;
   }
 
-  const palette = generatePalette(hex);
-  const darkPalette = generateDarkPalette(hex);
-  root.style.setProperty('--client-base', hex);
+  _currentHex = hex;
+  applyVars(hex);
 
-  (Object.entries(palette) as [string, string][]).forEach(([shade, value]) => {
-    root.style.setProperty(`--client-${shade}`, value);
+  // Watch for dark mode class changes and re-apply
+  _observer = new MutationObserver(() => {
+    if (_currentHex) applyVars(_currentHex);
   });
-
-  (Object.entries(darkPalette) as [string, string][]).forEach(([shade, value]) => {
-    root.style.setProperty(`--client-dark-${shade}`, value);
-  });
-
-  // Set contrast text color for the 500 shade
-  root.style.setProperty('--client-500-contrast', contrastText(palette['500']));
+  _observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 }
 
 /** Returns white or dark text color for best contrast on a given hex bg */
