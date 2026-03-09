@@ -47,7 +47,7 @@ const ReviewPage = () => {
                 <div className="flex-1 min-w-0">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-2" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
                     <Clock size={13} />
-                    Agendado: {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
+                    Publicação prevista para {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </span>
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
