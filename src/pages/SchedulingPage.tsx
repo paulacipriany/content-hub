@@ -220,7 +220,7 @@ const SchedulingPage = () => {
 
                 {/* Action buttons right below preview */}
                 {(previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2 mt-3 max-w-[350px] mx-auto">
                     {previewContent.copy_text && (
                       <Button
                         variant="outline"
