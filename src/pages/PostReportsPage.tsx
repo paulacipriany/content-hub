@@ -64,6 +64,23 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 type Tab = 'analyzed' | 'not-analyzed';
 
+/* ── Collapsible Section ── */
+const CollapsibleSection = ({ label, children, defaultOpen = true }: { label: string; children: React.ReactNode; defaultOpen?: boolean }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-border/50 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-3 py-2 bg-secondary/30 hover:bg-secondary/50 transition-colors"
+      >
+        <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</h5>
+        {open ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
+      </button>
+      {open && <div className="px-3 pb-3">{children}</div>}
+    </div>
+  );
+};
+
 /* ── Detail Sheet ── */
 const AnalysisSheet = ({
   content,
