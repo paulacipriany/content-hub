@@ -397,8 +397,9 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       {/* Table header */}
-      <div className="grid grid-cols-[160px_1fr_auto] border-b border-border bg-secondary/40">
+      <div className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border bg-secondary/40">
         <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</div>
+        <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Prioridade</div>
         <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Tarefa</div>
         <div className="px-4 py-2.5 w-32" />
       </div>
