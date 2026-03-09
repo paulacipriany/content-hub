@@ -158,6 +158,53 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
   );
 };
 
+const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChange: (priority: TaskPriority) => void }) => {
+  const [open, setOpen] = useState(false);
+  const currentOption = PRIORITY_OPTIONS.find(p => p.value === priority) ?? PRIORITY_OPTIONS[1]; // default to medium
+
+  const handlePriorityChange = (newPriority: TaskPriority) => {
+    onChange(newPriority);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+            currentOption.color
+          )}
+        >
+          {currentOption.label}
+          <ChevronDown size={10} className="opacity-60" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-32 p-1" align="start">
+        <div className="px-2 py-1 text-xs font-medium text-muted-foreground">Prioridade</div>
+        {PRIORITY_OPTIONS.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => handlePriorityChange(opt.value)}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
+              priority === opt.value && "bg-secondary"
+            )}
+          >
+            <span className={cn("w-2 h-2 rounded-full", 
+              opt.value === 'low' ? 'bg-slate-500' : 
+              opt.value === 'medium' ? 'bg-yellow-500' :
+              opt.value === 'high' ? 'bg-orange-500' :
+              'bg-red-500'
+            )} />
+            {opt.label}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
