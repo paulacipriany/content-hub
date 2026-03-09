@@ -7,7 +7,7 @@ import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWit
 import { platformIcon, PLATFORM_ICONS } from '@/components/content/PlatformIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target, ChevronDown, ChevronRight } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target, ChevronDown, ChevronRight, MousePointerClick, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,10 @@ interface PlatformMetrics {
   gender_women?: number;
   gender_unidentified?: number;
   replies?: number;
+  pins_saved?: number;
+  impressions?: number;
+  pin_clicks?: number;
+  outbound_clicks?: number;
 }
 
 interface PostAnalysis {
@@ -249,6 +253,7 @@ const AnalysisSheet = ({
   const isInstagram = activePlatform === 'instagram';
   const isFacebook = activePlatform === 'facebook';
   const isYoutube = activePlatform === 'youtube';
+  const isPinterest = activePlatform === 'pinterest';
 
   return (
     <>
@@ -412,6 +417,15 @@ const AnalysisSheet = ({
                 <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
                 <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
                 <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} />
+              </div>
+            ) : isPinterest ? (
+              <div className="grid grid-cols-2 gap-3">
+                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
+                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} />
+                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} />
+                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
