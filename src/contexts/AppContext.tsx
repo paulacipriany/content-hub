@@ -119,8 +119,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const content = contents.find(c => c.id === id);
     if (!content || !user) return;
 
-    // Validate that publish_date and publish_time are required when sending to review
-    if (status === 'review') {
+    // Validate that publish_date and publish_time are required when advancing to review (not when going back)
+    if (status === 'review' && content.status !== 'approval-client' && content.status !== 'scheduled') {
       const contentData = content as any;
       if (!contentData.publish_date || !contentData.publish_time) {
         throw new Error('Para enviar para revisão, é obrigatório preencher a data e horário da publicação.');
