@@ -7,10 +7,11 @@ import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWit
 import { platformIcon, PLATFORM_ICONS } from '@/components/content/PlatformIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 
 type AnalysisResult = 'positivo' | 'negativo' | 'neutro';
@@ -20,7 +21,6 @@ interface PlatformMetrics {
   likes: number;
   comments_count: number;
   shares: number;
-  // Instagram-specific
   reposts?: number;
   saves?: number;
   interactions?: number;
@@ -64,23 +64,22 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 type Tab = 'analyzed' | 'not-analyzed';
 
-const AnalysisRow = ({
+/* ── Detail Sheet ── */
+const AnalysisSheet = ({
   content,
   analysis,
   userId,
   onSaved,
-  readOnly = false,
+  onClose,
 }: {
   content: ContentWithRelations;
   analysis: PostAnalysis | null;
   userId: string;
   onSaved: () => void;
-  readOnly?: boolean;
+  onClose: () => void;
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
 
-  // Per-platform metrics state
   const initMetrics = (p: string): PlatformMetrics => {
     const saved = analysis?.platform_metrics?.[p];
     return saved ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
@@ -103,7 +102,6 @@ const AnalysisRow = ({
     }));
   };
 
-  // Compute totals from all platforms
   const totals = Object.values(platformMetrics).reduce(
     (acc, m) => ({
       views: acc.views + m.views,
@@ -140,110 +138,44 @@ const AnalysisRow = ({
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
 
-  const MetricsFields = ({ metrics, platform, editable }: { metrics: PlatformMetrics; platform: string; editable: boolean }) => {
-    const isInstagram = platform === 'instagram';
-    const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-        {editable ? (
-          <Input type="number" min={0} value={metrics[field] ?? 0} onChange={e => updateMetric(platform, field, Number(e.target.value))} className="h-8 text-sm" />
-        ) : (
-          <p className="text-sm font-medium text-foreground">{(metrics[field] ?? 0).toLocaleString('pt-BR')}</p>
-        )}
-      </div>
-    );
+  const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
+    <div>
+      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+      <Input type="number" min={0} value={currentMetrics[field] ?? 0} onChange={e => updateMetric(activePlatform, field, Number(e.target.value))} className="h-8 text-sm" />
+    </div>
+  );
 
-    if (isInstagram) {
-      return (
-        <div className="space-y-4">
-          <div>
-            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Principais</h5>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Field icon={<Heart size={11} />} label="Likes" field="likes" />
-              <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
-              <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
-              <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
-              <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
-            </div>
-          </div>
-          <div>
-            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Geral</h5>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
-              <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
-              <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
-              <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
-            </div>
-          </div>
-          <div>
-            <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Interações</h5>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
-              <Field icon={<Users size={11} />} label="Interações seguidores" field="interactions_followers" />
-              <Field icon={<UserPlus size={11} />} label="Interações não seguidores" field="interactions_non_followers" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
-        <Field icon={<Heart size={11} />} label="Likes" field="likes" />
-        <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
-        <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
-      </div>
-    );
-  };
+  const isInstagram = activePlatform === 'instagram';
 
   return (
-    <div className="border-b border-border last:border-b-0">
-      <div
-        onClick={() => setExpanded(!expanded)}
-        className={cn(
-          "grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-3 hover:bg-secondary/30 transition-colors cursor-pointer",
-          expanded && "bg-secondary/20"
-        )}
-      >
-        <div className="flex items-center">
-          {expanded ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
-        </div>
-        <div className="min-w-0">
-          <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
-        </div>
-        <div className="flex flex-wrap gap-1">
-          <span className={cn(
-            "text-xs font-medium px-2 py-0.5 rounded-md",
-            contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
-          )}>
-            {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          {analysis ? (
-            <>
-              <span className="flex items-center gap-1"><Eye size={12} /> {totals.views}</span>
-              <span className="flex items-center gap-1"><Heart size={12} /> {totals.likes}</span>
-              <span className="flex items-center gap-1"><MessageCircle size={12} /> {totals.comments_count}</span>
-              <span className="flex items-center gap-1"><Share2 size={12} /> {totals.shares}</span>
-              {analysis.result && (
-                <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
+    <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b border-border">
+            <SheetTitle className="text-lg font-semibold text-foreground mb-2">{content.title}</SheetTitle>
+            <div className="flex flex-wrap gap-2">
+              <span className={cn(
+                "text-xs font-medium px-2.5 py-1 rounded-full",
+                contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
+              )}>
+                {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                {platformIcon(content.platform, 12)}
+                {Array.isArray(content.platform) ? content.platform.map(p => PLATFORM_LABELS[p as Platform] ?? p).join(', ') : PLATFORM_LABELS[content.platform as Platform]}
+              </span>
+              {analysis?.result && (
+                <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
                   {resultOptions.find(o => o.value === analysis.result)?.label}
                 </span>
               )}
-            </>
-          ) : (
-            <span className="text-muted-foreground/60 italic">Sem análise</span>
-          )}
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {expanded && (
-        <div className="px-6 pb-4 pt-2 bg-secondary/10 border-t border-border/50">
           {/* Platform tabs */}
           {platforms.length > 1 && (
-            <div className="flex items-center gap-1 mb-4 border-b border-border pb-2">
+            <div className="px-6 pt-3 flex items-center gap-1 border-b border-border pb-3">
               {platforms.map(p => {
                 const Icon = PLATFORM_ICONS[p as Platform];
                 return (
@@ -267,74 +199,147 @@ const AnalysisRow = ({
 
           {/* Single platform header */}
           {platforms.length === 1 && (
-            <div className="flex items-center gap-1.5 mb-3 text-xs text-muted-foreground">
+            <div className="px-6 pt-3 pb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
               {(() => { const Icon = PLATFORM_ICONS[platforms[0] as Platform]; return Icon ? <Icon size={13} /> : null; })()}
               <span className="font-medium">{PLATFORM_LABELS[platforms[0] as Platform] ?? platforms[0]}</span>
             </div>
           )}
 
-          {readOnly && analysis ? (
-            <>
-              <MetricsFields metrics={currentMetrics} platform={activePlatform} editable={false} />
-              {analysis.analysis_text && (
-                <div className="mt-4 mb-3">
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{analysis.analysis_text}</p>
+          {/* Metrics */}
+          <div className="px-6 py-4 flex-1 overflow-y-auto space-y-4">
+            {isInstagram ? (
+              <>
+                <div>
+                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Principais</h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Field icon={<Heart size={11} />} label="Likes" field="likes" />
+                    <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
+                    <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
+                    <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
+                    <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
+                  </div>
                 </div>
-              )}
-              {analysis.result && (
-                <div className="mt-3">
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
-                  <span className={cn("px-3 py-1.5 rounded-full text-xs font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
-                    {resultOptions.find(o => o.value === analysis.result)?.label}
-                  </span>
+                <div>
+                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Geral</h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
+                    <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
+                    <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
+                    <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
+                  </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <>
-              <MetricsFields metrics={currentMetrics} platform={activePlatform} editable />
-              <div className="mt-4 mb-3">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
-                <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+                <div>
+                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Interações</h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
+                    <Field icon={<Users size={11} />} label="Interações seguidores" field="interactions_followers" />
+                    <Field icon={<UserPlus size={11} />} label="Interações não seguidores" field="interactions_non_followers" />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
+                <Field icon={<Heart size={11} />} label="Likes" field="likes" />
+                <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
+                <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
               </div>
-              <div className="mb-3">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
-                <div className="flex gap-2">
-                  {resultOptions.map(opt => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setResult(result === opt.value ? null : opt.value)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                        result === opt.value
-                          ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
-                          : "border-border text-muted-foreground hover:bg-secondary"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+            )}
+
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
+              <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
+              <div className="flex gap-2">
+                {resultOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setResult(result === opt.value ? null : opt.value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                      result === opt.value
+                        ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
+                        : "border-border text-muted-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
-              <Button size="sm" onClick={handleSave} disabled={saving}>
-                {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
-              </Button>
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Save button */}
+          <div className="px-6 py-3 border-t border-border">
+            <Button className="w-full" onClick={handleSave} disabled={saving}>
+              {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
+            </Button>
+          </div>
         </div>
-      )}
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+/* ── List Row ── */
+const AnalysisListRow = ({
+  content,
+  analysis,
+  onClick,
+}: {
+  content: ContentWithRelations;
+  analysis: PostAnalysis | null;
+  onClick: () => void;
+}) => {
+  return (
+    <div
+      onClick={onClick}
+      className="grid grid-cols-[1fr_140px_200px] items-center px-4 py-3 hover:bg-secondary/30 transition-colors cursor-pointer border-b border-border last:border-b-0"
+    >
+      <div className="min-w-0">
+        <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        <span className={cn(
+          "text-xs font-medium px-2 py-0.5 rounded-md",
+          contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
+        )}>
+          {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+        </span>
+      </div>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        {analysis ? (
+          <>
+            <span className="flex items-center gap-1"><Eye size={12} /> {analysis.views}</span>
+            <span className="flex items-center gap-1"><Heart size={12} /> {analysis.likes}</span>
+            <span className="flex items-center gap-1"><MessageCircle size={12} /> {analysis.comments_count}</span>
+            <span className="flex items-center gap-1"><Share2 size={12} /> {analysis.shares}</span>
+            {analysis.result && (
+              <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
+                {resultOptions.find(o => o.value === analysis.result)?.label}
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-muted-foreground/60 italic">Sem análise</span>
+        )}
+      </div>
     </div>
   );
 };
 
+/* ── Page ── */
 const PostReportsPage = () => {
   useClientFromUrl();
   const { projectContents } = useApp();
   const { user } = useAuth();
   const [analyses, setAnalyses] = useState<PostAnalysis[]>([]);
   const [tab, setTab] = useState<Tab>('not-analyzed');
+  const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
 
   const published = projectContents.filter(c => c.status === 'published');
 
@@ -359,8 +364,6 @@ const PostReportsPage = () => {
   const negativos = analyzed.filter(c => analysisMap.get(c.id)?.result === 'negativo');
   const neutros = analyzed.filter(c => analysisMap.get(c.id)?.result === 'neutro');
   const semResultado = analyzed.filter(c => !analysisMap.get(c.id)?.result);
-
-  const currentList = tab === 'analyzed' ? analyzed : notAnalyzed;
 
   return (
     <>
@@ -415,19 +418,17 @@ const PostReportsPage = () => {
                     <span className="text-xs text-muted-foreground">({group.items.length})</span>
                   </div>
                   <div className={cn("border rounded-xl overflow-hidden bg-card border-l-[3px]", group.color)}>
-                    <div className="grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-2 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      <div></div>
+                    <div className="grid grid-cols-[1fr_140px_200px] items-center px-4 py-2 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       <div>Título</div>
                       <div>Formato</div>
                       <div>Métricas</div>
                     </div>
                     {group.items.map(content => (
-                      <AnalysisRow
+                      <AnalysisListRow
                         key={content.id}
                         content={content}
                         analysis={analysisMap.get(content.id) ?? null}
-                        userId={user?.id ?? ''}
-                        onSaved={fetchAnalyses}
+                        onClick={() => setSelectedContent(content)}
                       />
                     ))}
                   </div>
@@ -437,8 +438,7 @@ const PostReportsPage = () => {
           )
         ) : (
           <div className="border border-border rounded-xl overflow-hidden bg-card">
-            <div className="grid grid-cols-[32px_1fr_140px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              <div></div>
+            <div className="grid grid-cols-[1fr_140px_200px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               <div>Título do Conteúdo</div>
               <div>Formato</div>
               <div>Status</div>
@@ -450,12 +450,11 @@ const PostReportsPage = () => {
               </div>
             ) : (
               notAnalyzed.map(content => (
-                <AnalysisRow
+                <AnalysisListRow
                   key={content.id}
                   content={content}
                   analysis={null}
-                  userId={user?.id ?? ''}
-                  onSaved={fetchAnalyses}
+                  onClick={() => setSelectedContent(content)}
                 />
               ))
             )}
@@ -468,6 +467,17 @@ const PostReportsPage = () => {
           </p>
         )}
       </div>
+
+      {/* Detail Sheet */}
+      {selectedContent && (
+        <AnalysisSheet
+          content={selectedContent}
+          analysis={analysisMap.get(selectedContent.id) ?? null}
+          userId={user?.id ?? ''}
+          onSaved={() => { fetchAnalyses(); }}
+          onClose={() => setSelectedContent(null)}
+        />
+      )}
     </>
   );
 };
