@@ -71,28 +71,27 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left p-2 bg-card border border-border/60 shadow-sm border-l-[3px]",
+        "w-full text-left px-1.5 py-1 bg-card border border-border/60 shadow-sm border-l-[3px]",
         "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
+        "overflow-hidden min-w-0",
         isDragging && "opacity-30"
       )}
       style={{ borderLeftColor: borderColor }}
+      title={content.title}
     >
-      {/* Platform icons */}
-      <div className="flex items-center gap-1 mb-1">
-        {platforms.map((p, i) => (
-          <span key={i}>{platformIcon([p] as any, 13)}</span>
+      {/* Header: Platform icons + Title in one line */}
+      <div className="flex items-center gap-1 min-w-0">
+        {platforms.slice(0, 2).map((p, i) => (
+          <span key={i} className="shrink-0">{platformIcon([p] as any, 11)}</span>
         ))}
+        <p className="text-[11px] font-semibold text-foreground truncate leading-tight">
+          {content.title}
+        </p>
       </div>
-      {/* Title */}
-      <p className="text-[12px] font-semibold text-foreground truncate mb-1.5">{content.title}</p>
-      {/* Status label */}
-      <span className="text-[10px] text-muted-foreground">{STATUS_LABELS[content.status as WorkflowStatus]}</span>
-      {/* Content type tag */}
-      <div className="mt-1">
-        <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-medium">
-          {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
-        </span>
-      </div>
+      {/* Status label only */}
+      <p className="text-[9px] text-muted-foreground truncate mt-0.5 leading-tight">
+        {STATUS_LABELS[content.status as WorkflowStatus]}
+      </p>
     </div>
   );
 };
