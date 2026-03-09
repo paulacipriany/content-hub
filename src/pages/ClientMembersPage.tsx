@@ -68,15 +68,22 @@ const ClientMembersPage = () => {
   useEffect(() => { fetchMembers(); }, [selectedProject?.id]);
 
   const handleAdd = async () => {
-    if (!email.trim() || !selectedProject || !user) return;
+    if ((!searchName.trim() && !searchEmail.trim()) || !selectedProject || !user) return;
     setAdding(true);
 
-    const { data: profileMatch } = await supabase
-      .from('profiles')
-      .select('user_id, display_name')
-      .or(`display_name.ilike.%${email.trim()}%`)
-      .limit(1)
-      .single();
+    // Build query based on provided fields
+    let query = supabase.from('profiles').select('user_id, display_name');
+    
+    if (searchName.trim() && searchEmail.trim()) {
+      query = query.or(`display_name.ilike.%${searchName.trim()}%`);
+    } else if (searchName.trim()) {
+      query = query.ilike('display_name', `%${searchName.trim()}%`);
+    } else if (searchEmail.trim()) {
+      // Search by display_name that might contain email
+      query = query.ilike('display_name', `%${searchEmail.trim()}%`);
+    }
+
+    const { data: profileMatch } = await query.limit(1).single();
 
     if (!profileMatch) {
       toast({ title: 'Usuário não encontrado', description: 'Verifique o nome e tente novamente.', variant: 'destructive' });
