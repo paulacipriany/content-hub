@@ -30,7 +30,18 @@ const SchedulingPage = () => {
   const { projectContents, updateContentStatus } = useApp();
   const { role } = useAuth();
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
-  const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>({});
+  const [checkedPlatforms, setCheckedPlatforms] = useState<Record<string, Record<string, boolean>>>(() => {
+    try {
+      const saved = localStorage.getItem('scheduling-checklist');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('scheduling-checklist', JSON.stringify(checkedPlatforms));
+  }, [checkedPlatforms]);
   const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState(false);
 
