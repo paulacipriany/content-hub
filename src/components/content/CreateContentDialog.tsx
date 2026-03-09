@@ -136,7 +136,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           <Button
             size="sm"
             className="gap-1.5 h-9"
-            style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+            style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}
           >
             <Plus size={16} />
             <span className="hidden sm:inline">Criar conteúdo</span>
