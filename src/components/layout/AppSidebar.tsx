@@ -164,41 +164,8 @@ const AppSidebar = () => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
 
-              // Workflow parent: toggle expand and navigate
-              if (item.path === '/workflow') {
-                const totalBadge = reviewCount + approvalCount + schedulingCount;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      setWorkflowExpanded(prev => !prev);
-                      navigate(fullPath);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
-                      isActive
-                        ? "bg-sidebar-hover text-sidebar-fg-active"
-                        : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
-                    )}
-                    title={sidebarCollapsed ? item.label : undefined}
-                  >
-                    <item.icon size={18} className="flex-shrink-0" />
-                    {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
-                    {!sidebarCollapsed && totalBadge > 0 && !workflowExpanded && (
-                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
-                        {totalBadge}
-                      </span>
-                    )}
-                    {!sidebarCollapsed && (
-                      <ChevronDown size={14} className={cn("flex-shrink-0 transition-transform duration-200 text-sidebar-fg/50", workflowExpanded && "rotate-180")} />
-                    )}
-                  </button>
-                );
-              }
-
-              // Sub-items: hide when collapsed
+              // Sub-items: always visible, indented
               if ((item as any).subItem) {
-                if (!workflowExpanded && !sidebarCollapsed) return null;
                 return (
                   <button
                     key={item.path}
