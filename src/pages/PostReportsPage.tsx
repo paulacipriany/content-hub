@@ -727,6 +727,8 @@ const PostReportsPage = () => {
           userId={user?.id ?? ''}
           onSaved={() => { fetchAnalyses(); }}
           onClose={() => setSelectedContent(null)}
+          readOnly={isClient}
+        />
         />
       )}
     </>
