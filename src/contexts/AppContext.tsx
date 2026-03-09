@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ContentWithRelations, DbProject, WorkflowStatus } from '@/data/types';
@@ -26,6 +27,7 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, role } = useAuth();
+  const location = useLocation();
   const [contents, setContents] = useState<ContentWithRelations[]>([]);
   const [projects, setProjects] = useState<DbProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null);
@@ -101,10 +103,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, [fetchData]);
 
-  // Apply client palette whenever selected project changes
+  // Apply client palette only on dashboard pages
   useEffect(() => {
-    applyClientPalette(selectedProject?.color ?? null);
-  }, [selectedProject?.color]);
+    const isClientDashboard = location.pathname.includes('/clients/') && 
+                              location.pathname.includes('/dashboard');
+    
+    if (isClientDashboard) {
+      applyClientPalette(selectedProject?.color ?? null);
+    } else {
+      applyClientPalette(null); // Revert to platform colors
+    }
+  }, [selectedProject?.color, location.pathname]);
 
   const updateContentStatus = async (id: string, status: WorkflowStatus) => {
     const content = contents.find(c => c.id === id);
