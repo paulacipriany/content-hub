@@ -208,7 +208,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
         assigned_to: newAssignee,
       } as any)
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
       .single();
     if (data) setTasks(prev => [...prev, data as Task]);
     setNewText('');
