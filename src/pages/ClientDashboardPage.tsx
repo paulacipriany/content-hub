@@ -6,7 +6,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform, CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
 import {
   FileText, Calendar, GitBranch, CheckCircle, Image, BarChart3,
-  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight,
+  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, CalendarClock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -70,7 +70,20 @@ const ClientDashboardPage = () => {
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
       <div className="p-6 space-y-6">
-        {/* Alert banners for review & approval */}
+        {/* Alert banners for scheduled, review & approval */}
+        {scheduled > 0 && (
+          <button
+            onClick={() => navigate(`${basePath}/scheduling`)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
+            style={{ backgroundColor: '#e3f2fd', borderColor: '#bbdefb' }}
+          >
+            <CalendarClock size={18} style={{ color: '#1565c0' }} />
+            <span className="text-sm font-medium" style={{ color: '#1565c0' }}>
+              {scheduled} conteúdo{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendamento
+            </span>
+            <ArrowRight size={14} className="ml-auto" style={{ color: '#1565c0' }} />
+          </button>
+        )}
         {inReview > 0 && (
           <button
             onClick={() => navigate(`${basePath}/review`)}
