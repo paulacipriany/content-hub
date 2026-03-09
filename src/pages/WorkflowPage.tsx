@@ -7,6 +7,7 @@ import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
+import { Check } from 'lucide-react';
 import {
   DndContext,
   DragOverlay,
@@ -21,6 +22,7 @@ import {
 import { useDraggable } from '@dnd-kit/core';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { X, Calendar, User } from 'lucide-react';
 
 const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
@@ -262,6 +264,23 @@ const WorkflowPage = () => {
                       <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Concluir button for programmed content */}
+              {previewContent.status === 'programmed' && !isClient && (
+                <div className="px-6 py-3 border-t border-border/50">
+                  <Button
+                    size="sm"
+                    className="w-full gap-1.5 font-semibold border-0"
+                    style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }}
+                    onClick={() => {
+                      updateContentStatus(previewContent.id, 'published');
+                      setPreviewContent(null);
+                    }}
+                  >
+                    <Check size={14} /> Concluir
+                  </Button>
                 </div>
               )}
             </div>
