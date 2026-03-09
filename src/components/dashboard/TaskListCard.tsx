@@ -186,7 +186,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     if (!user) return;
     const { data } = await supabase
       .from('project_tasks')
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
       .eq('project_id', projectId)
       .order('sort_order')
       .order('created_at');
