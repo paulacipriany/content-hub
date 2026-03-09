@@ -6,7 +6,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Shield } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -15,8 +15,9 @@ interface MemberWithProfile {
   id: string;
   user_id: string;
   created_at: string;
-  profile?: { display_name: string | null; user_id: string } | null;
+  profile?: { display_name: string | null; user_id: string; avatar_url?: string | null } | null;
   role?: string | null;
+  isOwner?: boolean;
 }
 
 const ClientMembersPage = () => {
@@ -41,28 +42,51 @@ const ClientMembersPage = () => {
     if (!selectedProject) return;
     setLoading(true);
 
+    // Fetch project members
     const { data: memberRows } = await supabase
       .from('project_members')
       .select('*')
       .eq('project_id', selectedProject.id)
       .order('created_at', { ascending: true });
 
-    if (!memberRows) { setLoading(false); return; }
+    // Collect all user IDs (members + owner)
+    const memberUserIds = (memberRows ?? []).map(m => m.user_id);
+    const allUserIds = [...new Set([selectedProject.owner_id, ...memberUserIds])];
 
-    const userIds = memberRows.map(m => m.user_id);
     const [{ data: profiles }, { data: roles }] = await Promise.all([
-      supabase.from('profiles').select('user_id, display_name').in('user_id', userIds),
-      supabase.from('user_roles').select('user_id, role').in('user_id', userIds),
+      supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', allUserIds),
+      supabase.from('user_roles').select('user_id, role').in('user_id', allUserIds),
     ]);
 
     const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
     const roleMap = new Map((roles ?? []).map(r => [r.user_id, r.role]));
 
-    setMembers(memberRows.map(m => ({
-      ...m,
-      profile: profileMap.get(m.user_id) ?? null,
-      role: roleMap.get(m.user_id) ?? null,
-    })));
+    // Build members list: owner first, then other members
+    const allMembers: MemberWithProfile[] = [];
+
+    // Add owner as first member
+    allMembers.push({
+      id: 'owner',
+      user_id: selectedProject.owner_id,
+      created_at: selectedProject.created_at,
+      profile: profileMap.get(selectedProject.owner_id) ?? null,
+      role: roleMap.get(selectedProject.owner_id) ?? null,
+      isOwner: true,
+    });
+
+    // Add other members (excluding owner if duplicated)
+    (memberRows ?? []).forEach(m => {
+      if (m.user_id !== selectedProject.owner_id) {
+        allMembers.push({
+          ...m,
+          profile: profileMap.get(m.user_id) ?? null,
+          role: roleMap.get(m.user_id) ?? null,
+          isOwner: false,
+        });
+      }
+    });
+
+    setMembers(allMembers);
     setLoading(false);
   };
 
@@ -180,7 +204,15 @@ const ClientMembersPage = () => {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                        {member.isOwner && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            <Crown size={10} />
+                            Dono
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Shield size={10} />
                         {member.role ? roleLabels[member.role] ?? member.role : 'Sem role'}
@@ -189,7 +221,7 @@ const ClientMembersPage = () => {
                     <span className="text-[10px] text-muted-foreground flex-shrink-0">
                       {new Date(member.created_at).toLocaleDateString('pt-BR')}
                     </span>
-                    {canManage && (
+                    {canManage && !member.isOwner && (
                       <button
                         onClick={() => setDeleteTarget(member)}
                         className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors flex-shrink-0"
