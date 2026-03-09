@@ -238,6 +238,7 @@ const AnalysisSheet = ({
                       { icon: <Share2 size={11} />, label: 'Compartilhamentos', field: 'shares' as keyof PlatformMetrics },
                       { icon: <Repeat2 size={11} />, label: 'Reposts', field: 'reposts' as keyof PlatformMetrics },
                       { icon: <Bookmark size={11} />, label: 'Salvos', field: 'saves' as keyof PlatformMetrics },
+                      { icon: <UserCheck size={11} />, label: 'Atividades do perfil', field: 'profile_activity' as keyof PlatformMetrics },
                     ],
                   },
                   {
@@ -246,7 +247,6 @@ const AnalysisSheet = ({
                       { icon: <Eye size={11} />, label: 'Visualizações', field: 'views' as keyof PlatformMetrics },
                       { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics },
                       { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics },
-                      { icon: <UserCheck size={11} />, label: 'Atividades do perfil', field: 'profile_activity' as keyof PlatformMetrics },
                     ],
                   },
                   {
