@@ -36,6 +36,9 @@ interface PlatformMetrics {
   link_clicks?: number;
   profile_visits?: number;
   followers_gained?: number;
+  gender_men?: number;
+  gender_women?: number;
+  gender_unidentified?: number;
 }
 
 interface PostAnalysis {
@@ -275,6 +278,14 @@ const AnalysisSheet = ({
                       { icon: <Activity size={11} />, label: 'Cliques em links', field: 'link_clicks' as keyof PlatformMetrics },
                       { icon: <UserCheck size={11} />, label: 'Visitas ao perfil', field: 'profile_visits' as keyof PlatformMetrics },
                       { icon: <UserPlus size={11} />, label: 'Seguidores', field: 'followers_gained' as keyof PlatformMetrics },
+                    ],
+                  },
+                  {
+                    label: 'Gênero público',
+                    fields: [
+                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics },
                     ],
                   },
                 ]).map(section => (
