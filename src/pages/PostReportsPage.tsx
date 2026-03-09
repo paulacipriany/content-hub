@@ -586,7 +586,8 @@ const AnalysisListRow = ({
 const PostReportsPage = () => {
   useClientFromUrl();
   const { projectContents } = useApp();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isClient = role === 'client';
   const [analyses, setAnalyses] = useState<PostAnalysis[]>([]);
   const [tab, setTab] = useState<Tab>('not-analyzed');
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
