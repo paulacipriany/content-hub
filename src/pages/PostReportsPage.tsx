@@ -250,8 +250,8 @@ const AnalysisSheet = ({
                     label: 'Interações',
                     fields: [
                       { icon: <Activity size={11} />, label: 'Interações', field: 'interactions' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Interações seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
-                      { icon: <UserPlus size={11} />, label: 'Interações não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
+                      { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
                     ],
                   },
                 ]).map(section => (
