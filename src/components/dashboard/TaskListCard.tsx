@@ -281,6 +281,11 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     setNewPriority('medium');
   };
 
+  const updatePriority = async (id: string, priority: TaskPriority) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, priority } : t));
+    await supabase.from('project_tasks').update({ priority }).eq('id', id);
+  };
+
   const updateTaskStatus = async (id: string, status: TaskStatus) => {
     const done = status === 'done';
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status, done } : t));
