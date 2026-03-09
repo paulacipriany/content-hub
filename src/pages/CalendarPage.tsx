@@ -935,8 +935,11 @@ const CalendarPage = () => {
 
                 {previewContent.description && (
                   <div className="px-6 py-4 border-b border-border/50">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Briefing</h4>
+                    <div 
+                      className="text-sm text-foreground prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground" 
+                      dangerouslySetInnerHTML={{ __html: previewContent.description }}
+                    />
                   </div>
                 )}
 
