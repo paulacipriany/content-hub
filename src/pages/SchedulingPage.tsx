@@ -115,59 +115,50 @@ const SchedulingPage = () => {
                   </h3>
                   <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
-                <div className="border border-border rounded-xl overflow-hidden bg-card">
-                  <div className="grid grid-cols-[1fr_140px_120px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <div>Título</div>
-                    <div>Formato</div>
-                    <div>Redes</div>
-                  </div>
+                <div className="space-y-3">
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
-                    const checked = checkedPlatforms[content.id] ?? {};
-                    const PlatformIconFirst = platforms[0] ? PLATFORM_ICONS[platforms[0]] : null;
-
                     return (
                       <div
                         key={content.id}
                         className={cn(
-                          "grid grid-cols-[1fr_140px_120px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-all cursor-pointer",
+                          "bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-all cursor-pointer",
                           exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
                         )}
+                        style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
                         onClick={() => setPreviewContent(content)}
                       >
-                        <div className="min-w-0">
-                          <span className="text-sm font-medium text-foreground truncate block">{content.title}</span>
-                          {content.publish_time && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <Clock size={10} /> {content.publish_time}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          <span className={cn(
-                            "text-xs font-medium px-2 py-0.5 rounded-md",
-                            contentTypeBadgeColors[content.content_type] || 'bg-secondary text-foreground'
-                          )}>
-                            {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
+                        {/* Thumbnail */}
+                        {content.media_urls && content.media_urls.length > 0 ? (
+                          <img src={content.media_urls[0]} alt="" className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
+                        ) : content.media_url ? (
+                          <img src={content.media_url} alt="" className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                            <Calendar size={24} className="text-muted-foreground" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-2" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                            <Clock size={13} />
+                            {content.publish_date ? new Date(content.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{content.publish_time ? ` às ${content.publish_time}` : ''}
                           </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {platforms.map(p => {
-                            const Icon = PLATFORM_ICONS[p];
-                            const isChecked = checked[p] ?? false;
-                            return Icon ? (
-                              <span
-                                key={p}
-                                style={{ color: isChecked ? undefined : (PLATFORM_COLORS[p] || 'var(--muted-foreground)') }}
-                                className={cn(
-                                  "transition-colors",
-                                  isChecked && "text-emerald-600 dark:text-emerald-400"
-                                )}
-                              >
-                                <Icon size={16} />
-                              </span>
-                            ) : null;
-                          })}
+                          <div className="flex items-center gap-1.5 mb-1">
+                            {platformIcon(platforms as Platform[], 14, true)}
+                          </div>
+                          <span className="text-sm font-medium text-foreground block mb-1">{content.title}</span>
+                          {(() => {
+                            const copyPreview = content.copy_text ? content.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
+                            return copyPreview ? (
+                              <p className="text-xs text-muted-foreground truncate">{copyPreview}{content.copy_text && content.copy_text.replace(/<[^>]*>/g, '').length > 120 ? '…' : ''}</p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground truncate">Sem copy</p>
+                            );
+                          })()}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Por {content.assignee_profile?.display_name ?? 'N/A'}
+                          </p>
                         </div>
                       </div>
                     );
