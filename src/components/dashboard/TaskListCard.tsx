@@ -411,6 +411,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const visibleTasks = tasks.filter(t => !(hideDone && t.done));
 
   return (
+    <>
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       {/* Table header */}
       <div className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border bg-secondary/40">
