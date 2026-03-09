@@ -36,6 +36,9 @@ interface PlatformMetrics {
   link_clicks?: number;
   profile_visits?: number;
   followers_gained?: number;
+  gender_men?: number;
+  gender_women?: number;
+  gender_unidentified?: number;
 }
 
 interface PostAnalysis {
