@@ -52,6 +52,13 @@ const STATUS_GROUPS = [
   { key: 'Completo', label: 'Completo' },
 ];
 
+const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] = [
+  { value: 'low', label: 'Baixa', color: 'bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-400' },
+  { value: 'medium', label: 'Média', color: 'bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-400' },
+  { value: 'high', label: 'Alta', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400' },
+  { value: 'urgent', label: 'Urgente', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400' },
+];
+
 const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
   if (status) return status;
   return done ? 'done' : 'backlog';
