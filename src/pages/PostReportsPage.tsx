@@ -41,6 +41,10 @@ interface PlatformMetrics {
   gender_women?: number;
   gender_unidentified?: number;
   replies?: number;
+  pins_saved?: number;
+  impressions?: number;
+  pin_clicks?: number;
+  outbound_clicks?: number;
 }
 
 interface PostAnalysis {
