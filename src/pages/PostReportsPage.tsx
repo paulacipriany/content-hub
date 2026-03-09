@@ -172,13 +172,6 @@ const AnalysisSheet = ({
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
 
-  const Field = ({ icon, label, field }: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics }) => (
-    <div>
-      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-      <Input type="text" value={currentMetrics[field] ?? 0} onChange={e => updateMetric(activePlatform, field, Number(e.target.value) || 0)} className="h-8 text-sm" />
-    </div>
-  );
-
   const isInstagram = activePlatform === 'instagram';
 
   return (
