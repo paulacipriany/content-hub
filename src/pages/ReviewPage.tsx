@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
-import { Eye, MessageSquare } from 'lucide-react';
+import { Eye, MessageSquare, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
@@ -45,9 +45,10 @@ const ReviewPage = () => {
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
-                  </p>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-2" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                    <Clock size={13} />
+                    Agendado: {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
+                  </span>
                   <div className="flex items-center gap-2 mb-1">
                     {platformIcon(c.platform, 14)}
                     <span className="text-sm font-medium text-foreground">{c.title}</span>
