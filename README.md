@@ -1,73 +1,125 @@
-# Welcome to your Lovable project
+# SocialFlow - Plataforma de Gerenciamento de Redes Sociais
 
-## Project info
+SocialFlow é uma plataforma robusta para gestão de presença digital, permitindo o controle de conteúdos, aprovações, calendários editoriais e relatórios de desempenho para múltiplos clientes.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Tecnologias Utilizadas
 
-## How can I edit this code?
+### Frontend
+- **React 18** com **TypeScript**: Base para uma interface reativa e tipagem forte.
+- **Vite**: Build tool extremamente rápida para desenvolvimento moderno.
+- **Tailwind CSS**: Estilização baseada em utilitários para design responsivo e customizável.
+- **shadcn/ui**: Componentes de UI de alta qualidade e acessíveis.
+- **Lucide React**: Biblioteca de ícones moderna.
+- **TanStack Query (React Query)**: Gerenciamento de estado assíncrono e cache de dados.
+- **React Router DOM**: Navegação e roteamento dinâmico.
+- **React Hook Form & Zod**: Validação de formulários e esquemas de dados.
+- **Embla Carousel**: Carrosséis fluidos para exibição de mídia.
+- **Recharts**: Visualização de dados e métricas em gráficos.
+- **Tiptap**: Editor de texto rico para criação de legendas e briefings.
+- **@dnd-kit**: Funcionalidades de arrastar e soltar (Drag and Drop) para fluxos de trabalho.
+- **Sonner**: Sistema de notificações (toasts).
 
-There are several ways of editing your application.
+### Backend & Infraestrutura
+- **Supabase**: Backend-as-a-Service (BaaS) provendo:
+  - **PostgreSQL**: Banco de dados relacional.
+  - **Auth**: Autenticação de usuários com controle de permissões (RBAC).
+  - **Storage**: Armazenamento de arquivos de mídia e logotipos.
+  - **Edge Functions**: Funções serverless para lógica de backend personalizada.
+  - **Realtime**: Atualizações em tempo real para colaboração.
 
-**Use Lovable**
+### Ferramentas de Desenvolvimento
+- **Vitest**: Framework de testes unitários e de integração.
+- **ESLint**: Linter para garantir a qualidade e consistência do código.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📂 Estrutura do Projeto
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```text
+├── public/              # Arquivos estáticos
+├── src/
+│   ├── components/      # Componentes de UI (shadcn e customizados)
+│   ├── contexts/        # Provedores de estado global (Auth, App)
+│   ├── data/            # Definições de tipos e constantes
+│   ├── hooks/           # Hooks React personalizados
+│   ├── integrations/    # Configurações de serviços externos (Supabase)
+│   ├── lib/             # Funções utilitárias e helpers
+│   ├── pages/           # Páginas principais da aplicação
+│   ├── App.tsx          # Componente raiz e definição de rotas
+│   └── main.tsx         # Ponto de entrada do React
+├── supabase/
+│   ├── functions/       # Supabase Edge Functions
+│   └── migrations/      # Scripts de migração do banco de dados
+├── package.json         # Dependências e scripts
+└── tailwind.config.ts   # Configuração do Tailwind CSS
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Passo a Passo para Instalação
 
-**Use GitHub Codespaces**
+### Pré-requisitos
+- Node.js (v18+)
+- npm ou bun
+- Conta no [Supabase](https://supabase.com/)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 1. Configuração Local
+1. Clone o repositório:
+   ```bash
+   git clone <url-do-repositorio>
+   cd <nome-do-diretorio>
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   # ou
+   bun install
+   ```
+3. Configure as variáveis de ambiente:
+   Crie um arquivo `.env` na raiz do projeto com as seguintes chaves (obtidas no painel do Supabase):
+   ```env
+   VITE_SUPABASE_URL=sua_url_do_supabase
+   VITE_SUPABASE_PUBLISHABLE_KEY=sua_chave_anonima
+   ```
 
-## What technologies are used for this project?
+### 2. Configuração do Supabase
+1. No painel do Supabase, crie um novo projeto.
+2. Aplique as migrações localizadas em `supabase/migrations` via SQL Editor ou usando a [Supabase CLI](https://supabase.com/docs/guides/cli):
+   ```bash
+   supabase db push
+   ```
+3. Configure as políticas de segurança (RLS) conforme necessário (as migrações já devem incluir as definições básicas).
+4. Crie os buckets de storage necessários (ex: `media`, `logos`) se não forem criados via migração.
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🌐 Passo a Passo para Hospedagem
 
-## How can I deploy this project?
+### Frontend (Vercel ou Netlify)
+Recomendamos a **Vercel** por sua integração nativa com Vite.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+1. Conecte seu repositório GitHub à Vercel.
+2. Nas configurações de Build:
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Adicione as **Environment Variables** configuradas no seu `.env`.
+4. Clique em **Deploy**.
 
-## Can I connect a custom domain to my Lovable project?
+### Backend (Supabase)
+O backend já está "hospedado" no ecossistema Supabase.
+1. Certifique-se de que as migrações foram aplicadas ao banco de produção.
+2. Deploy das Edge Functions:
+   ```bash
+   supabase functions deploy admin-update-user --project-ref seu-project-id
+   ```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🔍 Revisão de Código
+O projeto segue as melhores práticas de desenvolvimento com React:
+- **Componentização**: Interface dividida em componentes pequenos e reutilizáveis.
+- **Context API**: Utilizada para gerenciamento de autenticação e estado global da aplicação, evitando o "prop drilling".
+- **Clean Code**: Código bem organizado, com separação clara de responsabilidades entre lógica (hooks), UI (componentes) e dados.
+- **Tipagem**: Uso extensivo de TypeScript para prevenir erros em tempo de execução.
+- **UX/UI**: Uso de feedback visual (toasts), loaders e design consistente através do Tailwind e shadcn/ui.
