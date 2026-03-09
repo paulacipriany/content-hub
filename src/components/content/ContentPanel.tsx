@@ -427,24 +427,38 @@ const ContentPanel = () => {
                   Enviar para Workflow
                 </Button>
               ) : canAdvance && (
-                <Button
-                  size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
-                  onClick={async () => { 
-                    try {
-                      await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
-                      if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
-                    } catch (error) {
-                      toast({ 
-                        title: 'Erro', 
-                        description: error instanceof Error ? error.message : 'Erro ao atualizar status', 
-                        variant: 'destructive' 
-                      });
-                    }
-                  }}
-                >
-                  {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
-                </Button>
+                <>
+                  {selectedContent.status === 'approval-client' && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={async () => {
+                        await updateContentStatus(selectedContent.id, 'review');
+                        setSelectedContent(null);
+                      }}
+                    >
+                      Solicitar ajustes
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    onClick={async () => { 
+                      try {
+                        await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
+                        if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
+                      } catch (error) {
+                        toast({ 
+                          title: 'Erro', 
+                          description: error instanceof Error ? error.message : 'Erro ao atualizar status', 
+                          variant: 'destructive' 
+                        });
+                      }
+                    }}
+                  >
+                    {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
+                  </Button>
+                </>
               )}
             </>
           )}
