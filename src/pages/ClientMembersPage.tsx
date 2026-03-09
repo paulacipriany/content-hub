@@ -221,13 +221,30 @@ const ClientMembersPage = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <Input
-              placeholder="Nome do usuário..."
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              autoFocus
-            />
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Nome</label>
+                <Input
+                  placeholder="Digite o nome do usuário..."
+                  value={searchName}
+                  onChange={e => setSearchName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">E-mail</label>
+                <Input
+                  type="email"
+                  placeholder="Digite o e-mail do usuário..."
+                  value={searchEmail}
+                  onChange={e => setSearchEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Preencha pelo menos um campo para buscar o usuário cadastrado na plataforma.
+            </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAddDialogOpen(false)} disabled={adding}>
                 Cancelar
