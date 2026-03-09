@@ -269,6 +269,14 @@ const AnalysisSheet = ({
                       { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics },
                     ],
                   },
+                  {
+                    label: 'Atividade do perfil',
+                    fields: [
+                      { icon: <Activity size={11} />, label: 'Cliques em links', field: 'link_clicks' as keyof PlatformMetrics },
+                      { icon: <UserCheck size={11} />, label: 'Visitas ao perfil', field: 'profile_visits' as keyof PlatformMetrics },
+                      { icon: <UserPlus size={11} />, label: 'Seguidores', field: 'followers_gained' as keyof PlatformMetrics },
+                    ],
+                  },
                 ]).map(section => (
                   <CollapsibleSection
                     key={section.label}
