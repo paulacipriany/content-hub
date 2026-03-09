@@ -7,7 +7,7 @@ import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWit
 import { platformIcon, PLATFORM_ICONS } from '@/components/content/PlatformIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target, ChevronDown, ChevronRight } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Share2, FileText, Repeat2, Bookmark, Activity, UserCheck, Users, UserPlus, Target, ChevronDown, ChevronRight, MousePointerClick, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
