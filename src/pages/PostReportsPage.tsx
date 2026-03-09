@@ -185,6 +185,21 @@ const AnalysisSheet = ({
     setSaving(false);
     toast.success('Análise salva!');
     onSaved();
+
+    if (closeAfterSave) {
+      onClose();
+    }
+  };
+
+  const handleCloseAttempt = () => {
+    if (saving) return;
+
+    if (hasUnsavedChanges) {
+      setConfirmExitOpen(true);
+      return;
+    }
+
+    onClose();
   };
 
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
@@ -192,7 +207,8 @@ const AnalysisSheet = ({
   const isInstagram = activePlatform === 'instagram';
 
   return (
-    <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
+    <>
+      <Sheet open onOpenChange={(open) => { if (!open) handleCloseAttempt(); }}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
