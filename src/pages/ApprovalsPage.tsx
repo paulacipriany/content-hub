@@ -107,8 +107,8 @@ const ApprovalsPage = () => {
                     Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
 
-                  {/* Client-only: copy text & download buttons */}
-                  {isClient && (c.copy_text || getContentMediaUrls(c).length > 0) && (
+                  {/* Copy text & download buttons */}
+                  {(c.copy_text || getContentMediaUrls(c).length > 0) && (
                     <div className="flex gap-2 mt-2">
                       {c.copy_text && (
                         <Button
@@ -148,17 +148,15 @@ const ApprovalsPage = () => {
                   )}
                 </div>
 
-                {/* Admin/manager action buttons */}
-                {!isClient && (
-                  <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
-                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
-                      <MessageSquare size={14} /> Revisar
-                    </Button>
-                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
-                      <Check size={14} /> Aprovar
-                    </Button>
-                  </div>
-                )}
+                {/* Action buttons */}
+                <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
+                    <MessageSquare size={14} /> Revisar
+                  </Button>
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
+                    <Check size={14} /> Aprovar
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
