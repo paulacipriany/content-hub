@@ -318,6 +318,19 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     await supabase.from('project_tasks').delete().eq('id', id);
   };
 
+  const handleDeleteClick = (taskId: string) => {
+    setDeleteTaskId(taskId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteTaskId) {
+      await deleteTask(deleteTaskId);
+      setDeleteTaskId(null);
+    }
+    setDeleteDialogOpen(false);
+  };
+
   const getDueDateStyle = (due_date: string | null, done: boolean) => {
     if (!due_date || done) return 'text-muted-foreground';
     const date = new Date(due_date + 'T00:00:00');
