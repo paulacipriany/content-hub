@@ -127,6 +127,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    // Validate that publish_date and publish_time are required when sending to scheduled
+    if (status === 'scheduled') {
+      const contentData = content as any;
+      if (!contentData.publish_date || !contentData.publish_time) {
+        throw new Error('Para agendar o post, é obrigatório preencher a data e horário da publicação.');
+      }
+    }
+
     await supabase.from('contents').update({ status }).eq('id', id);
     await supabase.from('status_history').insert({
       content_id: id,
