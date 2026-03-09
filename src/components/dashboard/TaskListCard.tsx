@@ -502,7 +502,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
                 </PopoverContent>
               </Popover>
               <button
-                onClick={() => deleteTask(t.id)}
+                onClick={() => handleDeleteClick(t.id)}
                 className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all flex-shrink-0"
               >
                 <Trash2 size={14} />
