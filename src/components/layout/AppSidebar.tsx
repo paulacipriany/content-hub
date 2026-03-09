@@ -39,6 +39,19 @@ const AppSidebar = () => {
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Auto-expand workflow when a sub-item route is active
+  const workflowSubPaths = ['/review', '/approvals', '/scheduling'];
+  const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
+  const isWorkflowSubActive = workflowSubPaths.some(p => location.pathname === `${clientBasePath}${p}`);
+  const isWorkflowActive = location.pathname === `${clientBasePath}/workflow`;
+  const [workflowExpanded, setWorkflowExpanded] = useState(isWorkflowSubActive || isWorkflowActive);
+
+  useEffect(() => {
+    if (isWorkflowSubActive || isWorkflowActive) {
+      setWorkflowExpanded(true);
+    }
+  }, [location.pathname]);
+
   // Load saved theme from profile
   useEffect(() => {
     if (profile?.theme) {
