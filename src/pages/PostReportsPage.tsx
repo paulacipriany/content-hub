@@ -30,6 +30,9 @@ interface PlatformMetrics {
   views_followers?: number;
   views_non_followers?: number;
   accounts_reached?: number;
+  views_source_profile?: number;
+  views_source_feed?: number;
+  views_source_stories?: number;
 }
 
 interface PostAnalysis {
@@ -252,6 +255,14 @@ const AnalysisSheet = ({
                       { icon: <Activity size={11} />, label: 'Interações', field: 'interactions' as keyof PlatformMetrics },
                       { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
                       { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
+                    ],
+                  },
+                  {
+                    label: 'Fonte de visualizações',
+                    fields: [
+                      { icon: <UserCheck size={11} />, label: 'Perfil', field: 'views_source_profile' as keyof PlatformMetrics },
+                      { icon: <FileText size={11} />, label: 'Feed', field: 'views_source_feed' as keyof PlatformMetrics },
+                      { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics },
                     ],
                   },
                 ]).map(section => (
