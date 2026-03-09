@@ -392,6 +392,7 @@ export type Database = {
           id: string
           project_id: string
           sort_order: number
+          status: string | null
           text: string
         }
         Insert: {
@@ -403,6 +404,7 @@ export type Database = {
           id?: string
           project_id: string
           sort_order?: number
+          status?: string | null
           text: string
         }
         Update: {
@@ -414,6 +416,7 @@ export type Database = {
           id?: string
           project_id?: string
           sort_order?: number
+          status?: string | null
           text?: string
         }
         Relationships: [

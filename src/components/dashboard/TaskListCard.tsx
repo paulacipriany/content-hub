@@ -19,6 +19,7 @@ interface Task {
   due_date: string | null;
   assigned_to: string | null;
   created_by: string;
+  status?: TaskStatus;
 }
 
 interface MemberProfile {
@@ -32,15 +33,27 @@ interface TaskListCardProps {
   hideDone?: boolean;
 }
 
-type TaskStatus = 'todo' | 'in_progress' | 'done';
+type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
-  { value: 'todo', label: 'À fazer', color: 'bg-muted-foreground/30 text-muted-foreground' },
-  { value: 'in_progress', label: 'Em andamento', color: 'bg-amber-500/20 text-amber-600' },
-  { value: 'done', label: 'Concluído', color: 'bg-emerald-500/20 text-emerald-600' },
+const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
+  { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'To-do' },
+  { value: 'planning', label: 'Planning', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400', group: 'In progress' },
+  { value: 'in_progress', label: 'In progress', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400', group: 'In progress' },
+  { value: 'paused', label: 'Paused', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400', group: 'In progress' },
+  { value: 'done', label: 'Done', color: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400', group: 'Complete' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400', group: 'Complete' },
 ];
 
-const getTaskStatus = (done: boolean): TaskStatus => done ? 'done' : 'todo';
+const STATUS_GROUPS = [
+  { key: 'To-do', label: 'To-do' },
+  { key: 'In progress', label: 'In progress' },
+  { key: 'Complete', label: 'Complete' },
+];
+
+const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
+  if (status) return status;
+  return done ? 'done' : 'backlog';
+};
 
 const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
   const [editing, setEditing] = useState(false);
@@ -83,9 +96,8 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
   );
 };
 
-const StatusBadge = ({ done, onChange }: { done: boolean; onChange: (done: boolean) => void }) => {
-  const current = getTaskStatus(done);
-  const currentOption = STATUS_OPTIONS.find(s => s.value === current) ?? STATUS_OPTIONS[0];
+const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (status: TaskStatus) => void }) => {
+  const currentOption = STATUS_OPTIONS.find(s => s.value === status) ?? STATUS_OPTIONS[0];
 
   return (
     <Popover>
@@ -101,18 +113,30 @@ const StatusBadge = ({ done, onChange }: { done: boolean; onChange: (done: boole
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-1" align="start">
-        {STATUS_OPTIONS.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value === 'done')}
-            className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
-              current === opt.value && "bg-secondary"
-            )}
-          >
-            <span className={cn("w-2 h-2 rounded-full", opt.value === 'todo' ? 'bg-muted-foreground/50' : opt.value === 'in_progress' ? 'bg-amber-500' : 'bg-emerald-500')} />
-            {opt.label}
-          </button>
+        {STATUS_GROUPS.map(group => (
+          <div key={group.key}>
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{group.label}</div>
+            {STATUS_OPTIONS.filter(opt => opt.group === group.key).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onChange(opt.value)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
+                  status === opt.value && "bg-secondary"
+                )}
+              >
+                <span className={cn("w-2 h-2 rounded-full", 
+                  opt.value === 'backlog' ? 'bg-muted-foreground' : 
+                  opt.value === 'planning' ? 'bg-blue-500' :
+                  opt.value === 'in_progress' ? 'bg-orange-500' :
+                  opt.value === 'paused' ? 'bg-purple-500' :
+                  opt.value === 'done' ? 'bg-green-500' :
+                  'bg-red-500'
+                )} />
+                {opt.label}
+              </button>
+            ))}
+          </div>
         ))}
       </PopoverContent>
     </Popover>
@@ -162,7 +186,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     if (!user) return;
     const { data } = await supabase
       .from('project_tasks')
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
       .eq('project_id', projectId)
       .order('sort_order')
       .order('created_at');
@@ -184,7 +208,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
         assigned_to: newAssignee,
       } as any)
-      .select('id, text, done, sort_order, due_date, assigned_to, created_by')
+      .select('id, text, done, sort_order, due_date, assigned_to, created_by, status')
       .single();
     if (data) setTasks(prev => [...prev, data as Task]);
     setNewText('');
@@ -192,9 +216,10 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     setNewAssignee(null);
   };
 
-  const toggleTask = async (id: string, done: boolean) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done } : t));
-    await supabase.from('project_tasks').update({ done }).eq('id', id);
+  const updateTaskStatus = async (id: string, status: TaskStatus) => {
+    const done = status === 'done';
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status, done } : t));
+    await supabase.from('project_tasks').update({ status, done }).eq('id', id);
   };
 
   const updateDueDate = async (id: string, date: Date | undefined) => {
@@ -321,7 +346,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
           >
             {/* Status */}
             <div className="px-4 py-3 flex items-center">
-              <StatusBadge done={t.done} onChange={(done) => toggleTask(t.id, done)} />
+              <StatusBadge status={getTaskStatus(t.done, t.status)} onChange={(status) => updateTaskStatus(t.id, status)} />
             </div>
 
             {/* Task text + meta */}
