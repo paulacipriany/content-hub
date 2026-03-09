@@ -34,6 +34,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
+// Time slots for hourly grid (6am to 11pm)
+const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => i + 6); // 6-23
+
 interface CalTask {
   id: string;
   text: string;
