@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,19 @@ const AppSidebar = () => {
   const { profile, role, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
+
+  // Auto-expand workflow when a sub-item route is active
+  const workflowSubPaths = ['/review', '/approvals', '/scheduling'];
+  const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
+  const isWorkflowSubActive = workflowSubPaths.some(p => location.pathname === `${clientBasePath}${p}`);
+  const isWorkflowActive = location.pathname === `${clientBasePath}/workflow`;
+  const [workflowExpanded, setWorkflowExpanded] = useState(isWorkflowSubActive || isWorkflowActive);
+
+  useEffect(() => {
+    if (isWorkflowSubActive || isWorkflowActive) {
+      setWorkflowExpanded(true);
+    }
+  }, [location.pathname]);
 
   // Load saved theme from profile
   useEffect(() => {
@@ -82,7 +95,7 @@ const AppSidebar = () => {
     ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??';
 
-  const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
+  // clientBasePath defined above
 
   return (
     <aside
@@ -161,37 +174,90 @@ const AppSidebar = () => {
               .map(item => {
               const fullPath = `${clientBasePath}${item.path}`;
               const isActive = location.pathname === fullPath;
+
+              // Workflow parent: toggle expand and navigate
+              if (item.path === '/workflow') {
+                const totalBadge = reviewCount + approvalCount + schedulingCount;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      setWorkflowExpanded(prev => !prev);
+                      navigate(fullPath);
+                    }}
+                    className={cn(
+                      "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
+                      isActive
+                        ? "bg-sidebar-hover text-sidebar-fg-active"
+                        : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
+                    )}
+                    title={sidebarCollapsed ? item.label : undefined}
+                  >
+                    <item.icon size={18} className="flex-shrink-0" />
+                    {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
+                    {!sidebarCollapsed && totalBadge > 0 && !workflowExpanded && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                        {totalBadge}
+                      </span>
+                    )}
+                    {!sidebarCollapsed && (
+                      <ChevronDown size={14} className={cn("flex-shrink-0 transition-transform duration-200 text-sidebar-fg/50", workflowExpanded && "rotate-180")} />
+                    )}
+                  </button>
+                );
+              }
+
+              // Sub-items: hide when collapsed
+              if ((item as any).subItem) {
+                if (!workflowExpanded && !sidebarCollapsed) return null;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(fullPath)}
+                    className={cn(
+                      "flex items-center gap-3 w-full py-1.5 rounded-md text-[13px] text-left transition-all",
+                      !sidebarCollapsed ? "pl-9 pr-3" : "px-3",
+                      isActive
+                        ? "bg-sidebar-hover text-sidebar-fg-active"
+                        : "text-sidebar-fg/70 hover:bg-sidebar-hover hover:text-sidebar-fg-active"
+                    )}
+                    title={sidebarCollapsed ? item.label : undefined}
+                  >
+                    <item.icon size={15} className="flex-shrink-0" />
+                    {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
+                    {item.path === '/approvals' && approvalCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                        {approvalCount}
+                      </span>
+                    )}
+                    {item.path === '/review' && reviewCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                        {reviewCount}
+                      </span>
+                    )}
+                    {item.path === '/scheduling' && schedulingCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                        {schedulingCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.path}
                   onClick={() => navigate(fullPath)}
                   className={cn(
-                    "flex items-center gap-3 w-full py-2 rounded-md text-sm text-left transition-colors",
-                    (item as any).subItem && !sidebarCollapsed ? "pl-7 pr-3" : "px-3",
-                    (item as any).subItem && "text-[13px]",
+                    "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
                     isActive
                       ? "bg-sidebar-hover text-sidebar-fg-active"
                       : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
                   )}
                   title={sidebarCollapsed ? item.label : undefined}
                 >
-                  <item.icon size={(item as any).subItem ? 16 : 18} className="flex-shrink-0" />
+                  <item.icon size={18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
-                  {item.path === '/approvals' && approvalCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
-                      {approvalCount}
-                    </span>
-                  )}
-                  {item.path === '/review' && reviewCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
-                      {reviewCount}
-                    </span>
-                  )}
-                  {item.path === '/scheduling' && schedulingCount > 0 && (
-                    <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
-                      {schedulingCount}
-                    </span>
-                  )}
                 </button>
               );
             })}
