@@ -130,6 +130,15 @@ const PercentageField = ({ icon, label, value, onChange, readOnly }: { icon: Rea
     onChange(num);
   };
 
+  if (readOnly) {
+    return (
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+        <p className="h-8 flex items-center text-sm text-foreground">{numToStr(value ?? 0)}%</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
