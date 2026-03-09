@@ -95,7 +95,7 @@ const AppSidebar = () => {
     ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??';
 
-  const clientBasePath = selectedProject ? `/clients/${selectedProject.id}` : '';
+  // clientBasePath defined above
 
   return (
     <aside
