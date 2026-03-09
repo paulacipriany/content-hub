@@ -56,6 +56,7 @@ const ContentPanel = () => {
   const isClient = role === 'client';
   const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
+  const isReview = selectedContent?.status === 'review';
   const [newComment, setNewComment] = useState('');
   const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
   const [commentUploading, setCommentUploading] = useState(false);
@@ -560,8 +561,8 @@ const ContentPanel = () => {
             )}
           </div>
 
-          {/* Briefing — rich editor for idea-bank, read-only otherwise */}
-          {isIdeaBank ? (
+          {/* Briefing — rich editor for idea-bank, read-only otherwise, hidden in review */}
+          {!isReview && (isIdeaBank ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
               <RichTextEditor
@@ -579,10 +580,10 @@ const ContentPanel = () => {
                 dangerouslySetInnerHTML={{ __html: selectedContent.description }}
               />
             </div>
-          ) : null}
+          ) : null)}
 
-          {/* Briefing images — below briefing, for all modes */}
-          {!isClient && (
+          {/* Briefing images — below briefing, for all modes, hidden in review */}
+          {!isClient && !isReview && (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                 <ImagePlus size={12} />Imagens do briefing
