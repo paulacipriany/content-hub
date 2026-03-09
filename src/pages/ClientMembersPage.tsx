@@ -149,7 +149,7 @@ const ClientMembersPage = () => {
       <div className="p-6 max-w-2xl space-y-6">
         {/* Add member */}
         {canManage && (
-          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div id="add-member-section" className="bg-card border border-border rounded-xl p-5 space-y-3">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <UserPlus size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
               Adicionar usuário
