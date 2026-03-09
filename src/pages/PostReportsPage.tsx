@@ -40,6 +40,7 @@ interface PlatformMetrics {
   gender_men?: number;
   gender_women?: number;
   gender_unidentified?: number;
+  replies?: number;
 }
 
 interface PostAnalysis {
