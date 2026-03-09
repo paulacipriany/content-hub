@@ -65,12 +65,11 @@ const contentTypeBadgeColors: Record<string, string> = {
 type Tab = 'analyzed' | 'not-analyzed';
 
 /* ── Collapsible Section ── */
-const CollapsibleSection = ({ label, children, defaultOpen = true }: { label: string; children: React.ReactNode; defaultOpen?: boolean }) => {
-  const [open, setOpen] = useState(defaultOpen);
+const CollapsibleSection = ({ label, children, open, onToggle }: { label: string; children: React.ReactNode; open: boolean; onToggle: () => void }) => {
   return (
     <div className="border border-border/50 rounded-lg overflow-hidden">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="w-full flex items-center justify-between px-3 py-2 bg-secondary/30 hover:bg-secondary/50 transition-colors"
       >
         <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</h5>
