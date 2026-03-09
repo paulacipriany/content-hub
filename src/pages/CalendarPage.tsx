@@ -184,7 +184,7 @@ const DroppableFixedCell = ({ dateStr, children }: { dateStr: string; children: 
     <div
       ref={setNodeRef}
       className={cn(
-        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
+        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px] min-w-0 overflow-hidden",
         isOver && "bg-primary/5"
       )}
     >
@@ -200,7 +200,7 @@ const DroppableHourCell = ({ dateStr, hour, children }: { dateStr: string; hour:
     <div
       ref={setNodeRef}
       className={cn(
-        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
+        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative min-w-0 overflow-hidden",
         isOver && "bg-primary/5"
       )}
     >
@@ -772,35 +772,39 @@ const CalendarPage = () => {
           {/* Calendar grid */}
             <div className="flex-1 overflow-y-auto">
               {/* Day name headers */}
-              <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
-                {viewMode === 'week'
-                  ? getWeekDays().map((d, i) => (
-                      <div key={i} className="flex flex-col items-center py-2">
-                        <span className={cn(
-                          "text-[11px] font-medium uppercase tracking-wide",
-                          isDateToday(d) ? "text-primary" : "text-muted-foreground"
-                        )}>
-                          {DAYS_SHORT[d.getDay()]}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-[26px] leading-tight font-light mt-0.5 w-11 h-11 flex items-center justify-center rounded-full transition-colors",
-                            isDateToday(d)
-                              ? "bg-primary text-primary-foreground font-normal"
-                              : "text-foreground hover:bg-muted"
-                          )}
-                        >
-                          {d.getDate()}
-                        </span>
-                      </div>
-                    ))
-                  : DAYS_SHORT.map(d => (
-                      <div key={d} className="py-2 text-center text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-                        {d}
-                      </div>
-                    ))
-                }
-              </div>
+              {viewMode === 'week' ? (
+                <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40 sticky top-0 bg-background z-10">
+                  <div className="border-r border-border/40" />
+                  {getWeekDays().map((d, i) => (
+                    <div key={i} className="flex flex-col items-center py-2 border-r border-border/40 last:border-r-0 min-w-0">
+                      <span className={cn(
+                        "text-[11px] font-medium uppercase tracking-wide",
+                        isDateToday(d) ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {DAYS_SHORT[d.getDay()]}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-[26px] leading-tight font-light mt-0.5 w-11 h-11 flex items-center justify-center rounded-full transition-colors",
+                          isDateToday(d)
+                            ? "bg-primary text-primary-foreground font-normal"
+                            : "text-foreground hover:bg-muted"
+                        )}
+                      >
+                        {d.getDate()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
+                  {DAYS_SHORT.map(d => (
+                    <div key={d} className="py-2 text-center text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                      {d}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Week view with hourly grid */}
               {viewMode === 'week' && (
