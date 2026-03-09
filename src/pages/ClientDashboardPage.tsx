@@ -6,39 +6,52 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { STATUS_LABELS, WorkflowStatus, PLATFORM_LABELS, Platform, CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
 import {
   FileText, Calendar, GitBranch, CheckCircle, Image, BarChart3,
-  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, CalendarClock,
+  TrendingUp, Clock, ArrowRight, AlertTriangle, Eye, Heart, MessageCircle, Share2,
+  CalendarClock, ListTodo, Lightbulb, ClipboardList, Send, Radio,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-
-/** Helper: returns the right client palette var for current theme */
-const cv = (shade: string) => `var(--client-${shade})`;
-const dcv = (lightShade: string, darkShade: string) =>
-  `light-dark(var(--client-${lightShade}), var(--client-dark-${darkShade}))`;
+import { useAuth } from '@/contexts/AuthContext';
 
 const ClientDashboardPage = () => {
   useClientFromUrl();
   const { projectContents, selectedProject } = useApp();
+  const { role } = useAuth();
   const navigate = useNavigate();
+  const isClient = role === 'client';
 
   if (!selectedProject) return null;
 
   const basePath = `/clients/${selectedProject.id}`;
 
+  // Counts
   const total = projectContents.length;
   const published = projectContents.filter(c => c.status === 'published').length;
-  const inApproval = projectContents.filter(c => c.status.startsWith('approval')).length;
+  const programmed = projectContents.filter(c => c.status === 'programmed').length;
+  const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
+  const inApproval = projectContents.filter(c => c.status === 'approval-client').length;
   const inReview = projectContents.filter(c => c.status === 'review').length;
   const inProduction = projectContents.filter(c => c.status === 'production').length;
-  const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
+  const ideas = projectContents.filter(c => c.status === 'idea').length;
 
+  // Stats cards
   const stats = [
-    { label: 'Total', value: total, icon: FileText },
-    { label: 'Publicados', value: published, icon: CheckCircle },
-    { label: 'Em Aprovação', value: inApproval, icon: Clock },
-    { label: 'Em Produção', value: inProduction, icon: TrendingUp },
+    { label: 'Total', value: total, icon: FileText, desc: 'conteúdos' },
+    { label: 'Publicados', value: published, icon: CheckCircle, desc: 'finalizados' },
+    { label: 'Programados', value: programmed, icon: Radio, desc: 'aguardando publicação' },
+    { label: 'Agendados', value: scheduled, icon: CalendarClock, desc: 'prontos para agendar' },
+    { label: 'Em Aprovação', value: inApproval, icon: Clock, desc: 'pendentes' },
+    { label: 'Em Produção', value: inProduction, icon: TrendingUp, desc: 'em andamento' },
   ];
+
+  // Alert banners
+  const banners = [
+    { condition: inApproval > 0, path: '/approvals', icon: AlertTriangle, count: inApproval, text: 'aguardando aprovação', style: 'bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800 text-red-700 dark:text-red-400' },
+    { condition: inReview > 0, path: '/review', icon: AlertTriangle, count: inReview, text: 'aguardando revisão', style: 'bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800 text-orange-700 dark:text-orange-400' },
+    { condition: scheduled > 0, path: '/scheduling', icon: CalendarClock, count: scheduled, text: 'pronto(s) para agendamento', style: 'bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800 text-blue-700 dark:text-blue-400' },
+    { condition: programmed > 0, path: '/workflow', icon: Radio, count: programmed, text: 'programado(s)', style: 'bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 text-purple-700 dark:text-purple-400' },
+  ].filter(b => b.condition);
 
   // Platform breakdown
   const clientPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
@@ -58,62 +71,47 @@ const ClientDashboardPage = () => {
     count: projectContents.filter(c => c.status === key).length,
   })).filter(s => s.count > 0);
 
-  // Recent contents
-  const recent = projectContents.slice(0, 5);
+  // Recent contents sorted by updated_at
+  const recent = [...projectContents].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 6);
 
   // Quick access sections
   const sections = [
-    { icon: FileText, label: 'Conteúdos', path: '/contents', desc: `${total} conteúdos` },
+    { icon: ListTodo, label: 'Tarefas', path: '/tasks', desc: 'Gestão de tarefas' },
     { icon: Calendar, label: 'Calendário', path: '/calendar', desc: 'Planejamento mensal' },
     { icon: GitBranch, label: 'Workflow', path: '/workflow', desc: 'Quadro kanban' },
     { icon: CheckCircle, label: 'Aprovações', path: '/approvals', desc: `${inApproval} pendentes` },
-    { icon: Image, label: 'Biblioteca', path: '/media', desc: 'Mídia e templates' },
-    { icon: BarChart3, label: 'Relatórios', path: '/reports', desc: 'Métricas' },
+    { icon: CalendarClock, label: 'Agendamento', path: '/scheduling', desc: `${scheduled} agendados` },
+    { icon: ClipboardList, label: 'Relatórios', path: '/post-reports', desc: 'Análise de posts' },
+    { icon: Image, label: 'Biblioteca', path: '/media', desc: 'Mídias e arquivos' },
+    { icon: BarChart3, label: 'Estatísticas', path: '/reports', desc: 'Métricas gerais' },
+    ...(!isClient ? [{ icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', desc: 'Ideias de conteúdo' }] : []),
   ];
 
   return (
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
       <div className="p-6 space-y-6">
-        {/* Alert banners — dark mode aware */}
-        {scheduled > 0 && (
-          <button
-            onClick={() => navigate(`${basePath}/scheduling`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800"
-          >
-            <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-              {scheduled} conteúdo{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendamento
-            </span>
-            <ArrowRight size={14} className="ml-auto text-blue-700 dark:text-blue-400" />
-          </button>
+        {/* Alert banners */}
+        {banners.length > 0 && (
+          <div className="space-y-2">
+            {banners.map((b, i) => (
+              <button
+                key={i}
+                onClick={() => navigate(`${basePath}${b.path}`)}
+                className={cn("w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90", b.style)}
+              >
+                <b.icon size={18} />
+                <span className="text-sm font-medium">
+                  {b.count} conteúdo{b.count > 1 ? 's' : ''} {b.text}
+                </span>
+                <ArrowRight size={14} className="ml-auto" />
+              </button>
+            ))}
+          </div>
         )}
-        {inReview > 0 && (
-          <button
-            onClick={() => navigate(`${basePath}/review`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800"
-          >
-            <AlertTriangle size={18} className="text-orange-700 dark:text-orange-400" />
-            <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
-              {inReview} conteúdo{inReview > 1 ? 's' : ''} aguardando revisão
-            </span>
-            <ArrowRight size={14} className="ml-auto text-orange-700 dark:text-orange-400" />
-          </button>
-        )}
-        {inApproval > 0 && (
-          <button
-            onClick={() => navigate(`${basePath}/approvals`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800"
-          >
-            <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
-            <span className="text-sm font-medium text-red-700 dark:text-red-400">
-              {inApproval} conteúdo{inApproval > 1 ? 's' : ''} aguardando aprovação
-            </span>
-            <ArrowRight size={14} className="ml-auto text-red-700 dark:text-red-400" />
-          </button>
-        )}
-        {/* Stats — client palette accent, dark mode uses dark palette */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {stats.map(s => (
             <div
               key={s.label}
@@ -124,21 +122,21 @@ const ClientDashboardPage = () => {
               }}
             >
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
+                className="w-8 h-8 rounded-lg flex items-center justify-center mb-2"
                 style={{ backgroundColor: 'var(--client-200)' }}
               >
-                <s.icon size={18} style={{ color: 'var(--client-700)' }} />
+                <s.icon size={16} style={{ color: 'var(--client-700)' }} />
               </div>
               <p className="text-2xl font-bold text-foreground">{s.value}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--client-600)' }}>{s.label}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--client-600)' }}>{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Quick access — palette-tinted cards */}
+        {/* Quick access */}
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3">Acesso Rápido</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {sections.map(s => (
               <button
                 key={s.path}
@@ -149,8 +147,8 @@ const ClientDashboardPage = () => {
                   borderColor: 'var(--client-100)',
                 }}
               >
-                <s.icon size={20} className="mb-2" style={{ color: 'var(--client-500)' }} />
-                <p className="text-sm font-semibold text-foreground transition-colors">{s.label}</p>
+                <s.icon size={18} className="mb-2" style={{ color: 'var(--client-500)' }} />
+                <p className="text-sm font-semibold text-foreground">{s.label}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{s.desc}</p>
               </button>
             ))}
@@ -160,6 +158,7 @@ const ClientDashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Task list */}
           <TaskListCard projectId={selectedProject.id} hideDone />
+
           {/* Status distribution */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">Distribuição por Status</h2>
@@ -213,36 +212,35 @@ const ClientDashboardPage = () => {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Recent activity */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-foreground">Atividade Recente</h2>
-            <button
-              onClick={() => navigate(`${basePath}/contents`)}
-              className="text-xs hover:underline flex items-center gap-1"
-              style={{ color: 'var(--client-500)' }}
-            >
-              Ver todos <ArrowRight size={12} />
-            </button>
-          </div>
-          <div className="space-y-3">
-            {recent.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum conteúdo ainda.</p>
-            ) : (
-              recent.map(c => (
-                <div key={c.id} className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--client-500)' }} />
-                  <span className="text-foreground font-medium truncate">{c.title}</span>
-                  <span className="text-muted-foreground">→</span>
-                  <span className="text-muted-foreground text-xs">{STATUS_LABELS[c.status as WorkflowStatus]}</span>
-                  <span className="text-xs text-muted-foreground ml-auto flex-shrink-0">
-                    {new Date(c.updated_at).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              ))
-            )}
+          {/* Recent activity */}
+          <div className="bg-card border border-border rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground">Atividade Recente</h2>
+              <button
+                onClick={() => navigate(`${basePath}/contents`)}
+                className="text-xs hover:underline flex items-center gap-1"
+                style={{ color: 'var(--client-500)' }}
+              >
+                Ver todos <ArrowRight size={12} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              {recent.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum conteúdo ainda.</p>
+              ) : (
+                recent.map(c => (
+                  <div key={c.id} className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--client-500)' }} />
+                    <span className="text-foreground font-medium truncate flex-1">{c.title}</span>
+                    <span className="text-muted-foreground text-xs flex-shrink-0">{STATUS_LABELS[c.status as WorkflowStatus]}</span>
+                    <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                      {new Date(c.updated_at).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
@@ -291,7 +289,6 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
 
   if (published.length === 0) return null;
 
-  // Totals
   const totalViews = analyses.reduce((s, a) => s + (a.views ?? 0), 0);
   const totalLikes = analyses.reduce((s, a) => s + (a.likes ?? 0), 0);
   const totalComments = analyses.reduce((s, a) => s + (a.comments_count ?? 0), 0);
@@ -315,7 +312,6 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
         </button>
       </div>
 
-      {/* Aggregate metrics */}
       {analyses.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           {[
@@ -333,7 +329,6 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
         </div>
       )}
 
-      {/* Result distribution */}
       <div className="flex items-center gap-4 mb-4">
         {grouped.map(g => (
           <div key={g.value} className="flex items-center gap-1.5">
@@ -344,7 +339,6 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
         ))}
       </div>
 
-      {/* Analyzed posts list (latest 5) */}
       <div className="space-y-2">
         {analyzed.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">Nenhum conteúdo analisado ainda.</p>
@@ -368,7 +362,6 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
         )}
       </div>
 
-      {/* Footer summary */}
       <p className="text-[10px] text-muted-foreground mt-3 pt-2 border-t border-border/50">
         {published.length} publicado(s) · {analyzed.length} analisado(s) · {published.length - analyzed.length} pendente(s)
       </p>
