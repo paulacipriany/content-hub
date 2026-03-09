@@ -142,7 +142,7 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
     <div
       ref={setNodeRef}
       className={cn(
-        "border-b border-r border-border/40 last:border-r-0 transition-colors relative",
+        "border-b border-r border-border/40 last:border-r-0 transition-colors relative overflow-hidden",
         tall ? "min-h-[calc(100vh-300px)]" : "min-h-[140px]",
         isOver && "bg-primary/5",
         isCurrentMonth === false && "bg-muted/15"
@@ -172,7 +172,7 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
           </span>
         )}
       </div>
-      <div className="px-1.5 pb-1.5 space-y-1">{children}</div>
+      <div className="px-1.5 pb-1.5 space-y-0.5 overflow-y-auto max-h-[calc(100%-40px)] min-w-0">{children}</div>
     </div>
   );
 };
