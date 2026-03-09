@@ -455,7 +455,11 @@ const AnalysisSheet = ({
 
             <div>
               <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
-              <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+              {readOnly ? (
+                <p className="text-sm text-foreground whitespace-pre-wrap">{analysisText || <span className="text-muted-foreground italic">Sem análise.</span>}</p>
+              ) : (
+                <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
+              )}
             </div>
 
             <div>
@@ -465,12 +469,15 @@ const AnalysisSheet = ({
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setResult(result === opt.value ? null : opt.value)}
+                    onClick={() => !readOnly && setResult(result === opt.value ? null : opt.value)}
+                    disabled={readOnly}
                     className={cn(
                       "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
                       result === opt.value
                         ? cn(opt.color, "border-transparent ring-2 ring-offset-1 ring-current/20")
-                        : "border-border text-muted-foreground hover:bg-secondary"
+                        : "border-border text-muted-foreground",
+                      !readOnly && "hover:bg-secondary",
+                      readOnly && "cursor-default"
                     )}
                   >
                     {opt.label}
@@ -480,12 +487,14 @@ const AnalysisSheet = ({
             </div>
           </div>
 
-          {/* Save button */}
-          <div className="px-6 py-3 border-t border-border">
-            <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
-              {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
-            </Button>
-          </div>
+          {/* Save button — hidden for read-only */}
+          {!readOnly && (
+            <div className="px-6 py-3 border-t border-border">
+              <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
+                {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
+              </Button>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
