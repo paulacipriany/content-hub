@@ -729,7 +729,6 @@ const PostReportsPage = () => {
           onClose={() => setSelectedContent(null)}
           readOnly={isClient}
         />
-        />
       )}
     </>
   );
