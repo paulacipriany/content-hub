@@ -117,7 +117,7 @@ const ClientDashboardPage = () => {
           {stats.map(s => (
             <div
               key={s.label}
-              className="rounded-xl p-4 hover:shadow-sm transition-shadow border client-card-bg"
+              className="rounded-xl p-4 hover:shadow-sm transition-shadow border"
               style={{
                 backgroundColor: 'var(--client-50)',
                 borderColor: 'var(--client-200)',
