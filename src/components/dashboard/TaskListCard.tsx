@@ -31,9 +31,16 @@ interface MemberProfile {
   avatar_url: string | null;
 }
 
+interface TaskFilters {
+  statuses: TaskStatus[];
+  priorities: TaskPriority[];
+  dateFilter: 'all' | 'overdue' | 'today' | 'this_week' | 'no_date';
+}
+
 interface TaskListCardProps {
   projectId: string;
   hideDone?: boolean;
+  filters?: TaskFilters;
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
