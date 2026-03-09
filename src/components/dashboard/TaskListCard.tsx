@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2, ListTodo, CalendarIcon, X, UserPlus, User } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, X, UserPlus, User, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -32,6 +31,16 @@ interface TaskListCardProps {
   projectId: string;
   hideDone?: boolean;
 }
+
+type TaskStatus = 'todo' | 'in_progress' | 'done';
+
+const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
+  { value: 'todo', label: 'À fazer', color: 'bg-muted-foreground/30 text-muted-foreground' },
+  { value: 'in_progress', label: 'Em andamento', color: 'bg-amber-500/20 text-amber-600' },
+  { value: 'done', label: 'Concluído', color: 'bg-emerald-500/20 text-emerald-600' },
+];
+
+const getTaskStatus = (done: boolean): TaskStatus => done ? 'done' : 'todo';
 
 const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean; onSave: (text: string) => void }) => {
   const [editing, setEditing] = useState(false);
@@ -64,13 +73,49 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
     <span
       onDoubleClick={() => setEditing(true)}
       className={cn(
-        "text-sm block truncate transition-colors cursor-text",
+        "text-sm block transition-colors cursor-text",
         done ? "line-through text-muted-foreground" : "text-foreground"
       )}
       title="Clique duplo para editar"
     >
       {text}
     </span>
+  );
+};
+
+const StatusBadge = ({ done, onChange }: { done: boolean; onChange: (done: boolean) => void }) => {
+  const current = getTaskStatus(done);
+  const currentOption = STATUS_OPTIONS.find(s => s.value === current) ?? STATUS_OPTIONS[0];
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+            currentOption.color
+          )}
+        >
+          {currentOption.label}
+          <ChevronDown size={10} className="opacity-60" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-40 p-1" align="start">
+        {STATUS_OPTIONS.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value === 'done')}
+            className={cn(
+              "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
+              current === opt.value && "bg-secondary"
+            )}
+          >
+            <span className={cn("w-2 h-2 rounded-full", opt.value === 'todo' ? 'bg-muted-foreground/50' : opt.value === 'in_progress' ? 'bg-amber-500' : 'bg-emerald-500')} />
+            {opt.label}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -89,13 +134,11 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   }, [projectId, user]);
 
   const fetchMembers = async () => {
-    // Get all project members
     const { data: memberRows } = await supabase
       .from('project_members')
       .select('user_id')
       .eq('project_id', projectId);
 
-    // Also get the project owner
     const { data: project } = await supabase
       .from('projects')
       .select('owner_id')
@@ -177,8 +220,6 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     await supabase.from('project_tasks').delete().eq('id', id);
   };
 
-  const doneCount = tasks.filter(t => t.done).length;
-
   const getDueDateStyle = (due_date: string | null, done: boolean) => {
     if (!due_date || done) return 'text-muted-foreground';
     const date = new Date(due_date + 'T00:00:00');
@@ -199,17 +240,14 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const AssigneeSelector = ({ value, onChange, size = 'sm' }: { value: string | null; onChange: (v: string | null) => void; size?: 'sm' | 'md' }) => (
+  const AssigneeSelector = ({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) => (
     <Popover>
       <PopoverTrigger asChild>
         {value ? (
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                className={cn(
-                  "rounded-full flex items-center justify-center flex-shrink-0 font-bold text-primary-foreground",
-                  size === 'sm' ? "w-5 h-5 text-[8px]" : "w-6 h-6 text-[9px]"
-                )}
+                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-primary-foreground text-[9px]"
                 style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
               >
                 {getMemberInitials(value)}
@@ -219,13 +257,10 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
           </Tooltip>
         ) : (
           <button
-            className={cn(
-              "flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-all",
-              size === 'md' && "opacity-100"
-            )}
+            className="flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-all"
             title="Atribuir responsável"
           >
-            <UserPlus size={size === 'sm' ? 13 : 14} />
+            <UserPlus size={13} />
           </button>
         )}
       </PopoverTrigger>
@@ -262,69 +297,57 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     </Popover>
   );
 
+  const visibleTasks = tasks.filter(t => !(hideDone && t.done));
+
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <ListTodo size={16} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
-        <h2 className="text-sm font-semibold text-foreground">Tarefas</h2>
-        {tasks.length > 0 && (
-          <span className="ml-auto text-xs text-muted-foreground">{doneCount}/{tasks.length}</span>
-        )}
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      {/* Table header */}
+      <div className="grid grid-cols-[160px_1fr_auto] border-b border-border bg-secondary/40">
+        <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</div>
+        <div className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Tarefa</div>
+        <div className="px-4 py-2.5 w-32" />
       </div>
 
-      {tasks.length > 0 && (
-        <div className="h-1.5 rounded-full overflow-hidden mb-4" style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))' }}>
+      {/* Rows */}
+      {loading ? (
+        <div className="px-4 py-6 text-sm text-muted-foreground">Carregando...</div>
+      ) : visibleTasks.length === 0 ? (
+        <div className="px-4 py-8 text-sm text-muted-foreground text-center">Nenhuma tarefa ainda.</div>
+      ) : (
+        visibleTasks.map(t => (
           <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${(doneCount / tasks.length) * 100}%`, backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
-          />
-        </div>
-      )}
+            key={t.id}
+            className="grid grid-cols-[160px_1fr_auto] border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
+          >
+            {/* Status */}
+            <div className="px-4 py-3 flex items-center">
+              <StatusBadge done={t.done} onChange={(done) => toggleTask(t.id, done)} />
+            </div>
 
-      <div className="space-y-1.5 mb-3">
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : tasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma tarefa ainda.</p>
-        ) : (
-          tasks.filter(t => !(hideDone && t.done)).map(t => (
-            <div
-              key={t.id}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-secondary/50 transition-colors group"
-            >
-              <Checkbox
-                checked={t.done}
-                onCheckedChange={(checked) => toggleTask(t.id, !!checked)}
-                className="flex-shrink-0"
+            {/* Task text + meta */}
+            <div className="px-4 py-3 flex flex-col justify-center min-w-0">
+              <EditableTaskText
+                text={t.text}
+                done={t.done}
+                onSave={(text) => updateTaskText(t.id, text)}
               />
-              <div className="flex-1 min-w-0">
-                <EditableTaskText
-                  text={t.text}
-                  done={t.done}
-                  onSave={(text) => updateTaskText(t.id, text)}
-                />
-                <div className="flex items-center gap-2">
-                  {t.due_date && (
-                    <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
-                      {format(new Date(t.due_date + 'T00:00:00'), "dd MMM", { locale: ptBR })}
-                    </span>
-                  )}
-                  {t.assigned_to && t.assigned_to !== user?.id && (
-                    <span className="text-[10px] text-muted-foreground">
-                      → {getMemberName(t.assigned_to)}
-                    </span>
-                  )}
-                  {t.created_by !== user?.id && (
-                    <span className="text-[10px] text-muted-foreground italic">
-                      de {getMemberName(t.created_by)}
-                    </span>
-                  )}
-                </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                {t.due_date && (
+                  <span className={cn("text-[10px] font-medium", getDueDateStyle(t.due_date, t.done))}>
+                    {format(new Date(t.due_date + 'T00:00:00'), "dd MMM", { locale: ptBR })}
+                  </span>
+                )}
+                {t.created_by !== user?.id && (
+                  <span className="text-[10px] text-muted-foreground italic">
+                    de {getMemberName(t.created_by)}
+                  </span>
+                )}
               </div>
-              <AssigneeSelector
-                value={t.assigned_to}
-                onChange={(v) => updateAssignee(t.id, v)}
-              />
+            </div>
+
+            {/* Actions */}
+            <div className="px-4 py-3 flex items-center gap-2 w-32 justify-end">
+              <AssigneeSelector value={t.assigned_to} onChange={(v) => updateAssignee(t.id, v)} />
               <Popover>
                 <PopoverTrigger asChild>
                   <button
@@ -368,102 +391,124 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
                 <Trash2 size={14} />
               </button>
             </div>
-          ))
-        )}
-      </div>
+          </div>
+        ))
+      )}
 
+      {/* Add new task row */}
       <form
         onSubmit={(e) => { e.preventDefault(); addTask(); }}
-        className="flex gap-2"
+        className="grid grid-cols-[160px_1fr_auto] border-t border-border bg-secondary/20 hover:bg-secondary/40 transition-colors"
       >
-        <Input
-          value={newText}
-          onChange={e => setNewText(e.target.value)}
-          placeholder="Nova tarefa..."
-          className="h-8 text-sm"
-        />
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className={cn("h-8 px-2 flex-shrink-0", newAssignee && "border-primary/50")}
-              title="Atribuir responsável"
-            >
-              {newAssignee ? (
-                <div
-                  className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold text-primary-foreground"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
-                >
-                  {getMemberInitials(newAssignee)}
-                </div>
-              ) : (
-                <User size={14} />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-1" align="end">
-            <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
-            {newAssignee && (
+        {/* Status placeholder for new task */}
+        <div className="px-4 py-2.5 flex items-center">
+          <span className="text-xs text-muted-foreground/50 flex items-center gap-1">
+            <Plus size={11} /> Nova
+          </span>
+        </div>
+
+        {/* Input */}
+        <div className="px-4 py-2 flex items-center">
+          <input
+            value={newText}
+            onChange={e => setNewText(e.target.value)}
+            placeholder="Nova tarefa..."
+            className="w-full text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/60"
+          />
+        </div>
+
+        {/* Actions for new task */}
+        <div className="px-4 py-2 flex items-center gap-1.5 w-32 justify-end">
+          {/* Assignee */}
+          <Popover>
+            <PopoverTrigger asChild>
               <button
                 type="button"
-                onClick={() => setNewAssignee(null)}
-                className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground"
+                className={cn("flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors", newAssignee ? "opacity-100" : "opacity-40 hover:opacity-100")}
+                title="Atribuir responsável"
               >
-                <X size={14} />
-                <span>Remover</span>
-              </button>
-            )}
-            {members.map(m => (
-              <button
-                type="button"
-                key={m.user_id}
-                onClick={() => setNewAssignee(m.user_id)}
-                className={cn(
-                  "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors",
-                  newAssignee === m.user_id && "bg-secondary"
+                {newAssignee ? (
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground"
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                  >
+                    {getMemberInitials(newAssignee)}
+                  </div>
+                ) : (
+                  <User size={13} />
                 )}
-              >
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
-                >
-                  {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                </div>
-                <span className="truncate">{m.display_name || 'Usuário'}</span>
               </button>
-            ))}
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className={cn("h-8 px-2 flex-shrink-0", newDueDate && "text-primary")}
-              title="Definir data"
-            >
-              <CalendarIcon size={14} />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              mode="single"
-              selected={newDueDate}
-              onSelect={setNewDueDate}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
-          </PopoverContent>
-        </Popover>
-        <Button type="submit" size="sm" variant="outline" className="h-8 px-2.5 flex-shrink-0" disabled={!newText.trim()}>
-          <Plus size={14} />
-        </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-1" align="end">
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
+              {newAssignee && (
+                <button
+                  type="button"
+                  onClick={() => setNewAssignee(null)}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground"
+                >
+                  <X size={14} />
+                  <span>Remover</span>
+                </button>
+              )}
+              {members.map(m => (
+                <button
+                  type="button"
+                  key={m.user_id}
+                  onClick={() => setNewAssignee(m.user_id)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors",
+                    newAssignee === m.user_id && "bg-secondary"
+                  )}
+                >
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
+                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                  >
+                    {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                  </div>
+                  <span className="truncate">{m.display_name || 'Usuário'}</span>
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* Due date */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn("flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors", newDueDate ? "opacity-100 text-primary" : "opacity-40 hover:opacity-100")}
+                title="Definir data"
+              >
+                <CalendarIcon size={13} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={newDueDate}
+                onSelect={setNewDueDate}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={!newText.trim()}
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-all"
+            title="Adicionar tarefa"
+          >
+            <Plus size={15} />
+          </button>
+        </div>
       </form>
+
       {(newDueDate || newAssignee) && (
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+        <div className="flex items-center gap-2 px-4 py-1.5 flex-wrap bg-secondary/20 border-t border-border">
           {newDueDate && (
             <div className="flex items-center gap-1">
               <span className="text-[10px] text-muted-foreground">
