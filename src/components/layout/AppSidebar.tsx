@@ -28,7 +28,7 @@ const clientNavItems = [
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
   { icon: BarChart3, label: 'Estatísticas', path: '/reports', hideFromClient: true },
-  { icon: Settings, label: 'Configurações', path: '/settings' },
+  { icon: Settings, label: 'Configurações', path: '/settings', hideFromClient: true, hideFromSocialMedia: true },
 ];
 
 const AppSidebar = () => {
@@ -155,6 +155,7 @@ const AppSidebar = () => {
             {clientNavItems
               .filter(item => {
                 if (isClient && (item as any).hideFromClient) return false;
+                if (role === 'social_media' && (item as any).hideFromSocialMedia) return false;
                 return true;
               })
               .map(item => {
