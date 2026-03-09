@@ -499,13 +499,18 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
       {/* Add new task row */}
       <form
         onSubmit={(e) => { e.preventDefault(); addTask(); }}
-        className="grid grid-cols-[160px_1fr_auto] border-t border-border bg-secondary/20 hover:bg-secondary/40 transition-colors"
+        className="grid grid-cols-[120px_120px_1fr_auto] border-t border-border bg-secondary/20 hover:bg-secondary/40 transition-colors"
       >
         {/* Status placeholder for new task */}
         <div className="px-4 py-2.5 flex items-center">
           <span className="text-xs text-muted-foreground/50 flex items-center gap-1">
             <Plus size={11} /> Nova
           </span>
+        </div>
+
+        {/* Priority selector for new task */}
+        <div className="px-4 py-2.5 flex items-center">
+          <PriorityBadge priority={newPriority} onChange={setNewPriority} />
         </div>
 
         {/* Input */}
