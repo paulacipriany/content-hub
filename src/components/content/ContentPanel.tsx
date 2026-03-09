@@ -52,6 +52,7 @@ function useAutoSave(contentId: string | undefined, field: string, value: string
 const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
   const { user, profile, role } = useAuth();
+  const { toast } = useToast();
   const isClient = role === 'client';
   const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
