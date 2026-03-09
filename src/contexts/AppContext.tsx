@@ -103,10 +103,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, [fetchData]);
 
-  // Apply client palette whenever selected project changes
+  // Apply client palette only on dashboard pages
   useEffect(() => {
-    applyClientPalette(selectedProject?.color ?? null);
-  }, [selectedProject?.color]);
+    const isClientDashboard = location.pathname.includes('/clients/') && 
+                              location.pathname.includes('/dashboard');
+    
+    if (isClientDashboard) {
+      applyClientPalette(selectedProject?.color ?? null);
+    } else {
+      applyClientPalette(null); // Revert to platform colors
+    }
+  }, [selectedProject?.color, location.pathname]);
 
   const updateContentStatus = async (id: string, status: WorkflowStatus) => {
     const content = contents.find(c => c.id === id);
