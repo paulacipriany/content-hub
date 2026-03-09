@@ -362,9 +362,13 @@ const AppSidebar = () => {
                 sidebarCollapsed && "justify-center"
               )}
             >
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-primary text-xs font-semibold">{initials}</span>
-              </div>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary text-xs font-semibold">{initials}</span>
+                </div>
+              )}
               {!sidebarCollapsed && (
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
