@@ -353,22 +353,55 @@ const AppSidebar = () => {
       </div>
 
       <div className="px-3 py-3 border-t border-sidebar-border-custom">
-        <div className={cn("flex items-center gap-2.5", sidebarCollapsed && "justify-center")}>
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary text-xs font-semibold">{initials}</span>
-          </div>
-          {!sidebarCollapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
-              <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
-            </div>
-          )}
-          {!sidebarCollapsed && (
-            <button onClick={signOut} className="text-sidebar-fg hover:text-sidebar-fg-active transition-colors" title="Sair">
-              <LogOut size={16} />
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={cn(
+                "flex items-center gap-2.5 w-full rounded-lg px-1 py-1 hover:bg-sidebar-hover transition-colors cursor-pointer",
+                sidebarCollapsed && "justify-center"
+              )}
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary text-xs font-semibold">{initials}</span>
+              </div>
+              {!sidebarCollapsed && (
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm text-sidebar-fg-active font-medium truncate">{profile?.display_name ?? 'Usuário'}</p>
+                  <p className="text-xs text-sidebar-fg/60 truncate">{role ? roleLabels[role] : ''}</p>
+                </div>
+              )}
             </button>
-          )}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-56 p-0 rounded-xl shadow-lg">
+            {/* User info header */}
+            <div className="flex flex-col items-center gap-1 px-4 pt-4 pb-3">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-primary text-base font-semibold">{initials}</span>
+              </div>
+              <p className="text-sm font-medium text-foreground mt-1">{profile?.display_name ?? 'Usuário'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
+            <Separator />
+            {/* Menu items */}
+            <div className="p-1.5">
+              <button
+                onClick={() => setProfileDialogOpen(true)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent transition-colors"
+              >
+                <User size={16} className="text-muted-foreground" />
+                Perfil
+              </button>
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent transition-colors"
+              >
+                <LogOut size={16} className="text-muted-foreground" />
+                Sair
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       </div>
     </aside>
   );
