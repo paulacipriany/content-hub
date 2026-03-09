@@ -126,7 +126,7 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
                 )}
               >
                 <span className={cn("w-2 h-2 rounded-full", 
-                  opt.value === 'backlog' ? 'bg-gray-400' : 
+                  opt.value === 'backlog' ? 'bg-muted-foreground' : 
                   opt.value === 'planning' ? 'bg-blue-500' :
                   opt.value === 'in_progress' ? 'bg-orange-500' :
                   opt.value === 'paused' ? 'bg-purple-500' :
