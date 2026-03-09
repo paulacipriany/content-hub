@@ -45,9 +45,9 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: 
 ];
 
 const STATUS_GROUPS = [
-  { key: 'To-do', label: 'To-do' },
-  { key: 'In progress', label: 'In progress' },
-  { key: 'Complete', label: 'Complete' },
+  { key: 'A fazer', label: 'A fazer' },
+  { key: 'Em andamento', label: 'Em andamento' },
+  { key: 'Completo', label: 'Completo' },
 ];
 
 const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
