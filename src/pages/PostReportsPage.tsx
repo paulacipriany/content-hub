@@ -314,24 +314,24 @@ const AnalysisSheet = ({
                     fields: [
                       { icon: <Target size={11} />, label: 'Contas alcançadas', field: 'accounts_reached' as keyof PlatformMetrics },
                       { icon: <Eye size={11} />, label: 'Visualizações', field: 'views' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics },
-                      { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics, pct: true },
+                      { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
                     label: 'Interações',
                     fields: [
                       { icon: <Activity size={11} />, label: 'Interações', field: 'interactions' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
-                      { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Seguidores', field: 'interactions_followers' as keyof PlatformMetrics, pct: true },
+                      { icon: <UserPlus size={11} />, label: 'Não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
                     label: 'Fonte de visualizações',
                     fields: [
-                      { icon: <UserCheck size={11} />, label: 'Perfil', field: 'views_source_profile' as keyof PlatformMetrics },
-                      { icon: <FileText size={11} />, label: 'Feed', field: 'views_source_feed' as keyof PlatformMetrics },
-                      { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics },
+                      { icon: <UserCheck size={11} />, label: 'Perfil', field: 'views_source_profile' as keyof PlatformMetrics, pct: true },
+                      { icon: <FileText size={11} />, label: 'Feed', field: 'views_source_feed' as keyof PlatformMetrics, pct: true },
+                      { icon: <Eye size={11} />, label: 'Stories', field: 'views_source_stories' as keyof PlatformMetrics, pct: true },
                     ],
                   },
                   {
@@ -345,12 +345,12 @@ const AnalysisSheet = ({
                   {
                     label: 'Gênero público',
                     fields: [
-                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics },
-                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics, pct: true },
+                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics, pct: true },
+                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics, pct: true },
                     ],
                   },
-                ]).map(section => (
+                ] as { label: string; fields: { icon: React.ReactNode; label: string; field: keyof PlatformMetrics; pct?: boolean }[] }[]).map(section => (
                   <CollapsibleSection
                     key={section.label}
                     label={section.label}
@@ -359,13 +359,23 @@ const AnalysisSheet = ({
                   >
                     <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
-                        <MetricField
-                          key={f.field}
-                          icon={f.icon}
-                          label={f.label}
-                          value={currentMetrics[f.field] ?? 0}
-                          onChange={(v) => updateMetric(activePlatform, f.field, v)}
-                        />
+                        f.pct ? (
+                          <PercentageField
+                            key={f.field}
+                            icon={f.icon}
+                            label={f.label}
+                            value={currentMetrics[f.field] ?? 0}
+                            onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                          />
+                        ) : (
+                          <MetricField
+                            key={f.field}
+                            icon={f.icon}
+                            label={f.label}
+                            value={currentMetrics[f.field] ?? 0}
+                            onChange={(v) => updateMetric(activePlatform, f.field, v)}
+                          />
+                        )
                       ))}
                     </div>
                   </CollapsibleSection>
