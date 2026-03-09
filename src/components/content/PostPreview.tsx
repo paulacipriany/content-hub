@@ -224,9 +224,16 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
 };
 
 const PostPreview = ({ content, platform, compact }: PostPreviewProps) => {
+  const truncatedCopyTexts = compact && (content as any).copy_texts
+    ? Object.fromEntries(
+        Object.entries((content as any).copy_texts).map(([k, v]) => [k, truncateStr(v as string, 120)])
+      )
+    : (content as any).copy_texts;
+
   const displayContent = compact ? {
     ...content,
     copy_text: truncateStr((content as any).copy_text, 120),
+    copy_texts: truncatedCopyTexts,
     description: truncateStr(content.description, 120),
   } as ContentWithRelations : content;
 
