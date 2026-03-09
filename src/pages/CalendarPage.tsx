@@ -142,7 +142,7 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
     <div
       ref={setNodeRef}
       className={cn(
-        "border-b border-r border-border/40 last:border-r-0 transition-colors relative",
+        "border-b border-r border-border/40 last:border-r-0 transition-colors relative overflow-hidden",
         tall ? "min-h-[calc(100vh-300px)]" : "min-h-[140px]",
         isOver && "bg-primary/5",
         isCurrentMonth === false && "bg-muted/15"
@@ -172,7 +172,7 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
           </span>
         )}
       </div>
-      <div className="px-1.5 pb-1.5 space-y-1">{children}</div>
+      <div className="px-1.5 pb-1.5 space-y-0.5 overflow-y-auto max-h-[calc(100%-40px)] min-w-0">{children}</div>
     </div>
   );
 };
@@ -245,7 +245,7 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
 
   return (
     <div className={cn(
-      "flex items-center gap-1 px-1.5 py-[2px] rounded-[4px] text-[11px] group/task border-l-2 transition-colors",
+      "flex items-center gap-1 px-1.5 py-[2px] rounded-[4px] text-[11px] group/task border-l-2 transition-colors min-w-0 overflow-hidden",
       isOverdue ? "border-l-destructive bg-destructive/5" : "border-l-muted-foreground/30 hover:bg-muted/40"
     )}>
       <Checkbox
@@ -266,7 +266,7 @@ const EditableCalTask = ({ task, onToggle, onUpdate }: {
         <span
           onClick={() => setEditing(true)}
           className={cn(
-            "truncate cursor-text",
+            "truncate cursor-text min-w-0",
             task.done ? "line-through text-muted-foreground" : isOverdue ? "text-destructive" : "text-foreground"
           )}
         >
