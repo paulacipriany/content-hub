@@ -11,6 +11,8 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 const ReviewPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentStatus } = useApp();
+  const { role } = useAuth();
+  const isClient = role === 'client';
   const reviewContents = projectContents.filter(c => c.status === 'review');
 
   return (
