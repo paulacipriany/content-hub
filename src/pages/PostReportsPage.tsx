@@ -30,6 +30,9 @@ interface PlatformMetrics {
   views_followers?: number;
   views_non_followers?: number;
   accounts_reached?: number;
+  views_source_profile?: number;
+  views_source_feed?: number;
+  views_source_stories?: number;
 }
 
 interface PostAnalysis {
