@@ -40,6 +40,7 @@ interface PlatformMetrics {
   gender_men?: number;
   gender_women?: number;
   gender_unidentified?: number;
+  replies?: number;
 }
 
 interface PostAnalysis {
@@ -247,6 +248,7 @@ const AnalysisSheet = ({
 
   const isInstagram = activePlatform === 'instagram';
   const isFacebook = activePlatform === 'facebook';
+  const isYoutube = activePlatform === 'youtube';
 
   return (
     <>
@@ -404,6 +406,12 @@ const AnalysisSheet = ({
                 <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
                 <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
                 <MetricField icon={<Bookmark size={11} />} label="Salvos" value={currentMetrics.saves ?? 0} onChange={(v) => updateMetric(activePlatform, 'saves', v)} />
+              </div>
+            ) : isYoutube ? (
+              <div className="grid grid-cols-2 gap-3">
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
+                <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
