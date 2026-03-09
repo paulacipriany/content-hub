@@ -204,7 +204,15 @@ const ClientMembersPage = () => {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                        {member.isOwner && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            <Crown size={10} />
+                            Dono
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Shield size={10} />
                         {member.role ? roleLabels[member.role] ?? member.role : 'Sem role'}
