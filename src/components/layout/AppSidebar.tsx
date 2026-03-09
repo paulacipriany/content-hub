@@ -18,13 +18,12 @@ const globalNavItems = [
 
 const clientNavItems = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
-  { icon: GitBranch, label: 'Workflow', path: '/workflow' },
-  { icon: FileText, label: 'Conteúdos', path: '/contents' },
-  { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
-  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true },
   { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
+  { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
+  { icon: GitBranch, label: 'Workflow', path: '/workflow' },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: CalendarClock, label: 'Agendamento', path: '/scheduling' },
+  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
