@@ -19,6 +19,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage";
 import ReportsPage from "@/pages/ReportsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
+import ClientSettingsPage from "@/pages/ClientSettingsPage";
 import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
