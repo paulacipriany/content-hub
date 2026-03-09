@@ -214,7 +214,7 @@ const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChang
   );
 };
 
-const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
+const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProps) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newText, setNewText] = useState('');
