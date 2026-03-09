@@ -200,7 +200,7 @@ const DroppableHourCell = ({ dateStr, hour, children }: { dateStr: string; hour:
     <div
       ref={setNodeRef}
       className={cn(
-        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
+        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative min-w-0 overflow-hidden",
         isOver && "bg-primary/5"
       )}
     >
