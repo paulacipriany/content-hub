@@ -160,7 +160,7 @@ const ClientMembersPage = () => {
   return (
     <>
       <TopBar 
-        title="Usuários" 
+        title="Acessos" 
         subtitle={`Gerenciar acessos de ${selectedProject.name}`}
         actions={
           canManage ? (
