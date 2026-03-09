@@ -244,6 +244,7 @@ const AnalysisSheet = ({
                   {
                     label: 'Geral',
                     fields: [
+                      { icon: <Target size={11} />, label: 'Contas alcançadas', field: 'accounts_reached' as keyof PlatformMetrics },
                       { icon: <Eye size={11} />, label: 'Visualizações', field: 'views' as keyof PlatformMetrics },
                       { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics },
                       { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics },
