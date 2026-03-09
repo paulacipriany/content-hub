@@ -1,14 +1,58 @@
+import { useState, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { CheckCircle, Eye, MessageSquare, Clock, Check } from 'lucide-react';
+import { ContentWithRelations } from '@/data/types';
+import { CheckCircle, Eye, MessageSquare, Clock, Check, Copy, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
+import { toast } from 'sonner';
+import JSZip from 'jszip';
+
+const getContentMediaUrls = (content: ContentWithRelations): string[] => {
+  const urls: string[] = [];
+  if (content.media_urls && Array.isArray(content.media_urls)) {
+    urls.push(...content.media_urls.filter(Boolean));
+  }
+  if (content.media_url && !urls.includes(content.media_url)) {
+    urls.push(content.media_url);
+  }
+  return urls;
+};
 
 const ApprovalsPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentStatus } = useApp();
+  const { role } = useAuth();
+  const isClient = role === 'client';
   const approvals = projectContents.filter(c => c.status === 'approval-client');
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const handleDownloadZip = useCallback(async (content: ContentWithRelations) => {
+    const urls = getContentMediaUrls(content);
+    if (urls.length === 0) return;
+    setDownloading(content.id);
+    try {
+      const zip = new JSZip();
+      await Promise.all(urls.map(async (url, i) => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+        zip.file(`${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_${i + 1}.${ext}`, blob);
+      }));
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${content.title.replace(/[^a-zA-Z0-9]/g, '_')}_midias.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      console.error('Erro ao baixar mídias:', e);
+    } finally {
+      setDownloading(null);
+    }
+  }, []);
 
   return (
     <>
@@ -62,15 +106,59 @@ const ApprovalsPage = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
+
+                  {/* Client-only: copy text & download buttons */}
+                  {isClient && (c.copy_text || getContentMediaUrls(c).length > 0) && (
+                    <div className="flex gap-2 mt-2">
+                      {c.copy_text && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 text-xs border-0"
+                          style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(c.copy_text ?? '');
+                            toast.success('Texto copiado!');
+                          }}
+                        >
+                          <Copy size={13} /> Copiar texto
+                        </Button>
+                      )}
+                      {getContentMediaUrls(c).length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 text-xs border-0"
+                          style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                          disabled={downloading === c.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadZip(c);
+                          }}
+                        >
+                          {downloading === c.id ? (
+                            <><Loader2 size={13} className="animate-spin" /> Baixando...</>
+                          ) : (
+                            <><Download size={13} /> Baixar mídias</>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
-                    <MessageSquare size={14} /> Revisar
-                  </Button>
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
-                    <Check size={14} /> Aprovar
-                  </Button>
-                </div>
+
+                {/* Admin/manager action buttons */}
+                {!isClient && (
+                  <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
+                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
+                      <MessageSquare size={14} /> Revisar
+                    </Button>
+                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
+                      <Check size={14} /> Aprovar
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
