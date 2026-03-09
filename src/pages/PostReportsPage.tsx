@@ -24,6 +24,8 @@ interface PlatformMetrics {
   reposts?: number;
   saves?: number;
   interactions?: number;
+  interactions_followers?: number;
+  interactions_non_followers?: number;
   profile_activity?: number;
   views_followers?: number;
   views_non_followers?: number;
