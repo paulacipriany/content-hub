@@ -206,36 +206,46 @@ const AnalysisSheet = ({
           )}
 
           {/* Metrics */}
-          <div className="px-6 py-4 flex-1 overflow-y-auto space-y-4">
+          <div className="px-6 py-4 flex-1 overflow-y-auto space-y-2">
             {isInstagram ? (
               <>
-                <div>
-                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Principais</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <Field icon={<Heart size={11} />} label="Likes" field="likes" />
-                    <Field icon={<MessageCircle size={11} />} label="Comentários" field="comments_count" />
-                    <Field icon={<Share2 size={11} />} label="Compartilhamentos" field="shares" />
-                    <Field icon={<Repeat2 size={11} />} label="Reposts" field="reposts" />
-                    <Field icon={<Bookmark size={11} />} label="Salvos" field="saves" />
-                  </div>
-                </div>
-                <div>
-                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Geral</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <Field icon={<Eye size={11} />} label="Visualizações" field="views" />
-                    <Field icon={<Users size={11} />} label="Visualizações seguidores" field="views_followers" />
-                    <Field icon={<UserPlus size={11} />} label="Visualizações não seguidores" field="views_non_followers" />
-                    <Field icon={<UserCheck size={11} />} label="Atividades do perfil" field="profile_activity" />
-                  </div>
-                </div>
-                <div>
-                  <h5 className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 border-b border-border/50 pb-1">Interações</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <Field icon={<Activity size={11} />} label="Interações" field="interactions" />
-                    <Field icon={<Users size={11} />} label="Interações seguidores" field="interactions_followers" />
-                    <Field icon={<UserPlus size={11} />} label="Interações não seguidores" field="interactions_non_followers" />
-                  </div>
-                </div>
+                {([
+                  {
+                    label: 'Principais',
+                    fields: [
+                      { icon: <Heart size={11} />, label: 'Likes', field: 'likes' as keyof PlatformMetrics },
+                      { icon: <MessageCircle size={11} />, label: 'Comentários', field: 'comments_count' as keyof PlatformMetrics },
+                      { icon: <Share2 size={11} />, label: 'Compartilhamentos', field: 'shares' as keyof PlatformMetrics },
+                      { icon: <Repeat2 size={11} />, label: 'Reposts', field: 'reposts' as keyof PlatformMetrics },
+                      { icon: <Bookmark size={11} />, label: 'Salvos', field: 'saves' as keyof PlatformMetrics },
+                    ],
+                  },
+                  {
+                    label: 'Geral',
+                    fields: [
+                      { icon: <Eye size={11} />, label: 'Visualizações', field: 'views' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Visualizações seguidores', field: 'views_followers' as keyof PlatformMetrics },
+                      { icon: <UserPlus size={11} />, label: 'Visualizações não seguidores', field: 'views_non_followers' as keyof PlatformMetrics },
+                      { icon: <UserCheck size={11} />, label: 'Atividades do perfil', field: 'profile_activity' as keyof PlatformMetrics },
+                    ],
+                  },
+                  {
+                    label: 'Interações',
+                    fields: [
+                      { icon: <Activity size={11} />, label: 'Interações', field: 'interactions' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Interações seguidores', field: 'interactions_followers' as keyof PlatformMetrics },
+                      { icon: <UserPlus size={11} />, label: 'Interações não seguidores', field: 'interactions_non_followers' as keyof PlatformMetrics },
+                    ],
+                  },
+                ]).map(section => (
+                  <CollapsibleSection key={section.label} label={section.label}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                      {section.fields.map(f => (
+                        <Field key={f.field} icon={f.icon} label={f.label} field={f.field} />
+                      ))}
+                    </div>
+                  </CollapsibleSection>
+                ))}
               </>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
