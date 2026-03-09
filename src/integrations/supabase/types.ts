@@ -282,6 +282,7 @@ export type Database = {
           created_by: string
           id: string
           likes: number | null
+          platform_metrics: Json | null
           result: string | null
           shares: number | null
           updated_at: string
@@ -295,6 +296,7 @@ export type Database = {
           created_by: string
           id?: string
           likes?: number | null
+          platform_metrics?: Json | null
           result?: string | null
           shares?: number | null
           updated_at?: string
@@ -308,6 +310,7 @@ export type Database = {
           created_by?: string
           id?: string
           likes?: number | null
+          platform_metrics?: Json | null
           result?: string | null
           shares?: number | null
           updated_at?: string
