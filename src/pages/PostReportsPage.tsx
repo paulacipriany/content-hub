@@ -96,10 +96,14 @@ const CollapsibleSection = ({ label, children, open, onToggle }: { label: string
 };
 
 /* ── Metric Field ── */
-const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => (
+const MetricField = ({ icon, label, value, onChange, readOnly }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void; readOnly?: boolean }) => (
   <div>
     <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
-    <Input type="text" value={value ?? 0} onChange={e => onChange(Number(e.target.value) || 0)} className="h-8 text-sm" />
+    {readOnly ? (
+      <p className="h-8 flex items-center text-sm text-foreground">{(value ?? 0).toLocaleString('pt-BR')}</p>
+    ) : (
+      <Input type="text" value={value ?? 0} onChange={e => onChange(Number(e.target.value) || 0)} className="h-8 text-sm" />
+    )}
   </div>
 );
 
