@@ -421,35 +421,35 @@ const AnalysisSheet = ({
               </>
             ) : isFacebook ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Target size={11} />} label="Alcance" value={currentMetrics.accounts_reached ?? 0} onChange={(v) => updateMetric(activePlatform, 'accounts_reached', v)} />
-                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
-                <MetricField icon={<Activity size={11} />} label="Interações" value={currentMetrics.interactions ?? 0} onChange={(v) => updateMetric(activePlatform, 'interactions', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
-                <MetricField icon={<Bookmark size={11} />} label="Salvos" value={currentMetrics.saves ?? 0} onChange={(v) => updateMetric(activePlatform, 'saves', v)} />
+                <MetricField icon={<Target size={11} />} label="Alcance" value={currentMetrics.accounts_reached ?? 0} onChange={(v) => updateMetric(activePlatform, 'accounts_reached', v)} readOnly={readOnly} />
+                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} readOnly={readOnly} />
+                <MetricField icon={<Activity size={11} />} label="Interações" value={currentMetrics.interactions ?? 0} onChange={(v) => updateMetric(activePlatform, 'interactions', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} readOnly={readOnly} />
+                <MetricField icon={<Bookmark size={11} />} label="Salvos" value={currentMetrics.saves ?? 0} onChange={(v) => updateMetric(activePlatform, 'saves', v)} readOnly={readOnly} />
               </div>
             ) : isYoutube ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Respostas" value={currentMetrics.replies ?? 0} onChange={(v) => updateMetric(activePlatform, 'replies', v)} readOnly={readOnly} />
               </div>
             ) : isPinterest ? (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} />
-                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} />
-                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} />
+                <MetricField icon={<Bookmark size={11} />} label="Pins salvos" value={currentMetrics.pins_saved ?? 0} onChange={(v) => updateMetric(activePlatform, 'pins_saved', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Eye size={11} />} label="Impressões" value={currentMetrics.impressions ?? 0} onChange={(v) => updateMetric(activePlatform, 'impressions', v)} readOnly={readOnly} />
+                <MetricField icon={<MousePointerClick size={11} />} label="Cliques no pin" value={currentMetrics.pin_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'pin_clicks', v)} readOnly={readOnly} />
+                <MetricField icon={<ExternalLink size={11} />} label="Cliques de saída" value={currentMetrics.outbound_clicks ?? 0} onChange={(v) => updateMetric(activePlatform, 'outbound_clicks', v)} readOnly={readOnly} />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} />
-                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} />
-                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} />
-                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} />
+                <MetricField icon={<Eye size={11} />} label="Visualizações" value={currentMetrics.views ?? 0} onChange={(v) => updateMetric(activePlatform, 'views', v)} readOnly={readOnly} />
+                <MetricField icon={<Heart size={11} />} label="Likes" value={currentMetrics.likes ?? 0} onChange={(v) => updateMetric(activePlatform, 'likes', v)} readOnly={readOnly} />
+                <MetricField icon={<MessageCircle size={11} />} label="Comentários" value={currentMetrics.comments_count ?? 0} onChange={(v) => updateMetric(activePlatform, 'comments_count', v)} readOnly={readOnly} />
+                <MetricField icon={<Share2 size={11} />} label="Compartilhamentos" value={currentMetrics.shares ?? 0} onChange={(v) => updateMetric(activePlatform, 'shares', v)} readOnly={readOnly} />
               </div>
             )}
 
