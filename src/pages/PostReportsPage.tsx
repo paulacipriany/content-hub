@@ -20,6 +20,14 @@ interface PlatformMetrics {
   likes: number;
   comments_count: number;
   shares: number;
+  // Instagram-specific
+  reposts?: number;
+  saves?: number;
+  interactions?: number;
+  profile_activity?: number;
+  views_followers?: number;
+  views_non_followers?: number;
+  accounts_reached?: number;
 }
 
 interface PostAnalysis {
