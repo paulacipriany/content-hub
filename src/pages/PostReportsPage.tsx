@@ -280,6 +280,14 @@ const AnalysisSheet = ({
                       { icon: <UserPlus size={11} />, label: 'Seguidores', field: 'followers_gained' as keyof PlatformMetrics },
                     ],
                   },
+                  {
+                    label: 'Gênero público',
+                    fields: [
+                      { icon: <Users size={11} />, label: 'Homens', field: 'gender_men' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Mulheres', field: 'gender_women' as keyof PlatformMetrics },
+                      { icon: <Users size={11} />, label: 'Não identificado', field: 'gender_unidentified' as keyof PlatformMetrics },
+                    ],
+                  },
                 ]).map(section => (
                   <CollapsibleSection
                     key={section.label}
