@@ -27,7 +27,8 @@ const ClientMembersPage = () => {
 
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
+  const [searchName, setSearchName] = useState('');
+  const [searchEmail, setSearchEmail] = useState('');
   const [adding, setAdding] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<MemberWithProfile | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -68,15 +69,22 @@ const ClientMembersPage = () => {
   useEffect(() => { fetchMembers(); }, [selectedProject?.id]);
 
   const handleAdd = async () => {
-    if (!email.trim() || !selectedProject || !user) return;
+    if ((!searchName.trim() && !searchEmail.trim()) || !selectedProject || !user) return;
     setAdding(true);
 
-    const { data: profileMatch } = await supabase
-      .from('profiles')
-      .select('user_id, display_name')
-      .or(`display_name.ilike.%${email.trim()}%`)
-      .limit(1)
-      .single();
+    // Build query based on provided fields
+    let query = supabase.from('profiles').select('user_id, display_name');
+    
+    if (searchName.trim() && searchEmail.trim()) {
+      query = query.or(`display_name.ilike.%${searchName.trim()}%`);
+    } else if (searchName.trim()) {
+      query = query.ilike('display_name', `%${searchName.trim()}%`);
+    } else if (searchEmail.trim()) {
+      // Search by display_name that might contain email
+      query = query.ilike('display_name', `%${searchEmail.trim()}%`);
+    }
+
+    const { data: profileMatch } = await query.limit(1).single();
 
     if (!profileMatch) {
       toast({ title: 'Usuário não encontrado', description: 'Verifique o nome e tente novamente.', variant: 'destructive' });
@@ -100,7 +108,8 @@ const ClientMembersPage = () => {
       toast({ title: 'Erro ao adicionar', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Usuário adicionado!' });
-      setEmail('');
+      setSearchName('');
+      setSearchEmail('');
       setAddDialogOpen(false);
       await fetchMembers();
     }
@@ -210,20 +219,37 @@ const ClientMembersPage = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <Input
-              placeholder="Nome do usuário..."
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              autoFocus
-            />
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Nome</label>
+                <Input
+                  placeholder="Digite o nome do usuário..."
+                  value={searchName}
+                  onChange={e => setSearchName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">E-mail</label>
+                <Input
+                  type="email"
+                  placeholder="Digite o e-mail do usuário..."
+                  value={searchEmail}
+                  onChange={e => setSearchEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Preencha pelo menos um campo para buscar o usuário cadastrado na plataforma.
+            </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAddDialogOpen(false)} disabled={adding}>
                 Cancelar
               </Button>
               <Button
                 onClick={handleAdd}
-                disabled={adding || !email.trim()}
+                disabled={adding || (!searchName.trim() && !searchEmail.trim())}
                 style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
               >
                 {adding ? 'Adicionando...' : 'Adicionar'}
