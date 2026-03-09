@@ -215,6 +215,8 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberProfile[]>([]);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
