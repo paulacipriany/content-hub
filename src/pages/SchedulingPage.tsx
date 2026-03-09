@@ -217,41 +217,41 @@ const SchedulingPage = () => {
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
                 )}
-              </div>
 
-              {/* Action buttons side by side */}
-              {(previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
-                <div className="px-6 py-3 border-t border-border/50 flex gap-2">
-                  {previewContent.copy_text && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 gap-1.5"
-                      onClick={() => {
-                        navigator.clipboard.writeText(previewContent.copy_text ?? '');
-                        toast.success('Texto copiado!');
-                      }}
-                    >
-                      <Copy size={14} /> Copiar texto
-                    </Button>
-                  )}
-                  {getContentMediaUrls(previewContent).length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 gap-1.5"
-                      disabled={downloading}
-                      onClick={() => handleDownloadZip(previewContent)}
-                    >
-                      {downloading ? (
-                        <><Loader2 size={14} className="animate-spin" /> Baixando...</>
-                      ) : (
-                        <><Download size={14} /> Baixar mídias</>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
+                {/* Action buttons right below preview */}
+                {(previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
+                  <div className="flex gap-2 mt-3">
+                    {previewContent.copy_text && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                        onClick={() => {
+                          navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                          toast.success('Texto copiado!');
+                        }}
+                      >
+                        <Copy size={14} /> Copiar texto
+                      </Button>
+                    )}
+                    {getContentMediaUrls(previewContent).length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                        disabled={downloading}
+                        onClick={() => handleDownloadZip(previewContent)}
+                      >
+                        {downloading ? (
+                          <><Loader2 size={14} className="animate-spin" /> Baixando...</>
+                        ) : (
+                          <><Download size={14} /> Baixar mídias</>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {previewContent.hashtags && previewContent.hashtags.length > 0 && (
                 <div className="px-6 py-3 border-t border-border/50">
