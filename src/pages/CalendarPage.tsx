@@ -71,25 +71,25 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left px-1.5 py-1 bg-card border border-border/60 shadow-sm border-l-[3px]",
+        "w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm",
         "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
-        "overflow-hidden min-w-0",
+        "overflow-hidden min-w-0 max-h-[28px]",
         isDragging && "opacity-30"
       )}
       style={{ borderLeftColor: borderColor }}
       title={content.title}
     >
       {/* Header: Platform icons + Title in one line */}
-      <div className="flex items-center gap-1 min-w-0">
-        {platforms.slice(0, 2).map((p, i) => (
-          <span key={i} className="shrink-0">{platformIcon([p] as any, 11)}</span>
+      <div className="flex items-center gap-0.5 min-w-0">
+        {platforms.slice(0, 1).map((p, i) => (
+          <span key={i} className="shrink-0">{platformIcon([p] as any, 10)}</span>
         ))}
-        <p className="text-[11px] font-semibold text-foreground truncate leading-tight">
+        <p className="text-[10px] font-medium text-foreground truncate leading-none">
           {content.title}
         </p>
       </div>
       {/* Status label only */}
-      <p className="text-[9px] text-muted-foreground truncate mt-0.5 leading-tight">
+      <p className="text-[8px] text-muted-foreground truncate leading-none">
         {STATUS_LABELS[content.status as WorkflowStatus]}
       </p>
     </div>
