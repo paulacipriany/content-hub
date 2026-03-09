@@ -49,10 +49,10 @@ const ReviewPage = () => {
                     <Clock size={13} />
                     {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </span>
-                  <div className="flex items-center gap-2 mb-1">
-                    {platformIcon(c.platform, 14)}
-                    <span className="text-sm font-medium text-foreground">{c.title}</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {platformIcon(c.platform, 14, true)}
                   </div>
+                  <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>
                   {(() => {
                     const copyPreview = c.copy_text ? c.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
                     return copyPreview ? (
