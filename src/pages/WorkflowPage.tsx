@@ -7,6 +7,7 @@ import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
+import { Check } from 'lucide-react';
 import {
   DndContext,
   DragOverlay,
