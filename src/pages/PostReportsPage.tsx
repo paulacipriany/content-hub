@@ -255,7 +255,7 @@ const AnalysisSheet = ({
   const handleCloseAttempt = () => {
     if (saving) return;
 
-    if (hasUnsavedChanges) {
+    if (!readOnly && hasUnsavedChanges) {
       setConfirmExitOpen(true);
       return;
     }
