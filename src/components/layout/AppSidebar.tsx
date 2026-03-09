@@ -22,9 +22,9 @@ const clientNavItems = [
   { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
-  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true },
-  { icon: CheckCircle, label: 'Aprovações', path: '/approvals' },
-  { icon: CalendarClock, label: 'Agendamento', path: '/scheduling' },
+  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true, subItem: true },
+  { icon: CheckCircle, label: 'Aprovações', path: '/approvals', subItem: true },
+  { icon: CalendarClock, label: 'Agendamento', path: '/scheduling', subItem: true },
   { icon: Image, label: 'Biblioteca', path: '/media' },
   { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
   { icon: BarChart3, label: 'Estatísticas', path: '/reports', hideFromClient: true },
@@ -166,14 +166,16 @@ const AppSidebar = () => {
                   key={item.path}
                   onClick={() => navigate(fullPath)}
                   className={cn(
-                    "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
+                    "flex items-center gap-3 w-full py-2 rounded-md text-sm text-left transition-colors",
+                    (item as any).subItem && !sidebarCollapsed ? "pl-7 pr-3" : "px-3",
+                    (item as any).subItem && "text-[13px]",
                     isActive
                       ? "bg-sidebar-hover text-sidebar-fg-active"
                       : "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
                   )}
                   title={sidebarCollapsed ? item.label : undefined}
                 >
-                  <item.icon size={18} className="flex-shrink-0" />
+                  <item.icon size={(item as any).subItem ? 16 : 18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                   {item.path === '/approvals' && approvalCount > 0 && (
                     <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
