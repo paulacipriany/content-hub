@@ -36,7 +36,7 @@ const TasksPage = () => {
           </Button>
         }
       />
-      <div className="p-6 max-w-3xl">
+      <div className="p-6">
         <TaskListCard projectId={selectedProject.id} />
       </div>
     </>
