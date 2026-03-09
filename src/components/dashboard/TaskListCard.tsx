@@ -96,9 +96,8 @@ const EditableTaskText = ({ text, done, onSave }: { text: string; done: boolean;
   );
 };
 
-const StatusBadge = ({ done, onChange }: { done: boolean; onChange: (done: boolean) => void }) => {
-  const current = getTaskStatus(done);
-  const currentOption = STATUS_OPTIONS.find(s => s.value === current) ?? STATUS_OPTIONS[0];
+const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (status: TaskStatus) => void }) => {
+  const currentOption = STATUS_OPTIONS.find(s => s.value === status) ?? STATUS_OPTIONS[0];
 
   return (
     <Popover>
@@ -114,18 +113,30 @@ const StatusBadge = ({ done, onChange }: { done: boolean; onChange: (done: boole
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-1" align="start">
-        {STATUS_OPTIONS.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value === 'done')}
-            className={cn(
-              "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
-              current === opt.value && "bg-secondary"
-            )}
-          >
-            <span className={cn("w-2 h-2 rounded-full", opt.value === 'todo' ? 'bg-muted-foreground/50' : opt.value === 'in_progress' ? 'bg-amber-500' : 'bg-emerald-500')} />
-            {opt.label}
-          </button>
+        {STATUS_GROUPS.map(group => (
+          <div key={group.key}>
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{group.label}</div>
+            {STATUS_OPTIONS.filter(opt => opt.group === group.key).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onChange(opt.value)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary",
+                  status === opt.value && "bg-secondary"
+                )}
+              >
+                <span className={cn("w-2 h-2 rounded-full", 
+                  opt.value === 'backlog' ? 'bg-gray-400' : 
+                  opt.value === 'planning' ? 'bg-blue-500' :
+                  opt.value === 'in_progress' ? 'bg-orange-500' :
+                  opt.value === 'paused' ? 'bg-purple-500' :
+                  opt.value === 'done' ? 'bg-green-500' :
+                  'bg-red-500'
+                )} />
+                {opt.label}
+              </button>
+            ))}
+          </div>
         ))}
       </PopoverContent>
     </Popover>
