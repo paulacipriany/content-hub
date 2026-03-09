@@ -113,9 +113,6 @@ const ClientMembersPage = () => {
       setAddDialogOpen(false);
       await fetchMembers();
     }
-      setAddDialogOpen(false);
-      await fetchMembers();
-    }
     setAdding(false);
   };
 
