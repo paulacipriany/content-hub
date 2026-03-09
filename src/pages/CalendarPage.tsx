@@ -471,7 +471,7 @@ const CalendarPage = () => {
     }
   };
 
-  // --- Render day cell contents ---
+  // --- Render day cell contents (for month view and fixed section) ---
   const renderDayItems = (dateStr: string) => {
     const dayContents = showContents ? getContentsForDate(dateStr) : [];
     const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
@@ -498,6 +498,34 @@ const CalendarPage = () => {
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
         ))}
       </>
+    );
+  };
+  
+  // --- Render fixed top section for week view (dates + tasks without time) ---
+  const renderFixedTopSection = (dateStr: string) => {
+    const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
+    const commemoratives = showDates ? getCommemorativesForDate(dateStr) : [];
+    const contentsWithoutTime = showContents ? getContentsWithoutTime(dateStr) : [];
+    
+    if (commemoratives.length === 0 && dayTasks.length === 0 && contentsWithoutTime.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="space-y-1">
+        {commemoratives.map((title, i) => (
+          <div key={`comm-${i}`} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+            <Star size={8} className="flex-shrink-0 mt-[2px]" />
+            <span className="break-words whitespace-normal leading-tight">{title}</span>
+          </div>
+        ))}
+        {dayTasks.map(t => (
+          <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
+        ))}
+        {contentsWithoutTime.map(c => (
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+        ))}
+      </div>
     );
   };
 
