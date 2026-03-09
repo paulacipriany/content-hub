@@ -15,6 +15,13 @@ import { toast } from 'sonner';
 
 type AnalysisResult = 'positivo' | 'negativo' | 'neutro';
 
+interface PlatformMetrics {
+  views: number;
+  likes: number;
+  comments_count: number;
+  shares: number;
+}
+
 interface PostAnalysis {
   id: string;
   content_id: string;
@@ -25,6 +32,7 @@ interface PostAnalysis {
   analysis_text: string;
   result: AnalysisResult | null;
   created_by: string;
+  platform_metrics?: Record<string, PlatformMetrics>;
 }
 
 const resultOptions: { value: AnalysisResult; label: string; color: string }[] = [
