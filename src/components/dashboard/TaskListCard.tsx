@@ -346,7 +346,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
           >
             {/* Status */}
             <div className="px-4 py-3 flex items-center">
-              <StatusBadge done={t.done} onChange={(done) => toggleTask(t.id, done)} />
+              <StatusBadge status={getTaskStatus(t.done, t.status)} onChange={(status) => updateTaskStatus(t.id, status)} />
             </div>
 
             {/* Task text + meta */}
