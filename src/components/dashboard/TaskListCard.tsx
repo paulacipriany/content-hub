@@ -35,6 +35,7 @@ interface TaskListCardProps {
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
   { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'A fazer' },
