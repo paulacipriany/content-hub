@@ -289,8 +289,8 @@ const SchedulingPage = () => {
                 </div>
               )}
 
-              {/* Platform checklist */}
-              {(() => {
+              {/* Platform checklist — hidden for client users */}
+              {role !== 'client' && (() => {
                 const platforms = Array.isArray(previewContent.platform) ? previewContent.platform : [previewContent.platform];
                 const checked = checkedPlatforms[previewContent.id] ?? {};
                 return (
