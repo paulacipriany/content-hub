@@ -613,8 +613,18 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         </div>
       </form>
 
-      {(newDueDate || newAssignee) && (
+      {(newDueDate || newAssignee || newPriority !== 'medium') && (
         <div className="flex items-center gap-2 px-4 py-1.5 flex-wrap bg-secondary/20 border-t border-border">
+          {newPriority !== 'medium' && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">
+                Prioridade: {PRIORITY_OPTIONS.find(p => p.value === newPriority)?.label}
+              </span>
+              <button onClick={() => setNewPriority('medium')} className="text-muted-foreground hover:text-destructive">
+                <X size={10} />
+              </button>
+            </div>
+          )}
           {newDueDate && (
             <div className="flex items-center gap-1">
               <span className="text-[10px] text-muted-foreground">
