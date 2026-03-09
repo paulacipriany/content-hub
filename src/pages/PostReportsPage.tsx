@@ -261,7 +261,7 @@ const AnalysisSheet = ({
                     open={activeSection === section.label}
                     onToggle={() => setActiveSection(activeSection === section.label ? '' : section.label)}
                   >
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                    <div className="grid grid-cols-2 gap-3 pt-3">
                       {section.fields.map(f => (
                         <Field key={f.field} icon={f.icon} label={f.label} field={f.field} />
                       ))}
