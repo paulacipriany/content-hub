@@ -289,6 +289,42 @@ const WorkflowPage = () => {
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
                 )}
+
+                {/* Copy text & download buttons for published status */}
+                {previewContent.status === 'published' && (previewContent.copy_text || getContentMediaUrls(previewContent).length > 0) && (
+                  <div className="flex gap-2 mt-3 max-w-[350px] mx-auto">
+                    {previewContent.copy_text && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-0"
+                        style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                          toast.success('Texto copiado!');
+                        }}
+                      >
+                        <Copy size={14} /> Copiar texto
+                      </Button>
+                    )}
+                    {getContentMediaUrls(previewContent).length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-0"
+                        style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                        disabled={downloading}
+                        onClick={() => handleDownloadZip(previewContent)}
+                      >
+                        {downloading ? (
+                          <><Loader2 size={14} className="animate-spin" /> Baixando...</>
+                        ) : (
+                          <><Download size={14} /> Baixar mídias</>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Hashtags */}
