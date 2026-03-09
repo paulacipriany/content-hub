@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Trash2, CalendarIcon, X, UserPlus, User, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday } from 'date-fns';
@@ -214,6 +215,8 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberProfile[]>([]);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -315,6 +318,19 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
     await supabase.from('project_tasks').delete().eq('id', id);
   };
 
+  const handleDeleteClick = (taskId: string) => {
+    setDeleteTaskId(taskId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteTaskId) {
+      await deleteTask(deleteTaskId);
+      setDeleteTaskId(null);
+    }
+    setDeleteDialogOpen(false);
+  };
+
   const getDueDateStyle = (due_date: string | null, done: boolean) => {
     if (!due_date || done) return 'text-muted-foreground';
     const date = new Date(due_date + 'T00:00:00');
@@ -395,6 +411,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
   const visibleTasks = tasks.filter(t => !(hideDone && t.done));
 
   return (
+    <>
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       {/* Table header */}
       <div className="grid grid-cols-[120px_120px_1fr_auto] border-b border-border bg-secondary/40">
@@ -486,7 +503,7 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
                 </PopoverContent>
               </Popover>
               <button
-                onClick={() => deleteTask(t.id)}
+                onClick={() => handleDeleteClick(t.id)}
                 className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all flex-shrink-0"
               >
                 <Trash2 size={14} />
@@ -648,6 +665,28 @@ const TaskListCard = ({ projectId, hideDone = false }: TaskListCardProps) => {
         </div>
       )}
     </div>
+
+    {/* Delete confirmation dialog */}
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir tarefa</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleConfirmDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Excluir
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 
