@@ -380,9 +380,13 @@ const AppSidebar = () => {
           <PopoverContent side="top" align="start" className="w-56 p-0 rounded-xl shadow-lg">
             {/* User info header */}
             <div className="flex flex-col items-center gap-1 px-4 pt-4 pb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary text-base font-semibold">{initials}</span>
-              </div>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="text-primary text-base font-semibold">{initials}</span>
+                </div>
+              )}
               <p className="text-sm font-medium text-foreground mt-1">{profile?.display_name ?? 'Usuário'}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
