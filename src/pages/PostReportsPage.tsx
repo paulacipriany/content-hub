@@ -4,6 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { platformIcon, PLATFORM_ICONS } from '@/components/content/PlatformIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Eye, Heart, MessageCircle, Share2, ChevronDown, ChevronRight, FileText } from 'lucide-react';
@@ -13,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 type AnalysisResult = 'positivo' | 'negativo' | 'neutro';
+
+interface PlatformMetrics {
+  views: number;
+  likes: number;
+  comments_count: number;
+  shares: number;
+}
 
 interface PostAnalysis {
   id: string;
@@ -24,6 +32,7 @@ interface PostAnalysis {
   analysis_text: string;
   result: AnalysisResult | null;
   created_by: string;
+  platform_metrics?: Record<string, PlatformMetrics>;
 }
 
 const resultOptions: { value: AnalysisResult; label: string; color: string }[] = [
@@ -59,24 +68,51 @@ const AnalysisRow = ({
   readOnly?: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [views, setViews] = useState(analysis?.views ?? 0);
-  const [likes, setLikes] = useState(analysis?.likes ?? 0);
-  const [commentsCount, setCommentsCount] = useState(analysis?.comments_count ?? 0);
-  const [shares, setShares] = useState(analysis?.shares ?? 0);
+  const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
+
+  // Per-platform metrics state
+  const initMetrics = (p: string): PlatformMetrics => {
+    const saved = analysis?.platform_metrics?.[p];
+    return saved ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
+  };
+
+  const [platformMetrics, setPlatformMetrics] = useState<Record<string, PlatformMetrics>>(() => {
+    const m: Record<string, PlatformMetrics> = {};
+    platforms.forEach(p => { m[p] = initMetrics(p); });
+    return m;
+  });
+  const [activePlatform, setActivePlatform] = useState(platforms[0]);
   const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
   const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
   const [saving, setSaving] = useState(false);
 
-  const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
+  const updateMetric = (platform: string, field: keyof PlatformMetrics, value: number) => {
+    setPlatformMetrics(prev => ({
+      ...prev,
+      [platform]: { ...prev[platform], [field]: value },
+    }));
+  };
+
+  // Compute totals from all platforms
+  const totals = Object.values(platformMetrics).reduce(
+    (acc, m) => ({
+      views: acc.views + m.views,
+      likes: acc.likes + m.likes,
+      comments_count: acc.comments_count + m.comments_count,
+      shares: acc.shares + m.shares,
+    }),
+    { views: 0, likes: 0, comments_count: 0, shares: 0 }
+  );
 
   const handleSave = async () => {
     setSaving(true);
     const data = {
       content_id: content.id,
-      views,
-      likes,
-      comments_count: commentsCount,
-      shares,
+      views: totals.views,
+      likes: totals.likes,
+      comments_count: totals.comments_count,
+      shares: totals.shares,
+      platform_metrics: platformMetrics,
       analysis_text: analysisText,
       result,
       created_by: userId,
@@ -91,6 +127,45 @@ const AnalysisRow = ({
     toast.success('Análise salva!');
     onSaved();
   };
+
+  const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
+
+  const MetricsFields = ({ metrics, platform, editable }: { metrics: PlatformMetrics; platform: string; editable: boolean }) => (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
+        {editable ? (
+          <Input type="number" min={0} value={metrics.views} onChange={e => updateMetric(platform, 'views', Number(e.target.value))} className="h-8 text-sm" />
+        ) : (
+          <p className="text-sm font-medium text-foreground">{metrics.views.toLocaleString('pt-BR')}</p>
+        )}
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
+        {editable ? (
+          <Input type="number" min={0} value={metrics.likes} onChange={e => updateMetric(platform, 'likes', Number(e.target.value))} className="h-8 text-sm" />
+        ) : (
+          <p className="text-sm font-medium text-foreground">{metrics.likes.toLocaleString('pt-BR')}</p>
+        )}
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
+        {editable ? (
+          <Input type="number" min={0} value={metrics.comments_count} onChange={e => updateMetric(platform, 'comments_count', Number(e.target.value))} className="h-8 text-sm" />
+        ) : (
+          <p className="text-sm font-medium text-foreground">{metrics.comments_count.toLocaleString('pt-BR')}</p>
+        )}
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
+        {editable ? (
+          <Input type="number" min={0} value={metrics.shares} onChange={e => updateMetric(platform, 'shares', Number(e.target.value))} className="h-8 text-sm" />
+        ) : (
+          <p className="text-sm font-medium text-foreground">{metrics.shares.toLocaleString('pt-BR')}</p>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="border-b border-border last:border-b-0">
@@ -118,10 +193,10 @@ const AnalysisRow = ({
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {analysis ? (
             <>
-              <span className="flex items-center gap-1"><Eye size={12} /> {analysis.views}</span>
-              <span className="flex items-center gap-1"><Heart size={12} /> {analysis.likes}</span>
-              <span className="flex items-center gap-1"><MessageCircle size={12} /> {analysis.comments_count}</span>
-              <span className="flex items-center gap-1"><Share2 size={12} /> {analysis.shares}</span>
+              <span className="flex items-center gap-1"><Eye size={12} /> {totals.views}</span>
+              <span className="flex items-center gap-1"><Heart size={12} /> {totals.likes}</span>
+              <span className="flex items-center gap-1"><MessageCircle size={12} /> {totals.comments_count}</span>
+              <span className="flex items-center gap-1"><Share2 size={12} /> {totals.shares}</span>
               {analysis.result && (
                 <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
                   {resultOptions.find(o => o.value === analysis.result)?.label}
@@ -136,34 +211,49 @@ const AnalysisRow = ({
 
       {expanded && (
         <div className="px-6 pb-4 pt-2 bg-secondary/10 border-t border-border/50">
+          {/* Platform tabs */}
+          {platforms.length > 1 && (
+            <div className="flex items-center gap-1 mb-4 border-b border-border pb-2">
+              {platforms.map(p => {
+                const Icon = PLATFORM_ICONS[p as Platform];
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setActivePlatform(p)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                      activePlatform === p
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {Icon && <Icon size={13} />}
+                    {PLATFORM_LABELS[p as Platform] ?? p}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Single platform header */}
+          {platforms.length === 1 && (
+            <div className="flex items-center gap-1.5 mb-3 text-xs text-muted-foreground">
+              {(() => { const Icon = PLATFORM_ICONS[platforms[0] as Platform]; return Icon ? <Icon size={13} /> : null; })()}
+              <span className="font-medium">{PLATFORM_LABELS[platforms[0] as Platform] ?? platforms[0]}</span>
+            </div>
+          )}
+
           {readOnly && analysis ? (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
-                  <p className="text-sm font-medium text-foreground">{analysis.views.toLocaleString('pt-BR')}</p>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
-                  <p className="text-sm font-medium text-foreground">{analysis.likes.toLocaleString('pt-BR')}</p>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
-                  <p className="text-sm font-medium text-foreground">{analysis.comments_count.toLocaleString('pt-BR')}</p>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
-                  <p className="text-sm font-medium text-foreground">{analysis.shares.toLocaleString('pt-BR')}</p>
-                </div>
-              </div>
+              <MetricsFields metrics={currentMetrics} platform={activePlatform} editable={false} />
               {analysis.analysis_text && (
-                <div className="mb-3">
+                <div className="mt-4 mb-3">
                   <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
                   <p className="text-sm text-foreground whitespace-pre-wrap">{analysis.analysis_text}</p>
                 </div>
               )}
               {analysis.result && (
-                <div>
+                <div className="mt-3">
                   <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Resultado</label>
                   <span className={cn("px-3 py-1.5 rounded-full text-xs font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>
                     {resultOptions.find(o => o.value === analysis.result)?.label}
@@ -173,25 +263,8 @@ const AnalysisRow = ({
             </>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Eye size={11} /> Visualizações</label>
-                  <Input type="number" min={0} value={views} onChange={e => setViews(Number(e.target.value))} className="h-8 text-sm" />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Heart size={11} /> Likes</label>
-                  <Input type="number" min={0} value={likes} onChange={e => setLikes(Number(e.target.value))} className="h-8 text-sm" />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><MessageCircle size={11} /> Comentários</label>
-                  <Input type="number" min={0} value={commentsCount} onChange={e => setCommentsCount(Number(e.target.value))} className="h-8 text-sm" />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1"><Share2 size={11} /> Compartilhamentos</label>
-                  <Input type="number" min={0} value={shares} onChange={e => setShares(Number(e.target.value))} className="h-8 text-sm" />
-                </div>
-              </div>
-              <div className="mb-3">
+              <MetricsFields metrics={currentMetrics} platform={activePlatform} editable />
+              <div className="mt-4 mb-3">
                 <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 block">Análise pós-publicação</label>
                 <Textarea value={analysisText} onChange={e => setAnalysisText(e.target.value)} placeholder="Escreva sua análise sobre o desempenho deste conteúdo..." className="text-sm min-h-[80px]" />
               </div>
@@ -242,7 +315,7 @@ const PostReportsPage = () => {
       .from('post_analyses')
       .select('*')
       .in('content_id', contentIds);
-    setAnalyses((data as PostAnalysis[]) ?? []);
+    setAnalyses((data as unknown as PostAnalysis[]) ?? []);
   }, [published.map(c => c.id).join(',')]);
 
   useEffect(() => { fetchAnalyses(); }, [fetchAnalyses]);

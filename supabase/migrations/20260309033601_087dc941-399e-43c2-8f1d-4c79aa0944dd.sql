@@ -1,0 +1,1 @@
+ALTER TABLE public.post_analyses ADD COLUMN IF NOT EXISTS platform_metrics jsonb DEFAULT '{}'::jsonb;
