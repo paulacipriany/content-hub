@@ -246,6 +246,7 @@ const AnalysisSheet = ({
   const currentMetrics = platformMetrics[activePlatform] ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
 
   const isInstagram = activePlatform === 'instagram';
+  const isFacebook = activePlatform === 'facebook';
 
   return (
     <>
