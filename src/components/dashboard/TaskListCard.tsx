@@ -19,6 +19,7 @@ interface Task {
   due_date: string | null;
   assigned_to: string | null;
   created_by: string;
+  status?: TaskStatus;
 }
 
 interface MemberProfile {
