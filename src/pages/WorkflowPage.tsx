@@ -250,7 +250,7 @@ const WorkflowPage = () => {
               <div className="px-6 py-4 flex-1">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
                 {previewPlatform ? (
-                  <PostPreview content={previewContent} platform={previewPlatform as Platform} />
+                  <PostPreview content={previewContent} platform={previewPlatform as Platform} compact={previewContent.status === 'programmed'} />
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>
                 )}
