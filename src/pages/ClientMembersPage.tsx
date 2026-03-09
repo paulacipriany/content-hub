@@ -221,7 +221,7 @@ const ClientMembersPage = () => {
                     <span className="text-[10px] text-muted-foreground flex-shrink-0">
                       {new Date(member.created_at).toLocaleDateString('pt-BR')}
                     </span>
-                    {canManage && (
+                    {canManage && !member.isOwner && (
                       <button
                         onClick={() => setDeleteTarget(member)}
                         className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors flex-shrink-0"
