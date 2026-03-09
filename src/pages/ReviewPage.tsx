@@ -37,10 +37,10 @@ const ReviewPage = () => {
               >
                 {/* Thumbnail */}
                 {c.media_urls && c.media_urls.length > 0 ? (
-                  <img src={c.media_urls[0]} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                  <img src={c.media_urls[0]} alt="" className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Eye size={20} className="text-muted-foreground" />
+                  <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <Eye size={24} className="text-muted-foreground" />
                   </div>
                 )}
 
