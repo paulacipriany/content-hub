@@ -36,18 +36,18 @@ interface TaskListCardProps {
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
-  { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'To-do' },
-  { value: 'planning', label: 'Planning', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400', group: 'In progress' },
-  { value: 'in_progress', label: 'In progress', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400', group: 'In progress' },
-  { value: 'paused', label: 'Paused', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400', group: 'In progress' },
-  { value: 'done', label: 'Done', color: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400', group: 'Complete' },
-  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400', group: 'Complete' },
+  { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'A fazer' },
+  { value: 'planning', label: 'Planejamento', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400', group: 'Em andamento' },
+  { value: 'in_progress', label: 'Em andamento', color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400', group: 'Em andamento' },
+  { value: 'paused', label: 'Pausado', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400', group: 'Em andamento' },
+  { value: 'done', label: 'Concluído', color: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400', group: 'Completo' },
+  { value: 'cancelled', label: 'Cancelado', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400', group: 'Completo' },
 ];
 
 const STATUS_GROUPS = [
-  { key: 'To-do', label: 'To-do' },
-  { key: 'In progress', label: 'In progress' },
-  { key: 'Complete', label: 'Complete' },
+  { key: 'A fazer', label: 'A fazer' },
+  { key: 'Em andamento', label: 'Em andamento' },
+  { key: 'Completo', label: 'Completo' },
 ];
 
 const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
