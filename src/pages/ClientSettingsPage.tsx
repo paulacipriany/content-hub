@@ -24,7 +24,7 @@ const ClientSettingsPage = () => {
     return null;
   }
 
-  const isClient = role === 'client';
+  const isClient = false; // Only admin/moderator can access this page
   const currentPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
 
   const sections = [
