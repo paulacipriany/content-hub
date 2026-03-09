@@ -398,7 +398,6 @@ const PostReportsPage = () => {
                         analysis={analysisMap.get(content.id) ?? null}
                         userId={user?.id ?? ''}
                         onSaved={fetchAnalyses}
-                        readOnly
                       />
                     ))}
                   </div>
