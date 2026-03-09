@@ -1,5 +1,6 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,8 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 const ReviewPage = () => {
   useClientFromUrl();
   const { projectContents, setSelectedContent, updateContentStatus } = useApp();
+  const { role } = useAuth();
+  const isClient = role === 'client';
   const reviewContents = projectContents.filter(c => c.status === 'review');
 
   return (
@@ -65,14 +68,16 @@ const ReviewPage = () => {
                     Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
                 </div>
-                <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
-                    <Pencil size={14} /> Fazer ajustes
-                  </Button>
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'approval-client')}>
-                    <Check size={14} /> Enviar para aprovação
-                  </Button>
-                </div>
+                {!isClient && (
+                  <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
+                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
+                      <Pencil size={14} /> Fazer ajustes
+                    </Button>
+                    <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'approval-client')}>
+                      <Check size={14} /> Enviar para aprovação
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -22,7 +22,7 @@ const clientNavItems = [
   { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
   { icon: Calendar, label: 'Calendário', path: '/calendar' },
   { icon: GitBranch, label: 'Workflow', path: '/workflow' },
-  { icon: Eye, label: 'Revisão', path: '/review', hideFromClient: true, subItem: true },
+  { icon: Eye, label: 'Revisão', path: '/review', subItem: true },
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals', subItem: true },
   { icon: CalendarClock, label: 'Agendamento', path: '/scheduling', subItem: true },
   { icon: Image, label: 'Biblioteca', path: '/media' },
