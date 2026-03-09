@@ -45,6 +45,11 @@ const ClientSettingsPage = () => {
     },
   ];
 
+  const filteredSections = sections.filter(s => {
+    if (isClient && (s as any).hideFromClient) return false;
+    return true;
+  });
+
   return (
     <>
       <TopBar title="Configurações" subtitle={selectedProject.name} actions={<></>} />
