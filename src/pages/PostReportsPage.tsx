@@ -108,7 +108,7 @@ const MetricField = ({ icon, label, value, onChange, readOnly }: { icon: React.R
 );
 
 /* ── Percentage Field ── */
-const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => {
+const PercentageField = ({ icon, label, value, onChange, readOnly }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void; readOnly?: boolean }) => {
   const numToStr = (n: number) => (n === 0 ? '0' : n.toString().replace('.', ','));
 
   const [localValue, setLocalValue] = useState(numToStr(value ?? 0));
