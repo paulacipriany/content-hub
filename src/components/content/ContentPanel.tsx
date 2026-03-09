@@ -344,7 +344,7 @@ const ContentPanel = () => {
           >
             <X size={18} />
           </button>
-          {platformIcon(selectedContent.platform, 18)}
+          
           {isClient ? (
             <span className="font-semibold text-base text-foreground px-2">{editTitle}</span>
           ) : (
