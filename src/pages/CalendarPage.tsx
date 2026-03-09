@@ -34,6 +34,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
+// Time slots for hourly grid (6am to 11pm)
+const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => i + 6); // 6-23
+
 interface CalTask {
   id: string;
   text: string;
@@ -171,6 +174,38 @@ const DroppableDay = ({ dateStr, dayNum, dayName, isToday: todayFlag, isCurrentM
         )}
       </div>
       <div className="px-1.5 pb-1.5 space-y-1">{children}</div>
+    </div>
+  );
+};
+
+// --- Droppable fixed top cell (for week view) ---
+const DroppableFixedCell = ({ dateStr, children }: { dateStr: string; children: React.ReactNode }) => {
+  const { isOver, setNodeRef } = useDroppable({ id: dateStr });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
+        isOver && "bg-primary/5"
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
+// --- Droppable hour cell (for week view time grid) ---
+const DroppableHourCell = ({ dateStr, hour, children }: { dateStr: string; hour: number; children: React.ReactNode }) => {
+  const { isOver, setNodeRef } = useDroppable({ id: `${dateStr}-${hour}` });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
+        isOver && "bg-primary/5"
+      )}
+    >
+      {children}
     </div>
   );
 };
@@ -385,6 +420,20 @@ const CalendarPage = () => {
   const getContentsForDate = (dateStr: string) => projectContents.filter(c => c.publish_date === dateStr);
   const getTasksForDate = (dateStr: string) => tasks.filter(t => t.due_date === dateStr);
   const undatedTasks = tasks.filter(t => !t.due_date);
+  
+  // Get contents for specific hour on a date
+  const getContentsForDateAndHour = (dateStr: string, hour: number) => {
+    return projectContents.filter(c => {
+      if (c.publish_date !== dateStr || !c.publish_time) return false;
+      const contentHour = parseInt(c.publish_time.split(':')[0]);
+      return contentHour === hour;
+    });
+  };
+  
+  // Get contents without time for a date (show at top)
+  const getContentsWithoutTime = (dateStr: string) => {
+    return projectContents.filter(c => c.publish_date === dateStr && !c.publish_time);
+  };
 
   const getWeekDays = () => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -439,12 +488,36 @@ const CalendarPage = () => {
     setActiveTask(null);
     if (!over) return;
     const data = active.data.current;
-    const newDate = over.id as string;
+    const overId = String(over.id);
+    
+    // Parse drop zone ID - can be 'dateStr' or 'dateStr-hour'
+    const parts = overId.split('-');
+    let newDate: string;
+    let newHour: string | undefined;
+    
+    if (parts.length >= 4) {
+      // Format: YYYY-MM-DD-HH
+      newDate = parts.slice(0, 3).join('-');
+      newHour = parts[3] + ':00';
+    } else {
+      // Format: YYYY-MM-DD
+      newDate = overId;
+      newHour = undefined;
+    }
 
     if (data?.type === 'content') {
       const content = projectContents.find(c => c.id === active.id);
-      if (!content || content.publish_date === newDate) return;
-      updateContentDate(active.id as string, newDate);
+      if (!content || (content.publish_date === newDate && content.publish_time === newHour)) return;
+      
+      // Update content with new date and optionally time
+      const updates: any = { publish_date: newDate };
+      if (newHour !== undefined) {
+        updates.publish_time = newHour;
+      }
+      
+      await supabase.from('contents').update(updates).eq('id', String(active.id));
+      // Refresh the content list or update local state as needed
+      updateContentDate(String(active.id), newDate);
     } else if (data?.type === 'task') {
       const taskId = (active.id as string).replace('task-', '');
       const task = tasks.find(t => t.id === taskId);
@@ -454,7 +527,7 @@ const CalendarPage = () => {
     }
   };
 
-  // --- Render day cell contents ---
+  // --- Render day cell contents (for month view and fixed section) ---
   const renderDayItems = (dateStr: string) => {
     const dayContents = showContents ? getContentsForDate(dateStr) : [];
     const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
@@ -481,6 +554,34 @@ const CalendarPage = () => {
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
         ))}
       </>
+    );
+  };
+  
+  // --- Render fixed top section for week view (dates + tasks without time) ---
+  const renderFixedTopSection = (dateStr: string) => {
+    const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
+    const commemoratives = showDates ? getCommemorativesForDate(dateStr) : [];
+    const contentsWithoutTime = showContents ? getContentsWithoutTime(dateStr) : [];
+    
+    if (commemoratives.length === 0 && dayTasks.length === 0 && contentsWithoutTime.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="space-y-1">
+        {commemoratives.map((title, i) => (
+          <div key={`comm-${i}`} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+            <Star size={8} className="flex-shrink-0 mt-[2px]" />
+            <span className="break-words whitespace-normal leading-tight">{title}</span>
+          </div>
+        ))}
+        {dayTasks.map(t => (
+          <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
+        ))}
+        {contentsWithoutTime.map(c => (
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+        ))}
+      </div>
     );
   };
 
@@ -702,17 +803,51 @@ const CalendarPage = () => {
                 }
               </div>
 
-              {/* Week view */}
+              {/* Week view with hourly grid */}
               {viewMode === 'week' && (
-                <div className="grid grid-cols-7">
-                  {getWeekDays().map((d, i) => {
-                    const dateStr = fmtDateStr(d);
-                    return (
-                      <DroppableDay key={i} dateStr={dateStr} isToday={isDateToday(d)} isCurrentMonth tall>
-                        {renderDayItems(dateStr)}
-                      </DroppableDay>
-                    );
-                  })}
+                <div className="flex flex-col">
+                  {/* Fixed top section: commemorative dates, tasks, and contents without time */}
+                  <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
+                    <div className="border-r border-border/40 bg-muted/5" />
+                    {getWeekDays().map((d, i) => {
+                      const dateStr = fmtDateStr(d);
+                      return (
+                        <DroppableFixedCell key={i} dateStr={dateStr}>
+                          {renderFixedTopSection(dateStr)}
+                        </DroppableFixedCell>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Hourly grid */}
+                  <div className="relative">
+                    {TIME_SLOTS.map((hour) => (
+                      <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
+                        {/* Time label */}
+                        <div className="border-r border-border/40 bg-muted/5 flex items-start justify-end pr-2 pt-1">
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            {String(hour).padStart(2, '0')}:00
+                          </span>
+                        </div>
+                        
+                        {/* Day columns */}
+                        {getWeekDays().map((d, i) => {
+                          const dateStr = fmtDateStr(d);
+                          const hourContents = showContents ? getContentsForDateAndHour(dateStr, hour) : [];
+                          
+                          return (
+                            <DroppableHourCell key={i} dateStr={dateStr} hour={hour}>
+                              <div className="space-y-1">
+                                {hourContents.map(c => (
+                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+                                ))}
+                              </div>
+                            </DroppableHourCell>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -800,8 +935,11 @@ const CalendarPage = () => {
 
                 {previewContent.description && (
                   <div className="px-6 py-4 border-b border-border/50">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description}</p>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Briefing</h4>
+                    <div 
+                      className="text-sm text-foreground prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground" 
+                      dangerouslySetInnerHTML={{ __html: previewContent.description }}
+                    />
                   </div>
                 )}
 
