@@ -3,7 +3,8 @@ import { useApp } from '@/contexts/AppContext';
 import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
-import { Eye } from 'lucide-react';
+import { Eye, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ReviewPage = () => {
