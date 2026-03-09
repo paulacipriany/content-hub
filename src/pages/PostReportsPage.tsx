@@ -119,16 +119,32 @@ const AnalysisSheet = ({
     return saved ?? { views: 0, likes: 0, comments_count: 0, shares: 0 };
   };
 
-  const [platformMetrics, setPlatformMetrics] = useState<Record<string, PlatformMetrics>>(() => {
+  const initialPlatformMetrics = useMemo(() => {
     const m: Record<string, PlatformMetrics> = {};
-    platforms.forEach(p => { m[p] = initMetrics(p); });
+    platforms.forEach((p) => {
+      m[p] = initMetrics(p);
+    });
     return m;
-  });
+  }, [platforms, analysis?.platform_metrics]);
+
+  const initialAnalysisText = analysis?.analysis_text ?? '';
+  const initialResult = analysis?.result ?? null;
+
+  const [platformMetrics, setPlatformMetrics] = useState<Record<string, PlatformMetrics>>(initialPlatformMetrics);
   const [activePlatform, setActivePlatform] = useState(platforms[0]);
   const [activeSection, setActiveSection] = useState<string>('Principais');
-  const [analysisText, setAnalysisText] = useState(analysis?.analysis_text ?? '');
-  const [result, setResult] = useState<AnalysisResult | null>(analysis?.result ?? null);
+  const [analysisText, setAnalysisText] = useState(initialAnalysisText);
+  const [result, setResult] = useState<AnalysisResult | null>(initialResult);
   const [saving, setSaving] = useState(false);
+  const [confirmExitOpen, setConfirmExitOpen] = useState(false);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return (
+      JSON.stringify(platformMetrics) !== JSON.stringify(initialPlatformMetrics) ||
+      analysisText !== initialAnalysisText ||
+      result !== initialResult
+    );
+  }, [platformMetrics, initialPlatformMetrics, analysisText, initialAnalysisText, result, initialResult]);
 
   const updateMetric = (platform: string, field: keyof PlatformMetrics, value: number) => {
     setPlatformMetrics(prev => ({
@@ -147,7 +163,7 @@ const AnalysisSheet = ({
     { views: 0, likes: 0, comments_count: 0, shares: 0 }
   );
 
-  const handleSave = async () => {
+  const handleSave = async (closeAfterSave = false) => {
     setSaving(true);
     const data = {
       content_id: content.id,
