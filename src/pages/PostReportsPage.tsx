@@ -164,12 +164,14 @@ const AnalysisSheet = ({
   userId,
   onSaved,
   onClose,
+  readOnly = false,
 }: {
   content: ContentWithRelations;
   analysis: PostAnalysis | null;
   userId: string;
   onSaved: () => void;
   onClose: () => void;
+  readOnly?: boolean;
 }) => {
   const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
 
