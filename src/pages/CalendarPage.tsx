@@ -747,17 +747,67 @@ const CalendarPage = () => {
                 }
               </div>
 
-              {/* Week view */}
+              {/* Week view with hourly grid */}
               {viewMode === 'week' && (
-                <div className="grid grid-cols-7">
-                  {getWeekDays().map((d, i) => {
-                    const dateStr = fmtDateStr(d);
-                    return (
-                      <DroppableDay key={i} dateStr={dateStr} isToday={isDateToday(d)} isCurrentMonth tall>
-                        {renderDayItems(dateStr)}
-                      </DroppableDay>
-                    );
-                  })}
+                <div className="flex flex-col">
+                  {/* Fixed top section: commemorative dates, tasks, and contents without time */}
+                  <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
+                    <div className="border-r border-border/40 bg-muted/5" />
+                    {getWeekDays().map((d, i) => {
+                      const dateStr = fmtDateStr(d);
+                      const { isOver, setNodeRef } = useDroppable({ id: dateStr });
+                      return (
+                        <div
+                          key={i}
+                          ref={setNodeRef}
+                          className={cn(
+                            "border-r border-border/40 last:border-r-0 p-1.5 min-h-[60px]",
+                            isOver && "bg-primary/5"
+                          )}
+                        >
+                          {renderFixedTopSection(dateStr)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Hourly grid */}
+                  <div className="relative">
+                    {TIME_SLOTS.map((hour) => (
+                      <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
+                        {/* Time label */}
+                        <div className="border-r border-border/40 bg-muted/5 flex items-start justify-end pr-2 pt-1">
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            {String(hour).padStart(2, '0')}:00
+                          </span>
+                        </div>
+                        
+                        {/* Day columns */}
+                        {getWeekDays().map((d, i) => {
+                          const dateStr = fmtDateStr(d);
+                          const hourContents = showContents ? getContentsForDateAndHour(dateStr, hour) : [];
+                          const { isOver, setNodeRef } = useDroppable({ id: `${dateStr}-${hour}` });
+                          
+                          return (
+                            <div
+                              key={i}
+                              ref={setNodeRef}
+                              className={cn(
+                                "border-r border-border/40 last:border-r-0 p-1 min-h-[60px] relative",
+                                isOver && "bg-primary/5"
+                              )}
+                            >
+                              <div className="space-y-1">
+                                {hourContents.map(c => (
+                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
