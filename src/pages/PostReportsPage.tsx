@@ -98,6 +98,34 @@ const MetricField = ({ icon, label, value, onChange }: { icon: React.ReactNode; 
   </div>
 );
 
+/* ── Percentage Field ── */
+const PercentageField = ({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: number; onChange: (v: number) => void }) => {
+  const formatValue = (num: number) => {
+    if (num === 0) return '0';
+    return num.toString().replace('.', ',');
+  };
+
+  const parseValue = (str: string) => {
+    const cleaned = str.replace(/[^\d,]/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  };
+
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1 mb-1">{icon} {label}</label>
+      <div className="relative">
+        <Input
+          type="text"
+          value={formatValue(value ?? 0)}
+          onChange={e => onChange(parseValue(e.target.value))}
+          className="h-8 text-sm pr-6"
+        />
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+      </div>
+    </div>
+  );
+};
+
 /* ── Detail Sheet ── */
 const AnalysisSheet = ({
   content,
