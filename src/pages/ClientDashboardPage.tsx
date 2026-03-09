@@ -12,6 +12,11 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
+/** Helper: returns the right client palette var for current theme */
+const cv = (shade: string) => `var(--client-${shade})`;
+const dcv = (lightShade: string, darkShade: string) =>
+  `light-dark(var(--client-${lightShade}), var(--client-dark-${darkShade}))`;
+
 const ClientDashboardPage = () => {
   useClientFromUrl();
   const { projectContents, selectedProject } = useApp();
@@ -70,53 +75,53 @@ const ClientDashboardPage = () => {
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
       <div className="p-6 space-y-6">
-        {/* Alert banners for scheduled, review & approval */}
+        {/* Alert banners — dark mode aware */}
         {scheduled > 0 && (
           <button
             onClick={() => navigate(`${basePath}/scheduling`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#e3f2fd', borderColor: '#bbdefb' }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800"
           >
-            <CalendarClock size={18} style={{ color: '#1565c0' }} />
-            <span className="text-sm font-medium" style={{ color: '#1565c0' }}>
+            <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
               {scheduled} conteúdo{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendamento
             </span>
-            <ArrowRight size={14} className="ml-auto" style={{ color: '#1565c0' }} />
+            <ArrowRight size={14} className="ml-auto text-blue-700 dark:text-blue-400" />
           </button>
         )}
         {inReview > 0 && (
           <button
             onClick={() => navigate(`${basePath}/review`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#fff3e0', borderColor: '#ffe0b2' }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800"
           >
-            <AlertTriangle size={18} style={{ color: '#e65100' }} />
-            <span className="text-sm font-medium" style={{ color: '#e65100' }}>
+            <AlertTriangle size={18} className="text-orange-700 dark:text-orange-400" />
+            <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
               {inReview} conteúdo{inReview > 1 ? 's' : ''} aguardando revisão
             </span>
-            <ArrowRight size={14} className="ml-auto" style={{ color: '#e65100' }} />
+            <ArrowRight size={14} className="ml-auto text-orange-700 dark:text-orange-400" />
           </button>
         )}
         {inApproval > 0 && (
           <button
             onClick={() => navigate(`${basePath}/approvals`)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#fce4ec', borderColor: '#f8bbd0' }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors hover:opacity-90 bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800"
           >
-            <AlertTriangle size={18} style={{ color: '#c62828' }} />
-            <span className="text-sm font-medium" style={{ color: '#c62828' }}>
+            <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
+            <span className="text-sm font-medium text-red-700 dark:text-red-400">
               {inApproval} conteúdo{inApproval > 1 ? 's' : ''} aguardando aprovação
             </span>
-            <ArrowRight size={14} className="ml-auto" style={{ color: '#c62828' }} />
+            <ArrowRight size={14} className="ml-auto text-red-700 dark:text-red-400" />
           </button>
         )}
-        {/* Stats — client palette accent */}
+        {/* Stats — client palette accent, dark mode uses dark palette */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(s => (
             <div
               key={s.label}
               className="rounded-xl p-4 hover:shadow-sm transition-shadow border"
-              style={{ backgroundColor: 'var(--client-50)', borderColor: 'var(--client-200)' }}
+              style={{
+                backgroundColor: 'var(--client-50)',
+                borderColor: 'var(--client-200)',
+              }}
             >
               <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
@@ -145,7 +150,7 @@ const ClientDashboardPage = () => {
                 }}
               >
                 <s.icon size={20} className="mb-2" style={{ color: 'var(--client-500)' }} />
-                <p className="text-sm font-semibold text-foreground transition-colors" style={{ '--hover-color': 'var(--client-600)' } as React.CSSProperties}>{s.label}</p>
+                <p className="text-sm font-semibold text-foreground transition-colors">{s.label}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{s.desc}</p>
               </button>
             ))}
