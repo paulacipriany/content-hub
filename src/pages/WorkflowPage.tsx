@@ -266,6 +266,23 @@ const WorkflowPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Concluir button for programmed content */}
+              {previewContent.status === 'programmed' && !isClient && (
+                <div className="px-6 py-3 border-t border-border/50">
+                  <Button
+                    size="sm"
+                    className="w-full gap-1.5 font-semibold border-0"
+                    style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }}
+                    onClick={() => {
+                      updateContentStatus(previewContent.id, 'published');
+                      setPreviewContent(null);
+                    }}
+                  >
+                    <Check size={14} /> Concluir
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </SheetContent>
