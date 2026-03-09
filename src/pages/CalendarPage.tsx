@@ -488,7 +488,7 @@ const CalendarPage = () => {
     setActiveTask(null);
     if (!over) return;
     const data = active.data.current;
-    const overId = over.id as string;
+    const overId = String(over.id);
     
     // Parse drop zone ID - can be 'dateStr' or 'dateStr-hour'
     const parts = overId.split('-');
