@@ -27,8 +27,8 @@ const ClientMembersPage = () => {
 
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
-  const [adding, setAdding] = useState(false);
+  const [searchName, setSearchName] = useState('');
+  const [searchEmail, setSearchEmail] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<MemberWithProfile | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
