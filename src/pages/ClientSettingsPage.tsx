@@ -1,19 +1,24 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
-import { Shield, Palette, Link2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Palette, Link2, Users } from 'lucide-react';
 import ManagePlatformsDialog from '@/components/settings/ManagePlatformsDialog';
 import { Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 
 const ClientSettingsPage = () => {
   useClientFromUrl();
+  const navigate = useNavigate();
   const { selectedProject } = useApp();
+  const { role } = useAuth();
   const [platformsDialogOpen, setPlatformsDialogOpen] = useState(false);
 
   if (!selectedProject) return null;
 
+  const isClient = role === 'client';
   const currentPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
 
   const sections = [
@@ -25,27 +30,32 @@ const ClientSettingsPage = () => {
       preview: platformIcon(currentPlatforms, 16, true)
     },
     { 
+      icon: Users, 
+      label: 'Acessos', 
+      desc: 'Gerencie membros e permissões',
+      onClick: () => navigate(`/clients/${selectedProject.id}/members`),
+      hideFromClient: true
+    },
+    { 
       icon: Palette, 
       label: 'Aparência', 
       desc: 'Cor e logo do projeto',
       onClick: () => {},
       disabled: true
     },
-    { 
-      icon: Shield, 
-      label: 'Permissões', 
-      desc: 'Gerencie membros e acessos',
-      onClick: () => {},
-      disabled: true
-    },
   ];
+
+  const filteredSections = sections.filter(s => {
+    if (isClient && (s as any).hideFromClient) return false;
+    return true;
+  });
 
   return (
     <>
       <TopBar title="Configurações" subtitle={selectedProject.name} actions={<></>} />
       <div className="p-6 max-w-2xl">
         <div className="space-y-2">
-          {sections.map(s => (
+          {filteredSections.map(s => (
             <button
               key={s.label}
               onClick={s.onClick}
