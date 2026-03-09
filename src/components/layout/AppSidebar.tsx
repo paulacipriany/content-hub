@@ -26,8 +26,8 @@ const clientNavItems = [
   { icon: CheckCircle, label: 'Aprovações', path: '/approvals', subItem: true },
   { icon: CalendarClock, label: 'Agendamento', path: '/scheduling', subItem: true },
   { icon: Image, label: 'Biblioteca', path: '/media' },
-  { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports', hideFromClient: true },
-  { icon: BarChart3, label: 'Estatísticas', path: '/reports', hideFromClient: true },
+  { icon: ClipboardList, label: 'Relatório de Postagens', path: '/post-reports' },
+  { icon: BarChart3, label: 'Estatísticas', path: '/reports' },
   { icon: Settings, label: 'Configurações', path: '/settings', hideFromClient: true, hideFromSocialMedia: true },
 ];
 
