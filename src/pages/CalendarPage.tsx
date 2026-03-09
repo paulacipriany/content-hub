@@ -515,9 +515,9 @@ const CalendarPage = () => {
         updates.publish_time = newHour;
       }
       
-      await supabase.from('contents').update(updates).eq('id', active.id);
+      await supabase.from('contents').update(updates).eq('id', String(active.id));
       // Refresh the content list or update local state as needed
-      updateContentDate(active.id as string, newDate);
+      updateContentDate(String(active.id), newDate);
     } else if (data?.type === 'task') {
       const taskId = (active.id as string).replace('task-', '');
       const task = tasks.find(t => t.id === taskId);
