@@ -14,7 +14,7 @@ interface UserProfileDialogProps {
 }
 
 const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [password, setPassword] = useState('');
