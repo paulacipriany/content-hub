@@ -12,6 +12,7 @@ import PostPreview from './PostPreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { recordApproval } from '@/lib/approvalUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -402,7 +403,21 @@ const ContentPanel = () => {
                   <Button
                     size="sm"
                     style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
-                    onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                    onClick={async () => {
+                      if (!user) return;
+                      const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
+                      if (error) {
+                        toast({ title: 'Aviso', description: error, variant: 'destructive' });
+                        return;
+                      }
+                      if (allApproved) {
+                        await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]);
+                        setSelectedContent(null);
+                      } else {
+                        toast({ title: 'Aprovação registrada', description: 'Aguardando os demais aprovadores.' });
+                        setSelectedContent(null);
+                      }
+                    }}
                   >
                     Aprovar
                   </Button>
@@ -462,8 +477,21 @@ const ContentPanel = () => {
                           toast({ title: 'Mídia obrigatória', description: 'Adicione pelo menos uma mídia antes de enviar para revisão.', variant: 'destructive' });
                           return;
                         }
+                        // Multi-approver check for approval-client
+                        if (selectedContent.status === 'approval-client' && user) {
+                          const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
+                          if (error) {
+                            toast({ title: 'Aviso', description: error, variant: 'destructive' });
+                            return;
+                          }
+                          if (!allApproved) {
+                            toast({ title: 'Aprovação registrada', description: 'Aguardando os demais aprovadores.' });
+                            setSelectedContent(null);
+                            return;
+                          }
+                        }
                         await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
-                        if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
+                        if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review' || selectedContent.status === 'approval-client') setSelectedContent(null); 
                       } catch (error) {
                         toast({ 
                           title: 'Erro', 

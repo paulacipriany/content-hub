@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
+import { recordApproval } from '@/lib/approvalUtils';
 
 const getContentMediaUrls = (content: ContentWithRelations): string[] => {
   const urls: string[] = [];
@@ -23,8 +24,8 @@ const getContentMediaUrls = (content: ContentWithRelations): string[] => {
 
 const ApprovalsPage = () => {
   useClientFromUrl();
-  const { projectContents, setSelectedContent, updateContentStatus } = useApp();
-  const { role } = useAuth();
+  const { projectContents, setSelectedContent, updateContentStatus, refetch } = useApp();
+  const { role, user } = useAuth();
   const isClient = role === 'client';
   const approvals = projectContents.filter(c => c.status === 'approval-client');
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -153,7 +154,20 @@ const ApprovalsPage = () => {
                   <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }} onClick={() => setSelectedContent(c)}>
                     <MessageSquare size={14} /> Revisar
                   </Button>
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={() => updateContentStatus(c.id, 'scheduled')}>
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#ff88db', color: '#1a1a1a' }} onClick={async () => {
+                    if (!user) return;
+                    const { allApproved, error } = await recordApproval(c.id, user.id);
+                    if (error) {
+                      toast.error(error);
+                      return;
+                    }
+                    if (allApproved) {
+                      await updateContentStatus(c.id, 'scheduled');
+                    } else {
+                      toast.success('Aprovação registrada. Aguardando os demais aprovadores.');
+                      await refetch();
+                    }
+                  }}>
                     <Check size={14} /> Aprovar
                   </Button>
                 </div>
