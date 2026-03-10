@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
 import { PlatformSelector } from './PlatformIcons';
+import ApproverSelector from './ApproverSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [approverIds, setApproverIds] = useState<string[]>([]);
 
   const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
 
@@ -44,7 +46,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     setPlatforms([]);
     setContentType('post');
     setProjectId(defaultProjectId ?? '');
-    
+    setApproverIds([]);
     setSelectedFiles([]);
     filePreviews.forEach(url => URL.revokeObjectURL(url));
     setFilePreviews([]);
@@ -120,6 +122,16 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       if (mediaUrl) {
         await supabase.from('contents').update({ media_url: mediaUrl } as any).eq('id', inserted.id);
       }
+    }
+
+    // Insert approvers
+    if (inserted && approverIds.length > 0) {
+      await supabase.from('content_approvers' as any).insert(
+        approverIds.map(userId => ({
+          content_id: inserted.id,
+          user_id: userId,
+        }))
+      );
     }
 
     setLoading(false);
@@ -223,6 +235,13 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
               </SelectContent>
             </Select>
           </div>
+
+          {/* Approvers */}
+          <ApproverSelector
+            selectedApprovers={approverIds}
+            onChange={setApproverIds}
+            label="Aprovadores"
+          />
 
           {/* Briefing — Rich Text */}
           <div className="space-y-2">

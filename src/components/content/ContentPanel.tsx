@@ -1,4 +1,4 @@
-import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
 import AssigneeSelector from './AssigneeSelector';
@@ -64,6 +64,7 @@ const ContentPanel = () => {
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
   const [newCheckItem, setNewCheckItem] = useState('');
+  const [approvers, setApprovers] = useState<{ user_id: string; display_name: string | null }[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
 
@@ -157,6 +158,17 @@ const ContentPanel = () => {
       .eq('content_id', selectedContent.id)
       .order('sort_order')
       .then(({ data }) => setChecklist(data ?? []));
+    // Fetch approvers
+    supabase
+      .from('content_approvers' as any)
+      .select('user_id')
+      .eq('content_id', selectedContent.id)
+      .then(async ({ data }: any) => {
+        if (!data || data.length === 0) { setApprovers([]); return; }
+        const userIds = data.map((a: any) => a.user_id);
+        const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', userIds);
+        setApprovers(profiles ?? []);
+      });
   }, [selectedContent?.id]);
 
   if (!selectedContent) return null;
@@ -570,7 +582,21 @@ const ContentPanel = () => {
                     <User size={12} className="text-muted-foreground" />
                     <span>{assigneeName}</span>
                   </div>
-                )}
+            )}
+            {/* Approvers */}
+            {approvers.length > 0 && (
+              <div className="flex items-start gap-3 text-sm">
+                <span className="text-muted-foreground w-24 flex-shrink-0 mt-1">Aprovadores</span>
+                <div className="flex flex-wrap gap-1.5 flex-1">
+                  {approvers.map(a => (
+                    <span key={a.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-xs text-foreground">
+                      <UserCheck size={10} className="text-muted-foreground" />
+                      {a.display_name ?? 'Sem nome'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
               </div>
             )}
           </div>
