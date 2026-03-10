@@ -477,8 +477,21 @@ const ContentPanel = () => {
                           toast({ title: 'Mídia obrigatória', description: 'Adicione pelo menos uma mídia antes de enviar para revisão.', variant: 'destructive' });
                           return;
                         }
+                        // Multi-approver check for approval-client
+                        if (selectedContent.status === 'approval-client' && user) {
+                          const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
+                          if (error) {
+                            toast({ title: 'Aviso', description: error, variant: 'destructive' });
+                            return;
+                          }
+                          if (!allApproved) {
+                            toast({ title: 'Aprovação registrada', description: 'Aguardando os demais aprovadores.' });
+                            setSelectedContent(null);
+                            return;
+                          }
+                        }
                         await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
-                        if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
+                        if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review' || selectedContent.status === 'approval-client') setSelectedContent(null); 
                       } catch (error) {
                         toast({ 
                           title: 'Erro', 
