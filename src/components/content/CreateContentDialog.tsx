@@ -124,6 +124,16 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       }
     }
 
+    // Insert approvers
+    if (inserted && approverIds.length > 0) {
+      await supabase.from('content_approvers' as any).insert(
+        approverIds.map(userId => ({
+          content_id: inserted.id,
+          user_id: userId,
+        }))
+      );
+    }
+
     setLoading(false);
     toast({ title: 'Conteúdo criado!' });
     reset();
