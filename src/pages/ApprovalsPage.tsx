@@ -24,8 +24,8 @@ const getContentMediaUrls = (content: ContentWithRelations): string[] => {
 
 const ApprovalsPage = () => {
   useClientFromUrl();
-  const { projectContents, setSelectedContent, updateContentStatus } = useApp();
-  const { role } = useAuth();
+  const { projectContents, setSelectedContent, updateContentStatus, refetch } = useApp();
+  const { role, user } = useAuth();
   const isClient = role === 'client';
   const approvals = projectContents.filter(c => c.status === 'approval-client');
   const [downloading, setDownloading] = useState<string | null>(null);
