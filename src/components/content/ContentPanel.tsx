@@ -403,7 +403,21 @@ const ContentPanel = () => {
                   <Button
                     size="sm"
                     style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
-                    onClick={() => updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1])}
+                    onClick={async () => {
+                      if (!user) return;
+                      const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
+                      if (error) {
+                        toast({ title: 'Aviso', description: error, variant: 'destructive' });
+                        return;
+                      }
+                      if (allApproved) {
+                        await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]);
+                        setSelectedContent(null);
+                      } else {
+                        toast({ title: 'Aprovação registrada', description: 'Aguardando os demais aprovadores.' });
+                        setSelectedContent(null);
+                      }
+                    }}
                   >
                     Aprovar
                   </Button>
