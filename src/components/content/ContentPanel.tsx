@@ -64,6 +64,7 @@ const ContentPanel = () => {
   const [comments, setComments] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<any[]>([]);
   const [newCheckItem, setNewCheckItem] = useState('');
+  const [approvers, setApprovers] = useState<{ user_id: string; display_name: string | null }[]>([]);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [previewPlatform, setPreviewPlatform] = useState<Platform>('instagram');
 
