@@ -75,6 +75,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
       if (updateError) throw updateError;
 
       setAvatarPreview(url);
+      await refreshProfile();
       toast.success('Avatar atualizado!');
     } catch (err: any) {
       toast.error(err.message || 'Erro ao enviar avatar');
