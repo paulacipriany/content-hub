@@ -158,6 +158,17 @@ const ContentPanel = () => {
       .eq('content_id', selectedContent.id)
       .order('sort_order')
       .then(({ data }) => setChecklist(data ?? []));
+    // Fetch approvers
+    supabase
+      .from('content_approvers' as any)
+      .select('user_id')
+      .eq('content_id', selectedContent.id)
+      .then(async ({ data }: any) => {
+        if (!data || data.length === 0) { setApprovers([]); return; }
+        const userIds = data.map((a: any) => a.user_id);
+        const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', userIds);
+        setApprovers(profiles ?? []);
+      });
   }, [selectedContent?.id]);
 
   if (!selectedContent) return null;
