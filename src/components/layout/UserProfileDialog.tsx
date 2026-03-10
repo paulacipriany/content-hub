@@ -14,7 +14,7 @@ interface UserProfileDialogProps {
 }
 
 const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [password, setPassword] = useState('');
@@ -75,6 +75,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
       if (updateError) throw updateError;
 
       setAvatarPreview(url);
+      await refreshProfile();
       toast.success('Avatar atualizado!');
     } catch (err: any) {
       toast.error(err.message || 'Erro ao enviar avatar');
@@ -117,6 +118,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
         if (error) throw error;
       }
 
+      await refreshProfile();
       toast.success('Perfil atualizado com sucesso');
       onOpenChange(false);
     } catch (e: any) {
