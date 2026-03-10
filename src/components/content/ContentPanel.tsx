@@ -457,6 +457,11 @@ const ContentPanel = () => {
                     style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                     onClick={async () => { 
                       try {
+                        // Block advancing to review without media
+                        if (selectedContent.status === 'production' && mediaUrls.length === 0) {
+                          toast({ title: 'Mídia obrigatória', description: 'Adicione pelo menos uma mídia antes de enviar para revisão.', variant: 'destructive' });
+                          return;
+                        }
                         await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]); 
                         if (selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') setSelectedContent(null); 
                       } catch (error) {
