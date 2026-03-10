@@ -46,7 +46,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     setPlatforms([]);
     setContentType('post');
     setProjectId(defaultProjectId ?? '');
-    
+    setApproverIds([]);
     setSelectedFiles([]);
     filePreviews.forEach(url => URL.revokeObjectURL(url));
     setFilePreviews([]);
