@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
+import { recordApproval } from '@/lib/approvalUtils';
 
 const getContentMediaUrls = (content: ContentWithRelations): string[] => {
   const urls: string[] = [];
