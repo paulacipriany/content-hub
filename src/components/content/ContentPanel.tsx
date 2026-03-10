@@ -582,7 +582,21 @@ const ContentPanel = () => {
                     <User size={12} className="text-muted-foreground" />
                     <span>{assigneeName}</span>
                   </div>
-                )}
+            )}
+            {/* Approvers */}
+            {approvers.length > 0 && (
+              <div className="flex items-start gap-3 text-sm">
+                <span className="text-muted-foreground w-24 flex-shrink-0 mt-1">Aprovadores</span>
+                <div className="flex flex-wrap gap-1.5 flex-1">
+                  {approvers.map(a => (
+                    <span key={a.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-xs text-foreground">
+                      <UserCheck size={10} className="text-muted-foreground" />
+                      {a.display_name ?? 'Sem nome'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
               </div>
             )}
           </div>
