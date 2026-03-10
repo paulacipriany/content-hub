@@ -36,6 +36,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [approverIds, setApproverIds] = useState<string[]>([]);
 
   const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
 
