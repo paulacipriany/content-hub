@@ -92,8 +92,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(null);
   };
 
+  const refreshProfile = async () => {
+    if (user) await fetchProfileAndRole(user.id);
+  };
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, role, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, role, loading, refreshProfile, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

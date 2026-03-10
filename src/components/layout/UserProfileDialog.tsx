@@ -117,6 +117,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
         if (error) throw error;
       }
 
+      await refreshProfile();
       toast.success('Perfil atualizado com sucesso');
       onOpenChange(false);
     } catch (e: any) {
