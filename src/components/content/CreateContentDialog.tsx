@@ -236,6 +236,13 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </Select>
           </div>
 
+          {/* Approvers */}
+          <ApproverSelector
+            selectedApprovers={approverIds}
+            onChange={setApproverIds}
+            label="Aprovadores"
+          />
+
           {/* Briefing — Rich Text */}
           <div className="space-y-2">
             <Label>Briefing</Label>
