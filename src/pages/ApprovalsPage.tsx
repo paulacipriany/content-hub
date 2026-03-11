@@ -129,6 +129,15 @@ const ApprovalsPage = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
+                  {/* Approval progress */}
+                  {approvalCounts[c.id] && approvalCounts[c.id].total > 0 && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={(approvalCounts[c.id].approved / approvalCounts[c.id].total) * 100} className="h-2 flex-1" />
+                      <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                        {approvalCounts[c.id].approved}/{approvalCounts[c.id].total} aprovado{approvalCounts[c.id].total > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Copy text & download buttons */}
                   {(c.copy_text || getContentMediaUrls(c).length > 0) && (
