@@ -31,6 +31,26 @@ const ApprovalsPage = () => {
   const isClient = role === 'client';
   const approvals = projectContents.filter(c => c.status === 'approval-client');
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [approvalCounts, setApprovalCounts] = useState<Record<string, { approved: number; total: number }>>({});
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (approvals.length === 0) return;
+      const ids = approvals.map(a => a.id);
+      const [{ data: approvers }, { data: existing }] = await Promise.all([
+        supabase.from('content_approvers').select('content_id, user_id').in('content_id', ids),
+        supabase.from('approvals').select('content_id, reviewer_id').eq('decision', 'approved').in('content_id', ids),
+      ]);
+      const counts: Record<string, { approved: number; total: number }> = {};
+      ids.forEach(id => {
+        const total = (approvers ?? []).filter(a => a.content_id === id).length;
+        const approved = (existing ?? []).filter(a => a.content_id === id).length;
+        counts[id] = { approved: Math.min(approved, total), total };
+      });
+      setApprovalCounts(counts);
+    };
+    fetchCounts();
+  }, [approvals.map(a => a.id).join(',')]);
 
   const handleDownloadZip = useCallback(async (content: ContentWithRelations) => {
     const urls = getContentMediaUrls(content);
