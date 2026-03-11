@@ -86,6 +86,7 @@ const ContentPanel = () => {
   const [draftSaved, setDraftSaved] = useState(true);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
+  const [userAlreadyApproved, setUserAlreadyApproved] = useState(false);
 
   // Helper to get current draft fingerprint
   const getDraftFingerprint = useCallback(() => {
