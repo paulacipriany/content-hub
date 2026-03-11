@@ -14,6 +14,7 @@ import UserProfileDialog from './UserProfileDialog';
 
 const globalNavItems = [
 { icon: Home, label: 'Home', path: '/' },
+{ icon: ListTodo, label: 'Tarefas Gerais', path: '/all-tasks', adminOrModerator: true },
 { icon: FolderOpen, label: 'Clientes', path: '/clients' },
 { icon: Users, label: 'Usuários', path: '/users', adminOnly: true },
 { icon: Settings, label: 'Configurações', path: '/settings' }];
@@ -135,7 +136,11 @@ const AppSidebar = () => {
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
         {!isClient && globalNavItems.
-        filter((item) => !(item as any).adminOnly || role === 'admin').
+        filter((item) => {
+          if ((item as any).adminOnly && role !== 'admin') return false;
+          if ((item as any).adminOrModerator && role !== 'admin' && role !== 'moderator') return false;
+          return true;
+        }).
         map((item) => {
           const isActive = location.pathname === item.path || item.path !== '/' && location.pathname.startsWith(item.path);
           return (

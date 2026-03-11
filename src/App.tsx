@@ -26,6 +26,7 @@ import IdeasBankPage from "@/pages/IdeasBankPage";
 import PostReportsPage from "@/pages/PostReportsPage";
 import ReviewPage from "@/pages/ReviewPage";
 import SchedulingPage from "@/pages/SchedulingPage";
+import AllTasksPage from "@/pages/AllTasksPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import NotFound from "./pages/NotFound";
@@ -51,6 +52,7 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/all-tasks" element={<AllTasksPage />} />
               <Route path="/clients" element={<ProjectsPage />} />
               {/* Client-scoped routes */}
               <Route path="/clients/:id/contents" element={<ContentsPage />} />
