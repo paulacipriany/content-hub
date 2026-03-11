@@ -75,9 +75,6 @@ const AllTasksPage = () => {
   const [filters, setFilters] = useState<Filters>({ statuses: [], priorities: [], dateFilter: 'all', projectIds: [] });
   const [loading, setLoading] = useState(true);
 
-  // Only admin/moderator can access
-  if (role !== 'admin' && role !== 'moderator') return null;
-
   const projectMap = useMemo(() => {
     const m: Record<string, { name: string; color: string }> = {};
     projects.forEach(p => { m[p.id] = { name: p.name, color: p.color }; });
