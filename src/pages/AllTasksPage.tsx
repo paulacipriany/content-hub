@@ -102,6 +102,9 @@ const AllTasksPage = () => {
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
+  // Only admin/moderator can access
+  if (role !== 'admin' && role !== 'moderator') return null;
+
   const filtered = useMemo(() => {
     let result = tasks;
     if (filters.statuses.length > 0) {
