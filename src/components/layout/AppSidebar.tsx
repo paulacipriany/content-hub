@@ -14,6 +14,7 @@ import UserProfileDialog from './UserProfileDialog';
 
 const globalNavItems = [
 { icon: Home, label: 'Home', path: '/' },
+{ icon: ListTodo, label: 'Tarefas Gerais', path: '/all-tasks', adminOrModerator: true },
 { icon: FolderOpen, label: 'Clientes', path: '/clients' },
 { icon: Users, label: 'Usuários', path: '/users', adminOnly: true },
 { icon: Settings, label: 'Configurações', path: '/settings' }];

@@ -52,6 +52,7 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/all-tasks" element={<AllTasksPage />} />
               <Route path="/clients" element={<ProjectsPage />} />
               {/* Client-scoped routes */}
               <Route path="/clients/:id/contents" element={<ContentsPage />} />
