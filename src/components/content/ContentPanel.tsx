@@ -517,7 +517,7 @@ const ContentPanel = () => {
                       }
                     }}
                   >
-                    {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
+                    {selectedContent.status === 'approval-client' && userAlreadyApproved ? 'Já aprovado' : selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
                   </Button>
                 </>
               )}
