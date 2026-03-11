@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,10 +6,12 @@ import { platformIcon } from '@/components/content/PlatformIcons';
 import { ContentWithRelations } from '@/data/types';
 import { CheckCircle, Eye, MessageSquare, Clock, Check, Copy, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { recordApproval } from '@/lib/approvalUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const getContentMediaUrls = (content: ContentWithRelations): string[] => {
   const urls: string[] = [];
@@ -29,6 +31,26 @@ const ApprovalsPage = () => {
   const isClient = role === 'client';
   const approvals = projectContents.filter(c => c.status === 'approval-client');
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [approvalCounts, setApprovalCounts] = useState<Record<string, { approved: number; total: number }>>({});
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (approvals.length === 0) return;
+      const ids = approvals.map(a => a.id);
+      const [{ data: approvers }, { data: existing }] = await Promise.all([
+        supabase.from('content_approvers').select('content_id, user_id').in('content_id', ids),
+        supabase.from('approvals').select('content_id, reviewer_id').eq('decision', 'approved').in('content_id', ids),
+      ]);
+      const counts: Record<string, { approved: number; total: number }> = {};
+      ids.forEach(id => {
+        const total = (approvers ?? []).filter(a => a.content_id === id).length;
+        const approved = (existing ?? []).filter(a => a.content_id === id).length;
+        counts[id] = { approved: Math.min(approved, total), total };
+      });
+      setApprovalCounts(counts);
+    };
+    fetchCounts();
+  }, [approvals.map(a => a.id).join(',')]);
 
   const handleDownloadZip = useCallback(async (content: ContentWithRelations) => {
     const urls = getContentMediaUrls(content);
@@ -107,6 +129,15 @@ const ApprovalsPage = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     Por {c.assignee_profile?.display_name ?? 'N/A'}
                   </p>
+                  {/* Approval progress */}
+                  {approvalCounts[c.id] && approvalCounts[c.id].total > 0 && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={(approvalCounts[c.id].approved / approvalCounts[c.id].total) * 100} className="h-2 flex-1" />
+                      <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                        {approvalCounts[c.id].approved}/{approvalCounts[c.id].total} aprovado{approvalCounts[c.id].total > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Copy text & download buttons */}
                   {(c.copy_text || getContentMediaUrls(c).length > 0) && (
