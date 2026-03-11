@@ -86,6 +86,7 @@ const ContentPanel = () => {
   const [draftSaved, setDraftSaved] = useState(true);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
+  const [userAlreadyApproved, setUserAlreadyApproved] = useState(false);
 
   // Helper to get current draft fingerprint
   const getDraftFingerprint = useCallback(() => {
@@ -170,7 +171,19 @@ const ContentPanel = () => {
         const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', userIds);
         setApprovers(profiles ?? []);
       });
-  }, [selectedContent?.id]);
+    // Check if current user already approved
+    if (user) {
+      supabase
+        .from('approvals')
+        .select('id')
+        .eq('content_id', selectedContent.id)
+        .eq('reviewer_id', user.id)
+        .eq('decision', 'approved')
+        .then(({ data }) => setUserAlreadyApproved((data ?? []).length > 0));
+    } else {
+      setUserAlreadyApproved(false);
+    }
+  }, [selectedContent?.id, user?.id]);
 
   if (!selectedContent) return null;
 
@@ -402,7 +415,8 @@ const ContentPanel = () => {
                 {canAdvance && (
                   <Button
                     size="sm"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    disabled={userAlreadyApproved}
+                    style={{ backgroundColor: userAlreadyApproved ? 'hsl(var(--muted))' : 'var(--client-500, hsl(var(--primary)))', color: userAlreadyApproved ? 'hsl(var(--muted-foreground))' : 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                     onClick={async () => {
                       if (!user) return;
                       const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
@@ -410,6 +424,7 @@ const ContentPanel = () => {
                         toast({ title: 'Aviso', description: error, variant: 'destructive' });
                         return;
                       }
+                      setUserAlreadyApproved(true);
                       if (allApproved) {
                         await updateContentStatus(selectedContent.id, allStatuses[currentIdx + 1]);
                         setSelectedContent(null);
@@ -419,7 +434,7 @@ const ContentPanel = () => {
                       }
                     }}
                   >
-                    Aprovar
+                    {userAlreadyApproved ? 'Já aprovado' : 'Aprovar'}
                   </Button>
                 )}
               </>
@@ -469,7 +484,8 @@ const ContentPanel = () => {
                   )}
                   <Button
                     size="sm"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    disabled={selectedContent.status === 'approval-client' && userAlreadyApproved}
+                    style={{ backgroundColor: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted))' : 'var(--client-500, hsl(var(--primary)))', color: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted-foreground))' : 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                     onClick={async () => { 
                       try {
                         // Block advancing to review without media
@@ -501,7 +517,7 @@ const ContentPanel = () => {
                       }
                     }}
                   >
-                    {selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
+                    {selectedContent.status === 'approval-client' && userAlreadyApproved ? 'Já aprovado' : selectedContent.status === 'idea' ? 'Enviar para produção' : selectedContent.status === 'production' ? 'Enviar para revisão' : allStatuses[currentIdx + 1] === 'approval-client' ? 'Enviar para aprovação' : allStatuses[currentIdx + 1] === 'scheduled' ? 'Aprovar' : `Avançar para ${STATUS_LABELS[allStatuses[currentIdx + 1]]}`}
                   </Button>
                 </>
               )}
