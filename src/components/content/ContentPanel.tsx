@@ -171,7 +171,19 @@ const ContentPanel = () => {
         const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', userIds);
         setApprovers(profiles ?? []);
       });
-  }, [selectedContent?.id]);
+    // Check if current user already approved
+    if (user) {
+      supabase
+        .from('approvals')
+        .select('id')
+        .eq('content_id', selectedContent.id)
+        .eq('reviewer_id', user.id)
+        .eq('decision', 'approved')
+        .then(({ data }) => setUserAlreadyApproved((data ?? []).length > 0));
+    } else {
+      setUserAlreadyApproved(false);
+    }
+  }, [selectedContent?.id, user?.id]);
 
   if (!selectedContent) return null;
 
