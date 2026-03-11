@@ -484,7 +484,8 @@ const ContentPanel = () => {
                   )}
                   <Button
                     size="sm"
-                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    disabled={selectedContent.status === 'approval-client' && userAlreadyApproved}
+                    style={{ backgroundColor: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted))' : 'var(--client-500, hsl(var(--primary)))', color: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted-foreground))' : 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
                     onClick={async () => { 
                       try {
                         // Block advancing to review without media
