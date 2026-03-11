@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,10 +6,12 @@ import { platformIcon } from '@/components/content/PlatformIcons';
 import { ContentWithRelations } from '@/data/types';
 import { CheckCircle, Eye, MessageSquare, Clock, Check, Copy, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { recordApproval } from '@/lib/approvalUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const getContentMediaUrls = (content: ContentWithRelations): string[] => {
   const urls: string[] = [];
