@@ -128,7 +128,7 @@ const UsersPage = () => {
     setSaving(true);
 
     const [profileRes, roleRes] = await Promise.all([
-      supabase.from('profiles').update({ display_name: editName }).eq('user_id', editUser.user_id),
+      supabase.from('profiles').update({ display_name: editName, approved: true } as any).eq('user_id', editUser.user_id),
       editRole !== editUser.role
         ? supabase.from('user_roles').update({ role: editRole as any }).eq('user_id', editUser.user_id)
         : Promise.resolve({ error: null }),
