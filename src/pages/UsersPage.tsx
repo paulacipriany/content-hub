@@ -425,6 +425,98 @@ const UsersPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Approve Dialog */}
+      <Dialog open={!!approveUser} onOpenChange={(open) => !open && setApproveUser(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Aprovar usuário — {approveUser?.display_name}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Defina o tipo de conta e os clientes vinculados para aprovar este usuário.</p>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Tipo de conta</Label>
+              <Select value={approveRole} onValueChange={(val) => {
+                setApproveRole(val);
+                if (val === 'admin') setApproveProjectIds(projects.map(p => p.id));
+              }}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="moderator">Gestor</SelectItem>
+                  <SelectItem value="social_media">Social Media</SelectItem>
+                  <SelectItem value="client">Cliente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Clientes vinculados</Label>
+              {approveRole === 'admin' ? (
+                <p className="text-xs text-muted-foreground">Admins têm acesso a todos os clientes automaticamente.</p>
+              ) : (
+                <>
+                  <div className="space-y-2 max-h-40 overflow-y-auto rounded-md border border-border p-2">
+                    {projects.map(p => (
+                      <label key={p.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                        <Checkbox
+                          checked={approveProjectIds.includes(p.id)}
+                          onCheckedChange={(checked) => {
+                            setApproveProjectIds(prev =>
+                              checked ? [...prev, p.id] : prev.filter(id => id !== p.id)
+                            );
+                          }}
+                        />
+                        <span className="truncate text-foreground">{p.name}</span>
+                      </label>
+                    ))}
+                    {projects.length === 0 && <p className="text-xs text-muted-foreground">Nenhum cliente cadastrado</p>}
+                  </div>
+                  {approveRole !== 'admin' && approveProjectIds.length === 0 && (
+                    <p className="text-xs text-destructive">Selecione pelo menos um cliente para aprovar.</p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveUser(null)}>Cancelar</Button>
+            <Button
+              disabled={approving || (approveRole !== 'admin' && approveProjectIds.length === 0)}
+              onClick={async () => {
+                if (!approveUser) return;
+                setApproving(true);
+
+                // Update role
+                await supabase.from('user_roles').update({ role: approveRole as any }).eq('user_id', approveUser.user_id);
+
+                // Set approved
+                await supabase.from('profiles').update({ approved: true } as any).eq('user_id', approveUser.user_id);
+
+                // Sync project members
+                const finalProjectIds = approveRole === 'admin' ? projects.map(p => p.id) : approveProjectIds;
+                await supabase.from('project_members').delete().eq('user_id', approveUser.user_id);
+                if (finalProjectIds.length > 0) {
+                  await supabase.from('project_members').insert(
+                    finalProjectIds.map(pid => ({ project_id: pid, user_id: approveUser.user_id }))
+                  );
+                }
+
+                toast.success('Usuário aprovado com sucesso!');
+                setUsers(prev => prev.map(x =>
+                  x.user_id === approveUser.user_id
+                    ? { ...x, approved: true, role: approveRole as UserRow['role'] }
+                    : x
+                ));
+                setApproveUser(null);
+                setApproving(false);
+              }}
+            >
+              {approving ? 'Aprovando...' : 'Aprovar usuário'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog />
     </>
   );
