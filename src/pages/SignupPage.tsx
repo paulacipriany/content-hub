@@ -4,23 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-
-type AppRole = 'admin' | 'moderator' | 'social_media' | 'client';
-
-const ROLE_LABELS: Record<AppRole, string> = {
-  admin: 'Admin',
-  moderator: 'Gestor',
-  social_media: 'Social Media',
-  client: 'Cliente',
-};
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<AppRole>('social_media');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -33,13 +22,13 @@ const SignupPage = () => {
       return;
     }
     setIsLoading(true);
-    const { error } = await signUp(email, password, displayName, role);
+    const { error } = await signUp(email, password, displayName, 'client');
     setIsLoading(false);
 
     if (error) {
       toast({ title: 'Erro ao criar conta', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar.' });
+      toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar. Sua conta será ativada após aprovação de um administrador.' });
       navigate('/login');
     }
   };
@@ -67,19 +56,6 @@ const SignupPage = () => {
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <Label>Tipo de conta</Label>
-            <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.entries(ROLE_LABELS) as [AppRole, string][]).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Criando...' : 'Criar conta'}

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Trash2, Pencil, UserPlus } from 'lucide-react';
+import { Trash2, Pencil, UserPlus, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
@@ -18,6 +18,7 @@ interface UserRow {
   display_name: string | null;
   avatar_url: string | null;
   role: 'admin' | 'moderator' | 'social_media' | 'client';
+  approved: boolean;
 }
 
 const roleLabels: Record<string, string> = {
@@ -60,7 +61,7 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url');
+    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, approved');
     const { data: roles } = await supabase.from('user_roles').select('user_id, role');
 
     if (profiles && roles) {
@@ -70,8 +71,13 @@ const UsersPage = () => {
         display_name: p.display_name,
         avatar_url: p.avatar_url,
         role: (roleMap.get(p.user_id) as UserRow['role']) ?? 'social_media',
+        approved: p.approved ?? false,
       }));
-      merged.sort((a, b) => (a.display_name ?? '').localeCompare(b.display_name ?? ''));
+      merged.sort((a, b) => {
+        // Unapproved first
+        if (a.approved !== b.approved) return a.approved ? 1 : -1;
+        return (a.display_name ?? '').localeCompare(b.display_name ?? '');
+      });
       setUsers(merged);
     }
     setLoading(false);
@@ -122,7 +128,7 @@ const UsersPage = () => {
     setSaving(true);
 
     const [profileRes, roleRes] = await Promise.all([
-      supabase.from('profiles').update({ display_name: editName }).eq('user_id', editUser.user_id),
+      supabase.from('profiles').update({ display_name: editName, approved: true } as any).eq('user_id', editUser.user_id),
       editRole !== editUser.role
         ? supabase.from('user_roles').update({ role: editRole as any }).eq('user_id', editUser.user_id)
         : Promise.resolve({ error: null }),
@@ -224,7 +230,7 @@ const UsersPage = () => {
         ) : (
           <div className="space-y-1">
             {users.map(u => (
-              <div key={u.user_id} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/20 transition-colors">
+              <div key={u.user_id} className={`flex items-center gap-3 p-3 rounded-lg bg-card border transition-colors ${!u.approved ? 'border-amber-500/40 bg-amber-500/5' : 'border-border hover:border-primary/20'}`}>
                 <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
                   {u.avatar_url ? (
                     <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
@@ -234,10 +240,33 @@ const UsersPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{u.display_name ?? 'Sem nome'}</p>
-                  <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${roleBadgeVariant[u.role]}`}>
-                    {roleLabels[u.role]}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${roleBadgeVariant[u.role]}`}>
+                      {roleLabels[u.role]}
+                    </span>
+                    {!u.approved && (
+                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-500 flex items-center gap-0.5">
+                        <Clock size={10} />
+                        Pendente
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {!u.approved && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
+                    onClick={async () => {
+                      await supabase.from('profiles').update({ approved: true } as any).eq('user_id', u.user_id);
+                      toast.success('Usuário aprovado!');
+                      setUsers(prev => prev.map(x => x.user_id === u.user_id ? { ...x, approved: true } : x));
+                    }}
+                  >
+                    <CheckCircle2 size={13} />
+                    Aprovar
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
                 </Button>
