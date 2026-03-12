@@ -263,10 +263,10 @@ const UsersPage = () => {
                     variant="outline"
                     size="sm"
                     className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                    onClick={async () => {
-                      await supabase.from('profiles').update({ approved: true } as any).eq('user_id', u.user_id);
-                      toast.success('Usuário aprovado!');
-                      setUsers(prev => prev.map(x => x.user_id === u.user_id ? { ...x, approved: true } : x));
+                    onClick={() => {
+                      setApproveUser(u);
+                      setApproveRole('client');
+                      setApproveProjectIds([]);
                     }}
                   >
                     <CheckCircle2 size={13} />
