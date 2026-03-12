@@ -61,7 +61,7 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url');
+    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, approved');
     const { data: roles } = await supabase.from('user_roles').select('user_id, role');
 
     if (profiles && roles) {
@@ -71,8 +71,13 @@ const UsersPage = () => {
         display_name: p.display_name,
         avatar_url: p.avatar_url,
         role: (roleMap.get(p.user_id) as UserRow['role']) ?? 'social_media',
+        approved: p.approved ?? false,
       }));
-      merged.sort((a, b) => (a.display_name ?? '').localeCompare(b.display_name ?? ''));
+      merged.sort((a, b) => {
+        // Unapproved first
+        if (a.approved !== b.approved) return a.approved ? 1 : -1;
+        return (a.display_name ?? '').localeCompare(b.display_name ?? '');
+      });
       setUsers(merged);
     }
     setLoading(false);
