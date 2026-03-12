@@ -230,7 +230,7 @@ const UsersPage = () => {
         ) : (
           <div className="space-y-1">
             {users.map(u => (
-              <div key={u.user_id} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/20 transition-colors">
+              <div key={u.user_id} className={`flex items-center gap-3 p-3 rounded-lg bg-card border transition-colors ${!u.approved ? 'border-amber-500/40 bg-amber-500/5' : 'border-border hover:border-primary/20'}`}>
                 <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
                   {u.avatar_url ? (
                     <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
@@ -240,10 +240,33 @@ const UsersPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{u.display_name ?? 'Sem nome'}</p>
-                  <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${roleBadgeVariant[u.role]}`}>
-                    {roleLabels[u.role]}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${roleBadgeVariant[u.role]}`}>
+                      {roleLabels[u.role]}
+                    </span>
+                    {!u.approved && (
+                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-500 flex items-center gap-0.5">
+                        <Clock size={10} />
+                        Pendente
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {!u.approved && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
+                    onClick={async () => {
+                      await supabase.from('profiles').update({ approved: true } as any).eq('user_id', u.user_id);
+                      toast.success('Usuário aprovado!');
+                      setUsers(prev => prev.map(x => x.user_id === u.user_id ? { ...x, approved: true } : x));
+                    }}
+                  >
+                    <CheckCircle2 size={13} />
+                    Aprovar
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
                 </Button>
