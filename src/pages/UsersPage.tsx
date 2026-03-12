@@ -18,6 +18,7 @@ interface UserRow {
   display_name: string | null;
   avatar_url: string | null;
   role: 'admin' | 'moderator' | 'social_media' | 'client';
+  approved: boolean;
 }
 
 const roleLabels: Record<string, string> = {

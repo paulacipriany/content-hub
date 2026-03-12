@@ -10,6 +10,7 @@ interface Profile {
   display_name: string | null;
   avatar_url: string | null;
   theme: string;
+  approved: boolean;
 }
 
 interface AuthContextType {
