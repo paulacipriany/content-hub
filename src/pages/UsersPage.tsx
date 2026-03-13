@@ -536,6 +536,49 @@ const UsersPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Reject Dialog */}
+      <Dialog open={!!rejectUser} onOpenChange={(open) => !open && setRejectUser(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rejeitar usuário — {rejectUser?.display_name}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Informe o motivo da rejeição. O usuário e seus dados serão removidos.</p>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="reject-reason">Motivo</Label>
+              <textarea
+                id="reject-reason"
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Ex: Cadastro não autorizado, dados incorretos..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectUser(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              disabled={rejecting || !rejectReason.trim()}
+              onClick={async () => {
+                if (!rejectUser) return;
+                setRejecting(true);
+
+                // Remove user role and profile
+                await supabase.from('project_members').delete().eq('user_id', rejectUser.user_id);
+                await supabase.from('user_roles').delete().eq('user_id', rejectUser.user_id);
+
+                toast.success('Usuário rejeitado e removido.');
+                setUsers(prev => prev.filter(x => x.user_id !== rejectUser.user_id));
+                setRejectUser(null);
+                setRejecting(false);
+              }}
+            >
+              {rejecting ? 'Rejeitando...' : 'Rejeitar usuário'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog />
     </>
   );
