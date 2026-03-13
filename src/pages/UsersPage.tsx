@@ -110,7 +110,7 @@ const UsersPage = () => {
       toast.error('Erro ao atualizar role');
     } else {
       toast.success('Role atualizado');
-      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, role: newRole as UserRow['role'] } : u));
+      await fetchUsers();
     }
   };
 
