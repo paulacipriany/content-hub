@@ -563,9 +563,9 @@ const UsersPage = () => {
                 await supabase.from('user_roles').delete().eq('user_id', rejectUser.user_id);
 
                 toast.success('Usuário rejeitado e removido.');
-                setUsers(prev => prev.filter(x => x.user_id !== rejectUser.user_id));
                 setRejectUser(null);
                 setRejecting(false);
+                await fetchUsers();
               }}
             >
               {rejecting ? 'Rejeitando...' : 'Rejeitar usuário'}
