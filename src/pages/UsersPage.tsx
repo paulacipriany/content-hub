@@ -120,7 +120,7 @@ const UsersPage = () => {
       toast.error('Erro ao remover usuário');
     } else {
       toast.success('Usuário removido');
-      setUsers(prev => prev.filter(u => u.user_id !== userId));
+      await fetchUsers();
     }
   };
 
