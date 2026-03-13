@@ -140,6 +140,7 @@ const AppSidebar = () => {
         filter((item) => {
           if ((item as any).adminOnly && role !== 'admin') return false;
           if ((item as any).adminOrModerator && role !== 'admin' && role !== 'moderator') return false;
+          if ((item as any).hideFromClient && isClient) return false;
           return true;
         }).
         map((item) => {
