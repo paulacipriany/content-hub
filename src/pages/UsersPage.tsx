@@ -264,19 +264,33 @@ const UsersPage = () => {
                   </div>
                 </div>
                 {!u.approved && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                    onClick={() => {
-                      setApproveUser(u);
-                      setApproveRole('client');
-                      setApproveProjectIds([]);
-                    }}
-                  >
-                    <CheckCircle2 size={13} />
-                    Aprovar
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
+                      onClick={() => {
+                        setApproveUser(u);
+                        setApproveRole('client');
+                        setApproveProjectIds([]);
+                      }}
+                    >
+                      <CheckCircle2 size={13} />
+                      Aprovar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        setRejectUser(u);
+                        setRejectReason('');
+                      }}
+                    >
+                      <XCircle size={13} />
+                      Rejeitar
+                    </Button>
+                  </div>
                 )}
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
