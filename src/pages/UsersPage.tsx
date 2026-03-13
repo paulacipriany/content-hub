@@ -110,7 +110,7 @@ const UsersPage = () => {
       toast.error('Erro ao atualizar role');
     } else {
       toast.success('Role atualizado');
-      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, role: newRole as UserRow['role'] } : u));
+      await fetchUsers();
     }
   };
 
@@ -120,7 +120,7 @@ const UsersPage = () => {
       toast.error('Erro ao remover usuário');
     } else {
       toast.success('Usuário removido');
-      setUsers(prev => prev.filter(u => u.user_id !== userId));
+      await fetchUsers();
     }
   };
 
@@ -167,16 +167,14 @@ const UsersPage = () => {
 
     if (profileRes.error || roleRes.error) {
       toast.error('Erro ao salvar alterações');
-    } else {
-      toast.success('Usuário atualizado');
-      setUsers(prev => prev.map(u =>
-        u.user_id === editUser.user_id
-          ? { ...u, display_name: editName, role: editRole as UserRow['role'] }
-          : u
-      ));
-      setEditUser(null);
+      setSaving(false);
+      return;
     }
+
+    toast.success('Usuário atualizado');
+    setEditUser(null);
     setSaving(false);
+    await fetchUsers();
   };
 
   const handleAddUser = async () => {
@@ -522,13 +520,9 @@ const UsersPage = () => {
                 }
 
                 toast.success('Usuário aprovado com sucesso!');
-                setUsers(prev => prev.map(x =>
-                  x.user_id === approveUser.user_id
-                    ? { ...x, approved: true, role: approveRole as UserRow['role'] }
-                    : x
-                ));
                 setApproveUser(null);
                 setApproving(false);
+                await fetchUsers();
               }}
             >
               {approving ? 'Aprovando...' : 'Aprovar usuário'}
@@ -569,9 +563,9 @@ const UsersPage = () => {
                 await supabase.from('user_roles').delete().eq('user_id', rejectUser.user_id);
 
                 toast.success('Usuário rejeitado e removido.');
-                setUsers(prev => prev.filter(x => x.user_id !== rejectUser.user_id));
                 setRejectUser(null);
                 setRejecting(false);
+                await fetchUsers();
               }}
             >
               {rejecting ? 'Rejeitando...' : 'Rejeitar usuário'}
