@@ -65,6 +65,11 @@ const UsersPage = () => {
   const [approveProjectIds, setApproveProjectIds] = useState<string[]>([]);
   const [approving, setApproving] = useState(false);
 
+  // Reject dialog
+  const [rejectUser, setRejectUser] = useState<UserRow | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
+
   const fetchUsers = async () => {
     setLoading(true);
     const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, approved');
