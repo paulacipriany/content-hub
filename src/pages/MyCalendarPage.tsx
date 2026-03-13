@@ -227,7 +227,7 @@ const MyCalendarPage = () => {
       <Sheet open={!!previewContent} onOpenChange={open => !open && setPreviewContent(null)}>
         <SheetContent side="right" className="w-full sm:max-w-lg p-0 overflow-y-auto">
           <SheetTitle className="sr-only">Preview</SheetTitle>
-          {previewContent && <PostPreview content={previewContent} readOnly />}
+          {previewContent && <PostPreview content={previewContent} />}
         </SheetContent>
       </Sheet>
     </div>
