@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Trash2, Pencil, UserPlus, CheckCircle2, Clock } from 'lucide-react';
+import { Trash2, Pencil, UserPlus, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
@@ -64,6 +64,11 @@ const UsersPage = () => {
   const [approveRole, setApproveRole] = useState<string>('client');
   const [approveProjectIds, setApproveProjectIds] = useState<string[]>([]);
   const [approving, setApproving] = useState(false);
+
+  // Reject dialog
+  const [rejectUser, setRejectUser] = useState<UserRow | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -259,19 +264,33 @@ const UsersPage = () => {
                   </div>
                 </div>
                 {!u.approved && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                    onClick={() => {
-                      setApproveUser(u);
-                      setApproveRole('client');
-                      setApproveProjectIds([]);
-                    }}
-                  >
-                    <CheckCircle2 size={13} />
-                    Aprovar
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
+                      onClick={() => {
+                        setApproveUser(u);
+                        setApproveRole('client');
+                        setApproveProjectIds([]);
+                      }}
+                    >
+                      <CheckCircle2 size={13} />
+                      Aprovar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        setRejectUser(u);
+                        setRejectReason('');
+                      }}
+                    >
+                      <XCircle size={13} />
+                      Rejeitar
+                    </Button>
+                  </div>
                 )}
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
                   <Pencil size={14} />
@@ -513,6 +532,49 @@ const UsersPage = () => {
               }}
             >
               {approving ? 'Aprovando...' : 'Aprovar usuário'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Reject Dialog */}
+      <Dialog open={!!rejectUser} onOpenChange={(open) => !open && setRejectUser(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rejeitar usuário — {rejectUser?.display_name}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Informe o motivo da rejeição. O usuário e seus dados serão removidos.</p>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="reject-reason">Motivo</Label>
+              <textarea
+                id="reject-reason"
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Ex: Cadastro não autorizado, dados incorretos..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectUser(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              disabled={rejecting || !rejectReason.trim()}
+              onClick={async () => {
+                if (!rejectUser) return;
+                setRejecting(true);
+
+                // Remove user role and profile
+                await supabase.from('project_members').delete().eq('user_id', rejectUser.user_id);
+                await supabase.from('user_roles').delete().eq('user_id', rejectUser.user_id);
+
+                toast.success('Usuário rejeitado e removido.');
+                setUsers(prev => prev.filter(x => x.user_id !== rejectUser.user_id));
+                setRejectUser(null);
+                setRejecting(false);
+              }}
+            >
+              {rejecting ? 'Rejeitando...' : 'Rejeitar usuário'}
             </Button>
           </DialogFooter>
         </DialogContent>
