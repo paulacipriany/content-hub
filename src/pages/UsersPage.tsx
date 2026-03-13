@@ -520,13 +520,9 @@ const UsersPage = () => {
                 }
 
                 toast.success('Usuário aprovado com sucesso!');
-                setUsers(prev => prev.map(x =>
-                  x.user_id === approveUser.user_id
-                    ? { ...x, approved: true, role: approveRole as UserRow['role'] }
-                    : x
-                ));
                 setApproveUser(null);
                 setApproving(false);
+                await fetchUsers();
               }}
             >
               {approving ? 'Aprovando...' : 'Aprovar usuário'}
