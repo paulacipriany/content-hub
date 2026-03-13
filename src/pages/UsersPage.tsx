@@ -167,16 +167,14 @@ const UsersPage = () => {
 
     if (profileRes.error || roleRes.error) {
       toast.error('Erro ao salvar alterações');
-    } else {
-      toast.success('Usuário atualizado');
-      setUsers(prev => prev.map(u =>
-        u.user_id === editUser.user_id
-          ? { ...u, display_name: editName, role: editRole as UserRow['role'] }
-          : u
-      ));
-      setEditUser(null);
+      setSaving(false);
+      return;
     }
+
+    toast.success('Usuário atualizado');
+    setEditUser(null);
     setSaving(false);
+    await fetchUsers();
   };
 
   const handleAddUser = async () => {
