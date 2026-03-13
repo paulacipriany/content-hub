@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import UserProfileDialog from './UserProfileDialog';
 const globalNavItems = [
 { icon: Home, label: 'Home', path: '/' },
 { icon: ListTodo, label: 'Tarefas Gerais', path: '/all-tasks', adminOrModerator: true },
+{ icon: CalendarDays, label: 'Meu Calendário', path: '/my-calendar', hideFromClient: true },
 { icon: FolderOpen, label: 'Clientes', path: '/clients' },
 { icon: Users, label: 'Usuários', path: '/users', adminOnly: true },
 { icon: Settings, label: 'Configurações', path: '/settings' }];
@@ -139,6 +140,7 @@ const AppSidebar = () => {
         filter((item) => {
           if ((item as any).adminOnly && role !== 'admin') return false;
           if ((item as any).adminOrModerator && role !== 'admin' && role !== 'moderator') return false;
+          if ((item as any).hideFromClient && isClient) return false;
           return true;
         }).
         map((item) => {
