@@ -76,14 +76,12 @@ const DroppableColumn = ({ status, isEmpty, children }: { status: WorkflowStatus
     <div
       ref={setNodeRef}
       className={cn(
-        "border-t-[3px] flex flex-col transition-all",
+        "rounded-xl flex flex-col transition-all min-h-[200px]",
         isEmpty && !isOver ? "w-20 min-w-[5rem]" : "w-72",
-        isOver && "ring-2 ring-inset"
+        isOver && "ring-2 ring-inset ring-primary/30"
       )}
       style={{
-        backgroundColor: isOver ? `hsl(${`var(${cssVar})`} / 0.08)` : 'hsl(var(--secondary) / 0.5)',
-        borderTopColor: `hsl(var(${cssVar}))`,
-        ...(isOver ? { ringColor: `hsl(var(${cssVar}) / 0.3)` } : {}),
+        backgroundColor: `hsl(var(${cssVar}) / ${isOver ? '0.18' : '0.1'})`,
       }}
     >
       {children}
