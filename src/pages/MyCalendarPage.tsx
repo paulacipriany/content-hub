@@ -146,6 +146,12 @@ const MyCalendarPage = () => {
     );
   };
 
+  // Projects that have at least one content
+  const activeProjects = useMemo(() => {
+    const ids = new Set(contents.map(c => c.project_id));
+    return projects.filter(p => ids.has(p.id));
+  }, [contents, projects]);
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
