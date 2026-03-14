@@ -463,6 +463,7 @@ export type Database = {
           done: boolean
           due_date: string | null
           id: string
+          list_id: string | null
           priority: string | null
           project_id: string
           sort_order: number
@@ -476,6 +477,7 @@ export type Database = {
           done?: boolean
           due_date?: string | null
           id?: string
+          list_id?: string | null
           priority?: string | null
           project_id: string
           sort_order?: number
@@ -489,6 +491,7 @@ export type Database = {
           done?: boolean
           due_date?: string | null
           id?: string
+          list_id?: string | null
           priority?: string | null
           project_id?: string
           sort_order?: number
@@ -496,6 +499,13 @@ export type Database = {
           text?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "project_tasks_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "task_lists"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_tasks_project_id_fkey"
             columns: ["project_id"]
@@ -596,6 +606,41 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_lists: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          project_id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          project_id: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          project_id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_lists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
