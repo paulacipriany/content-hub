@@ -60,7 +60,7 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: Conten
     <>
       <button
         onClick={() => onClick ? onClick() : setSelectedContent(content)}
-        className="w-full text-left p-3 rounded-lg bg-card border hover:shadow-md transition-all group relative"
+        className="w-full text-left p-3 rounded-lg bg-card shadow-sm hover:shadow-md transition-all group relative"
         style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
       >
         {/* Action icons - visible on hover */}
