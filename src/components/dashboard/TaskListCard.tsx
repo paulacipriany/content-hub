@@ -515,6 +515,77 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
     );
   };
 
+  // ─── DnD setup ──────────────────────────────────────────────────
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const task = tasks.find(t => t.id === event.active.id);
+    if (task) setActiveTask(task);
+  };
+
+  const findListIdForTask = (taskId: string): string | null => {
+    const task = tasks.find(t => t.id === taskId);
+    return task?.list_id ?? null;
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Check if over is a list container (droppable id starts with 'list-')
+    const overListId = overId.startsWith('list-') ? overId.replace('list-', '') : findListIdForTask(overId);
+    const activeListId = findListIdForTask(activeId);
+
+    if (overListId !== activeListId) {
+      setTasks(prev => prev.map(t => t.id === activeId ? { ...t, list_id: overListId } : t));
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveTask(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const targetListId = overId.startsWith('list-') ? overId.replace('list-', '') : findListIdForTask(overId);
+    const task = tasks.find(t => t.id === activeId);
+    if (!task) return;
+
+    // Get tasks in the target list
+    const listTasks = tasks.filter(t => t.list_id === targetListId && t.id !== activeId);
+
+    // Find the position of the over item
+    let newOrder: number;
+    if (overId.startsWith('list-')) {
+      // Dropped on the list container itself (empty area) - put at end
+      newOrder = listTasks.length > 0 ? Math.max(...listTasks.map(t => t.sort_order)) + 1 : 0;
+    } else {
+      const overIndex = listTasks.findIndex(t => t.id === overId);
+      if (overIndex >= 0) {
+        newOrder = listTasks[overIndex].sort_order;
+        // Shift subsequent tasks
+        const tasksToShift = listTasks.filter(t => t.sort_order >= newOrder);
+        for (const t of tasksToShift) {
+          await supabase.from('project_tasks').update({ sort_order: t.sort_order + 1 }).eq('id', t.id);
+        }
+      } else {
+        newOrder = listTasks.length;
+      }
+    }
+
+    // Update the dragged task
+    setTasks(prev => prev.map(t => t.id === activeId ? { ...t, list_id: targetListId, sort_order: newOrder } : t));
+    await supabase.from('project_tasks').update({ list_id: targetListId, sort_order: newOrder } as any).eq('id', activeId);
+  };
+
   // ─── Render a single list ───────────────────────────────────────
   const renderList = (list: TaskList) => {
     const allListTasks = tasks.filter(t => t.list_id === list.id);
@@ -559,39 +630,41 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
 
         {/* Tasks */}
         {!isCollapsed && (
-          <>
-            {/* Pending tasks */}
-            {pendingTasks.map(task => <TaskRow key={task.id} task={task} />)}
+          <SortableContext items={pendingTasks.map(t => t.id)} strategy={verticalListSortingStrategy} id={`list-${list.id}`}>
+            <div className="min-h-[2px]" data-list-id={list.id}>
+              {/* Pending tasks */}
+              {pendingTasks.map(task => <SortableTaskRow key={task.id} task={task} />)}
 
-            {/* Add task button */}
-            {addingToList === list.id ? (
-              <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }}
-                className="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 bg-secondary/20">
-                <div className="w-5 h-5 rounded border-2 border-dashed border-border/50 flex-shrink-0" />
-                <input ref={newTaskInputRef} value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
-                  placeholder="Descreva a tarefa..."
-                  className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/60"
-                  onBlur={() => { if (!newTaskText.trim()) { setAddingToList(null); setNewTaskText(''); } }}
-                  onKeyDown={e => { if (e.key === 'Escape') { setAddingToList(null); setNewTaskText(''); } }}
-                />
-                <Button type="submit" size="sm" variant="ghost" disabled={!newTaskText.trim()} className="h-7 text-xs">
-                  <Plus size={12} className="mr-1" /> Adicionar
-                </Button>
-              </form>
-            ) : (
-              <button onClick={() => { setAddingToList(list.id); setNewTaskText(''); }}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors w-full border-b border-border/50">
-                <Plus size={14} /> Adicionar tarefa
-              </button>
-            )}
+              {/* Add task button */}
+              {addingToList === list.id ? (
+                <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }}
+                  className="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 bg-secondary/20">
+                  <div className="w-5 h-5 rounded border-2 border-dashed border-border/50 flex-shrink-0" />
+                  <input ref={newTaskInputRef} value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
+                    placeholder="Descreva a tarefa..."
+                    className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/60"
+                    onBlur={() => { if (!newTaskText.trim()) { setAddingToList(null); setNewTaskText(''); } }}
+                    onKeyDown={e => { if (e.key === 'Escape') { setAddingToList(null); setNewTaskText(''); } }}
+                  />
+                  <Button type="submit" size="sm" variant="ghost" disabled={!newTaskText.trim()} className="h-7 text-xs">
+                    <Plus size={12} className="mr-1" /> Adicionar
+                  </Button>
+                </form>
+              ) : (
+                <button onClick={() => { setAddingToList(list.id); setNewTaskText(''); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors w-full border-b border-border/50">
+                  <Plus size={14} /> Adicionar tarefa
+                </button>
+              )}
 
-            {/* Done tasks (separated) */}
-            {doneTasks.length > 0 && !hideDone && (
-              <div className="mt-1">
-                {doneTasks.map(task => <TaskRow key={task.id} task={task} />)}
-              </div>
-            )}
-          </>
+              {/* Done tasks (separated) */}
+              {doneTasks.length > 0 && !hideDone && (
+                <div className="mt-1">
+                  {doneTasks.map(task => <SortableTaskRow key={task.id} task={task} />)}
+                </div>
+              )}
+            </div>
+          </SortableContext>
         )}
       </div>
     );
@@ -606,62 +679,83 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Render each list */}
-        {lists.map(renderList)}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+        <div className="space-y-6">
+          {/* Render each list */}
+          {lists.map(renderList)}
 
-        {/* Unassigned tasks */}
-        {unlistedTasks.length > 0 && (
-          <div className="border border-border rounded-xl bg-card overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
-              <div className="w-3 h-3 rounded-full flex-shrink-0 bg-muted-foreground/30" />
-              <div className="flex-1">
-                <span className="text-xs text-muted-foreground">{unlistedTasks.filter(t => t.done).length}/{unlistedTasks.length} concluídas</span>
-                <span className="text-lg font-bold text-foreground block">Sem lista</span>
+          {/* Unassigned tasks */}
+          {unlistedTasks.length > 0 && (
+            <div className="border border-border rounded-xl bg-card overflow-hidden">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
+                <div className="w-3 h-3 rounded-full flex-shrink-0 bg-muted-foreground/30" />
+                <div className="flex-1">
+                  <span className="text-xs text-muted-foreground">{unlistedTasks.filter(t => t.done).length}/{unlistedTasks.length} concluídas</span>
+                  <span className="text-lg font-bold text-foreground block">Sem lista</span>
+                </div>
+              </div>
+              <SortableContext items={unlistedTasks.filter(t => !t.done).map(t => t.id)} strategy={verticalListSortingStrategy}>
+                {unlistedTasks.filter(t => !t.done).map(task => <SortableTaskRow key={task.id} task={task} />)}
+              </SortableContext>
+              {unlistedTasks.filter(t => t.done).length > 0 && !hideDone && (
+                <div className="mt-1">
+                  {unlistedTasks.filter(t => t.done).map(task => <SortableTaskRow key={task.id} task={task} />)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {lists.length === 0 && unlistedTasks.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground text-sm">
+              Nenhuma lista de tarefas ainda. Crie uma para começar!
+            </div>
+          )}
+
+          {/* New list button */}
+          {showNewListInput ? (
+            <form onSubmit={(e) => { e.preventDefault(); createList(); }}
+              className="border border-dashed border-border rounded-xl p-5 bg-secondary/10">
+              <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)}
+                placeholder="Nome da lista..."
+                className="text-lg font-bold bg-transparent outline-none w-full text-foreground placeholder:text-muted-foreground/60 mb-3"
+                onKeyDown={e => { if (e.key === 'Escape') { setShowNewListInput(false); setCreatingListName(''); } }}
+              />
+              <div className="flex gap-2">
+                <Button type="submit" size="sm" disabled={!creatingListName.trim()}
+                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}>
+                  <Plus size={14} className="mr-1" /> Criar lista
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setShowNewListInput(false); setCreatingListName(''); }}>
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <Button variant="outline" onClick={() => setShowNewListInput(true)} className="gap-1.5"
+              style={{ borderColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500, hsl(var(--primary)))' }}>
+              <Plus size={16} /> Nova lista
+            </Button>
+          )}
+        </div>
+
+        {/* Drag overlay */}
+        <DragOverlay>
+          {activeTask ? (
+            <div className="bg-card border border-border rounded-lg shadow-lg px-4 py-2.5 opacity-90">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-5 h-5 rounded border-2 flex items-center justify-center",
+                  activeTask.done ? "border-emerald-500 bg-emerald-500 text-white" : "border-border"
+                )}>
+                  {activeTask.done && <span className="text-[10px] font-bold">✓</span>}
+                </div>
+                <span className="text-sm">{activeTask.text}</span>
               </div>
             </div>
-            {unlistedTasks.filter(t => !t.done).map(task => <TaskRow key={task.id} task={task} />)}
-            {unlistedTasks.filter(t => t.done).length > 0 && !hideDone && (
-              <div className="mt-1">
-                {unlistedTasks.filter(t => t.done).map(task => <TaskRow key={task.id} task={task} />)}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {lists.length === 0 && unlistedTasks.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground text-sm">
-            Nenhuma lista de tarefas ainda. Crie uma para começar!
-          </div>
-        )}
-
-        {/* New list button */}
-        {showNewListInput ? (
-          <form onSubmit={(e) => { e.preventDefault(); createList(); }}
-            className="border border-dashed border-border rounded-xl p-5 bg-secondary/10">
-            <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)}
-              placeholder="Nome da lista..."
-              className="text-lg font-bold bg-transparent outline-none w-full text-foreground placeholder:text-muted-foreground/60 mb-3"
-              onKeyDown={e => { if (e.key === 'Escape') { setShowNewListInput(false); setCreatingListName(''); } }}
-            />
-            <div className="flex gap-2">
-              <Button type="submit" size="sm" disabled={!creatingListName.trim()}
-                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}>
-                <Plus size={14} className="mr-1" /> Criar lista
-              </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => { setShowNewListInput(false); setCreatingListName(''); }}>
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <Button variant="outline" onClick={() => setShowNewListInput(true)} className="gap-1.5"
-            style={{ borderColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500, hsl(var(--primary)))' }}>
-            <Plus size={16} /> Nova lista
-          </Button>
-        )}
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Delete task dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
