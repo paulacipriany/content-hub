@@ -214,6 +214,10 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [addingToList, setAddingToList] = useState<string | null>(null);
   const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskAssignee, setNewTaskAssignee] = useState<string | null>(null);
+  const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined);
+  const [newTaskNotes, setNewTaskNotes] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('medium');
   const newListInputRef = useRef<HTMLInputElement>(null);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
 
@@ -270,11 +274,23 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
     if (!trimmed || !user) return;
     const listTasks = tasks.filter(t => t.list_id === listId);
     const nextOrder = listTasks.length > 0 ? Math.max(...listTasks.map(t => t.sort_order)) + 1 : 0;
+    const dueDate = newTaskDueDate ? format(newTaskDueDate, 'yyyy-MM-dd') : null;
     const { data } = await supabase.from('project_tasks').insert({
       project_id: projectId, text: trimmed, created_by: user.id, sort_order: nextOrder, list_id: listId,
+      assigned_to: newTaskAssignee, due_date: dueDate, priority: newTaskPriority,
+      ...(newTaskNotes.trim() ? {} : {}), // notes field not in DB yet, keeping for future
     } as any).select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority, list_id').single();
     if (data) setTasks(prev => [...prev, data as Task]);
+    resetNewTaskForm();
+  };
+
+  const resetNewTaskForm = () => {
     setNewTaskText('');
+    setNewTaskAssignee(null);
+    setNewTaskDueDate(undefined);
+    setNewTaskNotes('');
+    setNewTaskPriority('medium');
+    setAddingToList(null);
   };
 
   const toggleDone = async (id: string) => {
@@ -635,21 +651,121 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
               {/* Pending tasks */}
               {pendingTasks.map(task => <SortableTaskRow key={task.id} task={task} />)}
 
-              {/* Add task button */}
+              {/* Add task form */}
               {addingToList === list.id ? (
-                <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }}
-                  className="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 bg-secondary/20">
-                  <div className="w-5 h-5 rounded border-2 border-dashed border-border/50 flex-shrink-0" />
-                  <input ref={newTaskInputRef} value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
-                    placeholder="Descreva a tarefa..."
-                    className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/60"
-                    onBlur={() => { if (!newTaskText.trim()) { setAddingToList(null); setNewTaskText(''); } }}
-                    onKeyDown={e => { if (e.key === 'Escape') { setAddingToList(null); setNewTaskText(''); } }}
-                  />
-                  <Button type="submit" size="sm" variant="ghost" disabled={!newTaskText.trim()} className="h-7 text-xs">
-                    <Plus size={12} className="mr-1" /> Adicionar
-                  </Button>
-                </form>
+                <div className="border-b border-border/50 bg-secondary/10">
+                  <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }}>
+                    {/* Task title row */}
+                    <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
+                      <div className="w-5 h-5 rounded border-2 border-dashed border-border/50 flex-shrink-0" />
+                      <input ref={newTaskInputRef} value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
+                        placeholder="Descreva a tarefa..."
+                        className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50"
+                        onKeyDown={e => { if (e.key === 'Escape') resetNewTaskForm(); }}
+                      />
+                    </div>
+
+                    {/* Fields */}
+                    <div className="px-5 py-3 space-y-3">
+                      {/* Responsável */}
+                      <div className="flex items-start gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Responsável</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button type="button" className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors flex items-center gap-2">
+                              {newTaskAssignee ? (
+                                <span className="flex items-center gap-2">
+                                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
+                                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
+                                    {getMemberInitials(newTaskAssignee)}
+                                  </span>
+                                  <span className="text-foreground">{getMemberName(newTaskAssignee)}</span>
+                                </span>
+                              ) : (
+                                'Selecione um responsável...'
+                              )}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 p-1" align="start">
+                            {newTaskAssignee && (
+                              <button type="button" onClick={() => setNewTaskAssignee(null)} className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground">
+                                <X size={14} /><span>Remover</span>
+                              </button>
+                            )}
+                            {members.map(m => (
+                              <button type="button" key={m.user_id} onClick={() => setNewTaskAssignee(m.user_id)}
+                                className={cn("w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors", newTaskAssignee === m.user_id && "bg-secondary")}>
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
+                                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
+                                  {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                </div>
+                                <span className="truncate">{m.display_name || 'Usuário'}</span>
+                              </button>
+                            ))}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Prioridade */}
+                      <div className="flex items-start gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Prioridade</span>
+                        <div className="flex gap-1.5">
+                          {PRIORITY_OPTIONS.map(opt => (
+                            <button type="button" key={opt.value} onClick={() => setNewTaskPriority(opt.value)}
+                              className={cn("px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
+                                newTaskPriority === opt.value ? opt.color : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                              )}>
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Data */}
+                      <div className="flex items-start gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Data limite</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button type="button" className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors flex items-center gap-1.5">
+                              <CalendarIcon size={13} />
+                              {newTaskDueDate ? format(newTaskDueDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : 'Selecione uma data...'}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={newTaskDueDate} onSelect={setNewTaskDueDate} initialFocus className="p-3 pointer-events-auto" />
+                            {newTaskDueDate && (
+                              <div className="px-3 pb-3">
+                                <Button type="button" variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => setNewTaskDueDate(undefined)}>
+                                  <X size={12} className="mr-1" /> Remover data
+                                </Button>
+                              </div>
+                            )}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Notas */}
+                      <div className="flex items-start gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1.5 flex-shrink-0">Notas</span>
+                        <input value={newTaskNotes} onChange={e => setNewTaskNotes(e.target.value)}
+                          placeholder="Adicione detalhes extras..."
+                          className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50 py-1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 px-5 py-3 border-t border-border/30">
+                      <Button type="submit" size="sm" disabled={!newTaskText.trim()}
+                        style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}>
+                        Adicionar tarefa
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={resetNewTaskForm}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
+                </div>
               ) : (
                 <button onClick={() => { setAddingToList(list.id); setNewTaskText(''); }}
                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors w-full border-b border-border/50">
