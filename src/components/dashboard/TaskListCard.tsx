@@ -214,6 +214,10 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [addingToList, setAddingToList] = useState<string | null>(null);
   const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskAssignee, setNewTaskAssignee] = useState<string | null>(null);
+  const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined);
+  const [newTaskNotes, setNewTaskNotes] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('medium');
   const newListInputRef = useRef<HTMLInputElement>(null);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
 
