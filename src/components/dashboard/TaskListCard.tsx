@@ -489,6 +489,32 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
     );
   };
 
+  // ─── Sortable task row wrapper ──────────────────────────────────
+  const SortableTaskRow = ({ task }: { task: Task }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+      id: task.id,
+      data: { type: 'task', task },
+    });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.4 : 1,
+    };
+
+    return (
+      <div ref={setNodeRef} style={style} className="relative group/sortable">
+        <div {...attributes} {...listeners}
+          className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-60 transition-opacity z-10">
+          <GripVertical size={14} className="text-muted-foreground" />
+        </div>
+        <div className="pl-2">
+          <TaskRow task={task} />
+        </div>
+      </div>
+    );
+  };
+
   // ─── Render a single list ───────────────────────────────────────
   const renderList = (list: TaskList) => {
     const allListTasks = tasks.filter(t => t.list_id === list.id);
