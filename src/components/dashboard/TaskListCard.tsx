@@ -274,11 +274,23 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
     if (!trimmed || !user) return;
     const listTasks = tasks.filter(t => t.list_id === listId);
     const nextOrder = listTasks.length > 0 ? Math.max(...listTasks.map(t => t.sort_order)) + 1 : 0;
+    const dueDate = newTaskDueDate ? format(newTaskDueDate, 'yyyy-MM-dd') : null;
     const { data } = await supabase.from('project_tasks').insert({
       project_id: projectId, text: trimmed, created_by: user.id, sort_order: nextOrder, list_id: listId,
+      assigned_to: newTaskAssignee, due_date: dueDate, priority: newTaskPriority,
+      ...(newTaskNotes.trim() ? {} : {}), // notes field not in DB yet, keeping for future
     } as any).select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority, list_id').single();
     if (data) setTasks(prev => [...prev, data as Task]);
+    resetNewTaskForm();
+  };
+
+  const resetNewTaskForm = () => {
     setNewTaskText('');
+    setNewTaskAssignee(null);
+    setNewTaskDueDate(undefined);
+    setNewTaskNotes('');
+    setNewTaskPriority('medium');
+    setAddingToList(null);
   };
 
   const toggleDone = async (id: string) => {
