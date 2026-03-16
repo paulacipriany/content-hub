@@ -9,9 +9,14 @@ interface PostPreviewProps {
   compact?: boolean;
 }
 
-const CarouselMedia = ({ urls, platform }: { urls: string[]; platform: string }) => {
+const getAspectClass = (platform: string, contentType?: string) => {
+  if (contentType === 'shorts' || contentType === 'reels' || contentType === 'stories') return 'aspect-[9/16]';
+  return platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+};
+
+const CarouselMedia = ({ urls, platform, contentType }: { urls: string[]; platform: string; contentType?: string }) => {
   const [current, setCurrent] = useState(0);
-  const aspectClass = platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+  const aspectClass = getAspectClass(platform, contentType);
 
   return (
     <div className="relative group">
