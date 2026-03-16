@@ -66,7 +66,7 @@ const CarouselMedia = ({ urls, platform, contentType }: { urls: string[]; platfo
 const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelations; platform: string }) => {
   const mediaUrls = (content as any).media_urls;
   const mediaUrl = (content as any).media_url;
-  const aspectClass = platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+  const aspectClass = getAspectClass(platform, content.content_type);
 
   const urls: string[] = mediaUrls && Array.isArray(mediaUrls) && mediaUrls.length > 0
     ? mediaUrls
