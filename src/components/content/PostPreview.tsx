@@ -73,7 +73,7 @@ const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelatio
     : mediaUrl ? [mediaUrl] : [];
 
   if (urls.length > 0) {
-    return <CarouselMedia urls={urls} platform={platform} />;
+    return <CarouselMedia urls={urls} platform={platform} contentType={content.content_type} />;
   }
 
   return (
