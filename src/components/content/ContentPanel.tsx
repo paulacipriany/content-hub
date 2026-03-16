@@ -58,6 +58,7 @@ const ContentPanel = () => {
   const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
   const isReview = selectedContent?.status === 'review';
+  const isProduction = selectedContent?.status === 'production';
   const [newComment, setNewComment] = useState('');
   const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
   const [commentUploading, setCommentUploading] = useState(false);
