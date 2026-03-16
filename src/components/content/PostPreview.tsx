@@ -9,9 +9,14 @@ interface PostPreviewProps {
   compact?: boolean;
 }
 
-const CarouselMedia = ({ urls, platform }: { urls: string[]; platform: string }) => {
+const getAspectClass = (platform: string, contentType?: string) => {
+  if (contentType === 'shorts' || contentType === 'reels' || contentType === 'stories') return 'aspect-[9/16]';
+  return platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+};
+
+const CarouselMedia = ({ urls, platform, contentType }: { urls: string[]; platform: string; contentType?: string }) => {
   const [current, setCurrent] = useState(0);
-  const aspectClass = platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+  const aspectClass = getAspectClass(platform, contentType);
 
   return (
     <div className="relative group">
@@ -61,14 +66,14 @@ const CarouselMedia = ({ urls, platform }: { urls: string[]; platform: string })
 const MediaOrPlaceholder = ({ content, platform }: { content: ContentWithRelations; platform: string }) => {
   const mediaUrls = (content as any).media_urls;
   const mediaUrl = (content as any).media_url;
-  const aspectClass = platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+  const aspectClass = getAspectClass(platform, content.content_type);
 
   const urls: string[] = mediaUrls && Array.isArray(mediaUrls) && mediaUrls.length > 0
     ? mediaUrls
     : mediaUrl ? [mediaUrl] : [];
 
   if (urls.length > 0) {
-    return <CarouselMedia urls={urls} platform={platform} />;
+    return <CarouselMedia urls={urls} platform={platform} contentType={content.content_type} />;
   }
 
   return (
