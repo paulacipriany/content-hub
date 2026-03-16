@@ -652,7 +652,7 @@ const ContentPanel = () => {
           </div>
 
           {/* Briefing — rich editor for idea-bank, read-only otherwise, hidden in review */}
-          {!isReview && (isIdeaBank ? (
+          {!isReview && ((isIdeaBank || selectedContent.status === 'idea') ? (
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Briefing</label>
               <RichTextEditor
