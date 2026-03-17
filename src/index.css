@@ -132,6 +132,10 @@
     --platform-linkedin: 210 80% 52%;
     --platform-tiktok: 0 0% 90%;
     --platform-youtube: 0 72% 60%;
+    --platform-pinterest: 0 80% 54%;
+    --platform-twitter: 0 0% 92%;
+    --platform-google-business: 142 60% 50%;
+    --platform-blog: 220 60% 60%;
 
     /* Shadcn sidebar tokens */
     --sidebar-background: 0 0% 0%;
