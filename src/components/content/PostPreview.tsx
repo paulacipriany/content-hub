@@ -8,6 +8,7 @@ import PinterestPreview from './previews/PinterestPreview';
 import TwitterPreview from './previews/TwitterPreview';
 import GoogleBusinessPreview from './previews/GoogleBusinessPreview';
 import BlogPreview from './previews/BlogPreview';
+import StoriesPreview from './previews/StoriesPreview';
 
 interface PostPreviewProps {
   content: ContentWithRelations;
@@ -33,6 +34,11 @@ const PostPreview = ({ content, platform, compact }: PostPreviewProps) => {
     copy_texts: truncatedCopyTexts,
     description: truncateStr(content.description, 120),
   } as ContentWithRelations : content;
+
+  // Stories get a dedicated preview regardless of platform
+  if (displayContent.content_type === 'stories') {
+    return <StoriesPreview content={displayContent} />;
+  }
 
   switch (platform) {
     case 'instagram':
