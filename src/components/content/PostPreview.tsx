@@ -8,6 +8,7 @@ import PinterestPreview from './previews/PinterestPreview';
 import TwitterPreview from './previews/TwitterPreview';
 import GoogleBusinessPreview from './previews/GoogleBusinessPreview';
 import BlogPreview from './previews/BlogPreview';
+import StoriesPreview from './previews/StoriesPreview';
 
 interface PostPreviewProps {
   content: ContentWithRelations;
