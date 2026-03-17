@@ -35,6 +35,11 @@ const PostPreview = ({ content, platform, compact }: PostPreviewProps) => {
     description: truncateStr(content.description, 120),
   } as ContentWithRelations : content;
 
+  // Stories get a dedicated preview regardless of platform
+  if (displayContent.content_type === 'stories') {
+    return <StoriesPreview content={displayContent} />;
+  }
+
   switch (platform) {
     case 'instagram':
       return <InstagramPreview content={displayContent} />;
