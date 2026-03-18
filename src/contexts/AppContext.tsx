@@ -20,6 +20,8 @@ interface AppContextType {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   loading: boolean;
+  pendingUsersCount: number;
+  fetchPendingUsersCount: () => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -34,6 +36,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
+
+  const fetchPendingUsersCount = useCallback(async () => {
+    if (role === 'admin' || role === 'moderator') {
+      const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('approved', false);
+      setPendingUsersCount(count ?? 0);
+    }
+  }, [role]);
 
   const projectContents = selectedProject
     ? contents.filter(c => c.project_id === selectedProject.id)
@@ -42,6 +52,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+
+    // Initial fetch of pending users
+    await fetchPendingUsersCount();
 
     const [projectsRes, contentsRes] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
@@ -97,16 +110,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setLoading(false);
-  }, [user, role]);
+  }, [user, role, fetchPendingUsersCount, selectedProject, setSelectedProject]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+
+    // Subscribe to profiles for pending users count if admin/moderator
+    let profilesSub: any;
+    if (role === 'admin' || role === 'moderator') {
+      profilesSub = supabase.channel('profiles-admin-count')
+        .on('postgres_changes' as any, { event: '*', table: 'profiles' }, () => {
+          fetchPendingUsersCount();
+        })
+        .subscribe();
+    }
+
+    return () => {
+      if (profilesSub) supabase.removeChannel(profilesSub);
+    };
+  }, [fetchData, role, fetchPendingUsersCount]);
 
   // Apply client palette only on dashboard pages
   useEffect(() => {
     const isClientDashboard = location.pathname.includes('/clients/') && 
-                              location.pathname.includes('/dashboard');
+                               location.pathname.includes('/dashboard');
     
     if (isClientDashboard) {
       applyClientPalette(selectedProject?.color ?? null);
@@ -190,7 +217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       selectedContent, setSelectedContent,
       updateContentStatus, updateContentDate, updateContentFields, deleteContent,
       sidebarCollapsed, setSidebarCollapsed,
-      loading, refetch: fetchData,
+      loading, pendingUsersCount, fetchPendingUsersCount, refetch: fetchData,
     }}>
       {children}
     </AppContext.Provider>

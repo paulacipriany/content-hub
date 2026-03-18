@@ -39,7 +39,7 @@ const clientNavItems = [
 const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents } = useApp();
+  const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents, pendingUsersCount } = useApp();
   const { profile, role, signOut, user } = useAuth();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -158,7 +158,12 @@ const AppSidebar = () => {
               title={sidebarCollapsed ? item.label : undefined}>
               
               <item.icon size={18} className="flex-shrink-0" />
-              {!sidebarCollapsed && <span>{item.label}</span>}
+              {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
+              {!sidebarCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#1a1a1a' }}>
+                  {pendingUsersCount}
+                </span>
+              )}
             </button>);
 
         })}

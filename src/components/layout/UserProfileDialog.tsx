@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +15,13 @@ interface UserProfileDialogProps {
 
 const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   const { user, profile, refreshProfile } = useAuth();
-  const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
+  
+  // Initial values from profile or user metadata
+  const initialName = profile?.display_name || user?.user_metadata?.display_name || '';
+  const initialEmail = user?.email || '';
+
+  const [displayName, setDisplayName] = useState(initialName);
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -24,17 +29,27 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const currentAvatarUrl = avatarPreview ?? profile?.avatar_url;
-  const initials = (displayName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  const handleOpenChange = (v: boolean) => {
-    if (v) {
-      setDisplayName(profile?.display_name ?? '');
-      setEmail(user?.email ?? '');
+  // Sync state with profile data when it loads or dialog opens
+  useEffect(() => {
+    if (open) {
+      setDisplayName(profile?.display_name || user?.user_metadata?.display_name || '');
+      setEmail(user?.email || '');
       setPassword('');
       setConfirmPassword('');
       setAvatarPreview(null);
     }
+  }, [open, profile, user]);
+
+  const currentAvatarUrl = avatarPreview ?? profile?.avatar_url;
+  const initials = (displayName || user?.user_metadata?.display_name || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleOpenChange = (v: boolean) => {
     onOpenChange(v);
   };
 
@@ -71,7 +86,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: url } as any)
-        .eq('id', profile!.id);
+        .eq('user_id', user.id); // Using user_id is safer
       if (updateError) throw updateError;
 
       setAvatarPreview(url);
@@ -85,7 +100,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   };
 
   const handleSave = async () => {
-    if (!profile || !user) return;
+    if (!user) return;
 
     if (password && password !== confirmPassword) {
       toast.error('As senhas não coincidem');
@@ -99,14 +114,14 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
 
     setSaving(true);
     try {
-      if (displayName !== profile.display_name) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ display_name: displayName } as any)
-          .eq('id', profile.id);
-        if (error) throw error;
-      }
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ display_name: displayName } as any)
+        .eq('user_id', user.id);
+      if (profileError) throw profileError;
 
+      // Update auth data
       if (email !== user.email) {
         const { error } = await supabase.auth.updateUser({ email });
         if (error) throw error;
@@ -177,6 +192,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
               placeholder="Seu nome"
+              autoComplete="name"
             />
           </div>
 
@@ -188,6 +204,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="seu@email.com"
+              autoComplete="email"
             />
           </div>
 
@@ -199,10 +216,11 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Deixe em branco para manter"
+              autoComplete="new-password"
             />
           </div>
 
-          {password && (
+          {(password || confirmPassword) && (
             <div className="space-y-2">
               <Label htmlFor="profile-confirm">Confirmar senha</Label>
               <Input
@@ -211,6 +229,7 @@ const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Confirme a nova senha"
+                autoComplete="new-password"
               />
             </div>
           )}

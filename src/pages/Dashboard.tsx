@@ -1,13 +1,15 @@
 import TopBar from '@/components/layout/TopBar';
 import RemindersCard from '@/components/dashboard/RemindersCard';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp, Wrench, CalendarClock, Radio, ArrowRight, Eye } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertTriangle, TrendingUp, Wrench, CalendarClock, Radio, ArrowRight, Eye, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { contents, projects, setSelectedProject } = useApp();
+  const { contents, projects, setSelectedProject, pendingUsersCount } = useApp();
+  const { role } = useAuth();
   const navigate = useNavigate();
 
   const published = contents.filter(c => c.status === 'published').length;
@@ -38,35 +40,62 @@ const Dashboard = () => {
   // Recent sorted by updated_at
   const recent = [...contents].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 6);
 
+  const isAdminOrModerator = role === 'admin' || role === 'moderator';
+
   return (
     <>
       <TopBar title="Dashboard" subtitle="Visão geral do SocialFlow" />
       <div className="p-6 space-y-6">
+        {/* Pending Users Alert */}
+        {isAdminOrModerator && pendingUsersCount > 0 && (
+          <button
+            onClick={() => navigate('/users')}
+            className="w-full flex items-center justify-between gap-3 px-4 py-4 rounded-xl border bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:border-amber-900 transition-all hover:shadow-md hover:brightness-105 active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
+                <UserPlus size={20} />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                  Novos usuários aguardando aprovação
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                  Existem {pendingUsersCount} {pendingUsersCount === 1 ? 'usuário pendente' : 'usuários pendentes'} que precisa{pendingUsersCount === 1 ? '' : 'm'} de aprovação para acessar a plataforma.
+                </p>
+              </div>
+            </div>
+            <ArrowRight size={18} className="text-amber-600 dark:text-amber-400" />
+          </button>
+        )}
+
         {/* Alert banners */}
-        {inApproval > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800">
-            <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
-            <span className="text-sm font-medium text-red-700 dark:text-red-400">
-              {inApproval} conteúdo{inApproval > 1 ? 's' : ''} aguardando aprovação
-            </span>
-          </div>
-        )}
-        {inReview > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800">
-            <Eye size={18} className="text-orange-700 dark:text-orange-400" />
-            <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
-              {inReview} conteúdo{inReview > 1 ? 's' : ''} aguardando revisão
-            </span>
-          </div>
-        )}
-        {scheduled > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
-            <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-              {scheduled} conteúdo{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendamento
-            </span>
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {inApproval > 0 && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800">
+              <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
+              <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                {inApproval} conteúdo{inApproval > 1 ? 's' : ''} em aprovação
+              </span>
+            </div>
+          )}
+          {inReview > 0 && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800">
+              <Eye size={18} className="text-orange-700 dark:text-orange-400" />
+              <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                {inReview} conteúdo{inReview > 1 ? 's' : ''} em revisão
+              </span>
+            </div>
+          )}
+          {scheduled > 0 && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
+              <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                {scheduled} post{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendar
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">

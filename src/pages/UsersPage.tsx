@@ -7,9 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Trash2, Pencil, UserPlus, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Trash2, Pencil, UserPlus, CheckCircle2, Clock, XCircle, Filter, Search, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+import { useApp } from '@/contexts/AppContext';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface SimpleProject { id: string; name: string; color: string; }
 
@@ -19,6 +22,8 @@ interface UserRow {
   avatar_url: string | null;
   role: 'admin' | 'moderator' | 'social_media' | 'client';
   approved: boolean;
+  created_at: string;
+  project_ids: string[];
 }
 
 const roleLabels: Record<string, string> = {
@@ -40,6 +45,13 @@ const UsersPage = () => {
   const [projects, setProjects] = useState<SimpleProject[]>([]);
   const [loading, setLoading] = useState(true);
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const { fetchPendingUsersCount } = useApp();
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState<string>('all');
+  const [filterProject, setFilterProject] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
 
   // Edit dialog
   const [editUser, setEditUser] = useState<UserRow | null>(null);
@@ -72,23 +84,32 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, approved');
-    const { data: roles } = await supabase.from('user_roles').select('user_id, role');
+    const [profilesRes, rolesRes, membersRes] = await Promise.all([
+      supabase.from('profiles').select('user_id, display_name, avatar_url, approved, created_at'),
+      supabase.from('user_roles').select('user_id, role'),
+      supabase.from('project_members').select('user_id, project_id')
+    ]);
 
-    if (profiles && roles) {
-      const roleMap = new Map(roles.map(r => [r.user_id, r.role]));
-      const merged: UserRow[] = profiles.map(p => ({
+    if (profilesRes.data && rolesRes.data) {
+      const roleMap = new Map(rolesRes.data.map(r => [r.user_id, r.role]));
+      const membersMap = new Map<string, string[]>();
+      
+      membersRes.data?.forEach(m => {
+        const uId = m.user_id;
+        if (!membersMap.has(uId)) membersMap.set(uId, []);
+        membersMap.get(uId)?.push(m.project_id);
+      });
+
+      const merged: UserRow[] = profilesRes.data.map(p => ({
         user_id: p.user_id,
         display_name: p.display_name,
         avatar_url: p.avatar_url,
         role: (roleMap.get(p.user_id) as UserRow['role']) ?? 'social_media',
         approved: p.approved ?? false,
+        created_at: p.created_at ?? new Date().toISOString(),
+        project_ids: membersMap.get(p.user_id) ?? []
       }));
-      merged.sort((a, b) => {
-        // Unapproved first
-        if (a.approved !== b.approved) return a.approved ? 1 : -1;
-        return (a.display_name ?? '').localeCompare(b.display_name ?? '');
-      });
+      
       setUsers(merged);
     }
     setLoading(false);
@@ -101,19 +122,6 @@ const UsersPage = () => {
     });
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ role: newRole as any })
-      .eq('user_id', userId);
-    if (error) {
-      toast.error('Erro ao atualizar role');
-    } else {
-      toast.success('Role atualizado');
-      await fetchUsers();
-    }
-  };
-
   const handleDelete = async (userId: string) => {
     const { error } = await supabase.from('user_roles').delete().eq('user_id', userId);
     if (error) {
@@ -121,6 +129,7 @@ const UsersPage = () => {
     } else {
       toast.success('Usuário removido');
       await fetchUsers();
+      await fetchPendingUsersCount();
     }
   };
 
@@ -130,8 +139,7 @@ const UsersPage = () => {
     setEditEmail('');
     setEditPassword('');
     setEditRole(u.role);
-    const { data } = await supabase.from('project_members').select('project_id').eq('user_id', u.user_id);
-    setEditProjectIds(data?.map(r => r.project_id) ?? []);
+    setEditProjectIds(u.project_ids);
   };
 
   const handleSaveEdit = async () => {
@@ -145,18 +153,12 @@ const UsersPage = () => {
         : Promise.resolve({ error: null }),
     ]);
 
-    // Update email/password via edge function if changed
     if (editEmail || editPassword) {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (token) {
-        await supabase.functions.invoke('admin-update-user', {
-          body: { user_id: editUser.user_id, email: editEmail || undefined, password: editPassword || undefined },
-        });
-      }
+      await supabase.functions.invoke('admin-update-user', {
+        body: { user_id: editUser.user_id, email: editEmail || undefined, password: editPassword || undefined },
+      });
     }
 
-    // Sync project_members: auto-select all for admin
     const finalProjectIds = editRole === 'admin' ? projects.map(p => p.id) : editProjectIds;
     await supabase.from('project_members').delete().eq('user_id', editUser.user_id);
     if (finalProjectIds.length > 0) {
@@ -175,6 +177,7 @@ const UsersPage = () => {
     setEditUser(null);
     setSaving(false);
     await fetchUsers();
+    await fetchPendingUsersCount();
   };
 
   const handleAddUser = async () => {
@@ -196,7 +199,6 @@ const UsersPage = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      // If client role, add project memberships after a delay for the trigger to finish
       if (addRole === 'client' && addProjectIds.length > 0 && signUpData.user) {
         const userId = signUpData.user.id;
         setTimeout(async () => {
@@ -212,8 +214,8 @@ const UsersPage = () => {
       setAddName('');
       setAddRole('social_media');
       setAddProjectIds([]);
-      // Refetch after a short delay to allow trigger to create profile
-      setTimeout(() => fetchUsers(), 2000);
+      setTimeout(() => fetchUsers(), 2500);
+      setTimeout(() => fetchPendingUsersCount(), 3500);
     }
     setAdding(false);
   };
@@ -221,15 +223,91 @@ const UsersPage = () => {
   const initials = (name: string | null) =>
     name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
 
+  // Apply filters and sorting
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = !searchTerm || u.display_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || u.role === filterRole;
+    // Admins always match any project filter
+    const matchesProject = filterProject === 'all' || u.role === 'admin' || u.project_ids.includes(filterProject);
+    return matchesSearch && matchesRole && matchesProject;
+  }).sort((a, b) => {
+    // Unapproved ALWAYS first
+    if (a.approved !== b.approved) return a.approved ? 1 : -1;
+
+    if (sortBy === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (sortBy === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (sortBy === 'name') return (a.display_name ?? '').localeCompare(b.display_name ?? '');
+    return 0;
+  });
+
   return (
     <>
       <TopBar title="Usuários" subtitle="Gerencie todos os usuários da plataforma" />
-      <div className="p-6 max-w-3xl">
-        <div className="flex justify-end mb-4">
-          <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5">
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl font-bold text-foreground">Gestão de Usuários</h2>
+          <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5 order-first sm:order-last">
             <UserPlus size={15} />
             Novo usuário
           </Button>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-secondary/30 p-4 rounded-xl border border-border">
+          <div className="relative md:col-span-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
+            <Input 
+              placeholder="Buscar por nome..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
+          
+          <Select value={filterRole} onValueChange={setFilterRole}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Cargo" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cargos</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="moderator">Gestor</SelectItem>
+              <SelectItem value="social_media">Social Media</SelectItem>
+              <SelectItem value="client">Cliente</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterProject} onValueChange={setFilterProject}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Cliente" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os clientes</SelectItem>
+              {projects.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Ordenar por" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mais recentes</SelectItem>
+              <SelectItem value="oldest">Mais antigos</SelectItem>
+              <SelectItem value="name">Nome (A-Z)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {loading ? (
@@ -237,74 +315,101 @@ const UsersPage = () => {
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="space-y-1">
-            {users.map(u => (
-              <div key={u.user_id} className={`flex items-center gap-3 p-3 rounded-lg bg-card border transition-colors ${!u.approved ? 'border-amber-500/40 bg-amber-500/5' : 'border-border hover:border-primary/20'}`}>
-                <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
-                  {u.avatar_url ? (
-                    <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-                  ) : (
-                    <span className="text-primary text-xs font-semibold">{initials(u.display_name)}</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{u.display_name ?? 'Sem nome'}</p>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${roleBadgeVariant[u.role]}`}>
-                      {roleLabels[u.role]}
-                    </span>
-                    {!u.approved && (
-                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-500 flex items-center gap-0.5">
-                        <Clock size={10} />
-                        Pendente
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground font-medium px-2 py-1">
+              {filteredUsers.length} usuários encontrados
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {filteredUsers.map(u => (
+                <div key={u.user_id} className={`flex items-center gap-3 p-3 rounded-lg bg-card border transition-colors ${!u.approved ? 'border-amber-500/40 bg-amber-500/5' : 'border-border hover:border-primary/20 shadow-sm'}`}>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                      <span className="text-primary text-xs font-bold">{initials(u.display_name)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground truncate">{u.display_name ?? 'Sem nome'}</p>
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm ${roleBadgeVariant[u.role]}`}>
+                        {roleLabels[u.role]}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock size={10} />
+                        Desde {format(new Date(u.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                      {u.project_ids.length > 0 && (
+                        <span className="text-[10px] text-muted-foreground truncate">
+                          • {u.project_ids.length} cliente{u.project_ids.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {!u.approved && (
+                        <span className="text-[10px] font-bold uppercase bg-amber-500/10 text-amber-600 px-1 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                          Aguardando aprovação
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {!u.approved ? (
+                      <div className="flex gap-1 mr-2 px-3 border-r pr-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 gap-1 text-xs border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/10"
+                          onClick={() => {
+                            setApproveUser(u);
+                            setApproveRole('client');
+                            setApproveProjectIds([]);
+                          }}
+                        >
+                          <CheckCircle2 size={13} />
+                          Aprovar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 gap-1 text-xs border-destructive/20 text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            setRejectUser(u);
+                            setRejectReason('');
+                          }}
+                        >
+                          <XCircle size={13} />
+                          Rejeitar
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
+                          <Pencil size={14} />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(u.user_id), `"${u.display_name || 'este usuário'}"`)}>
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
-                {!u.approved && (
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                      onClick={() => {
-                        setApproveUser(u);
-                        setApproveRole('client');
-                        setApproveProjectIds([]);
-                      }}
-                    >
-                      <CheckCircle2 size={13} />
-                      Aprovar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
-                      onClick={() => {
-                        setRejectUser(u);
-                        setRejectReason('');
-                      }}
-                    >
-                      <XCircle size={13} />
-                      Rejeitar
-                    </Button>
-                  </div>
-                )}
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(u)}>
-                  <Pencil size={14} />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(u.user_id), `"${u.display_name || 'este usuário'}"`)}>
-                  <Trash2 size={14} />
-                </Button>
-              </div>
-            ))}
-            {users.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">Nenhum usuário encontrado.</p>
-            )}
+              ))}
+              {filteredUsers.length === 0 && (
+                <div className="text-center py-16 bg-secondary/10 rounded-xl border-2 border-dashed border-border">
+                  <Filter className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
+                  <p className="text-sm text-muted-foreground">Nenhum usuário corresponde aos filtros aplicados.</p>
+                  <Button variant="link" onClick={() => { setSearchTerm(''); setFilterRole('all'); setFilterProject('all'); }} className="text-xs mt-1">
+                    Limpar todos os filtros
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
+      {/* Dialogs... (Edit, Add, Approve, Reject) */}
       {/* Edit Dialog */}
       <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
         <DialogContent className="sm:max-w-md">
@@ -523,6 +628,7 @@ const UsersPage = () => {
                 setApproveUser(null);
                 setApproving(false);
                 await fetchUsers();
+                await fetchPendingUsersCount();
               }}
             >
               {approving ? 'Aprovando...' : 'Aprovar usuário'}
@@ -566,6 +672,7 @@ const UsersPage = () => {
                 setRejectUser(null);
                 setRejecting(false);
                 await fetchUsers();
+                await fetchPendingUsersCount();
               }}
             >
               {rejecting ? 'Rejeitando...' : 'Rejeitar usuário'}
