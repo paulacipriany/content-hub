@@ -92,8 +92,8 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !projectId || !user || platforms.length === 0) {
-      toast({ title: 'Campos obrigatórios', description: 'Preencha o título, selecione um cliente e ao menos uma plataforma.', variant: 'destructive' });
+    if (!title.trim() || !projectId || !user || platforms.length === 0 || !contentType) {
+      toast({ title: 'Campos obrigatórios', description: 'Preencha o título, selecione um cliente, tipo de conteúdo e ao menos uma plataforma.', variant: 'destructive' });
       return;
     }
 
