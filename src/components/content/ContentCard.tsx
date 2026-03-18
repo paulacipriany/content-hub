@@ -3,7 +3,7 @@ import { ContentWithRelations, STATUS_LABELS, STATUS_COLORS, CONTENT_TYPE_LABELS
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
 import { platformIcon } from './PlatformIcons';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, GripVertical } from 'lucide-react';
 import EditContentDialog from './EditContentDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -13,9 +13,10 @@ interface ContentCardProps {
   hideStatus?: boolean;
   readOnly?: boolean;
   onClick?: () => void;
+  dragHandleProps?: any;
 }
 
-const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: ContentCardProps) => {
+const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHandleProps }: ContentCardProps) => {
   const { setSelectedContent, deleteContent } = useApp();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -66,6 +67,15 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick }: Conten
         {/* Action icons - visible on hover */}
         {hideStatus && !readOnly && content.status !== 'published' && (
           <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            {dragHandleProps && (
+              <div
+                {...dragHandleProps}
+                className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors cursor-grab active:cursor-grabbing"
+                title="Arrastar"
+              >
+                <GripVertical size={12} />
+              </div>
+            )}
             <button
               onClick={handleEdit}
               className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"

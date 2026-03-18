@@ -2,8 +2,8 @@ import { useState, useRef } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { CONTENT_TYPE_LABELS, Platform, ContentType } from '@/data/types';
-import { PlatformSelector } from './PlatformIcons';
+import { CONTENT_TYPE_LABELS, Platform, ContentType, VISIBLE_CONTENT_TYPES } from '@/data/types';
+import { PlatformSelector, getFilteredPlatformsForType } from './PlatformIcons';
 import ApproverSelector from './ApproverSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, X, ImagePlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
 interface CreateContentDialogProps {
   trigger?: React.ReactNode;
@@ -24,6 +25,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   const { projects, refetch } = useApp();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,27 +40,12 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [approverIds, setApproverIds] = useState<string[]>([]);
 
-  const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories', 'artigo'];
+  const universalContentTypes = VISIBLE_CONTENT_TYPES;
 
   // Filter platforms based on content type
   const getFilteredPlatforms = (): Platform[] | undefined => {
     const projectPlatforms = projects.find(p => p.id === projectId)?.platforms as Platform[] | undefined;
-    if (contentType === 'artigo') {
-      const artigoPlatforms: Platform[] = ['linkedin', 'blog'];
-      return projectPlatforms
-        ? artigoPlatforms.filter(p => projectPlatforms.includes(p))
-        : artigoPlatforms;
-    }
-
-    if (contentType === 'video') {
-      const excluded: Platform[] = ['instagram', 'blog'];
-      const videoPlatforms: Platform[] = ['facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest', 'twitter', 'google_business'];
-      return projectPlatforms
-        ? projectPlatforms.filter(p => !excluded.includes(p))
-        : videoPlatforms;
-    }
-
-    return projectPlatforms;
+    return getFilteredPlatformsForType(contentType as any, projectPlatforms);
   };
 
   const reset = () => {
@@ -91,25 +78,30 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   };
 
   const removeFile = (index: number) => {
-    URL.revokeObjectURL(filePreviews[index]);
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setFilePreviews(prev => prev.filter((_, i) => i !== index));
+    confirmDelete(() => {
+      URL.revokeObjectURL(filePreviews[index]);
+      setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+      setFilePreviews(prev => prev.filter((_, i) => i !== index));
+    }, 'esta imagem');
   };
 
-  const uploadFiles = async (contentId: string): Promise<string | null> => {
-    if (selectedFiles.length === 0) return null;
+  const uploadFiles = async (contentId: string): Promise<string[]> => {
+    if (selectedFiles.length === 0) return [];
 
     const urls: string[] = [];
     for (const file of selectedFiles) {
       const ext = file.name.split('.').pop();
-      const path = `${contentId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${user.id}/${contentId}/briefing/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('content-media').upload(path, file);
       if (!error) {
         const { data } = supabase.storage.from('content-media').getPublicUrl(path);
         urls.push(data.publicUrl);
+      } else {
+        console.error('Upload error for file:', file.name, error);
+        toast({ title: 'Erro no upload', description: `Erro ao enviar ${file.name}: ${error.message}`, variant: 'destructive' });
       }
     }
-    return urls.length > 0 ? urls[0] : null;
+    return urls;
   };
 
   const handleSubmit = async () => {
@@ -139,9 +131,11 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
     }
 
     if (inserted && selectedFiles.length > 0) {
-      const mediaUrl = await uploadFiles(inserted.id);
-      if (mediaUrl) {
-        await supabase.from('contents').update({ media_url: mediaUrl } as any).eq('id', inserted.id);
+      const briefingImageUrls = await uploadFiles(inserted.id);
+      if (briefingImageUrls.length > 0) {
+        await supabase.from('contents').update({ 
+          briefing_images: briefingImageUrls 
+        } as any).eq('id', inserted.id);
       }
     }
 
@@ -327,6 +321,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           </div>
         </div>
       </DialogContent>
+      <ConfirmDialog />
     </Dialog>
   );
 };

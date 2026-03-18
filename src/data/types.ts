@@ -12,6 +12,7 @@ export type DbStatusHistory = Tables<'status_history'>;
 // Extended content with relations
 export type ContentWithRelations = DbContent & {
   media_url?: string | null;
+  sort_order?: number | null;
   assignee_profile?: DbProfile | null;
   creator_profile?: DbProfile | null;
   project?: DbProject | null;
@@ -66,11 +67,11 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   stories: 'Stories',
   carousel: 'Carrossel',
   video: 'Vídeo Horizontal',
-  post: 'Post',
+  post: 'Post Feed',
   shorts: 'Vídeo Vertical',
   image: 'Imagem',
   artigo: 'Artigo',
 };
 
-// Content types visible in UI (carousel merged into feed)
-export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post', 'shorts', 'image', 'artigo'];
+// Content types visible in UI
+export const VISIBLE_CONTENT_TYPES: ContentType[] = ['stories', 'carousel', 'video', 'post', 'shorts', 'artigo'];

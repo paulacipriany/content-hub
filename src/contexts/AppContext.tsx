@@ -45,7 +45,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const [projectsRes, contentsRes] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
-      supabase.from('contents').select('*').order('created_at', { ascending: false }),
+      supabase.from('contents').select('*').order('sort_order', { ascending: true }),
     ]);
 
     let projectsList = (projectsRes.data ?? []) as DbProject[];
@@ -160,10 +160,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateContentFields = async (id: string, fields: Record<string, any>) => {
     if (!user) return;
-    await supabase.from('contents').update(fields as any).eq('id', id);
-    setContents(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
-    if (selectedContent?.id === id) {
-      setSelectedContent(prev => prev ? { ...prev, ...fields } : null);
+    try {
+      const { error } = await supabase.from('contents').update(fields as any).eq('id', id);
+      if (error) throw error;
+      
+      setContents(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
+      if (selectedContent?.id === id) {
+        setSelectedContent(prev => prev ? { ...prev, ...fields } : null);
+      }
+    } catch (error: any) {
+      console.error('Error updating content fields:', error);
+      // We don't want to spam toasts for auto-saves, but for manual ones it's good
+      // Maybe check if it's a "critical" field or just log it
     }
   };
 

@@ -1,11 +1,12 @@
 import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import RichTextEditor from './RichTextEditor';
 import AssigneeSelector from './AssigneeSelector';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType } from '@/data/types';
-import { platformIcon, PlatformSelector } from './PlatformIcons';
+import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType, VISIBLE_CONTENT_TYPES } from '@/data/types';
+import { platformIcon, PlatformSelector, getFilteredPlatformsForType } from './PlatformIcons';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PostPreview from './PostPreview';
@@ -31,7 +32,7 @@ import {
 
 const allStatuses: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'];
 const allPlatforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
-const allContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories'];
+const allContentTypes = VISIBLE_CONTENT_TYPES;
 
 function useAutoSave(contentId: string | undefined, field: string, value: string, updateFn: (id: string, fields: any) => Promise<void>) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -54,6 +55,7 @@ const ContentPanel = () => {
   const { selectedContent, setSelectedContent, updateContentStatus, updateContentFields } = useApp();
   const { user, profile, role } = useAuth();
   const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const isClient = role === 'client';
   const isIdeaBank = selectedContent?.status === 'idea-bank';
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
@@ -106,13 +108,13 @@ const ContentPanel = () => {
     if (!selectedContent) return;
     setEditTitle(selectedContent.title);
     setEditBriefing(selectedContent.description ?? '');
-    setEditCopyText((selectedContent as any).copy_text ?? '');
-    const texts = (selectedContent as any).copy_texts;
-    const parsedTexts = texts && typeof texts === 'object' ? texts : {};
+    setEditCopyText(selectedContent.copy_text ?? '');
+    const texts = selectedContent.copy_texts;
+    const parsedTexts = texts && typeof texts === 'object' ? (texts as Record<string, string>) : {};
     setEditCopyTexts(parsedTexts);
     setPerPlatformCopy(Object.keys(parsedTexts).length > 0);
-    setEditPublishTime((selectedContent as any).publish_time ?? '');
-    const urls = (selectedContent as any).media_urls;
+    setEditPublishTime(selectedContent.publish_time ?? '');
+    const urls = selectedContent.media_urls;
     if (urls && Array.isArray(urls) && urls.length > 0) {
       setMediaUrls(urls);
     } else if (selectedContent.media_url) {
@@ -120,16 +122,17 @@ const ContentPanel = () => {
     } else {
       setMediaUrls([]);
     }
-    const bImages = (selectedContent as any).briefing_images;
+    const bImages = selectedContent.briefing_images;
+    console.log('Loading content:', selectedContent.id, 'briefing_images:', bImages);
     setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
     setDraftSaved(true);
     // Set snapshot after a tick so state is updated
     setTimeout(() => {
       savedSnapshotRef.current = JSON.stringify({
         editTitle: selectedContent.title,
-        editCopyText: (selectedContent as any).copy_text ?? '',
+        editCopyText: selectedContent.copy_text ?? '',
         editCopyTexts: (texts && typeof texts === 'object' ? texts : {}),
-        editPublishTime: (selectedContent as any).publish_time ?? '',
+        editPublishTime: selectedContent.publish_time ?? '',
         mediaUrls: urls && Array.isArray(urls) && urls.length > 0 ? urls : selectedContent.media_url ? [selectedContent.media_url] : [],
         briefingImages: bImages && Array.isArray(bImages) ? bImages : [],
         editBriefing: selectedContent.description ?? '',
@@ -265,11 +268,18 @@ const ContentPanel = () => {
       const newUrls: string[] = [];
       for (const file of files) {
         const ext = file.name.split('.').pop();
-        const path = `${selectedContent.id}/${crypto.randomUUID()}.${ext}`;
+        const path = `${user.id}/${selectedContent.id}/${crypto.randomUUID()}.${ext}`;
         const { error } = await supabase.storage.from('content-media').upload(path, file);
         if (!error) {
           const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
           newUrls.push(publicUrl);
+        } else {
+          console.error('Upload error for media:', error);
+          toast({ 
+            title: 'Erro no upload', 
+            description: `Não foi possível enviar a mídia ${file.name}: ${error.message}`, 
+            variant: 'destructive' 
+          });
         }
       }
       const updatedUrls = [...mediaUrls, ...newUrls];
@@ -280,6 +290,7 @@ const ContentPanel = () => {
       });
     } catch (err) {
       console.error('Upload error:', err);
+      toast({ title: 'Erro inesperado', description: 'Erro ao processar o upload da mídia.', variant: 'destructive' });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -287,12 +298,14 @@ const ContentPanel = () => {
   };
 
   const handleRemoveMedia = async (index: number) => {
-    const updatedUrls = mediaUrls.filter((_, i) => i !== index);
-    setMediaUrls(updatedUrls);
-    await updateContentFields(selectedContent.id, {
-      media_url: updatedUrls[0] ?? null,
-      media_urls: updatedUrls,
-    });
+    confirmDelete(async () => {
+      const updatedUrls = mediaUrls.filter((_, i) => i !== index);
+      setMediaUrls(updatedUrls);
+      await updateContentFields(selectedContent.id, {
+        media_url: updatedUrls[0] ?? null,
+        media_urls: updatedUrls,
+      });
+    }, 'esta mídia');
   };
 
   const handleBriefingImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,18 +316,30 @@ const ContentPanel = () => {
       const newUrls: string[] = [];
       for (const file of files) {
         const ext = file.name.split('.').pop();
-        const path = `${selectedContent.id}/briefing/${crypto.randomUUID()}.${ext}`;
+        const path = `${user.id}/${selectedContent.id}/briefing/${crypto.randomUUID()}.${ext}`;
         const { error } = await supabase.storage.from('content-media').upload(path, file);
         if (!error) {
           const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
           newUrls.push(publicUrl);
+        } else {
+          console.error('Upload error for briefing image:', error);
+          toast({ 
+            title: 'Erro no upload', 
+            description: `Não foi possível enviar a imagem ${file.name}: ${error.message}`, 
+            variant: 'destructive' 
+          });
         }
       }
-      const updated = [...briefingImages, ...newUrls];
-      setBriefingImages(updated);
-      await updateContentFields(selectedContent.id, { briefing_images: updated });
+      
+      if (newUrls.length > 0) {
+        const updated = [...briefingImages, ...newUrls];
+        setBriefingImages(updated);
+        await updateContentFields(selectedContent.id, { briefing_images: updated });
+        toast({ title: 'Imagens enviadas', description: `${newUrls.length} imagens adicionadas ao briefing.` });
+      }
     } catch (err) {
       console.error('Briefing image upload error:', err);
+      toast({ title: 'Erro inesperado', description: 'Ocorreu um erro ao processar o upload das imagens.', variant: 'destructive' });
     } finally {
       setBriefingUploading(false);
       if (briefingFileInputRef.current) briefingFileInputRef.current.value = '';
@@ -322,9 +347,11 @@ const ContentPanel = () => {
   };
 
   const handleRemoveBriefingImage = async (index: number) => {
-    const updated = briefingImages.filter((_, i) => i !== index);
-    setBriefingImages(updated);
-    await updateContentFields(selectedContent.id, { briefing_images: updated });
+    confirmDelete(async () => {
+      const updated = briefingImages.filter((_, i) => i !== index);
+      setBriefingImages(updated);
+      await updateContentFields(selectedContent.id, { briefing_images: updated });
+    }, 'esta imagem do briefing');
   };
 
   const handleSaveDraft = async () => {
@@ -544,6 +571,10 @@ const ContentPanel = () => {
                   selected={Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]}
                   onChange={handlePlatformChange}
                   size={28}
+                  availablePlatforms={getFilteredPlatformsForType(
+                    selectedContent.content_type as ContentType, 
+                    (selectedContent as any).project?.platforms as Platform[]
+                  )}
                 />
               )}
             </div>
@@ -885,10 +916,12 @@ const ContentPanel = () => {
                   </div>
                   <span className={cn("flex-1", item.done && "line-through text-muted-foreground")}>{item.text}</span>
                   <button
-                    onClick={async (e) => {
+                    onClick={(e) => {
                       e.stopPropagation();
-                      await supabase.from('checklist_items').delete().eq('id', item.id);
-                      setChecklist(prev => prev.filter(i => i.id !== item.id));
+                      confirmDelete(async () => {
+                        await supabase.from('checklist_items').delete().eq('id', item.id);
+                        setChecklist(prev => prev.filter(i => i.id !== item.id));
+                      }, 'este item do checklist');
                     }}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
                   >
@@ -1096,6 +1129,7 @@ const ContentPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <ConfirmDialog />
     </div>
   );
 };

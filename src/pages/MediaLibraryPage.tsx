@@ -65,6 +65,9 @@ const MediaLibraryPage = () => {
       if (content.media_url && !urls.includes(content.media_url)) {
         urls.push(content.media_url);
       }
+      if (content.briefing_images && Array.isArray(content.briefing_images)) {
+        (content.briefing_images as string[]).forEach(u => { if (u && !urls.includes(u)) urls.push(u); });
+      }
       urls.forEach(url => {
         if (!libraryUrls.has(url)) {
           libraryUrls.add(url);

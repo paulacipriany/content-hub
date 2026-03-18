@@ -126,6 +126,56 @@ export const getContentTypesForPlatforms = (platforms: Platform[]): ContentType[
   return Array.from(allTypes);
 };
 
+export const getFilteredPlatformsForType = (contentType: ContentType | '' | undefined, projectPlatforms?: Platform[]): Platform[] | undefined => {
+  if (!contentType) return projectPlatforms;
+  
+  const allPlatforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest', 'twitter', 'google_business', 'blog'];
+  
+  if (contentType === 'artigo') {
+    const artigoPlatforms: Platform[] = ['linkedin', 'blog'];
+    return projectPlatforms 
+      ? artigoPlatforms.filter(p => projectPlatforms.includes(p))
+      : artigoPlatforms;
+  }
+
+  if (contentType === 'video') {
+    const excluded: Platform[] = ['instagram', 'blog', 'tiktok'];
+    return projectPlatforms
+      ? projectPlatforms.filter(p => !excluded.includes(p))
+      : allPlatforms.filter(p => !excluded.includes(p));
+  }
+
+  if (contentType === 'shorts') {
+    const excluded: Platform[] = ['blog'];
+    return projectPlatforms
+      ? projectPlatforms.filter(p => !excluded.includes(p))
+      : allPlatforms.filter(p => !excluded.includes(p));
+  }
+
+  if (contentType === 'post') {
+    const excluded: Platform[] = ['blog', 'tiktok'];
+    return projectPlatforms
+      ? projectPlatforms.filter(p => !excluded.includes(p))
+      : allPlatforms.filter(p => !excluded.includes(p));
+  }
+
+  if (contentType === 'stories') {
+    const allowed: Platform[] = ['instagram', 'facebook'];
+    return projectPlatforms
+      ? allowed.filter(p => projectPlatforms.includes(p))
+      : allowed;
+  }
+
+  if (contentType === 'carousel') {
+    const excluded: Platform[] = ['pinterest', 'tiktok', 'blog'];
+    return projectPlatforms
+      ? projectPlatforms.filter(p => !excluded.includes(p))
+      : allPlatforms.filter(p => !excluded.includes(p));
+  }
+
+  return projectPlatforms;
+};
+
 interface PlatformSelectorProps {
   selected: Platform[];
   onChange: (platforms: Platform[]) => void;
