@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,8 @@ import { ptBR } from 'date-fns/locale';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import PostPreview from '@/components/content/PostPreview';
 import { contrastText } from '@/lib/clientPalette';
+import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
+import { supabase } from '@/integrations/supabase/client';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -30,6 +32,7 @@ const MyCalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('month');
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
+  const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -121,6 +124,10 @@ const MyCalendarPage = () => {
     const dateStr = fmtDateStr(date);
     const dayContents = getContentsForDate(dateStr);
     const todayFlag = isDateToday(date);
+    
+    const presetCommemoratives = getCommemorativeDatesForDay(dateStr);
+    const customCommemoratives = customDates.filter(d => d.date === dateStr).map(d => d.title);
+    const commemoratives = [...new Set([...presetCommemoratives, ...customCommemoratives])];
 
     return (
       <div className={cn(
@@ -140,6 +147,16 @@ const MyCalendarPage = () => {
           </span>
         </div>
         <div className="px-1 pb-1 space-y-0.5 overflow-y-auto max-h-[calc(100%-40px)] min-w-0">
+          {commemoratives.length > 0 && (
+            <div className="space-y-0.5 mb-1">
+              {commemoratives.map((title, i) => (
+                <div key={i} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+                  <Star size={8} className="flex-shrink-0 mt-[2px]" />
+                  <span className="break-words whitespace-normal leading-tight">{title}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {dayContents.map(c => <ContentCard key={c.id} content={c} />)}
         </div>
       </div>
@@ -151,6 +168,16 @@ const MyCalendarPage = () => {
     const ids = new Set(contents.map(c => c.project_id));
     return projects.filter(p => ids.has(p.id));
   }, [contents, projects]);
+
+  useEffect(() => {
+    if (activeProjects.length === 0) { setCustomDates([]); return; }
+    const projectIds = activeProjects.map(p => p.id);
+    supabase
+      .from('commemorative_dates')
+      .select('id, date, title, project_id')
+      .in('project_id', projectIds)
+      .then(({ data }) => setCustomDates((data ?? []).map(d => ({ id: d.id, date: d.date, title: d.title }))));
+  }, [activeProjects]);
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">

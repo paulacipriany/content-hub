@@ -30,6 +30,7 @@ import AllTasksPage from "@/pages/AllTasksPage";
 import MyCalendarPage from "@/pages/MyCalendarPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="/clients/:id/scheduling" element={<SchedulingPage />} />
               <Route path="/clients/:id/settings" element={<ClientSettingsPage />} />
               <Route path="/users" element={<UsersPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

@@ -229,6 +229,15 @@ const TopBar = ({ title, subtitle, actions }: TopBarProps) => {
                 ))
               )}
             </div>
+            
+            <div className="p-2 border-t border-border bg-muted/20">
+              <button 
+                onClick={() => navigate('/notifications')} 
+                className="w-full text-center text-xs font-semibold text-primary py-2 hover:bg-secondary/50 rounded-md transition-all"
+              >
+                Ver todas as notificações
+              </button>
+            </div>
           </PopoverContent>
         </Popover>
 

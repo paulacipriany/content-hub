@@ -32,16 +32,69 @@ export function useRealtimeNotifications() {
     return name;
   };
 
+  const fetchNotifications = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+      
+    if (error) {
+      console.error('Error fetching notifications:', error);
+      return;
+    }
+    
+    if (data) {
+      setNotifications(data.map(d => ({
+        id: d.id,
+        type: d.type as NotificationType,
+        title: d.title,
+        message: d.message,
+        contentId: d.content_id,
+        createdAt: d.created_at,
+        read: d.read
+      })));
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [user]);
+
+  const addNotificationToDB = async (n: Notification) => {
+    if (!user) return;
+    const { error } = await supabase.from('notifications').insert({
+      id: n.id,
+      user_id: user.id,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      content_id: n.contentId,
+      read: n.read,
+      created_at: n.createdAt
+    } as any);
+    if (error) console.error('Failed to save notification:', error);
+  };
+
   const addNotification = (n: Notification) => {
     setNotifications(prev => [n, ...prev].slice(0, 50));
+    addNotificationToDB(n);
   };
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    if (user) {
+      await supabase.from('notifications').update({ read: true }).eq('id', id).eq('user_id', user.id);
+    }
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    if (user) {
+      await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false);
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
