@@ -691,6 +691,7 @@ export type Database = {
         | "post"
         | "shorts"
         | "image"
+        | "artigo"
       platform:
         | "instagram"
         | "facebook"
@@ -848,6 +849,7 @@ export const Constants = {
         "post",
         "shorts",
         "image",
+        "artigo",
       ],
       platform: [
         "instagram",

@@ -21,7 +21,7 @@ export type ContentWithRelations = DbContent & {
 
 // Keep label/color maps for UI
 export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business' | 'blog';
-export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image';
+export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image' | 'artigo';
 export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'programmed' | 'published';
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
@@ -65,11 +65,12 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   reels: 'Reels',
   stories: 'Stories',
   carousel: 'Carrossel',
-  video: 'Vídeo',
+  video: 'Vídeo Horizontal',
   post: 'Post',
-  shorts: 'Vídeo Curto',
+  shorts: 'Vídeo Vertical',
   image: 'Imagem',
+  artigo: 'Artigo',
 };
 
 // Content types visible in UI (carousel merged into feed)
-export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post', 'shorts', 'image'];
+export const VISIBLE_CONTENT_TYPES: ContentType[] = ['feed', 'reels', 'stories', 'video', 'post', 'shorts', 'image', 'artigo'];
