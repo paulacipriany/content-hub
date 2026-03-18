@@ -65,10 +65,11 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   reels: 'Reels',
   stories: 'Stories',
   carousel: 'Carrossel',
-  video: 'Vídeo',
+  video: 'Vídeo Horizontal',
   post: 'Post',
-  shorts: 'Vídeo Curto',
+  shorts: 'Vídeo Vertical',
   image: 'Imagem',
+  artigo: 'Artigo',
 };
 
 // Content types visible in UI (carousel merged into feed)
