@@ -49,6 +49,15 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
         ? artigoPlatforms.filter(p => projectPlatforms.includes(p))
         : artigoPlatforms;
     }
+
+    if (contentType === 'video') {
+      const excluded: Platform[] = ['instagram', 'blog'];
+      const videoPlatforms: Platform[] = ['facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest', 'twitter', 'google_business'];
+      return projectPlatforms
+        ? projectPlatforms.filter(p => !excluded.includes(p))
+        : videoPlatforms;
+    }
+
     return projectPlatforms;
   };
 
