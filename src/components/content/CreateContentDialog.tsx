@@ -245,7 +245,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
                 }}
                 size={40}
                 disabledPlatforms={platforms.includes('blog') ? (['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'pinterest', 'twitter', 'google_business'] as Platform[]) : undefined}
-                availablePlatforms={projects.find(p => p.id === projectId)?.platforms as Platform[] | undefined}
+                availablePlatforms={getFilteredPlatforms()}
               />
               {platforms.length === 0 && (
                 <p className="text-[11px] text-muted-foreground">Selecione ao menos uma plataforma.</p>
