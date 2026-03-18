@@ -131,10 +131,12 @@ interface PlatformSelectorProps {
   onChange: (platforms: Platform[]) => void;
   size?: number;
   disabledPlatforms?: Platform[];
+  availablePlatforms?: Platform[];
 }
 
-export const PlatformSelector = ({ selected, onChange, size = 32, disabledPlatforms }: PlatformSelectorProps) => {
-  const platforms: Platform[] = ['instagram', 'facebook', 'youtube', 'pinterest', 'tiktok', 'twitter', 'google_business', 'linkedin', 'blog'];
+export const PlatformSelector = ({ selected, onChange, size = 32, disabledPlatforms, availablePlatforms }: PlatformSelectorProps) => {
+  const allPlatforms: Platform[] = ['instagram', 'facebook', 'youtube', 'pinterest', 'tiktok', 'twitter', 'google_business', 'linkedin', 'blog'];
+  const platforms = availablePlatforms ? allPlatforms.filter(p => availablePlatforms.includes(p)) : allPlatforms;
   
   const toggle = (p: Platform) => {
     if (disabledPlatforms?.includes(p)) return;
