@@ -40,6 +40,18 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
 
   const universalContentTypes: ContentType[] = ['video', 'shorts', 'post', 'stories', 'artigo'];
 
+  // Filter platforms based on content type
+  const getFilteredPlatforms = (): Platform[] | undefined => {
+    const projectPlatforms = projects.find(p => p.id === projectId)?.platforms as Platform[] | undefined;
+    if (contentType === 'artigo') {
+      const artigoPlatforms: Platform[] = ['linkedin', 'blog'];
+      return projectPlatforms
+        ? artigoPlatforms.filter(p => projectPlatforms.includes(p))
+        : artigoPlatforms;
+    }
+    return projectPlatforms;
+  };
+
   const reset = () => {
     setTitle('');
     setBriefing('');
