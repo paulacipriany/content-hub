@@ -31,7 +31,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
   const [title, setTitle] = useState('');
   const [briefing, setBriefing] = useState('');
   const [platforms, setPlatforms] = useState<Platform[]>([]);
-  const [contentType, setContentType] = useState<ContentType>('post');
+  const [contentType, setContentType] = useState<ContentType | ''>('');
   const [projectId, setProjectId] = useState(defaultProjectId ?? '');
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
