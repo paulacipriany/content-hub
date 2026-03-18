@@ -15,19 +15,46 @@ interface ApproverSelectorProps {
   selectedApprovers: string[];
   onChange: (approverIds: string[]) => void;
   label?: string;
+  projectId?: string;
 }
 
-const ApproverSelector = ({ selectedApprovers, onChange, label }: ApproverSelectorProps) => {
+const ApproverSelector = ({ selectedApprovers, onChange, label, projectId }: ApproverSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!open) return;
-    supabase.from('profiles').select('user_id, display_name, avatar_url').then(({ data }) => {
-      setProfiles(data ?? []);
-    });
-  }, [open]);
+
+    const fetchProfiles = async () => {
+      if (projectId) {
+        // Fetch only members of the selected project
+        const { data: members } = await supabase
+          .from('project_members')
+          .select('user_id')
+          .eq('project_id', projectId);
+        
+        const memberIds = members?.map(m => m.user_id) ?? [];
+        if (memberIds.length === 0) {
+          setProfiles([]);
+          return;
+        }
+
+        const { data } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', memberIds);
+        setProfiles(data ?? []);
+      } else {
+        const { data } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url');
+        setProfiles(data ?? []);
+      }
+    };
+
+    fetchProfiles();
+  }, [open, projectId]);
 
   const filtered = search.trim()
     ? profiles.filter(p => p.display_name?.toLowerCase().includes(search.toLowerCase()))
