@@ -258,6 +258,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             selectedApprovers={approverIds}
             onChange={setApproverIds}
             label="Aprovadores"
+            projectId={projectId}
           />
 
           {/* Briefing — Rich Text */}
