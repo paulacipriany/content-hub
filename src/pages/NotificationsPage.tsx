@@ -8,44 +8,11 @@ import { cn } from '@/lib/utils';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
 
 const NotificationsPage = () => {
-  const { markAsRead, markAllAsRead } = useRealtimeNotifications();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAll } = useRealtimeNotifications();
   const { setSelectedProject, projects } = useApp();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAllNotifications = async () => {
-      if (!user) return;
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-        
-      if (!error && data) {
-        setNotifications(data.map(d => ({
-          id: d.id,
-          type: d.type as any,
-          title: d.title,
-          message: d.message,
-          contentId: d.content_id,
-          createdAt: d.created_at,
-          read: d.read
-        })));
-      }
-      setIsLoading(false);
-    };
-    
-    // We re-fetch here to ensure we have the full history, not just the recent 50
-    fetchAllNotifications();
-  }, [user]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -60,7 +27,6 @@ const NotificationsPage = () => {
   const handleNotificationClick = async (n: Notification) => {
     if (!n.read) {
       markAsRead(n.id);
-      setNotifications(prev => prev.map(notif => notif.id === n.id ? { ...notif, read: true } : notif));
     }
     
     // Find project and navigate
@@ -74,28 +40,19 @@ const NotificationsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) return;
-    const { error } = await supabase.from('notifications').delete().eq('id', id).eq('user_id', user.id);
-    if (!error) {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      toast({ title: "Notificação excluída" });
-    }
+    deleteNotification(id);
+    toast({ title: "Notificação excluída" });
   };
 
-  const handleDeleteAll = async () => {
-    if (!user) return;
-    const { error } = await supabase.from('notifications').delete().eq('user_id', user.id);
-    if (!error) {
-      setNotifications([]);
-      toast({ title: "Histórico limpo" });
-    }
+  const handleDeleteAll = () => {
+    clearAll();
+    toast({ title: "Histórico limpo" });
   };
   
   const handleMarkAllAsRead = () => {
     markAllAsRead();
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   return (
@@ -124,11 +81,7 @@ const NotificationsPage = () => {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center p-12 text-muted-foreground">
-            Carregando notificações...
-          </div>
-        ) : notifications.length === 0 ? (
+        {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-card border border-border rounded-xl text-center">
             <ClipboardList size={40} className="text-muted-foreground/30 mb-3" />
             <h3 className="text-base font-medium text-foreground mb-1">Nenhuma notificação</h3>

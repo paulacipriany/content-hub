@@ -123,9 +123,13 @@ const UsersPage = () => {
   }, []);
 
   const handleDelete = async (userId: string) => {
-    const { error } = await supabase.from('user_roles').delete().eq('user_id', userId);
-    if (error) {
-      toast.error('Erro ao remover usuário');
+    const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+      body: { user_id: userId }
+    });
+    const errorMessage = error?.message || data?.error;
+    if (errorMessage) {
+      console.error("Delete user error:", errorMessage);
+      toast.error('Erro ao remover usuário: ' + errorMessage);
     } else {
       toast.success('Usuário removido');
       await fetchUsers();
@@ -664,9 +668,18 @@ const UsersPage = () => {
                 if (!rejectUser) return;
                 setRejecting(true);
 
-                // Remove user role and profile
-                await supabase.from('project_members').delete().eq('user_id', rejectUser.user_id);
-                await supabase.from('user_roles').delete().eq('user_id', rejectUser.user_id);
+                // Remove user via edge function
+                const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+                  body: { user_id: rejectUser.user_id }
+                });
+
+                const errorMessage = error?.message || data?.error;
+                if (errorMessage) {
+                  console.error("Reject user error:", errorMessage);
+                  toast.error('Erro ao remover usuário: ' + errorMessage);
+                  setRejecting(false);
+                  return;
+                }
 
                 toast.success('Usuário rejeitado e removido.');
                 setRejectUser(null);
