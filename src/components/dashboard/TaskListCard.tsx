@@ -506,17 +506,24 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     return lists;
   }, [lists, singleListId]);
 
-  const renderList = (list: TaskList) => {
+  const renderList = (list: TaskList, handleProps?: { attributes: any; listeners: any }) => {
     const lTasks = tasks.filter(t => t.list_id === list.id).filter(filterTask);
     const doneT = lTasks.filter(t => t.done && t.status !== 'group');
     const pendT = lTasks.filter(t => !t.done || t.status === 'group');
     const totalT = lTasks.filter(t => t.status !== 'group').length;
 
     return (
-      <div className="mb-12 pl-12 relative group/list">
+      <div className="mb-12 pl-4 relative group/list">
         <div className="mb-4">
-          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight">{doneT.length}/{totalT} concluídas</div>
-          <div className="flex items-start gap-4">
+          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-10">{doneT.length}/{totalT} concluídas</div>
+          <div className="flex items-center gap-3">
+            {handleProps && (
+              <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
+                <div className="flex flex-col gap-[3px]">
+                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
+                </div>
+              </button>
+            )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
             <div className="flex-1">
               <div className="flex items-center gap-2 group/title">
