@@ -86,7 +86,7 @@ const TasksPage = () => {
   return (
     <>
       <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" />
-      <div className="p-6 bg-[#c5daf7] min-h-screen" style={{ '--primary': '214 84% 47%', '--ring': '214 84% 47%' } as any}>
+      <div className="p-6 bg-[#c5daf7] min-h-screen">
         {/* Filter bar */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           <Popover>

@@ -604,7 +604,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   return (
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="w-full py-12 px-6" style={{ '--primary': '77 100% 73%', '--ring': '77 100% 73%' } as any}>
+        <div className="w-full py-12 px-6" style={{ '--primary': '214 84% 47%', '--ring': '214 84% 47%' } as any}>
           <SortableContext items={displayedLists.map(l => l.id)} strategy={verticalListSortingStrategy}>
             {displayedLists.map(list => (
               <SortableTaskList 
