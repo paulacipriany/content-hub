@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ContentWithRelations, DbProject, WorkflowStatus } from '@/data/types';
+import { cn, withTimeout } from '@/lib/utils';
 import { applyClientPalette } from '@/lib/clientPalette';
 
 interface AppContextType {
@@ -53,64 +55,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!user) return;
     setLoading(true);
 
-    // Initial fetch of pending users
-    await fetchPendingUsersCount();
+    try {
+      // Initial fetch of pending users
+      await withTimeout(fetchPendingUsersCount());
 
-    const [projectsRes, contentsRes] = await Promise.all([
-      supabase.from('projects').select('*').order('created_at', { ascending: false }),
-      supabase.from('contents').select('*').order('sort_order', { ascending: true }),
-    ]);
+      const [projectsRes, contentsRes] = await withTimeout(Promise.all([
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.from('contents').select('*').order('sort_order', { ascending: true }).limit(200),
+      ]), 25000);
 
-    let projectsList = (projectsRes.data ?? []) as DbProject[];
-    let contentsList = (contentsRes.data ?? []) as ContentWithRelations[];
+      let projectsList = (projectsRes.data ?? []) as DbProject[];
+      let contentsList = (contentsRes.data ?? []) as ContentWithRelations[];
 
-    // For client-role users, only show projects they are members of
-    if (role === 'client') {
-      const { data: memberships } = await supabase
-        .from('project_members')
-        .select('project_id')
-        .eq('user_id', user.id);
-      const allowedIds = new Set((memberships ?? []).map(m => m.project_id));
-      projectsList = projectsList.filter(p => allowedIds.has(p.id));
-      contentsList = contentsList.filter(c => allowedIds.has(c.project_id));
-    }
+      // For client-role users, only show projects they are members of
+      if (role === 'client') {
+        const { data: memberships } = await withTimeout(supabase
+          .from('project_members')
+          .select('project_id')
+          .eq('user_id', user.id));
+        const allowedIds = new Set((memberships ?? []).map(m => m.project_id));
+        projectsList = projectsList.filter(p => allowedIds.has(p.id));
+        contentsList = contentsList.filter(c => allowedIds.has(c.project_id));
+      }
 
-    const userIds = new Set<string>();
-    contentsList.forEach(c => {
-      if (c.assignee_id) userIds.add(c.assignee_id);
-      if (c.created_by) userIds.add(c.created_by);
-    });
-
-    if (userIds.size > 0) {
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('user_id', Array.from(userIds));
-
-      const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
-
+      const userIds = new Set<string>();
       contentsList.forEach(c => {
-        c.assignee_profile = c.assignee_id ? profileMap.get(c.assignee_id) ?? null : null;
-        c.creator_profile = profileMap.get(c.created_by) ?? null;
-        c.project = projectsList.find(p => p.id === c.project_id) ?? null;
+        if (c.assignee_id) userIds.add(c.assignee_id);
+        if (c.created_by) userIds.add(c.created_by);
       });
+
+      if (userIds.size > 0) {
+        const { data: profiles } = await withTimeout(supabase
+          .from('profiles')
+          .select('*')
+          .in('user_id', Array.from(userIds)));
+
+        const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
+
+        contentsList.forEach(c => {
+          c.assignee_profile = c.assignee_id ? profileMap.get(c.assignee_id) ?? null : null;
+          c.creator_profile = profileMap.get(c.created_by) ?? null;
+          c.project = projectsList.find(p => p.id === c.project_id) ?? null;
+        });
+      }
+
+      setProjects(projectsList);
+      setContents(contentsList);
+
+      // Sync selectedProject or auto-select for client using functional update to avoid dependencies
+      setSelectedProject(current => {
+        if (current) {
+          const updated = projectsList.find(p => p.id === current.id);
+          return updated || null;
+        } else if (role === 'client' && projectsList.length > 0) {
+          return projectsList[0];
+        }
+        return current;
+      });
+    } catch (error: any) {
+      console.error('Error fetching app data:', error);
+      toast.error('Erro ao carregar dados: ' + (error.message || 'Verifique sua conexão'));
+    } finally {
+      setLoading(false);
     }
-
-    setProjects(projectsList);
-    setContents(contentsList);
-
-    // Keep selectedProject in sync
-    if (selectedProject) {
-      const updated = projectsList.find(p => p.id === selectedProject.id);
-      if (updated) setSelectedProject(updated);
-      else setSelectedProject(null);
-    } else if (role === 'client' && projectsList.length > 0) {
-      // Auto-select first project for client users
-      setSelectedProject(projectsList[0]);
-    }
-
-    setLoading(false);
-  }, [user, role, fetchPendingUsersCount, selectedProject, setSelectedProject]);
+  }, [user, role, fetchPendingUsersCount]);
 
   useEffect(() => {
     fetchData();
@@ -130,12 +138,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [fetchData, role, fetchPendingUsersCount]);
 
-  // Apply client palette only on dashboard pages
+  // Apply client palette only on client-scoped pages
   useEffect(() => {
-    const isClientDashboard = location.pathname.includes('/clients/') && 
-                               location.pathname.includes('/dashboard');
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const isClientScoped = pathSegments[0] === 'clients' && pathSegments.length >= 2;
     
-    if (isClientDashboard) {
+    if (isClientScoped) {
       applyClientPalette(selectedProject?.color ?? null);
     } else {
       applyClientPalette(null); // Revert to platform colors

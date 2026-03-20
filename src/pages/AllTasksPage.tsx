@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Filter, ChevronDown, X, Calendar as CalendarIcon, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, withTimeout } from '@/lib/utils';
 import { format, isPast, isToday, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -83,21 +83,30 @@ const AllTasksPage = () => {
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('project_tasks')
-      .select('id, text, done, due_date, assigned_to, status, priority, project_id')
-      .order('due_date', { ascending: true, nullsFirst: false });
-    setTasks((data as AllTask[]) ?? []);
+    try {
+      const { data } = await withTimeout(supabase
+        .from('project_tasks')
+        .select('id, text, done, due_date, assigned_to, status, priority, project_id')
+        .order('due_date', { ascending: true, nullsFirst: false }), 
+        15000
+      );
+      setTasks((data as AllTask[]) ?? []);
 
-    // Fetch profiles for assigned users
-    const userIds = [...new Set((data ?? []).map((t: any) => t.assigned_to).filter(Boolean))];
-    if (userIds.length > 0) {
-      const { data: profs } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', userIds);
-      const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
-      (profs ?? []).forEach((p: any) => { map[p.user_id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
-      setProfiles(map);
+      // Fetch profiles for assigned users
+      const userIds = [...new Set(((data as any[]) ?? []).map((t: any) => t.assigned_to).filter(Boolean))];
+      if (userIds.length > 0) {
+        const { data: profs } = await withTimeout(supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', userIds));
+        const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+        (profs ?? []).forEach((p: any) => { map[p.user_id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
+        setProfiles(map);
+      }
+    } catch (err: any) {
+      console.error('Error fetching tasks:', err);
+      const { toast } = await import('sonner');
+      toast.error('Erro ao carregar tarefas: ' + (err.message || 'Tempo limite excedido'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
@@ -147,7 +156,7 @@ const AllTasksPage = () => {
   return (
     <>
       <TopBar title="Tarefas Gerais" subtitle="Todas as tarefas de todos os clientes" />
-      <div className="p-6">
+      <div className="p-6 bg-[#c5daf7] min-h-screen">
         {/* Filter bar */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {/* Status filter */}

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Plus } from 'lucide-react';
 import TopBar from '@/components/layout/TopBar';
-import TaskListCard from '@/components/dashboard/TaskListCard';
+import TaskListCard, { TaskListCardHandle } from '@/components/dashboard/TaskListCard';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Filter, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
-type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled' | 'group';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent' | string;
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: 'backlog', label: 'Backlog' },
@@ -52,10 +53,28 @@ const FilterChip = ({ label, onRemove }: { label: string; onRemove: () => void }
 
 const TasksPage = () => {
   useClientFromUrl();
-  const { selectedProject } = useApp();
+  const { selectedProject, loading } = useApp();
   const [filters, setFilters] = useState<TaskFilters>({ statuses: [], priorities: [], dateFilter: 'all' });
 
-  if (!selectedProject) return null;
+  const taskListRef = useRef<TaskListCardHandle>(null);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground animate-pulse">Carregando tarefas...</p>
+      </div>
+    );
+  }
+
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Projeto não encontrado</h2>
+        <p className="text-sm text-muted-foreground mb-6">Não foi possível carregar as tarefas deste projeto.</p>
+      </div>
+    );
+  }
 
   const hasActiveFilters = filters.statuses.length > 0 || filters.priorities.length > 0 || filters.dateFilter !== 'all';
   const activeCount = filters.statuses.length + filters.priorities.length + (filters.dateFilter !== 'all' ? 1 : 0);
@@ -67,7 +86,7 @@ const TasksPage = () => {
   return (
     <>
       <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" />
-      <div className="p-6">
+      <div className="p-6 bg-[#c5daf7] min-h-screen" style={{ '--primary': '318 100% 77%', '--ring': '318 100% 77%' } as any}>
         {/* Filter bar */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           <Popover>
@@ -139,9 +158,13 @@ const TasksPage = () => {
               <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-1">Limpar ({activeCount})</button>
             </>
           )}
+
+          <Button variant="outline" size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="ml-auto gap-1.5 h-8 text-xs border-primary/50 text-primary hover:bg-primary/5">
+            <Plus size={14} /> Nova lista
+          </Button>
         </div>
 
-        <TaskListCard projectId={selectedProject.id} filters={filters} />
+        <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
       </div>
     </>
   );

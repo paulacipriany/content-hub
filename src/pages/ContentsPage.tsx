@@ -7,9 +7,27 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 
 const ContentsPage = () => {
   useClientFromUrl();
-  const { projectContents } = useApp();
+  const { projectContents, loading, selectedProject } = useApp();
   const [filterPlatform, setFilterPlatform] = useState<Platform | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<WorkflowStatus | 'all'>('all');
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground animate-pulse">Carregando conteúdos...</p>
+      </div>
+    );
+  }
+
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Projeto não encontrado</h2>
+        <p className="text-sm text-muted-foreground mb-6">Não foi possível carregar os conteúdos deste projeto.</p>
+      </div>
+    );
+  }
 
   const filtered = projectContents.filter(c => {
     if (filterPlatform !== 'all') {

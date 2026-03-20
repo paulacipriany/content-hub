@@ -16,12 +16,39 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const ClientDashboardPage = () => {
   useClientFromUrl();
-  const { projectContents, selectedProject } = useApp();
+  const { projectContents, selectedProject, loading } = useApp();
   const { role } = useAuth();
   const navigate = useNavigate();
   const isClient = role === 'client';
 
-  if (!selectedProject) return null;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground animate-pulse">Carregando dashboard do cliente...</p>
+      </div>
+    );
+  }
+
+  if (!selectedProject) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <AlertTriangle className="w-8 h-8 text-muted-foreground opacity-50" />
+        </div>
+        <h2 className="text-lg font-semibold text-foreground mb-2">Cliente não encontrado</h2>
+        <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-6">
+          Não foi possível encontrar as informações deste cliente ou você não tem permissão para acessá-las.
+        </p>
+        <button
+          onClick={() => navigate('/')}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Voltar para a Home
+        </button>
+      </div>
+    );
+  }
 
   const basePath = `/clients/${selectedProject.id}`;
 
@@ -276,10 +303,19 @@ const PostReportsSection = ({ contents, basePath }: { contents: ContentWithRelat
   const published = contents.filter(c => c.status === 'published');
 
   const fetchAnalyses = useCallback(async () => {
-    const ids = published.map(c => c.id);
-    if (ids.length === 0) { setAnalyses([]); return; }
-    const { data } = await supabase.from('post_analyses').select('*').in('content_id', ids);
-    setAnalyses((data as PostAnalysisSummary[]) ?? []);
+    try {
+      const ids = published.map(c => c.id);
+      if (ids.length === 0) {
+        setAnalyses([]);
+        return;
+      }
+      const { data, error } = await supabase.from('post_analyses').select('*').in('content_id', ids);
+      if (error) throw error;
+      setAnalyses((data as PostAnalysisSummary[]) ?? []);
+    } catch (error) {
+      console.error('Error fetching post analyses:', error);
+      setAnalyses([]);
+    }
   }, [published.map(c => c.id).join(',')]);
 
   useEffect(() => { fetchAnalyses(); }, [fetchAnalyses]);

@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { Link } from 'react-router-dom';
+import RichTextEditor from '@/components/content/RichTextEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,6 +13,7 @@ import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isToday as isTodayFn, isPast as isPastFn } from 'date-fns';
+import { toast } from 'sonner';
 import {
   DndContext,
   DragOverlay,
@@ -23,9 +26,10 @@ import {
   DragOverEvent,
 } from '@dnd-kit/core';
 import {
+  arrayMove,
   SortableContext,
-  useSortable,
   verticalListSortingStrategy,
+  useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -34,17 +38,18 @@ interface Task {
   text: string;
   done: boolean;
   sort_order: number;
-  due_date: string | null;
+  list_id: string | null;
   assigned_to: string | null;
-  created_by: string;
-  status?: TaskStatus;
-  priority?: TaskPriority;
-  list_id?: string | null;
+  due_date: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
 }
 
 interface TaskList {
   id: string;
   title: string;
+  description?: string | null;
+  file_urls?: string[] | null;
   sort_order: number;
   project_id: string;
   created_by: string;
@@ -62,14 +67,20 @@ interface TaskFilters {
   dateFilter: 'all' | 'overdue' | 'today' | 'this_week' | 'no_date';
 }
 
+export interface TaskListCardHandle {
+  triggerNewList: () => void;
+}
+
 interface TaskListCardProps {
   projectId: string;
   hideDone?: boolean;
   filters?: TaskFilters;
+  showNewListInline?: boolean;
+  singleListId?: string;
 }
 
-type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled';
-type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled' | 'group';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent' | string;
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string; group: string }[] = [
   { value: 'backlog', label: 'Backlog', color: 'bg-muted text-muted-foreground', group: 'A fazer' },
@@ -93,9 +104,41 @@ const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] 
   { value: 'urgent', label: 'Urgente', color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400' },
 ];
 
+const GROUP_COLORS = [
+  { value: '#f5f5f5', label: 'Cinza' },
+  { value: '#e2e8f0', label: 'Slate' },
+  { value: '#fee2e2', label: 'Vermelho' },
+  { value: '#fef3c7', label: 'Amarelo' },
+  { value: '#dcfce7', label: 'Verde' },
+  { value: '#dbeafe', label: 'Azul' },
+  { value: '#f3e8ff', label: 'Roxo' },
+  { value: '#fae8ff', label: 'Rosa' },
+];
+
 const getTaskStatus = (done: boolean, status?: TaskStatus): TaskStatus => {
   if (status) return status;
   return done ? 'done' : 'backlog';
+};
+
+const TaskListPieChart = ({ total, completed }: { total: number; completed: number }) => {
+  const percentage = total > 0 ? (completed / total) : 0;
+  const x = 10 + 10 * Math.sin(Math.PI * 2 * percentage);
+  const y = 10 - 10 * Math.cos(Math.PI * 2 * percentage);
+  const largeArcFlag = percentage > 0.5 ? 1 : 0;
+  const pathData = percentage === 1 
+    ? "M 10 10 m -10 0 a 10 10 0 1 0 20 0 a 10 10 0 1 0 -20 0" 
+    : percentage <= 0 ? "" : `M 10 10 L 10 0 A 10 10 0 ${largeArcFlag} 1 ${x} ${y} Z`;
+
+  return (
+    <div className="w-5 h-5 flex-shrink-0">
+      <svg viewBox="0 0 20 20" className="w-full h-full overflow-visible">
+        <circle cx="10" cy="10" r="10" className="fill-slate-200 dark:fill-slate-800" />
+        {percentage > 0 && (
+          <path d={pathData} style={{ fill: 'hsl(var(--primary))' }} />
+        )}
+      </svg>
+    </div>
+  );
 };
 
 // ─── Inline editable text ────────────────────────────────────────
@@ -103,47 +146,22 @@ const EditableText = ({ text, className, onSave }: { text: string; className?: s
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(text);
   const inputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => { setValue(text); }, [text]);
   useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
-
-  const commit = () => {
-    setEditing(false);
-    if (value.trim() && value.trim() !== text) onSave(value.trim());
-    else setValue(text);
-  };
-
-  if (editing) {
-    return (
-      <input
-        ref={inputRef}
-        value={value}
-        onChange={e => setValue(e.target.value)}
-        onBlur={commit}
-        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); } }}
-        className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)}
-      />
-    );
-  }
-
-  return (
-    <span onDoubleClick={() => setEditing(true)} className={cn("cursor-text", className)} title="Clique duplo para editar">
-      {text}
-    </span>
-  );
+  const commit = () => { setEditing(false); if (value.trim() && value.trim() !== text) onSave(value.trim()); else setValue(text); };
+  if (editing) return <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); }}} className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)} />;
+  return <span onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true); }} className={cn("cursor-pointer", className)} title="Clique duplo para editar">{text}</span>;
 };
 
 // ─── Status badge with popover ───────────────────────────────────
 const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (status: TaskStatus) => void }) => {
   const [open, setOpen] = useState(false);
   const currentOption = STATUS_OPTIONS.find(s => s.value === status) ?? STATUS_OPTIONS[0];
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors", currentOption.color)}>
+        <button className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors", currentOption.color)}>
           {currentOption.label}
-          <ChevronDown size={10} className="opacity-60" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-1" align="start">
@@ -151,13 +169,8 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
           <div key={group.key}>
             <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{group.label}</div>
             {STATUS_OPTIONS.filter(opt => opt.group === group.key).map(opt => (
-              <button key={opt.value} onClick={() => { onChange(opt.value); setOpen(false); }}
-                className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary", status === opt.value && "bg-secondary")}>
-                <span className={cn("w-2 h-2 rounded-full",
-                  opt.value === 'backlog' ? 'bg-muted-foreground' : opt.value === 'planning' ? 'bg-blue-500' :
-                  opt.value === 'in_progress' ? 'bg-orange-500' : opt.value === 'paused' ? 'bg-purple-500' :
-                  opt.value === 'done' ? 'bg-green-500' : 'bg-red-500'
-                )} />
+              <button key={opt.value} onClick={() => { onChange(opt.value); setOpen(false); }} className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary", status === opt.value && "bg-secondary")}>
+                <span className={cn("w-2 h-2 rounded-full", opt.value === 'backlog' ? 'bg-muted-foreground' : opt.value === 'planning' ? 'bg-blue-500' : opt.value === 'in_progress' ? 'bg-orange-500' : opt.value === 'paused' ? 'bg-purple-500' : opt.value === 'done' ? 'bg-green-500' : 'bg-red-500')} />
                 {opt.label}
               </button>
             ))}
@@ -168,29 +181,32 @@ const StatusBadge = ({ status, onChange }: { status: TaskStatus; onChange: (stat
   );
 };
 
-// ─── Priority badge ──────────────────────────────────────────────
-const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChange: (priority: TaskPriority) => void }) => {
+// ─── Assignee selector ──────────────────────────────────────────
+const AssigneeSelector = ({ value, onChange, members, getMemberInitials, getMemberName }: { value: string | null; onChange: (v: string | null) => void, members: MemberProfile[], getMemberInitials: (id: string | null) => string, getMemberName: (id: string | null) => string | null }) => {
   const [open, setOpen] = useState(false);
-  const currentOption = PRIORITY_OPTIONS.find(p => p.value === priority) ?? PRIORITY_OPTIONS[1];
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors", currentOption.color)}>
-          {currentOption.label}
-          <ChevronDown size={10} className="opacity-60" />
-        </button>
+        {value ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-[9px] shadow-sm transform hover:scale-105 transition-transform" style={{ backgroundColor: 'hsl(var(--primary))' }}>
+                {getMemberInitials(value)}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">{getMemberName(value)}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <button className="flex-shrink-0 text-slate-400 hover:text-primary transition-colors" title="Atribuir responsável"><UserPlus size={14} /></button>
+        )}
       </PopoverTrigger>
-      <PopoverContent className="w-32 p-1" align="start">
-        <div className="px-2 py-1 text-xs font-medium text-muted-foreground">Prioridade</div>
-        {PRIORITY_OPTIONS.map(opt => (
-          <button key={opt.value} onClick={() => { onChange(opt.value); setOpen(false); }}
-            className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors hover:bg-secondary", priority === opt.value && "bg-secondary")}>
-            <span className={cn("w-2 h-2 rounded-full",
-              opt.value === 'low' ? 'bg-slate-500' : opt.value === 'medium' ? 'bg-yellow-500' :
-              opt.value === 'high' ? 'bg-orange-500' : 'bg-red-500'
-            )} />
-            {opt.label}
+      <PopoverContent className="w-48 p-1" align="end">
+        <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
+        {value && <button onClick={() => { onChange(null); setOpen(false); }} className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground"><X size={14} /><span>Remover</span></button>}
+        {members.map(m => (
+          <button key={m.user_id} onClick={() => { onChange(m.user_id); setOpen(false); }} className={cn("w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors", value === m.user_id && "bg-secondary")}>
+            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white flex-shrink-0" style={{ backgroundColor: 'hsl(var(--primary))' }}>{getMemberInitials(m.user_id)}</div>
+            <span className="truncate">{m.display_name || 'Usuário'}</span>
           </button>
         ))}
       </PopoverContent>
@@ -198,8 +214,130 @@ const PriorityBadge = ({ priority, onChange }: { priority: TaskPriority; onChang
   );
 };
 
-// ─── Main component ──────────────────────────────────────────────
-const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProps) => {
+const GroupDivider = ({ task, onSave, onDelete }: { task: Task; onSave: (id: string, text: string) => void; onDelete: (id: string) => void }) => {
+  return (
+    <div className="flex items-center gap-2 group/group relative py-3 mt-6 mb-2 first:mt-0">
+      <div className={cn("px-2.5 py-0.5 rounded-md text-[13px] font-bold shadow-sm border border-black/5")} style={{ backgroundColor: task.priority || '#f5f5f5' }}>
+        <EditableText text={task.text} onSave={(t) => onSave(task.id, t)} className="cursor-pointer" />
+      </div>
+      <div className="flex-1 h-[1px] bg-slate-100" />
+      <button onClick={() => onDelete(task.id)} className="opacity-0 group-hover/group:opacity-100 text-slate-300 hover:text-red-500 transition-opacity p-1">
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
+
+const TaskRow = ({ 
+  task, toggleDone, updateTaskText, updateTaskStatus, updatePriority, updateDueDate, updateAssignee, setDeleteTaskId, setDeleteDialogOpen,
+  members, getMemberInitials, getMemberName, getDueDateStyle, deleteTask
+}: { 
+  task: Task; toggleDone: (id: string) => void; updateTaskText: (id: string, text: string) => void; updateTaskStatus: (id: string, status: TaskStatus) => void;
+  updatePriority: (id: string, priority: TaskPriority) => void; updateDueDate: (id: string, date: Date | undefined) => void; updateAssignee: (id: string, userId: string | null) => void;
+  setDeleteTaskId: (id: string) => void; setDeleteDialogOpen: (open: boolean) => void; members: MemberProfile[]; getMemberInitials: (id: string | null) => string;
+  getMemberName: (id: string | null) => string | null; getDueDateStyle: (date: string | null, done: boolean) => string; deleteTask?: (id: string) => void;
+}) => {
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  
+  if (task.status === 'group') {
+    return <GroupDivider task={task} onSave={updateTaskText} onDelete={deleteTask || (() => {})} />;
+  }
+
+  return (
+    <div className={cn("group/task flex items-center gap-3 py-1.5 transition-colors", task.done && "opacity-60")}>
+      <button onClick={() => toggleDone(task.id)} className="flex-shrink-0">
+        <div className={cn("w-[1.1rem] h-[1.1rem] rounded border flex items-center justify-center transition-all", task.done ? "border-emerald-500 bg-emerald-50 text-emerald-600" : "border-slate-400 hover:border-slate-600 bg-[#c5daf7] shadow-sm")}>
+          {task.done && <span className="text-[10px] font-bold">✓</span>}
+        </div>
+      </button>
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <EditableText text={task.text} className={cn("text-[15px] font-normal text-slate-700 dark:text-slate-200", task.done && "line-through text-slate-400")} onSave={(t) => updateTaskText(task.id, t)} />
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <AssigneeSelector value={task.assigned_to} onChange={(v) => updateAssignee(task.id, v)} members={members} getMemberInitials={getMemberInitials} getMemberName={getMemberName} />
+          
+          <div className="flex items-center gap-1">
+            {task.due_date && (
+              <button onClick={() => setDatePopoverOpen(true)} className={cn("flex items-center gap-1 text-[12px] font-medium px-1.5 py-0.5 rounded hover:bg-slate-100", getDueDateStyle(task.due_date, task.done))}>
+                <CalendarIcon size={12} className="opacity-70" />
+                <span>{format(new Date(task.due_date + 'T00:00:00'), "eee, MMM d", { locale: ptBR })}</span>
+              </button>
+            )}
+            
+            <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-opacity">
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <PopoverTrigger asChild><button className="p-1 text-slate-400 hover:text-slate-600"><CalendarIcon size={14} /></button></PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar mode="single" selected={task.due_date ? new Date(task.due_date + 'T00:00:00') : undefined} onSelect={(d) => { updateDueDate(task.id, d); setDatePopoverOpen(false); }} className="p-3" />
+                  {task.due_date && <div className="p-2 border-t"><Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => { updateDueDate(task.id, undefined); setDatePopoverOpen(false); }}>Remover data</Button></div>}
+                </PopoverContent>
+              </Popover>
+              <button onClick={() => { setDeleteTaskId(task.id); setDeleteDialogOpen(true); }} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SortableTaskRow = ({ task, ...props }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id, data: { type: 'task', task } });
+  return (
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }} className="relative group/sortable">
+      <div {...attributes} {...listeners} className="absolute -left-7 top-2 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-20 transition-opacity">
+        <div className="flex flex-col gap-[2px]">{[1,2,3].map(i => <div key={i} className="w-4 border-t border-slate-900" />)}</div>
+      </div>
+      <TaskRow task={task} {...props} />
+    </div>
+  );
+};
+
+const SortableTaskList = ({ list, renderList, hideHandle, onEdit, onAddTask, onDelete, onAddGroup }: { 
+  list: TaskList; 
+  renderList: (list: TaskList) => React.ReactNode; 
+  hideHandle?: boolean;
+  onEdit: (id: string) => void;
+  onAddTask: (id: string) => void;
+  onDelete: (id: string) => void;
+  onAddGroup: (id: string) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: list.id, data: { type: 'list', list } });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/list-sortable">
+      {!hideHandle && (
+        <div className="absolute -left-12 top-1 cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-2 flex items-center gap-1">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <button {...attributes} {...listeners} className="p-1 hover:bg-slate-100 rounded transition-colors" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <div className="flex flex-col gap-[3px]">
+                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
+                </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-1 bg-[#c5daf7] border shadow-xl rounded-xl font-jakarta" align="start" side="bottom" sideOffset={5}>
+              <div className="flex flex-col">
+                <button onClick={() => { onEdit(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Editar</span></button>
+                <button className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Mover...</span></button>
+                <button className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Copiar...</span></button>
+                <div className="h-px bg-slate-100 my-1 mx-2" />
+                <button onClick={() => { onDelete(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-red-600 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Arquivar</span></button>
+                <div className="h-px bg-slate-100 my-1 mx-2" />
+                <button onClick={() => { onAddTask(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Inserir tarefa</span></button>
+                <button onClick={() => { onAddGroup(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Adicionar grupo</span></button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+      {renderList(list)}
+    </div>
+  );
+};
+
+const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projectId, hideDone = false, filters, showNewListInline = true, singleListId }, ref) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TaskList[]>([]);
@@ -211,699 +349,326 @@ const TaskListCard = ({ projectId, hideDone = false, filters }: TaskListCardProp
   const [deleteListDialogOpen, setDeleteListDialogOpen] = useState(false);
   const [collapsedLists, setCollapsedLists] = useState<Set<string>>(new Set());
   const [creatingListName, setCreatingListName] = useState('');
+  const [creatingListDescription, setCreatingListDescription] = useState('');
+  const [showNewListDetails, setShowNewListDetails] = useState(false);
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [addingToList, setAddingToList] = useState<string | null>(null);
+  const [addingGroupToList, setAddingGroupToList] = useState<string | null>(null);
   const [newTaskText, setNewTaskText] = useState('');
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupColor, setNewGroupColor] = useState(GROUP_COLORS[0].value);
   const [newTaskAssignee, setNewTaskAssignee] = useState<string | null>(null);
   const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined);
-  const [newTaskNotes, setNewTaskNotes] = useState('');
-  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('medium');
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeList, setActiveList] = useState<TaskList | null>(null);
   const newListInputRef = useRef<HTMLInputElement>(null);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
+  const groupInputRef = useRef<HTMLInputElement>(null);
 
+  useImperativeHandle(ref, () => ({ triggerNewList: () => { setShowNewListInput(true); setTimeout(() => newListInputRef.current?.focus(), 100); }}));
   useEffect(() => { fetchAll(); }, [projectId, user]);
   useEffect(() => { if (showNewListInput) newListInputRef.current?.focus(); }, [showNewListInput]);
   useEffect(() => { if (addingToList) newTaskInputRef.current?.focus(); }, [addingToList]);
+  useEffect(() => { if (addingGroupToList) groupInputRef.current?.focus(); }, [addingGroupToList]);
 
   const fetchAll = async () => {
     if (!user) return;
     setLoading(true);
-    const [{ data: tasksData }, { data: listsData }, { data: memberRows }, { data: project }] = await Promise.all([
-      supabase.from('project_tasks').select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority, list_id').eq('project_id', projectId).order('sort_order').order('created_at'),
-      supabase.from('task_lists').select('id, title, sort_order, project_id, created_by').eq('project_id', projectId).order('sort_order'),
-      supabase.from('project_members').select('user_id').eq('project_id', projectId),
-      supabase.from('projects').select('owner_id').eq('id', projectId).single(),
-    ]);
-    setTasks((tasksData as Task[]) ?? []);
-    setLists((listsData as TaskList[]) ?? []);
-
-    const userIds = new Set<string>();
-    (memberRows ?? []).forEach(m => userIds.add(m.user_id));
-    if (project?.owner_id) userIds.add(project.owner_id);
-    if (userIds.size > 0) {
-      const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', Array.from(userIds));
-      setMembers((profiles as MemberProfile[]) ?? []);
+    try {
+      const [{ data: tasksData }, { data: listsData }, { data: memberRows }, { data: project }] = await Promise.all([
+        supabase.from('project_tasks').select('*').eq('project_id', projectId).order('sort_order'),
+        supabase.from('task_lists').select('*').eq('project_id', projectId).order('sort_order'),
+        supabase.from('project_members').select('user_id').eq('project_id', projectId),
+        supabase.from('projects').select('owner_id').eq('id', projectId).single()
+      ]);
+      if (tasksData) setTasks(tasksData as Task[]);
+      if (listsData) setLists(listsData as TaskList[]);
+      const uids = new Set((memberRows || []).map(m => m.user_id));
+      if (project?.owner_id) uids.add(project.owner_id);
+      if (uids.size) {
+        const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', Array.from(uids));
+        setMembers(profiles as MemberProfile[] ?? []);
+      }
+    } catch (error) {
+      console.error('Error fetching list data:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // ─── CRUD operations ────────────────────────────────────────────
   const createList = async () => {
-    const title = creatingListName.trim();
-    if (!title || !user) return;
-    const nextOrder = lists.length > 0 ? Math.max(...lists.map(l => l.sort_order)) + 1 : 0;
-    const { data } = await supabase.from('task_lists').insert({ project_id: projectId, title, sort_order: nextOrder, created_by: user.id } as any).select().single();
-    if (data) setLists(prev => [...prev, data as TaskList]);
-    setCreatingListName('');
-    setShowNewListInput(false);
+    if (!creatingListName.trim() || !user) return;
+    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: creatingListName.trim(), description: creatingListDescription, sort_order: lists.length, created_by: user.id } as any).select().single();
+    if (error) { toast.error('Erro ao criar lista'); return; }
+    if (data) setLists(p => [...p, data as TaskList]);
+    setCreatingListName(''); setCreatingListDescription(''); setShowNewListDetails(false); setShowNewListInput(false);
+    toast.success('Lista criada!');
   };
 
-  const updateListTitle = async (listId: string, title: string) => {
-    setLists(prev => prev.map(l => l.id === listId ? { ...l, title } : l));
-    await supabase.from('task_lists').update({ title } as any).eq('id', listId);
+  const updateListTitle = (id: string, title: string) => { setLists(p => p.map(l => l.id === id ? { ...l, title } : l)); supabase.from('task_lists').update({ title } as any).eq('id', id).then(); };
+  const deleteList = async (id: string) => { setLists(p => p.filter(l => l.id !== id)); setTasks(p => p.filter(t => t.list_id !== id)); await supabase.from('task_lists').delete().eq('id', id); fetchAll(); };
+
+  const addTask = async (lid: string) => {
+    if (!newTaskText.trim() || !user) return;
+    const { data: newTask, error } = await supabase.from('project_tasks').insert({ 
+      project_id: projectId, 
+      text: newTaskText.trim(), 
+      created_by: user.id, 
+      sort_order: tasks.filter(t => t.list_id === lid).length, 
+      list_id: lid, 
+      assigned_to: newTaskAssignee, 
+      due_date: newTaskDueDate ? format(newTaskDueDate, 'yyyy-MM-dd') : null,
+      status: 'backlog'
+    } as any).select().single();
+    
+    if (error) return;
+    if (newTask) {
+      setTasks(p => [...p, newTask as Task]);
+      resetNewTaskForm(false);
+      setTimeout(() => newTaskInputRef.current?.focus(), 50);
+    }
   };
 
-  const deleteList = async (listId: string) => {
-    setLists(prev => prev.filter(l => l.id !== listId));
-    setTasks(prev => prev.filter(t => t.list_id !== listId));
-    await supabase.from('task_lists').delete().eq('id', listId);
+  const addGroup = async (lid: string) => {
+    if (!newGroupName.trim() || !user) return;
+    const { data: ng, error } = await supabase.from('project_tasks').insert({ 
+      project_id: projectId, 
+      text: newGroupName.trim(), 
+      created_by: user.id, 
+      sort_order: tasks.filter(t => t.list_id === lid).length, 
+      list_id: lid, 
+      status: 'group',
+      priority: newGroupColor
+    } as any).select().single();
+    if (error) return;
+    if (ng) { setTasks(p => [...p, ng as Task]); setAddingGroupToList(null); setNewGroupName(''); }
   };
 
-  const addTask = async (listId: string) => {
-    const trimmed = newTaskText.trim();
-    if (!trimmed || !user) return;
-    const listTasks = tasks.filter(t => t.list_id === listId);
-    const nextOrder = listTasks.length > 0 ? Math.max(...listTasks.map(t => t.sort_order)) + 1 : 0;
-    const dueDate = newTaskDueDate ? format(newTaskDueDate, 'yyyy-MM-dd') : null;
-    const { data } = await supabase.from('project_tasks').insert({
-      project_id: projectId, text: trimmed, created_by: user.id, sort_order: nextOrder, list_id: listId,
-      assigned_to: newTaskAssignee, due_date: dueDate, priority: newTaskPriority,
-      ...(newTaskNotes.trim() ? {} : {}), // notes field not in DB yet, keeping for future
-    } as any).select('id, text, done, sort_order, due_date, assigned_to, created_by, status, priority, list_id').single();
-    if (data) setTasks(prev => [...prev, data as Task]);
-    resetNewTaskForm();
+  const resetNewTaskForm = (close = true) => { 
+    if (close) setAddingToList(null); 
+    setNewTaskText(''); 
+    setNewTaskAssignee(null); 
+    setNewTaskDueDate(undefined); 
+  };
+  const toggleDone = (id: string) => { const t = tasks.find(x => x.id === id); if (!t) return; const done = !t.done; setTasks(prev => prev.map(x => x.id === id ? { ...x, done, status: done ? 'done' : 'backlog' } : x)); supabase.from('project_tasks').update({ status: done ? 'done' : 'backlog', done }).eq('id', id); };
+  const updateTaskStatus = (id: string, s: TaskStatus) => { setTasks(prev => prev.map(t => t.id === id ? { ...t, status: s, done: s === 'done' } : t)); supabase.from('project_tasks').update({ status: s, done: s === 'done' }).eq('id', id); };
+  const updatePriority = (id: string, priority: TaskPriority) => { setTasks(prev => prev.map(t => t.id === id ? { ...t, priority } : t)); supabase.from('project_tasks').update({ priority }).eq('id', id); };
+  const updateDueDate = (id: string, d: Date | undefined) => { const ds = d ? format(d, 'yyyy-MM-dd') : null; setTasks(prev => prev.map(t => t.id === id ? { ...t, due_date: ds } : t)); supabase.from('project_tasks').update({ due_date: ds } as any).eq('id', id); };
+  const updateAssignee = (id: string, val: string | null) => { setTasks(prev => prev.map(t => t.id === id ? { ...t, assigned_to: val } : t)); supabase.from('project_tasks').update({ assigned_to: val } as any).eq('id', id); };
+  const updateTaskText = (id: string, text: string) => { if (!text.trim()) return; setTasks(prev => prev.map(t => t.id === id ? { ...t, text: text.trim() } : t)); supabase.from('project_tasks').update({ text: text.trim() }).eq('id', id); };
+  const deleteTask = async (id: string) => { setTasks(p => p.filter(t => t.id !== id)); await supabase.from('project_tasks').delete().eq('id', id); };
+
+  const getMemberName = (id: string | null) => members.find(m => m.user_id === id)?.display_name || null;
+  const getMemberInitials = (id: string | null) => { const n = getMemberName(id); return n ? n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2) : '?'; };
+  const getDueDateStyle = (due_date: string | null, done: boolean) => { 
+    if (!due_date || done) return 'text-slate-400'; 
+    const d = new Date(due_date + 'T00:00:00'); 
+    const isTodayFn = (date: Date) => isToday(date);
+    const isPastFn = (date: Date) => isPast(date);
+
+    if (isTodayFn(d)) return 'text-amber-600'; 
+    if (isPastFn(d)) return 'text-red-500'; 
+    return 'text-slate-500'; 
   };
 
-  const resetNewTaskForm = () => {
-    setNewTaskText('');
-    setNewTaskAssignee(null);
-    setNewTaskDueDate(undefined);
-    setNewTaskNotes('');
-    setNewTaskPriority('medium');
-    setAddingToList(null);
-  };
-
-  const toggleDone = async (id: string) => {
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-    const newDone = !task.done;
-    const newStatus = newDone ? 'done' : 'backlog';
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: newDone, status: newStatus as TaskStatus } : t));
-    await supabase.from('project_tasks').update({ done: newDone, status: newStatus }).eq('id', id);
-  };
-
-  const updateTaskStatus = async (id: string, status: TaskStatus) => {
-    const done = status === 'done';
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status, done } : t));
-    await supabase.from('project_tasks').update({ status, done }).eq('id', id);
-  };
-
-  const updatePriority = async (id: string, priority: TaskPriority) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, priority } : t));
-    await supabase.from('project_tasks').update({ priority }).eq('id', id);
-  };
-
-  const updateDueDate = async (id: string, date: Date | undefined) => {
-    const due_date = date ? format(date, 'yyyy-MM-dd') : null;
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, due_date } : t));
-    await supabase.from('project_tasks').update({ due_date } as any).eq('id', id);
-  };
-
-  const updateAssignee = async (id: string, assigned_to: string | null) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, assigned_to } : t));
-    await supabase.from('project_tasks').update({ assigned_to } as any).eq('id', id);
-  };
-
-  const updateTaskText = async (id: string, text: string) => {
-    if (!text.trim()) return;
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, text: text.trim() } : t));
-    await supabase.from('project_tasks').update({ text: text.trim() }).eq('id', id);
-  };
-
-  const deleteTask = async (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
-    await supabase.from('project_tasks').delete().eq('id', id);
-  };
-
-  // ─── Helpers ─────────────────────────────────────────────────────
-  const getMemberName = (userId: string | null) => {
-    if (!userId) return null;
-    const m = members.find(p => p.user_id === userId);
-    return m?.display_name || 'Usuário';
-  };
-
-  const getMemberInitials = (userId: string | null) => {
-    const name = getMemberName(userId);
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
-  const getDueDateStyle = (due_date: string | null, done: boolean) => {
-    if (!due_date || done) return 'text-muted-foreground';
-    const date = new Date(due_date + 'T00:00:00');
-    if (isToday(date)) return 'text-amber-500';
-    if (isPast(date)) return 'text-destructive';
-    return 'text-muted-foreground';
-  };
-
-  const toggleCollapsed = (listId: string) => {
-    setCollapsedLists(prev => {
-      const next = new Set(prev);
-      next.has(listId) ? next.delete(listId) : next.add(listId);
-      return next;
-    });
-  };
-
-  // ─── Filter tasks ────────────────────────────────────────────────
   const filterTask = useCallback((t: Task) => {
     if (hideDone && t.done) return false;
+    if (t.status === 'group') return true;
     if (!filters) return true;
-    if (filters.statuses.length > 0 && !filters.statuses.includes(getTaskStatus(t.done, t.status))) return false;
-    if (filters.priorities.length > 0 && !filters.priorities.includes(t.priority as TaskPriority || 'medium')) return false;
+    if (filters.statuses.length && !filters.statuses.includes(getTaskStatus(t.done, t.status) as any)) return false;
     if (filters.dateFilter !== 'all') {
       const now = new Date();
+      const isTodayFn = (date: Date) => isToday(date);
+      const isPastFn = (date: Date) => isPast(date);
       switch (filters.dateFilter) {
         case 'no_date': return !t.due_date;
         case 'today': return t.due_date ? isTodayFn(new Date(t.due_date + 'T00:00:00')) : false;
         case 'overdue': return t.due_date ? isPastFn(new Date(t.due_date + 'T00:00:00')) && !isTodayFn(new Date(t.due_date + 'T00:00:00')) && !t.done : false;
-        case 'this_week': {
-          if (!t.due_date) return false;
-          const d = new Date(t.due_date + 'T00:00:00');
-          return d >= startOfWeek(now, { weekStartsOn: 1 }) && d <= endOfWeek(now, { weekStartsOn: 1 });
-        }
+        case 'this_week': { const d = t.due_date ? new Date(t.due_date + 'T00:00:00') : null; return d ? d >= startOfWeek(now, { weekStartsOn: 1 }) && d <= endOfWeek(now, { weekStartsOn: 1 }) : false; }
       }
     }
     return true;
   }, [hideDone, filters]);
 
-  // ─── Assignee selector ──────────────────────────────────────────
-  const AssigneeSelector = ({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) => (
-    <Popover>
-      <PopoverTrigger asChild>
-        {value ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-primary-foreground text-[9px]"
-                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
-                {getMemberInitials(value)}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">{getMemberName(value)}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <button className="flex-shrink-0 text-muted-foreground opacity-0 group-hover/task:opacity-60 hover:!opacity-100 transition-all" title="Atribuir responsável">
-            <UserPlus size={13} />
-          </button>
-        )}
-      </PopoverTrigger>
-      <PopoverContent className="w-48 p-1" align="end">
-        <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Responsável</div>
-        {value && (
-          <button onClick={() => onChange(null)} className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground">
-            <X size={14} /><span>Remover</span>
-          </button>
-        )}
-        {members.map(m => (
-          <button key={m.user_id} onClick={() => onChange(m.user_id)}
-            className={cn("w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors", value === m.user_id && "bg-secondary")}>
-            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
-              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
-              {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-            </div>
-            <span className="truncate">{m.display_name || 'Usuário'}</span>
-          </button>
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-
-  // ─── Single task row (Basecamp style) ───────────────────────────
-  const TaskRow = ({ task }: { task: Task }) => {
-    const isOverdue = task.due_date && !task.done && isPast(new Date(task.due_date + 'T23:59:59')) && !isToday(new Date(task.due_date + 'T12:00:00'));
-
-    return (
-      <div className={cn(
-        "group/task flex items-center gap-3 px-4 py-2.5 border-b border-border/50 last:border-b-0 transition-colors hover:bg-secondary/30",
-        task.done && "opacity-60"
-      )}>
-        {/* Checkbox */}
-        <button onClick={() => toggleDone(task.id)} className="flex-shrink-0">
-          <div className={cn(
-            "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
-            task.done
-              ? "border-emerald-500 bg-emerald-500 text-white"
-              : "border-border hover:border-primary/50"
-          )}>
-            {task.done && <span className="text-[10px] font-bold">✓</span>}
-          </div>
-        </button>
-
-        {/* Task text */}
-        <div className="flex-1 min-w-0">
-          <EditableText
-            text={task.text}
-            className={cn("text-sm", task.done && "line-through text-muted-foreground")}
-            onSave={(text) => updateTaskText(task.id, text)}
-          />
-        </div>
-
-        {/* Status & Priority badges */}
-        <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover/task:opacity-100 transition-opacity">
-          <StatusBadge status={getTaskStatus(task.done, task.status)} onChange={(s) => updateTaskStatus(task.id, s)} />
-          <PriorityBadge priority={(task.priority as TaskPriority) || 'medium'} onChange={(p) => updatePriority(task.id, p)} />
-        </div>
-
-        {/* Due date */}
-        {task.due_date && (
-          <span className={cn("text-xs flex-shrink-0 font-medium", getDueDateStyle(task.due_date, task.done))}>
-            {format(new Date(task.due_date + 'T00:00:00'), "dd MMM", { locale: ptBR })}
-          </span>
-        )}
-
-        {/* Assignee */}
-        <AssigneeSelector value={task.assigned_to} onChange={(v) => updateAssignee(task.id, v)} />
-
-        {/* Date picker */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className={cn("flex-shrink-0 transition-all",
-              task.due_date ? cn("opacity-60 hover:opacity-100", getDueDateStyle(task.due_date, task.done))
-                : "opacity-0 group-hover/task:opacity-60 hover:!opacity-100 text-muted-foreground"
-            )} title="Definir data">
-              <CalendarIcon size={13} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar mode="single" selected={task.due_date ? new Date(task.due_date + 'T00:00:00') : undefined}
-              onSelect={(date) => updateDueDate(task.id, date)} initialFocus className="p-3 pointer-events-auto" />
-            {task.due_date && (
-              <div className="px-3 pb-3">
-                <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => updateDueDate(task.id, undefined)}>
-                  <X size={12} className="mr-1" /> Remover data
-                </Button>
-              </div>
-            )}
-          </PopoverContent>
-        </Popover>
-
-        {/* Delete */}
-        <button onClick={() => { setDeleteTaskId(task.id); setDeleteDialogOpen(true); }}
-          className="opacity-0 group-hover/task:opacity-100 text-muted-foreground hover:text-destructive transition-all flex-shrink-0">
-          <Trash2 size={13} />
-        </button>
-      </div>
-    );
+  const handleDragStart = (e: DragStartEvent) => { 
+    const { active } = e;
+    if (active.data.current?.type === 'task') {
+      const t = tasks.find(x => x.id === active.id); if (t) setActiveTask(t);
+    } else if (active.data.current?.type === 'list') {
+      const l = lists.find(x => x.id === active.id); if (l) setActiveList(l);
+    }
   };
-
-  // ─── Sortable task row wrapper ──────────────────────────────────
-  const SortableTaskRow = ({ task }: { task: Task }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-      id: task.id,
-      data: { type: 'task', task },
+  const handleDragOver = (e: DragOverEvent) => {
+    const { active, over } = e; if (!over || active.id === over.id || active.data.current?.type !== 'task') return;
+    const aTask = tasks.find(t => t.id === active.id); const oTask = tasks.find(t => t.id === over.id);
+    if (!aTask || !oTask || aTask.list_id === oTask.list_id) return;
+    setTasks(prev => {
+      const aIdx = prev.findIndex(t => t.id === active.id); const oIdx = prev.findIndex(t => t.id === over.id);
+      const updated = [...prev]; updated[aIdx] = { ...updated[aIdx], list_id: oTask.list_id };
+      return arrayMove(updated, aIdx, oIdx);
     });
-
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: isDragging ? 0.4 : 1,
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} className="relative group/sortable">
-        <div {...attributes} {...listeners}
-          className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-60 transition-opacity z-10">
-          <GripVertical size={14} className="text-muted-foreground" />
-        </div>
-        <div className="pl-2">
-          <TaskRow task={task} />
-        </div>
-      </div>
-    );
   };
-
-  // ─── DnD setup ──────────────────────────────────────────────────
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const task = tasks.find(t => t.id === event.active.id);
-    if (task) setActiveTask(task);
-  };
-
-  const findListIdForTask = (taskId: string): string | null => {
-    const task = tasks.find(t => t.id === taskId);
-    return task?.list_id ?? null;
-  };
-
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const activeId = active.id as string;
-    const overId = over.id as string;
-
-    // Check if over is a list container (droppable id starts with 'list-')
-    const overListId = overId.startsWith('list-') ? overId.replace('list-', '') : findListIdForTask(overId);
-    const activeListId = findListIdForTask(activeId);
-
-    if (overListId !== activeListId) {
-      setTasks(prev => prev.map(t => t.id === activeId ? { ...t, list_id: overListId } : t));
+  const handleDragEnd = async (e: DragEndEvent) => {
+    setActiveTask(null); setActiveList(null); if (!e.over || e.active.id === e.over.id) return;
+    const { active, over } = e;
+    
+    if (active.data.current?.type === 'task') {
+      const aIdx = tasks.findIndex(t => t.id === active.id); const oIdx = tasks.findIndex(t => t.id === over.id);
+      const newTasks = arrayMove(tasks, aIdx, oIdx); setTasks(newTasks);
+      const lid = tasks[aIdx].list_id; const lTasks = newTasks.filter(t => t.list_id === lid);
+      await Promise.all(lTasks.map((t, idx) => supabase.from('project_tasks').update({ sort_order: idx, list_id: lid }).eq('id', t.id)));
+    } else if (active.data.current?.type === 'list') {
+      const aIdx = lists.findIndex(l => l.id === active.id); const oIdx = lists.findIndex(l => l.id === over.id);
+      const newLists = arrayMove(lists, aIdx, oIdx); setLists(newLists);
+      await Promise.all(newLists.map((l, idx) => supabase.from('task_lists').update({ sort_order: idx }).eq('id', l.id)));
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    setActiveTask(null);
-    const { active, over } = event;
-    if (!over) return;
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-    const activeId = active.id as string;
-    const overId = over.id as string;
+  const displayedLists = useMemo(() => {
+    if (singleListId) return lists.filter(l => l.id === singleListId);
+    return lists;
+  }, [lists, singleListId]);
 
-    const targetListId = overId.startsWith('list-') ? overId.replace('list-', '') : findListIdForTask(overId);
-    const task = tasks.find(t => t.id === activeId);
-    if (!task) return;
-
-    // Get tasks in the target list
-    const listTasks = tasks.filter(t => t.list_id === targetListId && t.id !== activeId);
-
-    // Find the position of the over item
-    let newOrder: number;
-    if (overId.startsWith('list-')) {
-      // Dropped on the list container itself (empty area) - put at end
-      newOrder = listTasks.length > 0 ? Math.max(...listTasks.map(t => t.sort_order)) + 1 : 0;
-    } else {
-      const overIndex = listTasks.findIndex(t => t.id === overId);
-      if (overIndex >= 0) {
-        newOrder = listTasks[overIndex].sort_order;
-        // Shift subsequent tasks
-        const tasksToShift = listTasks.filter(t => t.sort_order >= newOrder);
-        for (const t of tasksToShift) {
-          await supabase.from('project_tasks').update({ sort_order: t.sort_order + 1 }).eq('id', t.id);
-        }
-      } else {
-        newOrder = listTasks.length;
-      }
-    }
-
-    // Update the dragged task
-    setTasks(prev => prev.map(t => t.id === activeId ? { ...t, list_id: targetListId, sort_order: newOrder } : t));
-    await supabase.from('project_tasks').update({ list_id: targetListId, sort_order: newOrder } as any).eq('id', activeId);
-  };
-
-  // ─── Render a single list ───────────────────────────────────────
   const renderList = (list: TaskList) => {
-    const allListTasks = tasks.filter(t => t.list_id === list.id);
-    const visibleListTasks = allListTasks.filter(filterTask);
-    const pendingTasks = visibleListTasks.filter(t => !t.done);
-    const doneTasks = visibleListTasks.filter(t => t.done);
-    const doneCount = allListTasks.filter(t => t.done).length;
-    const totalCount = allListTasks.length;
-    const isCollapsed = collapsedLists.has(list.id);
+    const lTasks = tasks.filter(t => t.list_id === list.id).filter(filterTask);
+    const doneT = lTasks.filter(t => t.done && t.status !== 'group');
+    const pendT = lTasks.filter(t => !t.done || t.status === 'group');
+    const totalT = lTasks.filter(t => t.status !== 'group').length;
 
     return (
-      <div key={list.id} className="border border-border rounded-xl bg-card overflow-hidden">
-        {/* List header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
-          <button onClick={() => toggleCollapsed(list.id)} className="text-muted-foreground hover:text-foreground transition-colors">
-            {isCollapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
-          </button>
-          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }} />
-          <div className="flex-1 min-w-0">
-            <span className="text-xs text-muted-foreground">{doneCount}/{totalCount} concluídas</span>
-            <EditableText
-              text={list.title}
-              className="text-lg font-bold text-foreground block"
-              onSave={(title) => updateListTitle(list.id, title)}
-            />
-          </div>
-          {/* List menu */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-secondary">
-                <MoreHorizontal size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-36 p-1" align="end">
-              <button onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs text-destructive hover:bg-destructive/10 transition-colors">
-                <Trash2 size={12} /> Excluir lista
-              </button>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Tasks */}
-        {!isCollapsed && (
-          <SortableContext items={pendingTasks.map(t => t.id)} strategy={verticalListSortingStrategy} id={`list-${list.id}`}>
-            <div className="min-h-[2px]" data-list-id={list.id}>
-              {/* Pending tasks */}
-              {pendingTasks.map(task => <SortableTaskRow key={task.id} task={task} />)}
-
-              {/* Add task form */}
-              {addingToList === list.id ? (
-                <div className="border-b border-border/50 bg-secondary/10">
-                  <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }}>
-                    {/* Task title row */}
-                    <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
-                      <div className="w-5 h-5 rounded border-2 border-dashed border-border/50 flex-shrink-0" />
-                      <input ref={newTaskInputRef} value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
-                        placeholder="Descreva a tarefa..."
-                        className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50"
-                        onKeyDown={e => { if (e.key === 'Escape') resetNewTaskForm(); }}
-                      />
-                    </div>
-
-                    {/* Fields */}
-                    <div className="px-5 py-3 space-y-3">
-                      {/* Responsável */}
-                      <div className="flex items-start gap-3">
-                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Responsável</span>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button type="button" className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors flex items-center gap-2">
-                              {newTaskAssignee ? (
-                                <span className="flex items-center gap-2">
-                                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
-                                    style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
-                                    {getMemberInitials(newTaskAssignee)}
-                                  </span>
-                                  <span className="text-foreground">{getMemberName(newTaskAssignee)}</span>
-                                </span>
-                              ) : (
-                                'Selecione um responsável...'
-                              )}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-48 p-1" align="start">
-                            {newTaskAssignee && (
-                              <button type="button" onClick={() => setNewTaskAssignee(null)} className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 text-muted-foreground">
-                                <X size={14} /><span>Remover</span>
-                              </button>
-                            )}
-                            {members.map(m => (
-                              <button type="button" key={m.user_id} onClick={() => setNewTaskAssignee(m.user_id)}
-                                className={cn("w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors", newTaskAssignee === m.user_id && "bg-secondary")}>
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-primary-foreground flex-shrink-0"
-                                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}>
-                                  {(m.display_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                                </div>
-                                <span className="truncate">{m.display_name || 'Usuário'}</span>
-                              </button>
-                            ))}
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      {/* Prioridade */}
-                      <div className="flex items-start gap-3">
-                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Prioridade</span>
-                        <div className="flex gap-1.5">
-                          {PRIORITY_OPTIONS.map(opt => (
-                            <button type="button" key={opt.value} onClick={() => setNewTaskPriority(opt.value)}
-                              className={cn("px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
-                                newTaskPriority === opt.value ? opt.color : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-                              )}>
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Data */}
-                      <div className="flex items-start gap-3">
-                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1 flex-shrink-0">Data limite</span>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button type="button" className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors flex items-center gap-1.5">
-                              <CalendarIcon size={13} />
-                              {newTaskDueDate ? format(newTaskDueDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : 'Selecione uma data...'}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={newTaskDueDate} onSelect={setNewTaskDueDate} initialFocus className="p-3 pointer-events-auto" />
-                            {newTaskDueDate && (
-                              <div className="px-3 pb-3">
-                                <Button type="button" variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => setNewTaskDueDate(undefined)}>
-                                  <X size={12} className="mr-1" /> Remover data
-                                </Button>
-                              </div>
-                            )}
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      {/* Notas */}
-                      <div className="flex items-start gap-3">
-                        <span className="text-xs font-semibold text-muted-foreground w-28 text-right pt-1.5 flex-shrink-0">Notas</span>
-                        <input value={newTaskNotes} onChange={e => setNewTaskNotes(e.target.value)}
-                          placeholder="Adicione detalhes extras..."
-                          className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50 py-1"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 px-5 py-3 border-t border-border/30">
-                      <Button type="submit" size="sm" disabled={!newTaskText.trim()}
-                        style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}>
-                        Adicionar tarefa
-                      </Button>
-                      <Button type="button" size="sm" variant="outline" onClick={resetNewTaskForm}>
-                        Cancelar
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              ) : (
-                <button onClick={() => { setAddingToList(list.id); setNewTaskText(''); }}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors w-full border-b border-border/50">
-                  <Plus size={14} /> Adicionar tarefa
+      <div className="mb-12 pl-12 relative group/list">
+        <div className="mb-4">
+          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight">{doneT.length}/{totalT} concluídas</div>
+          <div className="flex items-start gap-4">
+            <TaskListPieChart total={totalT} completed={doneT.length} />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 group/title">
+                <Link to={`/clients/${projectId}/tasks/${list.id}`} className="hover:opacity-80 transition-opacity">
+                  <EditableText 
+                    text={list.title} 
+                    className="text-[22px] font-bold text-primary" 
+                    onSave={(t) => updateListTitle(list.id, t)} 
+                  />
+                </Link>
+                <button onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }} className="opacity-0 group-hover/list:opacity-100 hover:text-red-500 text-slate-400 p-2 transition-opacity">
+                  <Trash2 size={18} />
                 </button>
-              )}
-
-              {/* Done tasks (separated) */}
-              {doneTasks.length > 0 && !hideDone && (
-                <div className="mt-1">
-                  {doneTasks.map(task => <SortableTaskRow key={task.id} task={task} />)}
-                </div>
-              )}
+              </div>
+              {list.description && <div className="mt-2 text-sm text-muted-foreground italic max-w-2xl line-clamp-1 leading-relaxed">{list.description.replace(/<[^>]*>?/gm, ' ')}</div>}
             </div>
+          </div>
+        </div>
+        <div className="space-y-0.5">
+          <SortableContext items={pendT.map(t => t.id)} strategy={verticalListSortingStrategy}>
+            {pendT.map(task => <SortableTaskRow key={task.id} task={task} toggleDone={toggleDone} updateTaskText={updateTaskText} updateTaskStatus={updateTaskStatus} updatePriority={updatePriority} updateDueDate={updateDueDate} updateAssignee={updateAssignee} setDeleteTaskId={setDeleteTaskId} setDeleteDialogOpen={setDeleteDialogOpen} members={members} getMemberInitials={getMemberInitials} getMemberName={getMemberName} getDueDateStyle={getDueDateStyle} deleteTask={deleteTask} />)}
           </SortableContext>
-        )}
+          
+          {addingGroupToList === list.id && (
+            <div className="my-6 max-w-2xl bg-[#c5daf7] border rounded-xl shadow-xl p-6 border-primary/20 animate-in slide-in-from-top-1 duration-200 font-jakarta">
+              <input ref={groupInputRef} autoFocus value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="Adicionar um novo grupo..." className="w-full text-lg font-bold outline-none mb-4" />
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1.5">
+                  {GROUP_COLORS.map(c => (
+                    <button key={c.value} onClick={() => setNewGroupColor(c.value)} className={cn("w-6 h-6 rounded-full border border-black/5 flex items-center justify-center transition-all hover:scale-110", newGroupColor === c.value && "ring-2 ring-primary ring-offset-1")} style={{ backgroundColor: c.value }}>
+                      {newGroupColor === c.value && <span className="text-[10px] drop-shadow-sm">✓</span>}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={() => addGroup(list.id)} size="sm" className="rounded-full bg-primary text-white hover:bg-primary/90 px-6">Adicionar grupo</Button>
+                  <Button variant="ghost" size="sm" onClick={() => { setAddingGroupToList(null); setNewGroupName(''); }} className="rounded-full">Cancelar</Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="pt-3">
+            {addingToList === list.id ? (
+              <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }} className="max-w-xl bg-[#c5daf7] border rounded-xl shadow-lg p-5 border-primary/20 animate-in slide-in-from-top-1 duration-200">
+                <input ref={newTaskInputRef} autoFocus value={newTaskText} onChange={e => setNewTaskText(e.target.value)} placeholder="Descreva a tarefa..." className="w-full text-lg outline-none mb-4" />
+                <div className="flex gap-2"><Button type="submit" size="sm" className="rounded-full bg-primary text-white hover:bg-primary/90 px-6">Adicionar</Button><Button type="button" size="sm" variant="ghost" onClick={() => resetNewTaskForm()} className="rounded-full">Cancelar</Button></div>
+              </form>
+            ) : <button onClick={() => setAddingToList(list.id)} className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">Adicionar tarefa</button>}
+          </div>
+          {doneT.length > 0 && !hideDone && <div className="mt-6 pt-4 border-t border-slate-100">{doneT.map(task => <TaskRow key={task.id} task={task} toggleDone={toggleDone} updateTaskText={updateTaskText} updateTaskStatus={updateTaskStatus} updatePriority={updatePriority} updateDueDate={updateDueDate} updateAssignee={updateAssignee} setDeleteTaskId={setDeleteTaskId} setDeleteDialogOpen={setDeleteDialogOpen} members={members} getMemberInitials={getMemberInitials} getMemberName={getMemberName} getDueDateStyle={getDueDateStyle} deleteTask={deleteTask} />)}</div>}
+        </div>
       </div>
     );
   };
 
-  // ─── Unassigned tasks (no list) ─────────────────────────────────
   const unlistedTasks = useMemo(() => tasks.filter(t => !t.list_id).filter(filterTask), [tasks, filterTask]);
-
-  if (loading) {
-    return <div className="text-center py-12 text-muted-foreground text-sm">Carregando...</div>;
-  }
+  if (loading) return <div className="text-center py-20 text-slate-400">Carregando...</div>;
 
   return (
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="space-y-6">
-          {/* Render each list */}
-          {lists.map(renderList)}
-
-          {/* Unassigned tasks */}
-          {unlistedTasks.length > 0 && (
-            <div className="border border-border rounded-xl bg-card overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
-                <div className="w-3 h-3 rounded-full flex-shrink-0 bg-muted-foreground/30" />
-                <div className="flex-1">
-                  <span className="text-xs text-muted-foreground">{unlistedTasks.filter(t => t.done).length}/{unlistedTasks.length} concluídas</span>
-                  <span className="text-lg font-bold text-foreground block">Sem lista</span>
-                </div>
+        <div className="w-full py-12 px-6" style={{ '--primary': '77 100% 73%', '--ring': '77 100% 73%' } as any}>
+          <SortableContext items={displayedLists.map(l => l.id)} strategy={verticalListSortingStrategy}>
+            {displayedLists.map(list => (
+              <SortableTaskList 
+                key={list.id} 
+                list={list} 
+                renderList={renderList} 
+                hideHandle={!!singleListId} 
+                onEdit={(id) => console.log('Edit list', id)}
+                onAddTask={(id) => setAddingToList(id)}
+                onDelete={(id) => { setDeleteListId(id); setDeleteListDialogOpen(true); }}
+                onAddGroup={(id) => setAddingGroupToList(id)}
+              />
+            ))}
+          </SortableContext>
+          {!singleListId && unlistedTasks.length > 0 && (
+            <div className="pl-12 mt-16 border-t border-border pt-10 font-jakarta">
+              <div className="flex items-center gap-4 mb-6">
+                <TaskListPieChart total={unlistedTasks.length} completed={unlistedTasks.filter(t => t.done).length} />
+                <span className="text-2xl font-bold text-foreground">Sem lista</span>
               </div>
               <SortableContext items={unlistedTasks.filter(t => !t.done).map(t => t.id)} strategy={verticalListSortingStrategy}>
-                {unlistedTasks.filter(t => !t.done).map(task => <SortableTaskRow key={task.id} task={task} />)}
-              </SortableContext>
-              {unlistedTasks.filter(t => t.done).length > 0 && !hideDone && (
-                <div className="mt-1">
-                  {unlistedTasks.filter(t => t.done).map(task => <SortableTaskRow key={task.id} task={task} />)}
+                <div className="space-y-0.5">
+                  {unlistedTasks.filter(t => !t.done).map(task => (
+                    <SortableTaskRow 
+                      key={task.id} task={task} 
+                      toggleDone={toggleDone} updateTaskText={updateTaskText} updateTaskStatus={updateTaskStatus} 
+                      updatePriority={updatePriority} updateDueDate={updateDueDate} updateAssignee={updateAssignee} 
+                      setDeleteTaskId={setDeleteTaskId} setDeleteDialogOpen={setDeleteDialogOpen} 
+                      members={members} getMemberInitials={getMemberInitials} 
+                      getMemberName={getMemberName} getDueDateStyle={getDueDateStyle} deleteTask={deleteTask}
+                    />
+                  ))}
                 </div>
-              )}
+              </SortableContext>
             </div>
           )}
-
-          {/* Empty state */}
-          {lists.length === 0 && unlistedTasks.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground text-sm">
-              Nenhuma lista de tarefas ainda. Crie uma para começar!
+          {!singleListId && showNewListInput && (
+            <div className="pl-12 mt-10">
+              <form onSubmit={e => { e.preventDefault(); createList(); }} className="max-w-xl bg-[#c5daf7] border border-primary/20 rounded-2xl p-8 shadow-xl">
+                <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)} placeholder="Nome da lista..." className="text-2xl font-bold text-primary outline-none w-full mb-4" />
+                {!showNewListDetails ? <button type="button" onClick={() => setShowNewListDetails(true)} className="text-slate-500 hover:text-primary mb-6 block text-sm">Adicionar detalhes ou anexos...</button> : <div className="mb-6"><RichTextEditor content={creatingListDescription} onChange={setCreatingListDescription} contentId={user?.id} /></div>}
+                <div className="flex gap-3"><Button type="submit" disabled={!creatingListName.trim()} className="rounded-full px-8 bg-primary text-white">Criar lista</Button><Button type="button" variant="ghost" onClick={() => setShowNewListInput(false)} className="rounded-full">Cancelar</Button></div>
+              </form>
             </div>
-          )}
-
-          {/* New list button */}
-          {showNewListInput ? (
-            <form onSubmit={(e) => { e.preventDefault(); createList(); }}
-              className="border border-dashed border-border rounded-xl p-5 bg-secondary/10">
-              <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)}
-                placeholder="Nome da lista..."
-                className="text-lg font-bold bg-transparent outline-none w-full text-foreground placeholder:text-muted-foreground/60 mb-3"
-                onKeyDown={e => { if (e.key === 'Escape') { setShowNewListInput(false); setCreatingListName(''); } }}
-              />
-              <div className="flex gap-2">
-                <Button type="submit" size="sm" disabled={!creatingListName.trim()}
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: '#ffffff' }}>
-                  <Plus size={14} className="mr-1" /> Criar lista
-                </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => { setShowNewListInput(false); setCreatingListName(''); }}>
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <Button variant="outline" onClick={() => setShowNewListInput(true)} className="gap-1.5"
-              style={{ borderColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500, hsl(var(--primary)))' }}>
-              <Plus size={16} /> Nova lista
-            </Button>
           )}
         </div>
-
-        {/* Drag overlay */}
         <DragOverlay>
           {activeTask ? (
-            <div className="bg-card border border-border rounded-lg shadow-lg px-4 py-2.5 opacity-90">
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-5 h-5 rounded border-2 flex items-center justify-center",
-                  activeTask.done ? "border-emerald-500 bg-emerald-500 text-white" : "border-border"
-                )}>
-                  {activeTask.done && <span className="text-[10px] font-bold">✓</span>}
-                </div>
-                <span className="text-sm">{activeTask.text}</span>
-              </div>
+            <div className="bg-[#c5daf7] border rounded-xl shadow-2xl px-6 py-3 border-primary/20 flex items-center gap-4 animate-in fade-in duration-200">
+              <div className={cn("w-5 h-5 rounded border", activeTask.done ? "bg-emerald-500 border-emerald-500" : "border-slate-300")} />
+              <span className="text-lg font-medium text-slate-700">{activeTask.text}</span>
+            </div>
+          ) : activeList ? (
+            <div className="bg-[#c5daf7] border rounded-2xl shadow-2xl px-8 py-6 border-primary/20 flex flex-col gap-2 min-w-[300px] animate-in fade-in duration-200">
+              <div className="flex items-center gap-3"><GripVertical size={20} className="text-primary/40" /><span className="text-2xl font-bold text-primary">{activeList.title}</span></div>
+              <div className="h-2 w-24 bg-slate-100 rounded-full" />
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      {/* Delete task dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir tarefa</AlertDialogTitle>
-            <AlertDialogDescription>Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={async () => { if (deleteTaskId) await deleteTask(deleteTaskId); setDeleteTaskId(null); setDeleteDialogOpen(false); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete list dialog */}
-      <AlertDialog open={deleteListDialogOpen} onOpenChange={setDeleteListDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir lista</AlertDialogTitle>
-            <AlertDialogDescription>Tem certeza? Todas as tarefas desta lista serão excluídas permanentemente.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={async () => { if (deleteListId) await deleteList(deleteListId); setDeleteListId(null); setDeleteListDialogOpen(false); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}><AlertDialogContent className="rounded-3xl"><AlertDialogHeader><AlertDialogTitle>Excluir tarefa</AlertDialogTitle><AlertDialogDescription>Deseja remover esta tarefa?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => { if (deleteTaskId) deleteTask(deleteTaskId); setDeleteDialogOpen(false); }} className="bg-red-500 text-white rounded-full">Excluir</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+      <AlertDialog open={deleteListDialogOpen} onOpenChange={setDeleteListDialogOpen}><AlertDialogContent className="rounded-3xl"><AlertDialogHeader><AlertDialogTitle>Excluir lista</AlertDialogTitle><AlertDialogDescription>Todas as tarefas serão removidas permanentemente.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => { if (deleteListId) deleteList(deleteListId); setDeleteListDialogOpen(false); }} className="bg-red-500 text-white rounded-full">Excluir</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
     </>
   );
-};
+});
 
 export default TaskListCard;

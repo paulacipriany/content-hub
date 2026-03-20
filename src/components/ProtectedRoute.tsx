@@ -5,7 +5,10 @@ import { Clock } from 'lucide-react';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading, profile, role } = useAuth();
 
+  console.log('ProtectedRoute: session state', { session: !!session, loading, profile: !!profile, role });
+
   if (loading) {
+    console.log('ProtectedRoute: loading spinner displayed');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -14,6 +17,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
+    console.log('ProtectedRoute: no session, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 

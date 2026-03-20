@@ -32,7 +32,7 @@ const Dashboard = () => {
   const reviewContents = contents.filter(c => c.status === 'review');
   const productionContents = contents.filter(c => c.status === 'production');
 
-  const handleClientClick = (project: typeof projects[number]) => {
+  const handleProjectClick = (project: typeof projects[number]) => {
     setSelectedProject(project);
     navigate(`/clients/${project.id}/dashboard`);
   };
@@ -114,19 +114,19 @@ const Dashboard = () => {
         <RemindersCard />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Clients */}
+          {/* Projects */}
           <div className="bg-card border border-border rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Clientes</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-4">Projetos</h2>
             <div className="space-y-2.5">
               {projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum cliente ainda. Crie seu primeiro cliente!</p>
+                <p className="text-sm text-muted-foreground">Nenhum projeto ainda. Crie seu primeiro projeto!</p>
               ) : (
                 projects.map(p => {
                   const pContents = contents.filter(c => c.project_id === p.id);
                   return (
                     <button
                       key={p.id}
-                      onClick={() => handleClientClick(p)}
+                      onClick={() => handleProjectClick(p)}
                       className="w-full p-3 rounded-lg hover:bg-secondary transition-colors text-left"
                     >
                       <div className="flex items-center gap-3">

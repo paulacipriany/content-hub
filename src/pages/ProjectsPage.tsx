@@ -151,11 +151,11 @@ const ProjectsPage = () => {
 
   return (
     <>
-      <TopBar title="Clientes" subtitle="Gerencie seus clientes e campanhas" />
+      <TopBar title="Projetos" subtitle="Gerencie seus projetos e campanhas" />
       <div className="p-6">
         <div className="flex justify-end mb-4">
           <Button size="sm" className="gap-1.5" onClick={() => setShowCreate(true)}>
-            <Plus size={16} /> Novo cliente
+            <Plus size={16} /> Novo projeto
           </Button>
         </div>
 
@@ -165,7 +165,7 @@ const ProjectsPage = () => {
             <input
               value={newName}
               onChange={e => setNewName(e.target.value)}
-              placeholder="Nome do cliente..."
+              placeholder="Nome do projeto..."
               className="w-full h-9 px-3 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
               autoFocus
             />
@@ -321,8 +321,8 @@ const ProjectsPage = () => {
           {projects.length === 0 && (
             <div className="col-span-full text-center py-20 text-muted-foreground">
               <FolderOpen size={48} className="mx-auto mb-4 opacity-50" />
-              <p className="text-sm">Nenhum cliente ainda.</p>
-              <p className="text-xs mt-1">Crie seu primeiro cliente para organizar seus conteúdos!</p>
+              <p className="text-sm">Nenhum projeto ainda.</p>
+              <p className="text-xs mt-1">Crie seu primeiro projeto para organizar seus conteúdos!</p>
             </div>
           )}
         </div>
@@ -332,9 +332,9 @@ const ProjectsPage = () => {
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa ação não pode ser desfeita. Todos os conteúdos vinculados a este cliente também serão afetados.
+              Essa ação não pode ser desfeita. Todos os conteúdos vinculados a este projeto também serão afetados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

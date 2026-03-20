@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { withTimeout } from '@/lib/utils';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,39 +36,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchProfileAndRole = async (userId: string) => {
-    const [profileRes, roleRes] = await Promise.all([
-      supabase.from('profiles').select('*').eq('user_id', userId).single(),
-      supabase.rpc('get_user_role', { _user_id: userId }),
-    ]);
-    if (profileRes.data) setProfile(profileRes.data as Profile);
-    if (roleRes.data) setRole(roleRes.data as AppRole);
+    try {
+      const [profileRes, roleRes] = await withTimeout(Promise.all([
+        supabase.from('profiles').select('*').eq('user_id', userId).single(),
+        supabase.rpc('get_user_role', { _user_id: userId }),
+      ]));
+      
+      if (profileRes.data) {
+        setProfile(profileRes.data as Profile);
+        console.log('Profile fetched:', profileRes.data);
+      } else if (profileRes.error) {
+        console.warn('Error fetching profile:', profileRes.error);
+      }
+      
+      if (roleRes.data) {
+        setRole(roleRes.data as AppRole);
+        console.log('Role fetched:', roleRes.data);
+      } else if (roleRes.error) {
+        console.warn('Error fetching role:', roleRes.error);
+      }
+    } catch (err) {
+      console.error('Fatal error in fetchProfileAndRole:', err);
+    }
   };
 
   useEffect(() => {
+    console.log('AuthContext: Initializing...');
+    let mounted = true;
+
+    // Fallback timeout: if still loading after 5 seconds, force stop loading
+    const timeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('AuthContext: Loading timeout reached, forcing loading to false');
+        setLoading(false);
+      }
+    }, 5000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log('AuthContext: onAuthStateChange event:', _event);
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
-        if (session?.user) {
-          setTimeout(() => fetchProfileAndRole(session.user.id), 0);
-        } else {
-          setProfile(null);
-          setRole(null);
+        try {
+          if (session?.user) {
+            await fetchProfileAndRole(session.user.id);
+          } else {
+            setProfile(null);
+            setRole(null);
+          }
+        } catch (err) {
+          console.error('AuthContext: Error in onAuthStateChange handler:', err);
+        } finally {
+          if (mounted) setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('AuthContext: getSession completed');
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfileAndRole(session.user.id);
+      try {
+        if (session?.user) {
+          await fetchProfileAndRole(session.user.id);
+        }
+      } catch (err) {
+        console.error('AuthContext: Error in getSession handler:', err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
+    }).catch(err => {
+      console.error('AuthContext: getSession failed:', err);
+      if (mounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, role: AppRole) => {

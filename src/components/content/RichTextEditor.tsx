@@ -3,10 +3,11 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
-import { Bold, Italic, Underline as UnderlineIcon, Link as LinkIcon, Image as ImageIcon, List, ListOrdered, Heading2, Undo, Redo } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Link as LinkIcon, Image as ImageIcon, Paperclip, List, ListOrdered, Heading2, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface RichTextEditorProps {
   content: string;
@@ -63,18 +64,35 @@ const RichTextEditor = ({ content, onChange, contentId }: RichTextEditorProps) =
   };
 
   const addImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('addImage starting...', { files: e.target.files?.length });
     const file = e.target.files?.[0];
-    if (!file || !editor || !contentId) return;
+    if (!file || !editor) return;
+    
+    const toastId = toast.loading('Enviando arquivo...');
+    
     try {
       const ext = file.name.split('.').pop();
-      const path = `${contentId}/briefing/${crypto.randomUUID()}.${ext}`;
+      const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext?.toLowerCase() ?? '');
+      const path = `${contentId || 'common'}/${isImage ? 'briefing' : 'attachments'}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('content-media').upload(path, file);
       if (!error) {
         const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
-        editor.chain().focus().setImage({ src: publicUrl }).run();
+        if (isImage) {
+          editor.chain().focus().setImage({ src: publicUrl }).run();
+        } else {
+          editor.chain().focus()
+            .extendMarkRange('link')
+            .setLink({ href: publicUrl })
+            .insertContent(file.name)
+            .run();
+        }
+        toast.success('Arquivo enviado com sucesso!', { id: toastId });
+      } else {
+        toast.error('Erro ao enviar arquivo: ' + error.message, { id: toastId });
       }
     } catch (err) {
       console.error('Image upload error:', err);
+      toast.error('Ocorreu um erro no upload.', { id: toastId });
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -122,6 +140,16 @@ const RichTextEditor = ({ content, onChange, contentId }: RichTextEditorProps) =
         <ToolBtn active={editor.isActive('link')} onClick={addLink} title="Link">
           <LinkIcon size={14} />
         </ToolBtn>
+        <ToolBtn onClick={() => { console.log('Paperclip clicked'); fileInputRef.current?.click(); }} title="Anexar arquivo">
+          <Paperclip size={14} />
+        </ToolBtn>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={addImage}
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+        />
         <div className="w-px h-5 bg-border mx-1" />
         <ToolBtn onClick={() => editor.chain().focus().undo().run()} title="Desfazer">
           <Undo size={14} />
