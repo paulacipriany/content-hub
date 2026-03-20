@@ -294,7 +294,7 @@ const SortableTaskRow = ({ task, ...props }: any) => {
 
 const SortableTaskList = ({ list, renderList, hideHandle, onEdit, onAddTask, onDelete, onAddGroup }: { 
   list: TaskList; 
-  renderList: (list: TaskList) => React.ReactNode; 
+  renderList: (list: TaskList, handleProps?: { attributes: any; listeners: any }) => React.ReactNode; 
   hideHandle?: boolean;
   onEdit: (id: string) => void;
   onAddTask: (id: string) => void;
@@ -307,32 +307,7 @@ const SortableTaskList = ({ list, renderList, hideHandle, onEdit, onAddTask, onD
   
   return (
     <div ref={setNodeRef} style={style} className="relative group/list-sortable">
-      {!hideHandle && (
-        <div className="absolute -left-12 top-1 cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-2 flex items-center gap-1">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <button {...attributes} {...listeners} className="p-1 hover:bg-slate-100 rounded transition-colors" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <div className="flex flex-col gap-[3px]">
-                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
-                </div>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-1 bg-[#c5daf7] border shadow-xl rounded-xl font-jakarta" align="start" side="bottom" sideOffset={5}>
-              <div className="flex flex-col">
-                <button onClick={() => { onEdit(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Editar</span></button>
-                <button className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Mover...</span></button>
-                <button className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Copiar...</span></button>
-                <div className="h-px bg-slate-100 my-1 mx-2" />
-                <button onClick={() => { onDelete(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-red-600 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Arquivar</span></button>
-                <div className="h-px bg-slate-100 my-1 mx-2" />
-                <button onClick={() => { onAddTask(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Inserir tarefa</span></button>
-                <button onClick={() => { onAddGroup(list.id); setOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 text-sm rounded-lg flex items-center gap-2 transition-colors"><span>Adicionar grupo</span></button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
-      {renderList(list)}
+      {renderList(list, hideHandle ? undefined : { attributes, listeners })}
     </div>
   );
 };
@@ -531,17 +506,24 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     return lists;
   }, [lists, singleListId]);
 
-  const renderList = (list: TaskList) => {
+  const renderList = (list: TaskList, handleProps?: { attributes: any; listeners: any }) => {
     const lTasks = tasks.filter(t => t.list_id === list.id).filter(filterTask);
     const doneT = lTasks.filter(t => t.done && t.status !== 'group');
     const pendT = lTasks.filter(t => !t.done || t.status === 'group');
     const totalT = lTasks.filter(t => t.status !== 'group').length;
 
     return (
-      <div className="mb-12 pl-12 relative group/list">
+      <div className="mb-12 pl-4 relative group/list">
         <div className="mb-4">
-          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight">{doneT.length}/{totalT} concluídas</div>
-          <div className="flex items-start gap-4">
+          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-10">{doneT.length}/{totalT} concluídas</div>
+          <div className="flex items-center gap-3">
+            {handleProps && (
+              <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
+                <div className="flex flex-col gap-[3px]">
+                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
+                </div>
+              </button>
+            )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
             <div className="flex-1">
               <div className="flex items-center gap-2 group/title">
