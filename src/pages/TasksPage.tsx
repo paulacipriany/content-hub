@@ -163,7 +163,7 @@ const TasksPage = () => {
             </>
           )}
 
-          <Button variant="outline" size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="ml-auto gap-1.5 h-8 text-xs border-primary/50 text-primary hover:bg-primary/5">
+          <Button size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="ml-auto gap-1.5 h-8 text-xs bg-[#1369db] text-white hover:bg-[#1369db]/90">
             <Plus size={14} /> Nova lista
           </Button>
         </div>
