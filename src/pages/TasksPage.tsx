@@ -168,7 +168,9 @@ const TasksPage = () => {
           </Button>
         </div>
 
-        <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+        <div className="px-6">
+          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+        </div>
       </div>
     </>
   );
