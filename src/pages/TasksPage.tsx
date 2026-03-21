@@ -87,7 +87,16 @@ const TasksPage = () => {
 
   return (
     <>
-      <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" className="bg-[#c5daf7] border-[#c5daf7]" />
+      <TopBar
+        title="Tarefas"
+        subtitle="Gerencie as tarefas do projeto"
+        className="bg-[#c5daf7] border-[#c5daf7]"
+        actions={
+          <Button size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="gap-1.5 h-9 text-sm bg-[#1369db] text-white hover:bg-[#1369db]/90 rounded-lg">
+            <Plus size={16} /> Criar lista
+          </Button>
+        }
+      />
       <div className="bg-[#c5daf7] min-h-screen">
         {/* Color accent bar */}
         <div className="h-2 w-full" style={{ background: `linear-gradient(90deg, ${projectColor}, ${projectColor}cc)` }} />
