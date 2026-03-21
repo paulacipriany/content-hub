@@ -83,12 +83,16 @@ const TasksPage = () => {
   const togglePriority = (p: TaskPriority) => setFilters(prev => ({ ...prev, priorities: prev.priorities.includes(p) ? prev.priorities.filter(x => x !== p) : [...prev.priorities, p] }));
   const clearFilters = () => setFilters({ statuses: [], priorities: [], dateFilter: 'all' });
 
+  const projectColor = selectedProject?.color || '#1369db';
+
   return (
     <>
       <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" />
-      <div className="p-6 bg-[#c5daf7] min-h-screen">
+      <div className="bg-[#c5daf7] min-h-screen">
+        {/* Color accent bar */}
+        <div className="h-2 w-full" style={{ background: `linear-gradient(90deg, ${projectColor}, ${projectColor}cc)` }} />
         {/* Filter bar */}
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <div className="flex items-center gap-2 px-6 py-4 flex-wrap">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className={cn("gap-1.5 h-8 text-xs", filters.statuses.length > 0 && "border-primary/50 bg-primary/5")}>
@@ -164,7 +168,9 @@ const TasksPage = () => {
           </Button>
         </div>
 
-        <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+        <div className="px-6">
+          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+        </div>
       </div>
     </>
   );
