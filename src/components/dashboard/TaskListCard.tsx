@@ -515,7 +515,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     return (
       <div className="mb-12 pl-4 relative group/list">
         <div className="mb-4">
-          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-10">{doneT.length}/{totalT} concluídas</div>
+          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-[72px]">{doneT.length}/{totalT} concluídas</div>
           <div className="flex items-center gap-3">
             {handleProps && (
               <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
@@ -542,7 +542,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
             </div>
           </div>
         </div>
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 pl-[72px]">
           <SortableContext items={pendT.map(t => t.id)} strategy={verticalListSortingStrategy}>
             {pendT.map(task => <SortableTaskRow key={task.id} task={task} toggleDone={toggleDone} updateTaskText={updateTaskText} updateTaskStatus={updateTaskStatus} updatePriority={updatePriority} updateDueDate={updateDueDate} updateAssignee={updateAssignee} setDeleteTaskId={setDeleteTaskId} setDeleteDialogOpen={setDeleteDialogOpen} members={members} getMemberInitials={getMemberInitials} getMemberName={getMemberName} getDueDateStyle={getDueDateStyle} deleteTask={deleteTask} />)}
           </SortableContext>
