@@ -542,7 +542,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
             </div>
           </div>
         </div>
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 pl-[72px]">
           <SortableContext items={pendT.map(t => t.id)} strategy={verticalListSortingStrategy}>
             {pendT.map(task => <SortableTaskRow key={task.id} task={task} toggleDone={toggleDone} updateTaskText={updateTaskText} updateTaskStatus={updateTaskStatus} updatePriority={updatePriority} updateDueDate={updateDueDate} updateAssignee={updateAssignee} setDeleteTaskId={setDeleteTaskId} setDeleteDialogOpen={setDeleteDialogOpen} members={members} getMemberInitials={getMemberInitials} getMemberName={getMemberName} getDueDateStyle={getDueDateStyle} deleteTask={deleteTask} />)}
           </SortableContext>
