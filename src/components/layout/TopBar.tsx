@@ -14,9 +14,10 @@ interface TopBarProps {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  className?: string;
 }
 
-const TopBar = ({ title, subtitle, actions }: TopBarProps) => {
+const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject, pendingUsersCount } = useApp();
   const { role } = useAuth();
@@ -46,7 +47,7 @@ const TopBar = ({ title, subtitle, actions }: TopBarProps) => {
   const totalUnread = unreadCount + (hasUnreadPendingUsers ? 1 : 0);
 
   return (
-    <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0">
+    <header className={cn("flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0", className)}>
       <div className="flex items-center gap-4">
         {role !== 'client' && (
           <>

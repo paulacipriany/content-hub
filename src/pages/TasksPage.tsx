@@ -87,7 +87,7 @@ const TasksPage = () => {
 
   return (
     <>
-      <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" />
+      <TopBar title="Tarefas" subtitle="Gerencie as tarefas do projeto" className="bg-[#c5daf7] border-[#c5daf7]" />
       <div className="bg-[#c5daf7] min-h-screen">
         {/* Color accent bar */}
         <div className="h-2 w-full" style={{ background: `linear-gradient(90deg, ${projectColor}, ${projectColor}cc)` }} />
