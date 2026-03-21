@@ -47,7 +47,7 @@ const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
   const totalUnread = unreadCount + (hasUnreadPendingUsers ? 1 : 0);
 
   return (
-    <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0">
+    <header className={cn("flex items-center justify-between h-14 px-6 border-b border-border bg-card flex-shrink-0", className)}>
       <div className="flex items-center gap-4">
         {role !== 'client' && (
           <>
