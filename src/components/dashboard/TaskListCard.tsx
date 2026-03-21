@@ -515,7 +515,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     return (
       <div className="mb-12 pl-4 relative group/list">
         <div className="mb-4">
-          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-10">{doneT.length}/{totalT} concluídas</div>
+          <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-[72px]">{doneT.length}/{totalT} concluídas</div>
           <div className="flex items-center gap-3">
             {handleProps && (
               <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
