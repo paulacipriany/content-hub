@@ -768,14 +768,15 @@ const ContentPanel = () => {
                     key={p}
                     onClick={() => setPreviewPlatform(p)}
                     className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                      "w-9 h-9 rounded-full flex items-center justify-center transition-all",
                       previewPlatform === p
                         ? "text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:bg-accent"
                     )}
                     style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
+                    title={PLATFORM_LABELS[p]}
                   >
-                    {PLATFORM_LABELS[p]}
+                    {platformIcon([p], 18)}
                   </button>
                 ))}
               </div>
