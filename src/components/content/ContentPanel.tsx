@@ -886,23 +886,28 @@ const ContentPanel = () => {
                   <ImagePlus size={12} />Mídia
                 </label>
                 {mediaUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {mediaUrls.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                        {url.match(/\.(mp4|webm|mov)$/i) ? (
-                          <video src={url} controls className="w-full h-full object-cover" />
-                        ) : (
-                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
-                        )}
-                        <button
-                          onClick={() => handleRemoveMedia(i)}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={10} />
-                        </button>
+                  <DndContext
+                    sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event: DragEndEvent) => {
+                      const { active, over } = event;
+                      if (!over || active.id === over.id) return;
+                      const oldIndex = mediaUrls.findIndex((u, i) => u + '__' + i === active.id);
+                      const newIndex = mediaUrls.findIndex((u, i) => u + '__' + i === over.id);
+                      if (oldIndex === -1 || newIndex === -1) return;
+                      const reordered = arrayMove(mediaUrls, oldIndex, newIndex);
+                      setMediaUrls(reordered);
+                      updateContentFields(selectedContent.id, { media_urls: reordered });
+                    }}
+                  >
+                    <SortableContext items={mediaUrls.map((u, i) => u + '__' + i)} strategy={rectSortingStrategy}>
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {mediaUrls.map((url, i) => (
+                          <SortableMediaItem key={url + '__' + i} url={url} index={i} onRemove={handleRemoveMedia} onLightbox={setLightboxUrl} />
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
                 <button
                   onClick={() => fileInputRef.current?.click()}
