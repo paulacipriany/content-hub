@@ -784,7 +784,8 @@ const ContentPanel = () => {
             </div>
           ) : (
             <>
-              {/* Copy text (editable) */}
+              {/* Copy text (editable) — hidden for stories */}
+              {selectedContent.content_type !== 'stories' && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
@@ -848,6 +849,7 @@ const ContentPanel = () => {
                   />
                 )}
               </div>
+              )}
 
               {/* Media Upload */}
               <div>
