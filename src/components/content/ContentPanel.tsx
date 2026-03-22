@@ -888,7 +888,7 @@ const ContentPanel = () => {
                 </label>
                 {mediaUrls.length > 0 && (
                   <DndContext
-                    sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))}
+                    sensors={mediaSensors}
                     collisionDetection={closestCenter}
                     onDragEnd={(event: DragEndEvent) => {
                       const { active, over } = event;
