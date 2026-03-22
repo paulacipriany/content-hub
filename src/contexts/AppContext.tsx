@@ -61,7 +61,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const [projectsRes, contentsRes] = await withTimeout(Promise.all([
         supabase.from('projects').select('*').order('created_at', { ascending: false }),
-        supabase.from('contents').select('*').order('sort_order', { ascending: true }).limit(200),
+        supabase.from('contents').select('*').order('created_at', { ascending: false }).limit(200),
       ]), 25000);
 
       let projectsList = (projectsRes.data ?? []) as DbProject[];
