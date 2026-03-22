@@ -48,9 +48,6 @@ const StoriesPreview = ({ content }: { content: ContentWithRelations }) => {
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-4">
-        {text && (
-          <p className="text-[11px] text-white/90 mb-3 line-clamp-2">{text}</p>
-        )}
 
         {/* Swipe up / CTA */}
         <div className="flex items-center justify-center mb-2">
