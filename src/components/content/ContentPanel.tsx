@@ -1,4 +1,7 @@
-import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck, GripVertical } from 'lucide-react';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useToast } from '@/hooks/use-toast';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import RichTextEditor from './RichTextEditor';
@@ -29,6 +32,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+
+// Sortable media item for drag-and-drop reordering
+const SortableMediaItem = ({ url, index, onRemove, onLightbox }: { url: string; index: number; onRemove: (i: number) => void; onLightbox: (url: string) => void }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: url + '__' + index });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, zIndex: isDragging ? 10 : undefined };
+  const isVideo = url.match(/\.(mp4|webm|mov)$/i);
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+      {isVideo ? (
+        <video src={url} controls className="w-full h-full object-cover" />
+      ) : (
+        <img src={url} alt={`Mídia ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => onLightbox(url)} />
+      )}
+      <div {...attributes} {...listeners} className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
+        <GripVertical size={12} />
+      </div>
+      <button
+        onClick={() => onRemove(index)}
+        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <Trash2 size={10} />
+      </button>
+    </div>
+  );
+};
 
 const allStatuses: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'published'];
 const allPlatforms: Platform[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
@@ -87,6 +116,7 @@ const ContentPanel = () => {
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [draftSaved, setDraftSaved] = useState(true);
+  const mediaSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
   const [userAlreadyApproved, setUserAlreadyApproved] = useState(false);
@@ -857,23 +887,28 @@ const ContentPanel = () => {
                   <ImagePlus size={12} />Mídia
                 </label>
                 {mediaUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {mediaUrls.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                        {url.match(/\.(mp4|webm|mov)$/i) ? (
-                          <video src={url} controls className="w-full h-full object-cover" />
-                        ) : (
-                          <img src={url} alt={`Mídia ${i + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(url)} />
-                        )}
-                        <button
-                          onClick={() => handleRemoveMedia(i)}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={10} />
-                        </button>
+                  <DndContext
+                    sensors={mediaSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event: DragEndEvent) => {
+                      const { active, over } = event;
+                      if (!over || active.id === over.id) return;
+                      const oldIndex = mediaUrls.findIndex((u, i) => u + '__' + i === active.id);
+                      const newIndex = mediaUrls.findIndex((u, i) => u + '__' + i === over.id);
+                      if (oldIndex === -1 || newIndex === -1) return;
+                      const reordered = arrayMove(mediaUrls, oldIndex, newIndex);
+                      setMediaUrls(reordered);
+                      updateContentFields(selectedContent.id, { media_urls: reordered });
+                    }}
+                  >
+                    <SortableContext items={mediaUrls.map((u, i) => u + '__' + i)} strategy={rectSortingStrategy}>
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {mediaUrls.map((url, i) => (
+                          <SortableMediaItem key={url + '__' + i} url={url} index={i} onRemove={handleRemoveMedia} onLightbox={setLightboxUrl} />
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
                 <button
                   onClick={() => fileInputRef.current?.click()}
