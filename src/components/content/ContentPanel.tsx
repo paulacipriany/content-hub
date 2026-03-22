@@ -116,6 +116,7 @@ const ContentPanel = () => {
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [draftSaved, setDraftSaved] = useState(true);
+  const mediaSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
   const [userAlreadyApproved, setUserAlreadyApproved] = useState(false);
