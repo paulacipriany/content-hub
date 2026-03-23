@@ -117,6 +117,7 @@ const ContentPanel = () => {
   const [editBriefing, setEditBriefing] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [draftSaved, setDraftSaved] = useState(true);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const mediaSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
@@ -639,7 +640,7 @@ const ContentPanel = () => {
                     : 'Não definida'}
                 </span>
               ) : (
-                <Popover>
+                <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                   <PopoverTrigger asChild>
                     <button className="h-8 px-3 text-xs rounded-md border border-input bg-background text-foreground hover:bg-accent flex items-center gap-2 flex-1 text-left">
                       <CalIcon size={12} className="text-muted-foreground" />
@@ -652,7 +653,7 @@ const ContentPanel = () => {
                     <Calendar
                       mode="single"
                       selected={selectedContent.publish_date ? new Date(selectedContent.publish_date + 'T12:00:00') : undefined}
-                      onSelect={handleDateChange}
+                      onSelect={(d) => { handleDateChange(d); setDatePopoverOpen(false); }}
                       locale={ptBR}
                       className={cn("p-3 pointer-events-auto")}
                     />
