@@ -701,16 +701,44 @@ const ContentPanel = () => {
               </div>
             )}
             {/* Approvers — below Responsável */}
-            {!isIdeaBank && approvers.length > 0 && (
+            {!isIdeaBank && (
               <div className="flex items-start gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0 mt-1">Aprovadores</span>
-                <div className="flex flex-wrap gap-1.5 flex-1">
-                  {approvers.map(a => (
-                    <span key={a.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-xs text-foreground">
-                      <UserCheck size={10} className="text-muted-foreground" />
-                      {a.display_name ?? 'Sem nome'}
-                    </span>
-                  ))}
+                <div className="flex-1">
+                  {selectedContent.status === 'idea' ? (
+                    <ApproverSelector
+                      selectedApprovers={approvers.map(a => a.user_id)}
+                      onChange={async (newIds) => {
+                        // Delete existing approvers
+                        await supabase.from('content_approvers' as any).delete().eq('content_id', selectedContent.id);
+                        // Insert new ones
+                        if (newIds.length > 0) {
+                          await supabase.from('content_approvers' as any).insert(
+                            newIds.map(userId => ({ content_id: selectedContent.id, user_id: userId }))
+                          );
+                        }
+                        // Refresh approvers
+                        if (newIds.length > 0) {
+                          const { data: profiles } = await supabase.from('profiles').select('user_id, display_name').in('user_id', newIds);
+                          setApprovers(profiles ?? []);
+                        } else {
+                          setApprovers([]);
+                        }
+                      }}
+                      projectId={selectedContent.project_id}
+                    />
+                  ) : approvers.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {approvers.map(a => (
+                        <span key={a.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-xs text-foreground">
+                          <UserCheck size={10} className="text-muted-foreground" />
+                          {a.display_name ?? 'Sem nome'}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Nenhum aprovador</span>
+                  )}
                 </div>
               </div>
             )}
