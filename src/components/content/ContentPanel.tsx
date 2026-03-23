@@ -696,9 +696,11 @@ const ContentPanel = () => {
                     <User size={12} className="text-muted-foreground" />
                     <span>{assigneeName}</span>
                   </div>
+                )}
+              </div>
             )}
-            {/* Approvers */}
-            {approvers.length > 0 && (
+            {/* Approvers — below Responsável */}
+            {!isIdeaBank && approvers.length > 0 && (
               <div className="flex items-start gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0 mt-1">Aprovadores</span>
                 <div className="flex flex-wrap gap-1.5 flex-1">
@@ -709,8 +711,6 @@ const ContentPanel = () => {
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
               </div>
             )}
           </div>
