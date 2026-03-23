@@ -160,7 +160,7 @@ const AppSidebar = () => {
               <item.icon size={18} className="flex-shrink-0" />
               {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
               {!sidebarCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1369db', color: '#ffffff' }}>
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                   {pendingUsersCount}
                 </span>
               )}
@@ -216,17 +216,17 @@ const AppSidebar = () => {
                     <item.icon size={15} className="flex-shrink-0" />
                     {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                     {item.path === '/approvals' && approvalCount > 0 &&
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1369db', color: '#ffffff' }}>
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                         {approvalCount}
                       </span>
                   }
                     {item.path === '/review' && reviewCount > 0 &&
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1369db', color: '#ffffff' }}>
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                         {reviewCount}
                       </span>
                   }
                     {item.path === '/scheduling' && schedulingCount > 0 &&
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1369db', color: '#ffffff' }}>
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                         {schedulingCount}
                       </span>
                   }
@@ -249,7 +249,7 @@ const AppSidebar = () => {
                   <item.icon size={18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                   {item.path === '/post-reports' && postReportsCount > 0 &&
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#1369db', color: '#ffffff' }}>
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                       {postReportsCount}
                     </span>
                 }
