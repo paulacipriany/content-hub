@@ -70,7 +70,7 @@ const Dashboard = () => {
         )}
 
         {/* Alert banners */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           {inApproval > 0 && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800">
               <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
