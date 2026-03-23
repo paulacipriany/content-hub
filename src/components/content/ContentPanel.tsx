@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 import RichTextEditor from './RichTextEditor';
 import AssigneeSelector from './AssigneeSelector';
+import ApproverSelector from './ApproverSelector';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, STATUS_COLORS, PLATFORM_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, Platform, ContentType, VISIBLE_CONTENT_TYPES } from '@/data/types';
