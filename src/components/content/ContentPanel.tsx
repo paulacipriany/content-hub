@@ -156,6 +156,9 @@ const ContentPanel = () => {
     console.log('Loading content:', selectedContent.id, 'briefing_images:', bImages);
     setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
     setDraftSaved(true);
+    if (selectedContent.platform && selectedContent.platform.length > 0) {
+      setPreviewPlatform(selectedContent.platform[0]);
+    }
     // Set snapshot after a tick so state is updated
     setTimeout(() => {
       savedSnapshotRef.current = JSON.stringify({
