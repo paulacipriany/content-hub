@@ -4,7 +4,8 @@ export const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
 
 export const getAspectClass = (platform: string, contentType?: string) => {
   if (contentType === 'shorts' || contentType === 'reels' || contentType === 'stories') return 'aspect-[9/16]';
-  return platform === 'instagram' ? 'aspect-square' : 'aspect-video';
+  if (contentType === 'feed' || contentType === 'carousel' || contentType === 'image') return 'aspect-[3/4]';
+  return platform === 'instagram' ? 'aspect-[3/4]' : 'aspect-video';
 };
 
 export const getDisplayText = (content: ContentWithRelations, platform?: string, maxChars?: number) => {
