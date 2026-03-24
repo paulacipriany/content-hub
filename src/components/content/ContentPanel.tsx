@@ -657,6 +657,11 @@ const ContentPanel = () => {
                       locale={ptBR}
                       className={cn("p-3 pointer-events-auto")}
                     />
+                    {selectedContent.publish_date && (
+                      <div className="p-2 border-t">
+                        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => { handleDateChange(undefined); setDatePopoverOpen(false); }}>Remover data</Button>
+                      </div>
+                    )}
                   </PopoverContent>
                 </Popover>
               )}
