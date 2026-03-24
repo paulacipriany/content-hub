@@ -296,8 +296,14 @@ const ContentPanel = () => {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    let files = Array.from(e.target.files || []);
     if (files.length === 0 || !user || !selectedContent) return;
+    
+    const isPostFeed = selectedContent.content_type === 'post';
+    if (isPostFeed) {
+      files = [files[0]];
+    }
+    
     setUploading(true);
     try {
       const newUrls: string[] = [];
@@ -317,7 +323,7 @@ const ContentPanel = () => {
           });
         }
       }
-      const updatedUrls = [...mediaUrls, ...newUrls];
+      const updatedUrls = isPostFeed ? [newUrls[0]] : [...mediaUrls, ...newUrls];
       setMediaUrls(updatedUrls);
       await updateContentFields(selectedContent.id, {
         media_url: updatedUrls[0] ?? null,
@@ -948,25 +954,27 @@ const ContentPanel = () => {
                     </SortableContext>
                   </DndContext>
                 )}
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-                >
-                  {uploading ? (
-                    <Loader2 size={18} className="animate-spin text-primary" />
-                  ) : (
-                    <>
-                      <ImagePlus size={18} />
-                      <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagens' : 'Adicionar mais imagens'}</span>
-                    </>
-                  )}
-                </button>
+                {!(selectedContent.content_type === 'post' && mediaUrls.length >= 1) && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
+                  >
+                    {uploading ? (
+                      <Loader2 size={18} className="animate-spin text-primary" />
+                    ) : (
+                      <>
+                        <ImagePlus size={18} />
+                        <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagem' : 'Adicionar mais imagens'}</span>
+                      </>
+                    )}
+                  </button>
+                )}
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*,video/*"
-                  multiple
+                  {...(selectedContent.content_type !== 'post' ? { multiple: true } : {})}
                   onChange={handleFileUpload}
                   className="hidden"
                 />
