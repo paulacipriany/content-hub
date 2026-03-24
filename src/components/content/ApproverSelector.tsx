@@ -83,6 +83,9 @@ const ApproverSelector = ({ selectedApprovers, onChange, label, projectId }: App
         <div className="flex flex-wrap gap-1.5 mb-1.5">
           {selectedProfiles.map(p => (
             <Badge key={p.user_id} variant="secondary" className="gap-1 pr-1">
+              {p.avatar_url ? (
+                <img src={p.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover flex-shrink-0" />
+              ) : null}
               <span className="text-xs">{p.display_name ?? 'Sem nome'}</span>
               <button
                 type="button"
@@ -139,6 +142,13 @@ const ApproverSelector = ({ selectedApprovers, onChange, label, projectId }: App
                     }`}>
                       {isSelected && <span className="text-primary-foreground text-[10px]">✓</span>}
                     </div>
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[9px] font-bold text-primary">{(p.display_name ?? '?').charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
                     {p.display_name ?? 'Sem nome'}
                   </button>
                 );

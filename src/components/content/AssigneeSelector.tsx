@@ -12,12 +12,12 @@ interface AssigneeSelectorProps {
 
 const AssigneeSelector = ({ currentAssigneeId, assigneeName, onChangeAssignee }: AssigneeSelectorProps) => {
   const [open, setOpen] = useState(false);
-  const [profiles, setProfiles] = useState<{ user_id: string; display_name: string | null }[]>([]);
+  const [profiles, setProfiles] = useState<{ user_id: string; display_name: string | null; avatar_url: string | null }[]>([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!open) return;
-    supabase.from('profiles').select('user_id, display_name').then(({ data }) => {
+    supabase.from('profiles').select('user_id, display_name, avatar_url').then(({ data }) => {
       setProfiles(data ?? []);
     });
   }, [open]);
@@ -59,6 +59,13 @@ const AssigneeSelector = ({ currentAssigneeId, assigneeName, onChangeAssignee }:
                     : 'hover:bg-secondary text-foreground'
                 }`}
               >
+                {p.avatar_url ? (
+                  <img src={p.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[9px] font-bold text-primary">{(p.display_name ?? '?').charAt(0).toUpperCase()}</span>
+                  </div>
+                )}
                 {p.display_name ?? 'Sem nome'}
               </button>
             ))
