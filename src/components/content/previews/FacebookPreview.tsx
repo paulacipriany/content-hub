@@ -4,7 +4,7 @@ import { getDisplayText, getInitials } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const FacebookPreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'Usuário';
+  const userName = content.project?.name ?? 'Página';
   const initials = getInitials(userName);
 
   return (
