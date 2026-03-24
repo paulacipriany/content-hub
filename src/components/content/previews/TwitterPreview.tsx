@@ -4,7 +4,7 @@ import { getDisplayText, getInitials, getUserHandle } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const TwitterPreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'Usuário';
+  const userName = content.project?.name ?? 'Usuário';
   const initials = getInitials(userName);
 
   return (

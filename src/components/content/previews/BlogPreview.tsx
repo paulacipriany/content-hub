@@ -4,7 +4,7 @@ import { getDisplayText, getInitials } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const BlogPreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'Autor';
+  const userName = content.project?.name ?? 'Autor';
   const initials = getInitials(userName);
 
   return (

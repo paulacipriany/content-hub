@@ -4,7 +4,7 @@ import { getDisplayText, getInitials, getUserHandle } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'usuario';
+  const userName = content.project?.name ?? 'usuario';
   const initials = getInitials(userName);
 
   return (

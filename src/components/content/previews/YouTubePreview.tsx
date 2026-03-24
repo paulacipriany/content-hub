@@ -4,7 +4,7 @@ import { getDisplayText, getInitials } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const YouTubePreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'Canal';
+  const userName = content.project?.name ?? 'Canal';
   const initials = getInitials(userName);
 
   return (

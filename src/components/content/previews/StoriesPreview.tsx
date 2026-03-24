@@ -4,7 +4,7 @@ import { getDisplayText, getInitials, getUserHandle } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const StoriesPreview = ({ content }: { content: ContentWithRelations }) => {
-  const userName = content.creator_profile?.display_name ?? 'usuario';
+  const userName = content.project?.name ?? 'usuario';
   const initials = getInitials(userName);
   const platform = Array.isArray(content.platform) ? content.platform[0] : content.platform;
   const text = getDisplayText(content, platform, 80);
