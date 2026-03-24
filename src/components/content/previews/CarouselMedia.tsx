@@ -18,7 +18,9 @@ const CarouselMedia = ({ urls, platform, contentType }: CarouselMediaProps) => {
       {urls[current].match(/\.(mp4|webm|mov)$/i) ? (
         <video src={urls[current]} controls className={cn("w-full object-cover", aspectClass)} />
       ) : (
-        <img src={urls[current]} alt={`Slide ${current + 1}`} className={cn("w-full object-cover", aspectClass)} />
+        <div className={cn("w-full bg-black/5 dark:bg-white/5 flex items-center justify-center", aspectClass)}>
+          <img src={urls[current]} alt={`Slide ${current + 1}`} className="w-full h-full object-contain" />
+        </div>
       )}
       {urls.length > 1 && (
         <>
