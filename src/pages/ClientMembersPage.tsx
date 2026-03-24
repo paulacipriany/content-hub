@@ -195,14 +195,18 @@ const ClientMembersPage = () => {
                     key={member.id}
                     className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
                   >
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: 'var(--client-100, hsl(var(--primary) / 0.1))' }}
-                    >
-                      <span className="text-xs font-semibold" style={{ color: 'var(--client-600, hsl(var(--primary)))' }}>
-                        {initials}
-                      </span>
-                    </div>
+                    {member.profile?.avatar_url ? (
+                      <img src={member.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: 'var(--client-100, hsl(var(--primary) / 0.1))' }}
+                      >
+                        <span className="text-xs font-semibold" style={{ color: 'var(--client-600, hsl(var(--primary)))' }}>
+                          {initials}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm font-medium text-foreground truncate">{name}</p>
