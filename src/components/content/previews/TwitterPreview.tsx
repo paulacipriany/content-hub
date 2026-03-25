@@ -1,6 +1,6 @@
 import { ContentWithRelations } from '@/data/types';
 import { Heart, MessageCircle, Repeat2, BarChart3, Upload, MoreHorizontal } from 'lucide-react';
-import { getDisplayText, getInitials, getUserHandle } from './previewUtils';
+import { getDisplayText, getInitials, getUserHandle, getProjectLogo } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const TwitterPreview = ({ content }: { content: ContentWithRelations }) => {
@@ -11,8 +11,12 @@ const TwitterPreview = ({ content }: { content: ContentWithRelations }) => {
     <div className="bg-card border border-border rounded-xl overflow-hidden max-w-[350px] mx-auto">
       <div className="px-3 py-3">
         <div className="flex gap-2.5">
-          <div className="w-10 h-10 rounded-full bg-[hsl(var(--platform-twitter))] flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold">{initials}</span>
+          <div className="w-10 h-10 rounded-full bg-[hsl(var(--platform-twitter))] flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {getProjectLogo(content) ? (
+              <img src={getProjectLogo(content)!} alt={userName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold">{initials}</span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">

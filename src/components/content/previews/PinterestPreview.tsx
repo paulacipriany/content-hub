@@ -1,6 +1,6 @@
 import { ContentWithRelations } from '@/data/types';
 import { MoreHorizontal, ExternalLink, Upload } from 'lucide-react';
-import { getDisplayText, getInitials } from './previewUtils';
+import { getDisplayText, getInitials, getProjectLogo } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const PinterestPreview = ({ content }: { content: ContentWithRelations }) => {
@@ -37,8 +37,12 @@ const PinterestPreview = ({ content }: { content: ContentWithRelations }) => {
           {getDisplayText(content, 'pinterest', 80)}
         </p>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[hsl(var(--platform-pinterest))] flex items-center justify-center">
-            <span className="text-[9px] font-bold text-white">{initials}</span>
+          <div className="w-7 h-7 rounded-full bg-[hsl(var(--platform-pinterest))] flex items-center justify-center overflow-hidden">
+            {getProjectLogo(content) ? (
+              <img src={getProjectLogo(content)!} alt={userName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[9px] font-bold text-white">{initials}</span>
+            )}
           </div>
           <span className="text-xs font-medium text-foreground">{userName}</span>
         </div>

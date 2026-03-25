@@ -27,5 +27,8 @@ export const getDisplayText = (content: ContentWithRelations, platform?: string,
 export const getInitials = (name: string) =>
   name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
+export const getProjectLogo = (content: ContentWithRelations) =>
+  content.project?.logo_url || null;
+
 export const getUserHandle = (name: string) =>
   name.toLowerCase().replace(/\s+/g, '.');
