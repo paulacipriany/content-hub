@@ -329,8 +329,7 @@ const WorkflowPage = () => {
                   <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[previewContent.status as WorkflowStatus])}>{STATUS_LABELS[previewContent.status as WorkflowStatus]}</span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">{CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}</span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                    {platformIcon(previewContent.platform, 12)}
-                    {Array.isArray(previewContent.platform) ? previewContent.platform.join(', ') : previewContent.platform}
+                    {platformIcon(previewContent.platform, 14, true)}
                   </span>
                 </div>
               </div>
