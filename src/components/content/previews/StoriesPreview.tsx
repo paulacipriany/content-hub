@@ -53,13 +53,6 @@ const StoriesPreview = ({ content }: { content: ContentWithRelations }) => {
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-4">
 
-        {/* Swipe up / CTA */}
-        <div className="flex items-center justify-center mb-2">
-          <div className="flex flex-col items-center">
-            <ChevronUp size={16} className="text-white/70 -mb-1" />
-            <span className="text-[9px] text-white/60">Ver mais</span>
-          </div>
-        </div>
 
         {/* Reply bar */}
         <div className="flex items-center gap-2">
