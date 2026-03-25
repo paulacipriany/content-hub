@@ -95,7 +95,7 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHand
 
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
-            {platformIcon(content.platform)}
+            {platformIcon(content.platform, 14, true)}
             <span className="text-xs font-medium text-muted-foreground">{CONTENT_TYPE_LABELS[content.content_type as ContentType]}</span>
           </div>
           {!hideStatus && (
