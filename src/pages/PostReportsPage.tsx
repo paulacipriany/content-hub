@@ -490,7 +490,7 @@ const AnalysisSheet = ({
           {/* Save button — hidden for read-only */}
           {!readOnly && (
             <div className="px-6 py-3 border-t border-border">
-              <Button className="w-full" onClick={() => handleSave()} disabled={saving}>
+              <Button className="w-full" onClick={() => handleSave(true)} disabled={saving}>
                 {saving ? 'Salvando...' : analysis ? 'Atualizar análise' : 'Salvar análise'}
               </Button>
             </div>
