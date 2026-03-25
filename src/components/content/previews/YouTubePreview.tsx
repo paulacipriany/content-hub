@@ -1,6 +1,6 @@
 import { ContentWithRelations } from '@/data/types';
 import { ThumbsUp, ThumbsDown, Share2, MoreHorizontal } from 'lucide-react';
-import { getDisplayText, getInitials } from './previewUtils';
+import { getDisplayText, getInitials, getProjectLogo } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const YouTubePreview = ({ content }: { content: ContentWithRelations }) => {
@@ -21,8 +21,12 @@ const YouTubePreview = ({ content }: { content: ContentWithRelations }) => {
           {content.title}
         </h3>
         <div className="flex items-start gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-[hsl(var(--platform-youtube))] flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] font-bold text-white">{initials}</span>
+          <div className="w-9 h-9 rounded-full bg-[hsl(var(--platform-youtube))] flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {getProjectLogo(content) ? (
+              <img src={getProjectLogo(content)!} alt={userName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] font-bold text-white">{initials}</span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-xs font-medium text-foreground block">{userName}</span>

@@ -1,6 +1,6 @@
 import { ContentWithRelations } from '@/data/types';
 import { MessageCircle, MoreHorizontal, ThumbsUp, Send, Repeat2, Globe } from 'lucide-react';
-import { getDisplayText, getInitials } from './previewUtils';
+import { getDisplayText, getInitials, getProjectLogo } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
@@ -10,8 +10,12 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden max-w-[350px] mx-auto">
       <div className="flex items-center gap-2.5 px-3 py-3">
-        <div className="w-12 h-12 rounded-full bg-[hsl(var(--platform-linkedin))] flex items-center justify-center">
-          <span className="text-sm font-bold text-white">{initials}</span>
+        <div className="w-12 h-12 rounded-full bg-[hsl(var(--platform-linkedin))] flex items-center justify-center overflow-hidden">
+          {getProjectLogo(content) ? (
+            <img src={getProjectLogo(content)!} alt={userName} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-sm font-bold text-white">{initials}</span>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold text-foreground block">{userName}</span>

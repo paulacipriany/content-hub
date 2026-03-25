@@ -1,6 +1,6 @@
 import { ContentWithRelations } from '@/data/types';
 import { Heart, MessageCircle, Share2, Bookmark, Music } from 'lucide-react';
-import { getDisplayText, getInitials, getUserHandle } from './previewUtils';
+import { getDisplayText, getInitials, getUserHandle, getProjectLogo } from './previewUtils';
 import MediaOrPlaceholder from './MediaOrPlaceholder';
 
 const TikTokPreview = ({ content }: { content: ContentWithRelations }) => {
@@ -16,8 +16,12 @@ const TikTokPreview = ({ content }: { content: ContentWithRelations }) => {
         <div className="flex items-end gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
-                <span className="text-[9px] font-bold text-white">{initials}</span>
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30 overflow-hidden">
+                {getProjectLogo(content) ? (
+                  <img src={getProjectLogo(content)!} alt={userName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[9px] font-bold text-white">{initials}</span>
+                )}
               </div>
               <span className="text-xs font-semibold text-white">@{getUserHandle(userName)}</span>
             </div>
