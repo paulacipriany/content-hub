@@ -80,7 +80,7 @@ const IdeasBankPage = () => {
           ) : (
             ideas.map(idea => {
               const platforms = Array.isArray(idea.platform) ? idea.platform : [idea.platform];
-              const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
+              const _ = platforms; // used below
 
               return (
                 <div
@@ -88,7 +88,7 @@ const IdeasBankPage = () => {
                   className="grid grid-cols-[40px_1fr_180px_180px_80px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors"
                 >
                   <div className="flex items-center justify-center">
-                    {PlatformIcon && <PlatformIcon size={16} className="text-muted-foreground" />}
+                    {platformIcon(platforms, 16)}
                   </div>
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-foreground truncate block">{idea.title}</span>
