@@ -59,10 +59,11 @@ const STATUS_CSS_VAR: Record<string, string> = {
 };
 
 // --- Expanded content card for calendar (like reference image) ---
-const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
+const DraggableContent = ({ content, onClick, disabled }: { content: ContentWithRelations; onClick: () => void; disabled?: boolean }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
     data: { type: 'content', content },
+    disabled,
   });
   const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
   const borderColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
@@ -72,8 +73,8 @@ const DraggableContent = ({ content, onClick }: { content: ContentWithRelations;
       onClick={onClick}
       className={cn(
         "w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm",
-        "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
-        "overflow-hidden min-w-0 max-h-[28px]",
+        "hover:shadow-md transition-all overflow-hidden min-w-0 max-h-[28px]",
+        disabled ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
       style={{ borderLeftColor: borderColor }}
@@ -544,7 +545,7 @@ const CalendarPage = () => {
           </div>
         )}
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
         ))}
         {viewMode === 'month' && dayContents.length > 3 && (
           <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
@@ -578,7 +579,7 @@ const CalendarPage = () => {
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
         ))}
         {contentsWithoutTime.map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
         ))}
       </div>
     );
@@ -842,7 +843,7 @@ const CalendarPage = () => {
                             <DroppableHourCell key={i} dateStr={dateStr} hour={hour}>
                               <div className="space-y-1">
                                 {hourContents.map(c => (
-                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
                                 ))}
                               </div>
                             </DroppableHourCell>
