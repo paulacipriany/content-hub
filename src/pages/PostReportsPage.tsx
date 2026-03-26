@@ -286,8 +286,7 @@ const AnalysisSheet = ({
                 {CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                {platformIcon(content.platform, 12)}
-                {Array.isArray(content.platform) ? content.platform.map(p => PLATFORM_LABELS[p as Platform] ?? p).join(', ') : PLATFORM_LABELS[content.platform as Platform]}
+                {platformIcon(content.platform, 14, true)}
               </span>
               {analysis?.result && (
                 <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", resultOptions.find(o => o.value === analysis.result)?.color)}>

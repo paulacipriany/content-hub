@@ -2,7 +2,8 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform } from '@/data/types';
-import { Instagram, Facebook, Linkedin, Youtube, Plus, Pencil, Trash2 } from 'lucide-react';
+import { platformIcon } from '@/components/content/PlatformIcons';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
@@ -10,12 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
-const platformIcons: Partial<Record<Platform, React.ElementType>> = {
-  instagram: Instagram,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  youtube: Youtube,
-};
 
 const contentTypeBadgeColors: Record<string, string> = {
   stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
@@ -85,7 +80,7 @@ const IdeasBankPage = () => {
           ) : (
             ideas.map(idea => {
               const platforms = Array.isArray(idea.platform) ? idea.platform : [idea.platform];
-              const PlatformIcon = platforms[0] ? platformIcons[platforms[0] as Platform] : null;
+              
 
               return (
                 <div
@@ -93,7 +88,7 @@ const IdeasBankPage = () => {
                   className="grid grid-cols-[40px_1fr_180px_180px_80px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors"
                 >
                   <div className="flex items-center justify-center">
-                    {PlatformIcon && <PlatformIcon size={16} className="text-muted-foreground" />}
+                    {platformIcon(platforms, 16)}
                   </div>
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-foreground truncate block">{idea.title}</span>
@@ -112,11 +107,7 @@ const IdeasBankPage = () => {
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {platforms.map(p => (
-                      <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
-                        {PLATFORM_LABELS[p as Platform] || p}
-                      </span>
-                    ))}
+                    {platformIcon(platforms, 14, true)}
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <button
