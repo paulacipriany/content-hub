@@ -250,7 +250,7 @@ const UsersPage = () => {
       <div className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl font-bold text-foreground">Gestão de Usuários</h2>
-          <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5 order-first sm:order-last">
+          <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5 order-first sm:order-last" style={{ backgroundColor: '#ff88db', color: '#000000' }}>
             <UserPlus size={15} />
             Novo usuário
           </Button>
