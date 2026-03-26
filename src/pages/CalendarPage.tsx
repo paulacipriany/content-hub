@@ -73,8 +73,8 @@ const DraggableContent = ({ content, onClick, disabled }: { content: ContentWith
       onClick={onClick}
       className={cn(
         "w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm",
-        "hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
-        "overflow-hidden min-w-0 max-h-[28px]",
+        "hover:shadow-md transition-all overflow-hidden min-w-0 max-h-[28px]",
+        disabled ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
       style={{ borderLeftColor: borderColor }}
