@@ -545,7 +545,7 @@ const CalendarPage = () => {
           </div>
         )}
         {dayContents.slice(0, viewMode === 'week' ? 10 : 3).map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
         ))}
         {viewMode === 'month' && dayContents.length > 3 && (
           <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
@@ -579,7 +579,7 @@ const CalendarPage = () => {
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
         ))}
         {contentsWithoutTime.map(c => (
-          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+          <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
         ))}
       </div>
     );
@@ -843,7 +843,7 @@ const CalendarPage = () => {
                             <DroppableHourCell key={i} dateStr={dateStr} hour={hour}>
                               <div className="space-y-1">
                                 {hourContents.map(c => (
-                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} />
+                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
                                 ))}
                               </div>
                             </DroppableHourCell>
