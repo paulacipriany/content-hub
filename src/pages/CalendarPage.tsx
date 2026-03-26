@@ -59,10 +59,11 @@ const STATUS_CSS_VAR: Record<string, string> = {
 };
 
 // --- Expanded content card for calendar (like reference image) ---
-const DraggableContent = ({ content, onClick }: { content: ContentWithRelations; onClick: () => void }) => {
+const DraggableContent = ({ content, onClick, disabled }: { content: ContentWithRelations; onClick: () => void; disabled?: boolean }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
     data: { type: 'content', content },
+    disabled,
   });
   const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
   const borderColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
