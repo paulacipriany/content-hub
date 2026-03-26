@@ -112,11 +112,7 @@ const IdeasBankPage = () => {
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {platforms.map(p => (
-                      <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
-                        {PLATFORM_LABELS[p as Platform] || p}
-                      </span>
-                    ))}
+                    {platformIcon(platforms, 14, true)}
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <button
