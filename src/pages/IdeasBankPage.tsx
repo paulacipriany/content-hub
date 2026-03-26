@@ -80,7 +80,7 @@ const IdeasBankPage = () => {
           ) : (
             ideas.map(idea => {
               const platforms = Array.isArray(idea.platform) ? idea.platform : [idea.platform];
-              const _ = platforms; // used below
+              
 
               return (
                 <div
