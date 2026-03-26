@@ -159,7 +159,7 @@ const MediaLibraryPage = () => {
             <Button
               size="sm"
               className="gap-1.5 h-9"
-              style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+              style={{ backgroundColor: '#ff88db', color: '#000000' }}
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
             >

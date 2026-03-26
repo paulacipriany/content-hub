@@ -154,7 +154,7 @@ const ProjectsPage = () => {
       <TopBar title="Projetos" subtitle="Gerencie seus projetos e campanhas" />
       <div className="p-6">
         <div className="flex justify-end mb-4">
-          <Button size="sm" className="gap-1.5" onClick={() => setShowCreate(true)}>
+          <Button size="sm" className="gap-1.5" style={{ backgroundColor: '#ff88db', color: '#000000' }} onClick={() => setShowCreate(true)}>
             <Plus size={16} /> Novo projeto
           </Button>
         </div>
