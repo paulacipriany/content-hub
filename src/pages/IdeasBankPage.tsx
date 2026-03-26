@@ -11,12 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
 
-const platformIcons: Partial<Record<Platform, React.ElementType>> = {
-  instagram: Instagram,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  youtube: Youtube,
-};
 
 const contentTypeBadgeColors: Record<string, string> = {
   stories: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
