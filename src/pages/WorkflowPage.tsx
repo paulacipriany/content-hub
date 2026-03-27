@@ -353,32 +353,48 @@ const WorkflowPage = () => {
 
               {previewContent.description && (
                 <div className="px-6 py-4 border-b border-border/50">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Descrição</h4>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{previewContent.description.replace(/<[^>]*>/g, '')}</p>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Briefing</h4>
+                  <div className="text-sm text-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: previewContent.description }} />
                 </div>
               )}
 
-              <div className="px-6 py-4 flex-1">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
-                {previewContent.platform && (Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) ? (
-                  <PostPreview content={previewContent} platform={(Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) as Platform} compact={previewContent.status === 'programmed'} />
-                ) : <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>}
-
-                {previewContent.status === 'published' && (previewContent.copy_text || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
-                  <div className="flex gap-2 mt-3 max-w-[350px] mx-auto">
-                    {previewContent.copy_text && (
-                      <Button variant="outline" size="sm" className="flex-1 gap-1.5 border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} onClick={() => { navigator.clipboard.writeText(previewContent.copy_text ?? ''); toast.success('Texto copiado!'); }}>
-                        <Copy size={14} /> Copiar texto
-                      </Button>
-                    )}
-                    {(previewContent.media_url || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
-                      <Button variant="outline" size="sm" className="flex-1 gap-1.5 border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} disabled={downloading} onClick={() => handleDownloadZip(previewContent)}>
-                        {downloading ? <><Loader2 size={14} className="animate-spin" /> Baixando...</> : <><Download size={14} /> Baixar mídias</>}
-                      </Button>
-                    )}
+              {previewContent.status === 'client-request' ? (
+                /* Client request: show only briefing images, no post preview */
+                (previewContent as any).briefing_images && (previewContent as any).briefing_images.length > 0 && (
+                  <div className="px-6 py-4 flex-1">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Imagens do briefing</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(previewContent as any).briefing_images.map((url: string, i: number) => (
+                        <div key={i} className="aspect-square rounded-lg overflow-hidden border border-border">
+                          <img src={url} alt={`Briefing ${i + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
+                )
+              ) : (
+                <div className="px-6 py-4 flex-1">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
+                  {previewContent.platform && (Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) ? (
+                    <PostPreview content={previewContent} platform={(Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) as Platform} compact={previewContent.status === 'programmed'} />
+                  ) : <p className="text-sm text-muted-foreground text-center py-8">Preview não disponível</p>}
+
+                  {previewContent.status === 'published' && (previewContent.copy_text || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
+                    <div className="flex gap-2 mt-3 max-w-[350px] mx-auto">
+                      {previewContent.copy_text && (
+                        <Button variant="outline" size="sm" className="flex-1 gap-1.5 border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} onClick={() => { navigator.clipboard.writeText(previewContent.copy_text ?? ''); toast.success('Texto copiado!'); }}>
+                          <Copy size={14} /> Copiar texto
+                        </Button>
+                      )}
+                      {(previewContent.media_url || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
+                        <Button variant="outline" size="sm" className="flex-1 gap-1.5 border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} disabled={downloading} onClick={() => handleDownloadZip(previewContent)}>
+                          {downloading ? <><Loader2 size={14} className="animate-spin" /> Baixando...</> : <><Download size={14} /> Baixar mídias</>}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {previewContent.hashtags && previewContent.hashtags.length > 0 && (
                 <div className="px-6 py-3 border-t border-border/50">
