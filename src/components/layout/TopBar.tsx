@@ -243,7 +243,7 @@ const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
         </Popover>
 
         {actions}
-        {selectedProject && !actions && <CreateContentDialog defaultProjectId={selectedProject.id} />}
+        {selectedProject && !actions && role !== 'client' && <CreateContentDialog defaultProjectId={selectedProject.id} />}
       </div>
     </header>
   );
