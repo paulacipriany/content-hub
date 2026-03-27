@@ -262,7 +262,7 @@ const WorkflowPage = () => {
       <div className="p-6 overflow-x-auto">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max">
-            {statusOrder.filter(status => !(isClient && status === 'idea')).map(status => {
+            {statusOrder.filter(status => !(isClient && (status === 'idea' || status === 'production'))).map(status => {
               const items = columns[status] || [];
               const cssVar = STATUS_CSS_VARS[status];
               
