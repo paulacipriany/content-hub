@@ -33,7 +33,7 @@ import { X, Calendar, User } from 'lucide-react';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 
-const statusOrder: WorkflowStatus[] = ['idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
+const statusOrder: WorkflowStatus[] = ['client-request', 'idea', 'production', 'review', 'approval-client', 'scheduled', 'programmed', 'published'];
 const previewOnlyStatuses: WorkflowStatus[] = ['published', 'programmed', 'scheduled'];
 
 const SortableCard = ({ content, onPreviewClick }: { content: ContentWithRelations; onPreviewClick?: (c: ContentWithRelations) => void }) => {
@@ -79,6 +79,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   'scheduled': '--status-scheduled',
   'programmed': '--status-programmed',
   'published': '--status-published',
+  'client-request': '--status-idea',
 };
 
 const WorkflowPage = () => {
