@@ -176,25 +176,27 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Project — moved to top */}
-          <div className="space-y-1.5">
-            <Label>Cliente *</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map(p => (
-                  <SelectItem key={p.id} value={p.id}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
-                      {p.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Project — hidden for clients */}
+          {role !== 'client' && (
+            <div className="space-y-1.5">
+              <Label>Cliente *</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map(p => (
+                    <SelectItem key={p.id} value={p.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                        {p.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Title */}
           <div className="space-y-1.5">
@@ -256,13 +258,15 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             </div>
           )}
 
-          {/* Approvers */}
-          <ApproverSelector
-            selectedApprovers={approverIds}
-            onChange={setApproverIds}
-            label="Aprovadores"
-            projectId={projectId}
-          />
+          {/* Approvers — hidden for clients */}
+          {role !== 'client' && (
+            <ApproverSelector
+              selectedApprovers={approverIds}
+              onChange={setApproverIds}
+              label="Aprovadores"
+              projectId={projectId}
+            />
+          )}
 
           {/* Briefing — Rich Text */}
           <div className="space-y-2">
