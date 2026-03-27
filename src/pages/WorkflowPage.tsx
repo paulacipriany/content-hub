@@ -1,4 +1,5 @@
 import TopBar from '@/components/layout/TopBar';
+import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { useApp } from '@/contexts/AppContext';
 import ContentCard from '@/components/content/ContentCard';
 import PostPreview from '@/components/content/PostPreview';
@@ -84,7 +85,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
 
 const WorkflowPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus, updateContentFields } = useApp();
+  const { projectContents, updateContentStatus, updateContentFields, selectedProject } = useApp();
   const { role } = useAuth();
   const isClient = role === 'client';
   
@@ -258,7 +259,7 @@ const WorkflowPage = () => {
 
   return (
     <>
-      <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} />
+      <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} actions={isClient && selectedProject ? <CreateContentDialog defaultProjectId={selectedProject.id} /> : undefined} />
       <div className="p-6 overflow-x-auto">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max">
