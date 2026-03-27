@@ -23,7 +23,7 @@ interface CreateContentDialogProps {
 
 const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: CreateContentDialogProps) => {
   const { projects, refetch } = useApp();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [open, setOpen] = useState(false);
@@ -121,7 +121,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
       project_id: projectId,
       assignee_id: assigneeId ?? user.id,
       created_by: user.id,
-      status: defaultStatus || 'idea',
+      status: defaultStatus || (role === 'client' ? 'client-request' : 'idea'),
     } as any).select('id').single();
 
     if (error) {
@@ -166,13 +166,13 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
             style={{ backgroundColor: '#ff88db', color: '#000000' }}
           >
             <Plus size={16} />
-            <span className="hidden sm:inline">Criar conteúdo</span>
+            <span className="hidden sm:inline">{role === 'client' ? 'Solicitar conteúdo' : 'Criar conteúdo'}</span>
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{defaultStatus === 'idea-bank' ? 'Nova Ideia' : 'Novo Conteúdo'}</DialogTitle>
+          <DialogTitle>{defaultStatus === 'idea-bank' ? 'Nova Ideia' : role === 'client' ? 'Solicitar Conteúdo' : 'Novo Conteúdo'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
@@ -316,7 +316,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? 'Salvando...' : defaultStatus === 'idea-bank' ? 'Salvar ideia' : 'Criar conteúdo'}
+              {loading ? 'Salvando...' : defaultStatus === 'idea-bank' ? 'Salvar ideia' : role === 'client' ? 'Solicitar conteúdo' : 'Criar conteúdo'}
             </Button>
           </div>
         </div>
