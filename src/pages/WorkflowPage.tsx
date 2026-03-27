@@ -85,7 +85,7 @@ const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
 
 const WorkflowPage = () => {
   useClientFromUrl();
-  const { projectContents, updateContentStatus, updateContentFields } = useApp();
+  const { projectContents, updateContentStatus, updateContentFields, selectedProject } = useApp();
   const { role } = useAuth();
   const isClient = role === 'client';
   
