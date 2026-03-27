@@ -23,7 +23,7 @@ export type ContentWithRelations = DbContent & {
 // Keep label/color maps for UI
 export type Platform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest' | 'twitter' | 'google_business' | 'blog';
 export type ContentType = 'feed' | 'reels' | 'stories' | 'carousel' | 'video' | 'post' | 'shorts' | 'image' | 'artigo';
-export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'programmed' | 'published';
+export type WorkflowStatus = 'idea' | 'idea-bank' | 'production' | 'review' | 'approval-client' | 'scheduled' | 'programmed' | 'published' | 'client-request';
 
 export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'idea': 'Rascunho',
@@ -35,6 +35,7 @@ export const STATUS_LABELS: Record<WorkflowStatus, string> = {
   'scheduled': 'Aguardando Agendamento',
   'programmed': 'Programado',
   'published': 'Publicado',
+  'client-request': 'Solicitação Cliente',
 };
 
 export const STATUS_COLORS: Record<WorkflowStatus, string> = {
@@ -47,6 +48,7 @@ export const STATUS_COLORS: Record<WorkflowStatus, string> = {
   'scheduled': 'bg-status-scheduled',
   'programmed': 'bg-status-programmed',
   'published': 'bg-status-published',
+  'client-request': 'bg-status-idea',
 };
 
 export const PLATFORM_LABELS: Record<Platform, string> = {
