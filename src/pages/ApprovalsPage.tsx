@@ -119,7 +119,7 @@ const ApprovalsPage = () => {
                     {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </span>
                   <div className="flex items-center gap-1.5 mb-1">
-                    {platformIcon(c.platform, 14, true)}
+                    {platformIcon(c.platform, 14)}
                   </div>
                   <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>
                   {(() => {
@@ -186,7 +186,16 @@ const ApprovalsPage = () => {
 
                 {/* Action buttons */}
                 <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: '#1369db', color: '#ffffff' }} onClick={() => setSelectedContent(c)}>
+                  <Button 
+                    size="sm" 
+                    className="gap-1 text-xs font-semibold border-0 w-full justify-center" 
+                    style={{ 
+                      backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#1369db', 
+                      color: userApproved[c.id] ? '#9ca3af' : '#ffffff' 
+                    }} 
+                    disabled={userApproved[c.id]}
+                    onClick={() => setSelectedContent(c)}
+                  >
                     <MessageSquare size={14} /> Revisar
                   </Button>
                   <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#ff88db', color: userApproved[c.id] ? '#9ca3af' : '#1a1a1a' }} disabled={userApproved[c.id]} onClick={async () => {

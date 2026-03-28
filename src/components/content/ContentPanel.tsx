@@ -1,4 +1,4 @@
-import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck, GripVertical } from 'lucide-react';
+import { X, MessageSquare, CheckSquare, Calendar as CalIcon, User, Send, Check, Pencil, Eye, ImagePlus, Trash2, Loader2, Clock, Plus, UserCheck, GripVertical, Copy, Download } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -33,6 +33,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Sortable media item for drag-and-drop reordering
 const SortableMediaItem = ({ url, index, onRemove, onLightbox }: { url: string; index: number; onRemove: (i: number) => void; onLightbox: (url: string) => void }) => {
@@ -428,6 +434,42 @@ const ContentPanel = () => {
     setSelectedContent(null);
   };
 
+  const handleCopyText = () => {
+    let text = editCopyText;
+    if (perPlatformCopy && editCopyTexts[previewPlatform]) {
+      text = editCopyTexts[previewPlatform];
+    }
+    navigator.clipboard.writeText(text);
+    toast({ title: 'Copiado!', description: 'Texto da copy copiado para a área de transferência.' });
+  };
+
+  const handleDownloadMedia = async () => {
+    if (mediaUrls.length === 0) return;
+    toast({ title: 'Baixando...', description: 'As mídias estão sendo baixadas.' });
+    
+    for (const [i, url] of mediaUrls.entries()) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        // Try to keep original extension
+        const filename = url.split('/').pop()?.split('?')[0] || `media-${i + 1}`;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+        // Small delay to prevent browser blocking multiple downloads
+        if (mediaUrls.length > 1) await new Promise(r => setTimeout(r, 300));
+      } catch (err) {
+        console.error('Download error:', err);
+        window.open(url, '_blank'); // Fallback
+      }
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
       {/* Header */}
@@ -441,14 +483,24 @@ const ContentPanel = () => {
           </button>
           
           {isClient ? (
-            <span className="font-semibold text-base text-foreground px-2">{editTitle}</span>
+            <div className="flex items-center gap-2 px-2 overflow-hidden">
+              <span className="font-semibold text-base text-foreground truncate">{editTitle}</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary text-secondary-foreground border border-border/50 whitespace-nowrap">
+                {CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}
+              </span>
+            </div>
           ) : (
-            <input
-              value={editTitle}
-              onChange={e => setEditTitle(e.target.value)}
-              className="font-semibold text-base text-foreground bg-transparent border-none outline-none w-full focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
-              placeholder="Título do conteúdo"
-            />
+            <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+              <input
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                className="font-semibold text-base text-foreground bg-transparent border-none outline-none flex-1 truncate focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
+                placeholder="Título do conteúdo"
+              />
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary text-secondary-foreground border border-border/50 whitespace-nowrap flex-shrink-0">
+                {CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}
+              </span>
+            </div>
           )}
           {!isClient && !isIdeaBank && (
             <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
@@ -460,32 +512,49 @@ const ContentPanel = () => {
           {isClient ? (
             isClientApproval ? (
               <>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                  disabled={!newComment.trim() && !commentImageUrl && comments.length === 0}
-                  title={!newComment.trim() && !commentImageUrl && comments.length === 0 ? 'Adicione um comentário antes de enviar para ajustes' : ''}
-                  onClick={async () => {
-                    if (!user) return;
-                    if (newComment.trim() || commentImageUrl) {
-                      const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
-                      if (commentImageUrl) insertData.image_url = commentImageUrl;
-                      await supabase.from('comments').insert(insertData);
-                    }
-                    await updateContentStatus(selectedContent.id, 'review');
-                    setNewComment('');
-                    setCommentImageUrl(null);
-                    setSelectedContent(null);
-                  }}
-                >
-                  Enviar para ajustes
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        (userAlreadyApproved || (!newComment.trim() && !commentImageUrl && comments.length === 0)) ? "cursor-help" : ""
+                      )}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                          disabled={userAlreadyApproved || (!newComment.trim() && !commentImageUrl && comments.length === 0)}
+                          onClick={async () => {
+                            if (!user) return;
+                            if (newComment.trim() || commentImageUrl) {
+                              const insertData: any = { content_id: selectedContent.id, user_id: user.id, text: newComment.trim() || '' };
+                              if (commentImageUrl) insertData.image_url = commentImageUrl;
+                              await supabase.from('comments').insert(insertData);
+                            }
+                            await updateContentStatus(selectedContent.id, 'review');
+                            setNewComment('');
+                            setCommentImageUrl(null);
+                            setSelectedContent(null);
+                          }}
+                        >
+                          Enviar para ajustes
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    {(userAlreadyApproved || (!newComment.trim() && !commentImageUrl && comments.length === 0)) && (
+                      <TooltipContent>
+                        <p>{userAlreadyApproved ? 'Você já aprovou este conteúdo' : 'É necessário deixar um comentário ou anexo para enviar o post para ajustes'}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
                 {canAdvance && (
                   <Button
                     size="sm"
                     disabled={userAlreadyApproved}
-                    style={{ backgroundColor: userAlreadyApproved ? 'hsl(var(--muted))' : 'var(--client-500, hsl(var(--primary)))', color: userAlreadyApproved ? 'hsl(var(--muted-foreground))' : 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    className={cn(
+                      "font-semibold",
+                      userAlreadyApproved ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"
+                    )}
                     onClick={async () => {
                       if (!user) return;
                       const { allApproved, error } = await recordApproval(selectedContent.id, user.id);
@@ -529,7 +598,7 @@ const ContentPanel = () => {
               {isIdeaBank ? (
                 <Button
                   size="sm"
-                  style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                  className="bg-primary text-primary-foreground"
                   onClick={() => {
                     updateContentStatus(selectedContent.id, 'idea');
                     setSelectedContent(null);
@@ -554,7 +623,10 @@ const ContentPanel = () => {
                   <Button
                     size="sm"
                     disabled={selectedContent.status === 'approval-client' && userAlreadyApproved}
-                    style={{ backgroundColor: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted))' : 'var(--client-500, hsl(var(--primary)))', color: (selectedContent.status === 'approval-client' && userAlreadyApproved) ? 'hsl(var(--muted-foreground))' : 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
+                    className={cn(
+                      "font-semibold",
+                      (selectedContent.status === 'approval-client' && userAlreadyApproved) ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"
+                    )}
                     onClick={async () => { 
                       try {
                         // Block advancing to review without media
@@ -603,8 +675,8 @@ const ContentPanel = () => {
 
           {/* Details */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground w-24 flex-shrink-0">Plataforma</span>
+            <div className="flex items-center gap-3 text-sm opacity-0 h-0 overflow-hidden">
+              <span className="text-muted-foreground w-24 flex-shrink-0">Plataformas</span>
               {isClient ? (
                 <div className="flex items-center gap-1">{platformIcon(selectedContent.platform, 22)}</div>
               ) : (
@@ -619,32 +691,30 @@ const ContentPanel = () => {
                 />
               )}
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
-              {isClient ? (
+            {/* Tipo — hidden (moved to header tag) */}
+            {!isClient && (
+              <div className="flex items-center gap-3 text-sm opacity-0 h-0 overflow-hidden">
+                <span className="text-muted-foreground w-24 flex-shrink-0">Tipo</span>
                 <span className="text-foreground text-xs">{CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}</span>
-              ) : (
-                <Select value={selectedContent.content_type} onValueChange={handleTypeChange}>
-                  <SelectTrigger className="h-8 text-xs flex-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allContentTypes.map(t => (
-                      <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
+              </div>
+            )}
             <div className="flex items-center gap-3 text-sm">
               <span className="text-muted-foreground w-24 flex-shrink-0">Publicação</span>
               {isClient ? (
-                <span className="text-foreground text-xs flex items-center gap-2">
-                  <CalIcon size={12} className="text-muted-foreground" />
-                  {selectedContent.publish_date
-                    ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
-                    : 'Não definida'}
-                </span>
+                <div className="flex items-center gap-3 text-foreground text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <CalIcon size={12} className="text-muted-foreground" />
+                    {selectedContent.publish_date
+                      ? format(new Date(selectedContent.publish_date + 'T12:00:00'), 'dd MMM yyyy', { locale: ptBR })
+                      : 'Não definida'}
+                  </span>
+                  {editPublishTime && (
+                    <span className="flex items-center gap-1.5 border-l border-border pl-3 ml-1">
+                      <Clock size={12} className="text-muted-foreground" />
+                      {editPublishTime}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                   <PopoverTrigger asChild>
@@ -672,7 +742,7 @@ const ContentPanel = () => {
                 </Popover>
               )}
             </div>
-            {!isIdeaBank && (
+            {!isIdeaBank && !isClient && (
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground w-24 flex-shrink-0">Horário</span>
                 {isClient ? (
@@ -832,29 +902,10 @@ const ContentPanel = () => {
             </div>
           )}
 
-          {/* Client view: show preview inline instead of copy/media */}
+          {/* Client view: space handled in right sidebar */}
           {isIdeaBank ? null : isClient ? (
-            <div className="space-y-4">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
-              <div className="flex gap-1.5">
-                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setPreviewPlatform(p)}
-                    className={cn(
-                      "w-9 h-9 rounded-full flex items-center justify-center transition-all",
-                      previewPlatform === p
-                        ? "text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:bg-accent"
-                    )}
-                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
-                    title={PLATFORM_LABELS[p]}
-                  >
-                    {platformIcon([p], 18)}
-                  </button>
-                ))}
-              </div>
-              <PostPreview content={selectedContent} platform={previewPlatform} />
+            <div className="py-4 border-t border-border/50">
+              <p className="text-xs text-muted-foreground italic">Role para a direita para ver o preview do post e os comentários.</p>
             </div>
           ) : (
             <>
@@ -878,11 +929,10 @@ const ContentPanel = () => {
                         updateContentFields(selectedContent.id, { copy_texts: seeded });
                       }
                     }}
-                    className="text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors"
-                    style={{
-                      backgroundColor: perPlatformCopy ? 'var(--client-100, hsl(var(--primary) / 0.1))' : 'hsl(var(--secondary))',
-                      color: perPlatformCopy ? 'var(--client-600, hsl(var(--primary)))' : 'hsl(var(--muted-foreground))',
-                    }}
+                    className={cn(
+                      "text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors",
+                      perPlatformCopy ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+                    )}
                   >
                     {perPlatformCopy ? '✓ Texto por rede' : 'Mesmo texto para todas'}
                   </button>
@@ -1039,29 +1089,88 @@ const ContentPanel = () => {
               </Button>
             </form>
           </div>
-        ) : <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[350px]")}>
+        ) : <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[450px]")}>
+          {/* Right Sidebar Header (Preview & Buttons) for Review/Approval/Published phases */}
+          {(selectedContent.status === 'approval-client' || selectedContent.status === 'scheduled' || selectedContent.status === 'published') && (
+            <div className="p-5 border-b border-border space-y-5 bg-card/50">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5"><Eye size={12} />Preview</label>
+                <div className="flex gap-1">
+                  {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
+                    <button
+                      key={p}
+                      onClick={(e) => { e.stopPropagation(); setPreviewPlatform(p); }}
+                      className={cn(
+                        "w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                        previewPlatform === p
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-secondary text-muted-foreground hover:bg-accent"
+                      )}
+                      title={PLATFORM_LABELS[p]}
+                    >
+                      {platformIcon([p], 14)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-center overflow-hidden">
+                <div className="w-full max-w-[320px] transform scale-[0.95] origin-top">
+                  <PostPreview content={selectedContent} platform={previewPlatform} />
+                </div>
+              </div>
+              
+              {/* Quick Actions — Below Preview, Always visible in these phases */}
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 h-9 text-xs gap-1.5 border-0"
+                  style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                  onClick={handleCopyText}
+                >
+                  <Copy size={14} /> Copiar texto
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 h-9 text-xs gap-1.5 border-0"
+                  style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                  onClick={handleDownloadMedia}
+                >
+                  <Download size={14} /> Baixar mídias
+                </Button>
+              </div>
+            </div>
+          )}
+
           {!isClient && !isIdeaBank && (
             <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-4">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
-              <div className="flex gap-1.5 justify-center">
-                {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setPreviewPlatform(p)}
-                    className={cn(
-                      "w-9 h-9 rounded-full flex items-center justify-center transition-all",
-                      previewPlatform === p
-                        ? "text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:bg-accent"
-                    )}
-                    style={previewPlatform === p ? { backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' } : undefined}
-                    title={PLATFORM_LABELS[p]}
-                  >
-                    {platformIcon([p], 18)}
-                  </button>
-                ))}
-              </div>
-              <PostPreview content={selectedContent} platform={previewPlatform} />
+              {/* Preview — Only show here if NOT handled in the header above (phases idea/production/review) */}
+              {(selectedContent.status === 'idea' || selectedContent.status === 'production' || selectedContent.status === 'review') && (
+                <>
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</h3>
+                  <div className="flex gap-1.5 justify-center">
+                    {(Array.isArray(selectedContent.platform) ? selectedContent.platform : [selectedContent.platform]).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setPreviewPlatform(p)}
+                        className={cn(
+                          "w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm",
+                          previewPlatform === p
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-muted-foreground hover:bg-accent"
+                        )}
+                        title={PLATFORM_LABELS[p]}
+                      >
+                        {platformIcon([p], 18)}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-center">
+                    <PostPreview content={selectedContent} platform={previewPlatform} />
+                  </div>
+                </>
+              )}
 
               {/* Checklist — only for idea/production */}
               {(selectedContent.status === 'idea' || selectedContent.status === 'production') && (
@@ -1115,9 +1224,12 @@ const ContentPanel = () => {
             </div>
           )}
 
-          {/* Comments — hidden when status is idea (rascunho) */}
           {selectedContent.status !== 'idea' && (
-            <div className={cn("border-t border-border p-5 flex flex-col", isClient ? "flex-1" : "max-h-[40%]")}>
+            <div className={cn("p-5 flex flex-col min-h-0", isClient ? "flex-1 overflow-hidden" : "max-h-[50%]")}>
+              {/* Admin/Agency Quick Actions (REMOVED: Now handled in fixed header above for consistency) */}
+
+
+              {/* In-comment Preview for Clients — MOVED ABOVE */}
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"><MessageSquare size={12} />Comentários</label>
               <div className="flex-1 overflow-y-auto scrollbar-thin space-y-2.5 mb-3">
                 {comments.map(c => (
@@ -1166,8 +1278,7 @@ const ContentPanel = () => {
                     <input ref={commentFileRef} type="file" accept="image/*" onChange={handleCommentImageUpload} className="hidden" />
                     <button
                       onClick={handleAddComment}
-                      className="w-8 h-8 rounded-md flex items-center justify-center hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))' }}
+                      className="w-8 h-8 rounded-md flex items-center justify-center bg-primary hover:opacity-90 transition-opacity"
                     >
                       <Send size={14} className="text-primary-foreground" />
                     </button>

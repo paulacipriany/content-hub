@@ -7,8 +7,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Calendar as CalIcon, Filter, X } from 'lucide-react';
 import { useConfirmDelete } from '@/hooks/useConfirmDelete';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CONTENT_TYPE_LABELS, VISIBLE_CONTENT_TYPES, ContentType } from '@/data/types';
+import { cn } from '@/lib/utils';
+import { DateRange } from "react-day-picker";
 
 interface MediaItem {
   id: string;
@@ -17,6 +25,9 @@ interface MediaItem {
   content_id: string | null;
   contentTitle: string | null;
   source: 'library' | 'content';
+  publish_date: string | null;
+  content_type: ContentType | null;
+  created_at: string;
 }
 
 const MediaLibraryPage = () => {
@@ -25,11 +36,14 @@ const MediaLibraryPage = () => {
   const { role, user } = useAuth();
   const { toast } = useToast();
   const [search, setSearch] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canDelete = role === 'admin' || role === 'moderator';
+  const isClient = role === 'client';
+  const canDelete = !isClient && (role === 'admin' || role === 'moderator');
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
 
@@ -51,6 +65,9 @@ const MediaLibraryPage = () => {
         content_id: m.content_id,
         contentTitle: content?.title ?? null,
         source: 'library' as const,
+        publish_date: content?.publish_date ?? null,
+        content_type: content?.content_type ?? null,
+        created_at: m.created_at,
       };
     });
 
@@ -78,6 +95,9 @@ const MediaLibraryPage = () => {
             content_id: content.id,
             contentTitle: content.title,
             source: 'content',
+            publish_date: content.publish_date ?? null,
+            content_type: content.content_type ?? null,
+            created_at: content.created_at,
           });
         }
       });
@@ -140,12 +160,27 @@ const MediaLibraryPage = () => {
   };
 
 
-  const filtered = search.trim()
-    ? mediaItems.filter(item =>
+  const filtered = useMemo(() => {
+    return mediaItems.filter(item => {
+      // Search filter
+      const matchesSearch = !search.trim() || 
         item.filename.toLowerCase().includes(search.toLowerCase()) ||
-        (item.contentTitle && item.contentTitle.toLowerCase().includes(search.toLowerCase()))
-      )
-    : mediaItems;
+        (item.contentTitle && item.contentTitle.toLowerCase().includes(search.toLowerCase()));
+      
+      // Type filter
+      const matchesType = typeFilter === 'all' || item.content_type === typeFilter;
+      
+      // Date filter
+      const matchesDate = !dateRange?.from || (() => {
+        if (!item.publish_date) return false;
+        const from = format(dateRange.from, 'yyyy-MM-dd');
+        const to = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : from;
+        return item.publish_date >= from && item.publish_date <= to;
+      })();
+
+      return matchesSearch && matchesType && matchesDate;
+    });
+  }, [mediaItems, search, typeFilter, dateRange]);
 
 
   return (
@@ -153,7 +188,7 @@ const MediaLibraryPage = () => {
       <TopBar
         title="Biblioteca de Mídia"
         subtitle="Todas as imagens deste cliente"
-        actions={
+        actions={!isClient && (
           <>
             <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleUpload} className="hidden" />
             <Button
@@ -167,23 +202,87 @@ const MediaLibraryPage = () => {
               <span className="hidden sm:inline">Adicionar imagem</span>
             </Button>
           </>
-        }
+        )}
       />
       <div className="p-6">
-        <div className="relative mb-6 max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar por nome..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full h-10 pl-9 pr-4 rounded-lg bg-card border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 transition-colors"
-            style={{
-              borderColor: 'var(--client-200, hsl(var(--border)))',
-              // @ts-ignore
-              '--tw-ring-color': 'var(--client-300, hsl(var(--ring) / 0.2))',
-            }}
-          />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          {/* Filters (left) */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 px-3 h-10 rounded-lg bg-card border border-border">
+              <Filter size={14} className="text-muted-foreground" />
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-2">Filtros:</span>
+              
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[160px] text-xs focus:ring-0">
+                  <SelectValue placeholder="Tipo de postagem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
+                  {VISIBLE_CONTENT_TYPES.map(t => (
+                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="w-px h-4 bg-border mx-1" />
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "flex items-center gap-1.5 h-7 px-2 rounded-md transition-colors text-xs font-medium",
+                    dateRange?.from ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                  )}>
+                    <CalIcon size={14} />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        `${format(dateRange.from, 'dd/MM/yy')} - ${format(dateRange.to, 'dd/MM/yy')}`
+                      ) : format(dateRange.from, 'dd/MM/yy')
+                    ) : 'Período de postagem'}
+                    {dateRange?.from && (
+                      <X 
+                        size={14} 
+                        className="ml-1 hover:text-foreground" 
+                        onClick={(e) => { e.stopPropagation(); setDateRange(undefined); }} 
+                      />
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    locale={ptBR}
+                    className="p-3"
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {(typeFilter !== 'all' || dateRange?.from) && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setTypeFilter('all'); setDateRange(undefined); }}
+                className="text-xs h-8 text-muted-foreground hover:text-foreground"
+              >
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+
+          {/* Search (right) */}
+          <div className="relative w-full md:max-w-sm">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar por nome..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full h-10 pl-9 pr-4 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
+            />
+          </div>
         </div>
 
         <p className="text-xs text-muted-foreground mb-3">
@@ -198,7 +297,7 @@ const MediaLibraryPage = () => {
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Image size={48} className="mb-3 opacity-40" />
             <p className="text-sm">Nenhuma mídia encontrada</p>
-            <p className="text-xs mt-1">Clique em "Adicionar imagem" para enviar arquivos.</p>
+            {!isClient && <p className="text-xs mt-1">Clique em "Adicionar imagem" para enviar arquivos.</p>}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -214,18 +313,15 @@ const MediaLibraryPage = () => {
                   <img src={item.url} alt={item.filename} className="w-full h-full object-cover" loading="lazy" />
                 )}
 
-                {/* Association badge */}
-                {item.contentTitle && (
-                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white truncate max-w-[80%]">
-                    {item.contentTitle}
-                  </div>
-                )}
+                {/* Images in library cards */}
 
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                  <p className="text-white text-xs font-medium truncate">{item.filename}</p>
+                  <div className="mb-auto">
+                    <p className="text-white/50 text-[10px]">Upload em {format(new Date(item.created_at), 'dd/MM/yyyy')}</p>
+                  </div>
                   {item.contentTitle && (
-                    <p className="text-white/70 text-[10px] truncate">Vinculada: {item.contentTitle}</p>
+                    <p className="text-white text-xs font-semibold truncate">Vinculada: {item.contentTitle}</p>
                   )}
                   <div className="flex items-center gap-2 mt-1.5">
                     <a

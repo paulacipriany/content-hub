@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
-import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper, Copy, Download } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isPast, isToday as isTodayDateFns, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import JSZip from 'jszip';
 import {
   DndContext,
   DragOverlay,
@@ -284,6 +285,12 @@ const CalendarPage = () => {
   const { projectContents, setSelectedContent, updateContentDate, selectedProject } = useApp();
   const { user, role } = useAuth();
   const isClient = role === 'client';
+  
+  const clientAllowedStatuses: WorkflowStatus[] = ['approval-client', 'review', 'scheduled', 'programmed', 'published'];
+  const displayContents = useMemo(() => {
+    if (!isClient) return projectContents;
+    return projectContents.filter(c => clientAllowedStatuses.includes(c.status as WorkflowStatus));
+  }, [projectContents, isClient]);
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
@@ -417,13 +424,13 @@ const CalendarPage = () => {
   const isDateToday = (d: Date) => d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   const fmtDateStr = (d: Date) => format(d, 'yyyy-MM-dd');
 
-  const getContentsForDate = (dateStr: string) => projectContents.filter(c => c.publish_date === dateStr);
+  const getContentsForDate = (dateStr: string) => displayContents.filter(c => c.publish_date === dateStr);
   const getTasksForDate = (dateStr: string) => tasks.filter(t => t.due_date === dateStr);
   const undatedTasks = tasks.filter(t => !t.due_date);
   
   // Get contents for specific hour on a date
   const getContentsForDateAndHour = (dateStr: string, hour: number) => {
-    return projectContents.filter(c => {
+    return displayContents.filter(c => {
       if (c.publish_date !== dateStr || !c.publish_time) return false;
       const contentHour = parseInt(c.publish_time.split(':')[0]);
       return contentHour === hour;
@@ -432,7 +439,7 @@ const CalendarPage = () => {
   
   // Get contents without time for a date (show at top)
   const getContentsWithoutTime = (dateStr: string) => {
-    return projectContents.filter(c => c.publish_date === dateStr && !c.publish_time);
+    return displayContents.filter(c => c.publish_date === dateStr && !c.publish_time);
   };
 
   const getWeekDays = () => {
@@ -506,7 +513,7 @@ const CalendarPage = () => {
     }
 
     if (data?.type === 'content') {
-      const content = projectContents.find(c => c.id === active.id);
+      const content = displayContents.find(c => c.id === active.id);
       if (!content || (content.publish_date === newDate && content.publish_time === newHour)) return;
       
       // Update content with new date and optionally time
@@ -913,7 +920,7 @@ const CalendarPage = () => {
                       {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                      {platformIcon(previewContent.platform, 14, true)}
+                      {platformIcon(previewContent.platform, 14)}
                     </span>
                   </div>
                 </div>
@@ -962,6 +969,65 @@ const CalendarPage = () => {
                         <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Fixed Footer with Quick Actions for Client */}
+                {(previewContent.status === 'approval-client' || previewContent.status === 'scheduled' || previewContent.status === 'published') && (
+                  <div className="mt-auto px-6 py-5 border-t border-border bg-card sticky bottom-0 z-20 flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0"
+                      style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(previewContent.copy_text ?? '');
+                        toast({ title: 'Texto copiado!' });
+                      }}
+                    >
+                      <Copy size={14} /> Copiar texto
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0"
+                      style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const urls: string[] = [];
+                        if (previewContent.media_urls && Array.isArray(previewContent.media_urls)) {
+                          urls.push(...previewContent.media_urls.filter(Boolean));
+                        }
+                        if (previewContent.media_url && !urls.includes(previewContent.media_url)) {
+                          urls.push(previewContent.media_url);
+                        }
+                        
+                        if (urls.length === 0) return;
+                        
+                        toast({ title: 'Preparando download...', description: 'Aguarde um momento.' });
+
+                        try {
+                          const zip = new JSZip();
+                          await Promise.all(urls.map(async (url, i) => {
+                            const res = await fetch(url);
+                            const blob = await res.blob();
+                            const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+                            zip.file(`${previewContent.title.replace(/[^a-zA-Z0-9]/g, '_')}_${i + 1}.${ext}`, blob);
+                          }));
+                          const zipBlob = await zip.generateAsync({ type: 'blob' });
+                          const a = document.createElement('a');
+                          a.href = URL.createObjectURL(zipBlob);
+                          a.download = `${previewContent.title.replace(/[^a-zA-Z0-9]/g, '_')}_midias.zip`;
+                          a.click();
+                          URL.revokeObjectURL(a.href);
+                          toast({ title: 'Download concluído!' });
+                        } catch (err) {
+                          console.error('Download error:', err);
+                          toast({ title: 'Erro ao baixar mídias', description: 'Por favor, tente novamente.', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      <Download size={14} /> Baixar mídias
+                    </Button>
                   </div>
                 )}
               </div>

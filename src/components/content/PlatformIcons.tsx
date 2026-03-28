@@ -81,15 +81,13 @@ export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.El
   blog: BlogSvg,
 };
 
-export const platformIcon = (platforms: Platform | Platform[], size = 14, showAll = false) => {
+export const platformIcon = (platforms: Platform | Platform[], size = 14) => {
   const arr = Array.isArray(platforms) ? platforms : [platforms];
   if (arr.length === 0) return null;
   
-  const platformsToShow = showAll ? arr : arr.slice(0, 3);
-  
   return (
     <div className="flex items-center gap-1 flex-wrap">
-      {platformsToShow.map(p => {
+      {arr.map(p => {
         const Icon = PLATFORM_ICONS[p];
         return Icon ? (
           <span key={p} style={{ color: PLATFORM_COLORS[p] }} title={p.charAt(0).toUpperCase() + p.slice(1)}>
@@ -97,9 +95,6 @@ export const platformIcon = (platforms: Platform | Platform[], size = 14, showAl
           </span>
         ) : null;
       })}
-      {!showAll && arr.length > 3 && (
-        <span className="text-[10px] text-muted-foreground ml-0.5">+{arr.length - 3}</span>
-      )}
     </div>
   );
 };

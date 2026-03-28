@@ -1,5 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import RemindersCard from '@/components/dashboard/RemindersCard';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { STATUS_LABELS, WorkflowStatus } from '@/data/types';
@@ -9,11 +11,25 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { contents, projects, setSelectedProject, pendingUsersCount } = useApp();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const navigate = useNavigate();
+  const [approvedIds, setApprovedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (user) {
+      supabase.from('approvals')
+        .select('content_id')
+        .eq('reviewer_id', user.id)
+        .eq('decision', 'approved')
+        .then(({ data }) => {
+          if (data) setApprovedIds(new Set(data.map(d => d.content_id)));
+        });
+    }
+  }, [user]);
 
   const published = contents.filter(c => c.status === 'published').length;
-  const inApproval = contents.filter(c => c.status === 'approval-client').length;
+  // For clients, only count those NOT yet approved by them
+  const inApproval = contents.filter(c => c.status === 'approval-client' && (role !== 'client' || !approvedIds.has(c.id))).length;
   const inReview = contents.filter(c => c.status === 'review').length;
   const inProduction = contents.filter(c => c.status === 'production').length;
   const scheduled = contents.filter(c => c.status === 'scheduled').length;
@@ -28,7 +44,7 @@ const Dashboard = () => {
     { label: 'Em Produção', value: inProduction, icon: TrendingUp, color: 'text-orange-600 dark:text-orange-400' },
   ];
 
-  const pendingApprovals = contents.filter(c => c.status === 'approval-client');
+  const pendingApprovals = contents.filter(c => c.status === 'approval-client' && (role !== 'client' || !approvedIds.has(c.id)));
   const reviewContents = contents.filter(c => c.status === 'review');
   const productionContents = contents.filter(c => c.status === 'production');
 
@@ -72,28 +88,45 @@ const Dashboard = () => {
         {/* Alert banners */}
         <div className="flex flex-col gap-3">
           {inApproval > 0 && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800">
-              <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
-              <span className="text-sm font-medium text-red-700 dark:text-red-400">
-                {inApproval} conteúdo{inApproval > 1 ? 's' : ''} em aprovação
-              </span>
-            </div>
+            <button
+              onClick={() => {
+                if (pendingApprovals.length > 0) {
+                  const firstPending = pendingApprovals[0];
+                  navigate(`/clients/${firstPending.project_id}/approvals`);
+                } else {
+                  navigate('/all-tasks', { state: { filterStatus: 'approval-client' } });
+                }
+              }}
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800 transition-all hover:shadow-sm hover:brightness-105 active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-3">
+                <AlertTriangle size={18} className="text-red-700 dark:text-red-400" />
+                <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                  {inApproval} conteúdo{inApproval > 1 ? 's' : ''} aguardando aprovação
+                </span>
+              </div>
+              <ArrowRight size={16} className="text-red-700 dark:text-red-400" />
+            </button>
           )}
-          {inReview > 0 && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800">
-              <Eye size={18} className="text-orange-700 dark:text-orange-400" />
-              <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
-                {inReview} conteúdo{inReview > 1 ? 's' : ''} em revisão
-              </span>
-            </div>
-          )}
-          {scheduled > 0 && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
-              <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                {scheduled} post{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendar
-              </span>
-            </div>
+          {role !== 'client' && (
+            <>
+              {inReview > 0 && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800">
+                  <Eye size={18} className="text-orange-700 dark:text-orange-400" />
+                  <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                    {inReview} conteúdo{inReview > 1 ? 's' : ''} em revisão
+                  </span>
+                </div>
+              )}
+              {scheduled > 0 && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
+                  <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                    {scheduled} post{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendar
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -113,13 +146,16 @@ const Dashboard = () => {
         {/* Reminders */}
         <RemindersCard />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={cn(
+          "grid grid-cols-1 gap-6",
+          role === 'client' ? "lg:grid-cols-2" : "lg:grid-cols-3"
+        )}>
           {/* Projects */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">Projetos</h2>
             <div className="space-y-2.5">
               {projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum projeto ainda. Crie seu primeiro projeto!</p>
+                <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>
               ) : (
                 projects.map(p => {
                   const pContents = contents.filter(c => c.project_id === p.id);
@@ -145,34 +181,36 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* In Review */}
-          <div className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Eye size={16} className="text-orange-600 dark:text-orange-400" />
-              <h2 className="text-sm font-semibold text-foreground">Em Revisão</h2>
-              <span className="ml-auto text-xs font-semibold text-muted-foreground">{reviewContents.length}</span>
-            </div>
-            <div className="space-y-2.5">
-              {reviewContents.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum conteúdo em revisão.</p>
-              ) : (
-                reviewContents.slice(0, 5).map(c => {
-                  const project = projects.find(p => p.id === c.project_id);
-                  return (
-                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">{project?.name ?? ''}</p>
+          {/* In Review (Only for Agency) */}
+          {role !== 'client' && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye size={16} className="text-orange-600 dark:text-orange-400" />
+                <h2 className="text-sm font-semibold text-foreground">Em Revisão</h2>
+                <span className="ml-auto text-xs font-semibold text-muted-foreground">{reviewContents.length}</span>
+              </div>
+              <div className="space-y-2.5">
+                {reviewContents.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum conteúdo em revisão.</p>
+                ) : (
+                  reviewContents.slice(0, 5).map(c => {
+                    const project = projects.find(p => p.id === c.project_id);
+                    return (
+                      <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{project?.name ?? ''}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                          {c.assignee_profile?.display_name?.split(' ')[0] ?? ''}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                        {c.assignee_profile?.display_name?.split(' ')[0] ?? ''}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Pending Approvals */}
           <div className="bg-card border border-border rounded-xl p-5">

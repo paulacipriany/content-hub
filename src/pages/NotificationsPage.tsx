@@ -30,12 +30,18 @@ const NotificationsPage = () => {
     }
     
     // Find project and navigate
-    const { data: contentData } = await supabase.from('contents').select('project_id').eq('id', n.contentId).single();
+    const { data: contentData } = await supabase.from('contents').select('project_id, status').eq('id', n.contentId).single();
     if (contentData?.project_id) {
       const proj = projects.find(p => p.id === contentData.project_id);
       if (proj) {
         setSelectedProject(proj);
-        navigate(`/clients/${proj.id}/content?content=${n.contentId}`);
+        
+        // If it's a content awaiting approval, go to approvals page
+        if (contentData.status === 'approval-client') {
+          navigate(`/clients/${proj.id}/approvals`);
+        } else {
+          navigate(`/clients/${proj.id}/content?content=${n.contentId}`);
+        }
       }
     }
   };

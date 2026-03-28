@@ -17,8 +17,22 @@ import { useAuth } from '@/contexts/AuthContext';
 const ClientDashboardPage = () => {
   useClientFromUrl();
   const { projectContents, selectedProject, loading } = useApp();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const navigate = useNavigate();
+  const [approvedIds, setApprovedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (user) {
+      supabase.from('approvals')
+        .select('content_id')
+        .eq('reviewer_id', user.id)
+        .eq('decision', 'approved')
+        .then(({ data }) => {
+          if (data) setApprovedIds(new Set(data.map(d => d.content_id)));
+        });
+    }
+  }, [user]);
+
   const isClient = role === 'client';
 
   if (loading) {
@@ -57,7 +71,8 @@ const ClientDashboardPage = () => {
   const published = projectContents.filter(c => c.status === 'published').length;
   const programmed = projectContents.filter(c => c.status === 'programmed').length;
   const scheduled = projectContents.filter(c => c.status === 'scheduled').length;
-  const inApproval = projectContents.filter(c => c.status === 'approval-client').length;
+  // For clients, only count those NOT yet approved by them
+  const inApproval = projectContents.filter(c => c.status === 'approval-client' && (!isClient || !approvedIds.has(c.id))).length;
   const inReview = projectContents.filter(c => c.status === 'review').length;
   const inProduction = projectContents.filter(c => c.status === 'production').length;
   const ideas = projectContents.filter(c => c.status === 'idea').length;
@@ -75,9 +90,11 @@ const ClientDashboardPage = () => {
   // Alert banners
   const banners = [
     { condition: inApproval > 0, path: '/approvals', icon: AlertTriangle, count: inApproval, text: 'aguardando aprovação', style: 'bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800 text-red-700 dark:text-red-400' },
-    { condition: inReview > 0, path: '/review', icon: AlertTriangle, count: inReview, text: 'aguardando revisão', style: 'bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800 text-orange-700 dark:text-orange-400' },
-    { condition: scheduled > 0, path: '/scheduling', icon: CalendarClock, count: scheduled, text: 'pronto(s) para agendamento', style: 'bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800 text-blue-700 dark:text-blue-400' },
-    { condition: programmed > 0, path: '/workflow', icon: Radio, count: programmed, text: 'programado(s)', style: 'bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 text-purple-700 dark:text-purple-400' },
+    ...(!isClient ? [
+      { condition: inReview > 0, path: '/review', icon: AlertTriangle, count: inReview, text: 'aguardando revisão', style: 'bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800 text-orange-700 dark:text-orange-400' },
+      { condition: scheduled > 0, path: '/scheduling', icon: CalendarClock, count: scheduled, text: 'pronto(s) para agendamento', style: 'bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800 text-blue-700 dark:text-blue-400' },
+      { condition: programmed > 0, path: '/workflow', icon: Radio, count: programmed, text: 'programado(s)', style: 'bg-purple-50 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 text-purple-700 dark:text-purple-400' },
+    ] : [])
   ].filter(b => b.condition);
 
   // Platform breakdown

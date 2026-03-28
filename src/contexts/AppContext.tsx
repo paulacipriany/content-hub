@@ -178,6 +178,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       changed_by: user.id,
     });
 
+    // Notify approvers if status changed to approval-client
+    if (status === 'approval-client') {
+      try {
+        const { data: approvers } = await supabase
+          .from('content_approvers' as any)
+          .select('user_id')
+          .eq('content_id', id);
+        
+        if (approvers && approvers.length > 0) {
+          const notifs = approvers.map((a: any) => ({
+            user_id: a.user_id,
+            type: 'status_change',
+            title: 'Novo conteúdo para aprovação',
+            message: `O conteúdo "${content.title}" está aguardando sua revisão.`,
+            content_id: id,
+            read: false,
+          }));
+          await supabase.from('notifications' as any).insert(notifs);
+        }
+      } catch (err) {
+        console.error('Failed to notify approvers:', err);
+      }
+    }
+
     setContents(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     if (selectedContent?.id === id) {
       setSelectedContent(prev => prev ? { ...prev, status } : null);
