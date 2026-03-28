@@ -150,7 +150,7 @@ const ApprovalsPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1.5 text-xs border-0"
+                          className="gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
                           style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -165,7 +165,7 @@ const ApprovalsPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1.5 text-xs border-0"
+                          className="gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
                           style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
                           disabled={downloading === c.id}
                           onClick={(e) => {

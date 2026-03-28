@@ -19,9 +19,9 @@ const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
             )}
           </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-xs font-semibold text-foreground block truncate">{getUserHandle(userName)}</span>
-          <span className="text-[10px] text-muted-foreground">Patrocinado</span>
+        <div className="flex-1 min-w-0 flex flex-col gap-[1px]">
+          <span className="text-[13px] font-semibold text-foreground truncate leading-tight">{getUserHandle(userName)}</span>
+          <span className="text-[11px] text-muted-foreground leading-tight">Patrocinado</span>
         </div>
         <MoreHorizontal size={16} className="text-muted-foreground" />
       </div>

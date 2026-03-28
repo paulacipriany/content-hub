@@ -403,12 +403,12 @@ const WorkflowPage = () => {
               {(previewContent.status === 'approval-client' || previewContent.status === 'scheduled' || previewContent.status === 'programmed' || previewContent.status === 'published') && (previewContent.copy_text || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
                 <div className="mt-auto px-6 py-5 border-t border-border bg-card sticky bottom-0 z-20 flex gap-2">
                   {previewContent.copy_text && (
-                    <Button variant="outline" className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} onClick={() => { navigator.clipboard.writeText(previewContent.copy_text ?? ''); toast.success('Texto copiado!'); }}>
+                    <Button variant="outline" className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} onClick={() => { navigator.clipboard.writeText(previewContent.copy_text ?? ''); toast.success('Texto copiado!'); }}>
                       <Copy size={14} /> Copiar texto
                     </Button>
                   )}
                   {(previewContent.media_url || (previewContent.media_urls && previewContent.media_urls.length > 0)) && (
-                    <Button variant="outline" className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} disabled={downloading} onClick={() => handleDownloadZip(previewContent)}>
+                    <Button variant="outline" className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]" style={{ backgroundColor: '#c5daf7', color: '#1369db' }} disabled={downloading} onClick={() => handleDownloadZip(previewContent)}>
                       {downloading ? <><Loader2 size={14} className="animate-spin" /> Baixando...</> : <><Download size={14} /> Baixar mídias</>}
                     </Button>
                   )}

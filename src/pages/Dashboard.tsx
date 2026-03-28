@@ -47,6 +47,7 @@ const Dashboard = () => {
   const pendingApprovals = contents.filter(c => c.status === 'approval-client' && (role !== 'client' || !approvedIds.has(c.id)));
   const reviewContents = contents.filter(c => c.status === 'review');
   const productionContents = contents.filter(c => c.status === 'production');
+  const scheduledContents = contents.filter(c => c.status === 'scheduled');
 
   const handleProjectClick = (project: typeof projects[number]) => {
     setSelectedProject(project);
@@ -111,20 +112,40 @@ const Dashboard = () => {
           {role !== 'client' && (
             <>
               {inReview > 0 && (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800">
-                  <Eye size={18} className="text-orange-700 dark:text-orange-400" />
-                  <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
-                    {inReview} conteúdo{inReview > 1 ? 's' : ''} em revisão
-                  </span>
-                </div>
+                <button
+                  onClick={() => {
+                    if (reviewContents.length > 0) {
+                      navigate(`/clients/${reviewContents[0].project_id}/review`);
+                    }
+                  }}
+                  className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border bg-orange-50 border-orange-200 dark:bg-orange-950/50 dark:border-orange-800 transition-all hover:shadow-sm hover:brightness-105 active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3">
+                    <Eye size={18} className="text-orange-700 dark:text-orange-400" />
+                    <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                      {inReview} conteúdo{inReview > 1 ? 's' : ''} em revisão
+                    </span>
+                  </div>
+                  <ArrowRight size={16} className="text-orange-700 dark:text-orange-400" />
+                </button>
               )}
               {scheduled > 0 && (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
-                  <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                    {scheduled} post{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendar
-                  </span>
-                </div>
+                <button
+                  onClick={() => {
+                    if (scheduledContents.length > 0) {
+                      navigate(`/clients/${scheduledContents[0].project_id}/scheduling`);
+                    }
+                  }}
+                  className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800 transition-all hover:shadow-sm hover:brightness-105 active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3">
+                    <CalendarClock size={18} className="text-blue-700 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                      {scheduled} post{scheduled > 1 ? 's' : ''} pronto{scheduled > 1 ? 's' : ''} para agendar
+                    </span>
+                  </div>
+                  <ArrowRight size={16} className="text-blue-700 dark:text-blue-400" />
+                </button>
               )}
             </>
           )}

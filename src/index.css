@@ -1,4 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-BookItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-MediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CircularStd';
+  src: url('/fonts/CircularStd-BlackItalic.otf') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -150,12 +212,15 @@
 }
 
 @layer base {
+  html {
+    font-size: 112%; /* Aumenta um pouco mais o tamanho base (aprox 18px) */
+  }
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'CircularStd', system-ui, sans-serif;
   }
 }
 

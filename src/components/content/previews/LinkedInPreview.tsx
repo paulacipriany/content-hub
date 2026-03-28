@@ -17,10 +17,10 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
             <span className="text-sm font-bold text-white">{initials}</span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold text-foreground block">{userName}</span>
-          <span className="text-[11px] text-muted-foreground block">Social Media Manager</span>
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="flex-1 min-w-0 flex flex-col gap-[1px]">
+          <span className="text-[13px] font-semibold text-foreground leading-tight">{userName}</span>
+          <span className="text-[11px] text-muted-foreground leading-tight">Social Media Manager</span>
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground leading-none mt-0.5">
             <span>Agora</span><span>·</span><Globe size={10} />
           </div>
         </div>

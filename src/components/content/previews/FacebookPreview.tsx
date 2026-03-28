@@ -17,9 +17,9 @@ const FacebookPreview = ({ content }: { content: ContentWithRelations }) => {
             <span className="text-xs font-bold text-white">{initials}</span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold text-foreground block">{userName}</span>
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="flex-1 min-w-0 flex flex-col gap-[1px] mt-0.5">
+          <span className="text-[13px] font-semibold text-foreground leading-tight">{userName}</span>
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground leading-none">
             <span>Agora</span><span>·</span><Globe size={10} />
           </div>
         </div>

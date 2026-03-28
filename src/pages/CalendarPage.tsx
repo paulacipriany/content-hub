@@ -74,7 +74,7 @@ const DraggableContent = ({ content, onClick, disabled }: { content: ContentWith
       onClick={onClick}
       className={cn(
         "w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm",
-        "hover:shadow-md transition-all overflow-hidden min-w-0 max-h-[28px]",
+        "hover:shadow-md transition-all overflow-hidden min-w-0 max-h-[42px]",
         disabled ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
@@ -82,16 +82,16 @@ const DraggableContent = ({ content, onClick, disabled }: { content: ContentWith
       title={content.title}
     >
       {/* Header: Platform icons + Title in one line */}
-      <div className="flex items-center gap-0.5 min-w-0">
+      <div className="flex items-center gap-0.5 min-w-0 relative">
         {platforms.slice(0, 1).map((p, i) => (
-          <span key={i} className="shrink-0">{platformIcon([p] as any, 10)}</span>
+          <span key={i} className="shrink-0">{platformIcon([p] as any, 12)}</span>
         ))}
-        <p className="text-[10px] font-medium text-foreground truncate leading-none">
+        <p className="text-[13px] font-medium text-foreground truncate leading-tight">
           {content.title}
         </p>
       </div>
       {/* Status label only */}
-      <p className="text-[8px] text-muted-foreground truncate leading-none">
+      <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5 pl-4">
         {STATUS_LABELS[content.status as WorkflowStatus]}
       </p>
     </div>
@@ -300,7 +300,7 @@ const CalendarPage = () => {
   const [newTaskText, setNewTaskText] = useState('');
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [showDates, setShowDates] = useState(true);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
@@ -544,8 +544,8 @@ const CalendarPage = () => {
         {commemoratives.length > 0 && (
           <div className="space-y-0.5 mb-1">
             {commemoratives.map((title, i) => (
-              <div key={i} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
-                <Star size={8} className="flex-shrink-0 mt-[2px]" />
+              <div key={i} className="flex items-start gap-1 px-1.5 py-[3px] text-[12px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+                <Star size={10} className="flex-shrink-0 mt-[2px]" />
                 <span className="break-words whitespace-normal leading-tight">{title}</span>
               </div>
             ))}
@@ -577,8 +577,8 @@ const CalendarPage = () => {
     return (
       <div className="space-y-1">
         {commemoratives.map((title, i) => (
-          <div key={`comm-${i}`} className="flex items-start gap-1 px-1.5 py-[2px] text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
-            <Star size={8} className="flex-shrink-0 mt-[2px]" />
+          <div key={`comm-${i}`} className="flex items-start gap-1 px-1.5 py-[2px] text-[12px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+            <Star size={10} className="flex-shrink-0 mt-[2px]" />
             <span className="break-words whitespace-normal leading-tight">{title}</span>
           </div>
         ))}
@@ -595,75 +595,7 @@ const CalendarPage = () => {
   return (
     <>
       <TopBar title="Calendário" subtitle="Planejamento de conteúdos" />
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex h-[calc(100vh-130px)]">
-        {/* Sidebar: undated tasks */}
-        <div className={cn(
-          "flex-shrink-0 border-r border-border/50 bg-card overflow-y-auto transition-all duration-200",
-          sidebarOpen ? "w-60" : "w-10"
-        )}>
-          {sidebarOpen ? (
-            <div className="p-3">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sem data</h3>
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 font-medium">
-                    {undatedTasks.length}
-                  </span>
-                  <button
-                    onClick={() => setSidebarOpen(false)}
-                    className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground"
-                    title="Minimizar"
-                  >
-                    <PanelLeftClose size={14} />
-                  </button>
-                </div>
-              </div>
-
-              {undatedTasks.length === 0 ? (
-                <p className="text-xs text-muted-foreground/60 py-4 text-center">Nenhuma tarefa</p>
-              ) : (
-                <div className="space-y-0.5 mb-3">
-                  {undatedTasks.map(t => (
-                    <DraggableTask key={t.id} task={t} onToggle={toggleTask} />
-                  ))}
-                </div>
-              )}
-
-              <form onSubmit={e => { e.preventDefault(); addTask(); }} className="flex items-center gap-1.5 mt-2">
-                <Input
-                  value={newTaskText}
-                  onChange={e => setNewTaskText(e.target.value)}
-                  placeholder="Adicionar tarefa..."
-                  className="h-8 text-xs border-dashed bg-transparent"
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-primary"
-                  disabled={!newTaskText.trim()}
-                >
-                  <Plus size={14} />
-                </Button>
-              </form>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center pt-3">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground"
-                title="Expandir tarefas"
-              >
-                <PanelLeftOpen size={14} />
-              </button>
-              {undatedTasks.length > 0 && (
-                <span className="text-[9px] text-muted-foreground mt-1 font-medium">{undatedTasks.length}</span>
-              )}
-            </div>
-          )}
-        </div>
-
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>      <div className="flex h-[calc(100vh-130px)]">
         {/* Main calendar area */}
         <div className="flex-1 min-w-0 flex flex-col bg-background">
           {/* Toolbar */}
@@ -977,7 +909,7 @@ const CalendarPage = () => {
                   <div className="mt-auto px-6 py-5 border-t border-border bg-card sticky bottom-0 z-20 flex gap-2">
                     <Button
                       variant="outline"
-                      className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0"
+                      className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
                       style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -989,7 +921,7 @@ const CalendarPage = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      className="flex-1 h-10 gap-1.5 text-xs font-semibold border-0"
+                      className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
                       style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
                       onClick={async (e) => {
                         e.stopPropagation();
