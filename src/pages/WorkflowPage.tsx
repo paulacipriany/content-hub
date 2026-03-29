@@ -140,21 +140,19 @@ const WorkflowPage = () => {
       const overItems = prev[overContainer as WorkflowStatus] || [];
 
       const activeIndex = activeItems.findIndex(i => i.id === activeId);
+      if (activeIndex === -1) return prev; // already moved
+
+      const movingItem = activeItems[activeIndex];
       const overIndex = overItems.findIndex(i => i.id === overId);
 
-      let newIndex;
-      if (overItems.some(i => i.id === overId)) {
-        newIndex = overIndex >= 0 ? overIndex : overItems.length;
-      } else {
-        newIndex = overItems.length;
-      }
+      const newIndex = overIndex >= 0 ? overIndex : overItems.length;
 
       return {
         ...prev,
         [activeContainer as WorkflowStatus]: activeItems.filter(i => i.id !== activeId),
         [overContainer as WorkflowStatus]: [
           ...overItems.slice(0, newIndex),
-          activeItems[activeIndex],
+          movingItem,
           ...overItems.slice(newIndex)
         ],
       };
