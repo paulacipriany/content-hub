@@ -1030,6 +1030,7 @@ const ContentPanel = () => {
                   className="hidden"
                 />
               </div>
+              )}
             </>
           )}
 
