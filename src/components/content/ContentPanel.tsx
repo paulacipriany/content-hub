@@ -128,11 +128,15 @@ const ContentPanel = () => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const savedSnapshotRef = useRef<string>('');
   const [userAlreadyApproved, setUserAlreadyApproved] = useState(false);
+  const [briefingOpen, setBriefingOpen] = useState(true);
+  const [urlToFilename, setUrlToFilename] = useState<Record<string, string>>({});
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   // Helper to get current draft fingerprint
   const getDraftFingerprint = useCallback(() => {
-    return JSON.stringify({ editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing });
-  }, [editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing]);
+    return JSON.stringify({ editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing, thumbnailUrl });
+  }, [editTitle, editCopyText, editCopyTexts, editPublishTime, mediaUrls, briefingImages, editBriefing, thumbnailUrl]);
 
   // Mark dirty when fields change
   useEffect(() => {
@@ -161,12 +165,14 @@ const ContentPanel = () => {
       setMediaUrls([]);
     }
     const bImages = selectedContent.briefing_images;
-    console.log('Loading content:', selectedContent.id, 'briefing_images:', bImages);
     setBriefingImages(bImages && Array.isArray(bImages) ? bImages : []);
     setDraftSaved(true);
     if (selectedContent.platform && selectedContent.platform.length > 0) {
       setPreviewPlatform(selectedContent.platform[0]);
     }
+    setBriefingOpen(!(selectedContent.status === 'production' || selectedContent.status === 'review' || selectedContent.status === 'approval-client' || selectedContent.status === 'scheduled'));
+    setThumbnailUrl((selectedContent as any).thumbnail_url ?? null);
+    
     // Set snapshot after a tick so state is updated
     setTimeout(() => {
       savedSnapshotRef.current = JSON.stringify({
@@ -177,13 +183,14 @@ const ContentPanel = () => {
         mediaUrls: urls && Array.isArray(urls) && urls.length > 0 ? urls : selectedContent.media_url ? [selectedContent.media_url] : [],
         briefingImages: bImages && Array.isArray(bImages) ? bImages : [],
         editBriefing: selectedContent.description ?? '',
+        thumbnailUrl: (selectedContent as any).thumbnail_url ?? null
       });
     }, 0);
   }, [selectedContent?.id]);
 
-  // Auto-save title
-  useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
-  useAutoSave(selectedContent?.id, 'description', editBriefing, updateContentFields);
+  // REMOVED AUTO-SAVE hooks
+  // useAutoSave(selectedContent?.id, 'title', editTitle, updateContentFields);
+  // useAutoSave(selectedContent?.id, 'description', editBriefing, updateContentFields);
 
   useEffect(() => {
     if (!selectedContent) return;
@@ -304,9 +311,9 @@ const ContentPanel = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let files = Array.from(e.target.files || []);
     if (files.length === 0 || !user || !selectedContent) return;
-    
-    const isPostFeed = selectedContent.content_type === 'post';
-    if (isPostFeed) {
+    const isVideoType = selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels';
+    const isSingleFile = selectedContent.content_type === 'post' || isVideoType;
+    if (isSingleFile) {
       files = [files[0]];
     }
     
@@ -329,12 +336,8 @@ const ContentPanel = () => {
           });
         }
       }
-      const updatedUrls = isPostFeed ? [newUrls[0]] : [...mediaUrls, ...newUrls];
+      const updatedUrls = isSingleFile ? [newUrls[0]] : [...mediaUrls, ...newUrls];
       setMediaUrls(updatedUrls);
-      await updateContentFields(selectedContent.id, {
-        media_url: updatedUrls[0] ?? null,
-        media_urls: updatedUrls,
-      });
     } catch (err) {
       console.error('Upload error:', err);
       toast({ title: 'Erro inesperado', description: 'Erro ao processar o upload da mídia.', variant: 'destructive' });
@@ -348,11 +351,19 @@ const ContentPanel = () => {
     confirmDelete(async () => {
       const updatedUrls = mediaUrls.filter((_, i) => i !== index);
       setMediaUrls(updatedUrls);
-      await updateContentFields(selectedContent.id, {
-        media_url: updatedUrls[0] ?? null,
-        media_urls: updatedUrls,
-      });
     }, 'esta mídia');
+  };
+
+  const handleRemoveAllMedia = async () => {
+    confirmDelete(async () => {
+      setMediaUrls([]);
+    }, 'todas as mídias');
+  };
+
+  const handleRemoveAllBriefingImages = async () => {
+    confirmDelete(async () => {
+      setBriefingImages([]);
+    }, 'todas as imagens do briefing');
   };
 
   const handleBriefingImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,7 +392,6 @@ const ContentPanel = () => {
       if (newUrls.length > 0) {
         const updated = [...briefingImages, ...newUrls];
         setBriefingImages(updated);
-        await updateContentFields(selectedContent.id, { briefing_images: updated });
         toast({ title: 'Imagens enviadas', description: `${newUrls.length} imagens adicionadas ao briefing.` });
       }
     } catch (err) {
@@ -397,22 +407,49 @@ const ContentPanel = () => {
     confirmDelete(async () => {
       const updated = briefingImages.filter((_, i) => i !== index);
       setBriefingImages(updated);
-      await updateContentFields(selectedContent.id, { briefing_images: updated });
     }, 'esta imagem do briefing');
   };
 
   const handleSaveDraft = async () => {
     await updateContentFields(selectedContent.id, {
       title: editTitle,
+      description: editBriefing,
       copy_text: editCopyText,
       copy_texts: editCopyTexts,
       publish_time: editPublishTime || null,
       media_url: mediaUrls[0] ?? null,
       media_urls: mediaUrls,
       briefing_images: briefingImages,
+      thumbnail_url: thumbnailUrl,
     });
     savedSnapshotRef.current = getDraftFingerprint();
     setDraftSaved(true);
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedContent) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${selectedContent.id}/thumbnail/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('content-media').upload(path, file);
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('content-media').getPublicUrl(path);
+      setThumbnailUrl(publicUrl);
+    } catch (err: any) {
+      console.error('Thumbnail upload error:', err);
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveThumbnail = async () => {
+    confirmDelete(async () => {
+      setThumbnailUrl(null);
+    }, 'a capa do vídeo');
   };
 
   const handleClose = () => {
@@ -508,7 +545,17 @@ const ContentPanel = () => {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          {!draftSaved && !isClient && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={handleSaveDraft}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 h-8 animate-pulse shadow-md"
+            >
+              <Check size={14} /> Salvar Alterações
+            </Button>
+          )}
           {isClient ? (
             isClientApproval ? (
               <>
@@ -909,8 +956,8 @@ const ContentPanel = () => {
             </div>
           ) : (
             <>
-              {/* Copy text (editable) — hidden for stories and client-request */}
-              {selectedContent.content_type !== 'stories' && selectedContent.status !== 'client-request' && (
+              {/* Copy text (editable) — hidden for stories */}
+              {selectedContent.content_type !== 'stories' && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
@@ -975,62 +1022,128 @@ const ContentPanel = () => {
               </div>
               )}
 
-              {/* Media Upload — hidden for client-request */}
-              {selectedContent.status !== 'client-request' && (
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <ImagePlus size={12} />Mídia
-                </label>
-                {mediaUrls.length > 0 && (
-                  <DndContext
-                    sensors={mediaSensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event: DragEndEvent) => {
-                      const { active, over } = event;
-                      if (!over || active.id === over.id) return;
-                      const oldIndex = mediaUrls.findIndex((u, i) => u + '__' + i === active.id);
-                      const newIndex = mediaUrls.findIndex((u, i) => u + '__' + i === over.id);
-                      if (oldIndex === -1 || newIndex === -1) return;
-                      const reordered = arrayMove(mediaUrls, oldIndex, newIndex);
-                      setMediaUrls(reordered);
-                      updateContentFields(selectedContent.id, { media_urls: reordered });
-                    }}
-                  >
-                    <SortableContext items={mediaUrls.map((u, i) => u + '__' + i)} strategy={rectSortingStrategy}>
-                      <div className="grid grid-cols-3 gap-2 mb-2">
-                        {mediaUrls.map((url, i) => (
-                          <SortableMediaItem key={url + '__' + i} url={url} index={i} onRemove={handleRemoveMedia} onLightbox={setLightboxUrl} />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                )}
-                {!(selectedContent.content_type === 'post' && mediaUrls.length >= 1) && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="w-full max-w-sm h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground"
-                  >
-                    {uploading ? (
-                      <Loader2 size={18} className="animate-spin text-primary" />
-                    ) : (
-                      <>
-                        <ImagePlus size={18} />
-                        <span className="text-xs">{mediaUrls.length === 0 ? 'Clique para enviar imagem' : 'Adicionar mais imagens'}</span>
-                      </>
+              {/* Media Upload */}
+              <div className={cn("grid gap-6", (selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') ? "grid-cols-2" : "grid-cols-1")}>
+                
+                {/* Main Media Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                      <ImagePlus size={12} />Mídia
+                    </label>
+                    {mediaUrls.length > 0 && (
+                      <button
+                        onClick={handleRemoveAllMedia}
+                        className="text-[10px] text-destructive hover:underline flex items-center gap-1"
+                      >
+                        <Trash2 size={10} /> Excluir todas
+                      </button>
                     )}
-                  </button>
+                  </div>
+                  {mediaUrls.length > 0 && (
+                    <DndContext
+                      sensors={mediaSensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(event: DragEndEvent) => {
+                        const { active, over } = event;
+                        if (!over || active.id === over.id) return;
+                        const oldIndex = mediaUrls.findIndex((u, i) => u + '__' + i === active.id);
+                        const newIndex = mediaUrls.findIndex((u, i) => u + '__' + i === over.id);
+                        if (oldIndex === -1 || newIndex === -1) return;
+                        const reordered = arrayMove(mediaUrls, oldIndex, newIndex);
+                        setMediaUrls(reordered);
+                      }}
+                    >
+                      <SortableContext items={mediaUrls.map((u, i) => u + '__' + i)} strategy={rectSortingStrategy}>
+                        <div className={cn("gap-2 mb-2", (selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') ? "flex flex-col" : "grid grid-cols-3")}>
+                          {mediaUrls.map((url, i) => (
+                            <div key={url + '__' + i} className={cn("relative rounded-md overflow-hidden bg-muted group", (selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') ? (selectedContent.content_type === 'video' ? 'w-full aspect-video' : 'w-full aspect-[9/16]') : 'w-24 h-24')}>
+                              <SortableMediaItem url={url} index={i} onRemove={handleRemoveMedia} onLightbox={setLightboxUrl} />
+                            </div>
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                  {!(
+                    (selectedContent.content_type === 'post' || selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') 
+                    && mediaUrls.length >= 1
+                  ) && (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className={cn("w-full h-20 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground",
+                        (selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') ? 'max-w-none aspect-[16/9]' : 'max-w-sm'
+                      )}
+                    >
+                      {uploading ? (
+                        <Loader2 size={18} className="animate-spin text-primary" />
+                      ) : (
+                        <>
+                          <ImagePlus size={18} />
+                          <span className="text-xs text-center px-2">
+                            {mediaUrls.length === 0 
+                              ? (selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels' ? 'Clique para enviar vídeo' : 'Clique para enviar imagem') 
+                              : 'Adicionar mais mídias'}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={(selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') ? "video/*" : "image/*,video/*"}
+                    multiple={!(selectedContent.content_type === 'post' || selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels')}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Thumbnail Section (Only for Video types) */}
+                {(selectedContent.content_type === 'video' || selectedContent.content_type === 'shorts' || selectedContent.content_type === 'reels') && (
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <ImagePlus size={12} />Capa do {selectedContent.content_type === 'video' ? 'Vídeo' : 'Reels/Shorts'}
+                    </label>
+                    {thumbnailUrl ? (
+                      <div className={cn("relative rounded-md overflow-hidden bg-muted group", selectedContent.content_type === 'video' ? 'w-full aspect-video' : 'w-full aspect-[9/16]')}>
+                        <img src={thumbnailUrl} alt="Capa" className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(thumbnailUrl)} />
+                        <button
+                          onClick={handleRemoveThumbnail}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={12} className="text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => thumbnailInputRef.current?.click()}
+                        disabled={uploading}
+                        className={cn("w-full border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground",
+                          selectedContent.content_type === 'video' ? 'aspect-video' : 'aspect-[9/16]'
+                        )}
+                      >
+                        {uploading ? (
+                          <Loader2 size={18} className="animate-spin text-primary" />
+                        ) : (
+                          <>
+                            <ImagePlus size={18} />
+                            <span className="text-xs text-center px-4">Adicionar Capa</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                    <input
+                      ref={thumbnailInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailUpload}
+                      className="hidden"
+                    />
+                  </div>
                 )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,video/*"
-                  {...(selectedContent.content_type !== 'post' ? { multiple: true } : {})}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
               </div>
-              )}
             </>
           )}
 
@@ -1117,7 +1230,18 @@ const ContentPanel = () => {
               </div>
               <div className="flex justify-center overflow-hidden">
                 <div className="w-full max-w-[320px] transform scale-[0.95] origin-top">
-                  <PostPreview content={selectedContent} platform={previewPlatform} />
+                  <PostPreview 
+                    content={{
+                      ...selectedContent,
+                      title: editTitle,
+                      copy_text: editCopyText,
+                      copy_texts: editCopyTexts,
+                      media_urls: mediaUrls,
+                      thumbnail_url: thumbnailUrl,
+                      description: editBriefing,
+                    } as any}
+                    platform={previewPlatform} 
+                  />
                 </div>
               </div>
               
@@ -1169,7 +1293,18 @@ const ContentPanel = () => {
                     ))}
                   </div>
                   <div className="flex justify-center">
-                    <PostPreview content={selectedContent} platform={previewPlatform} />
+                    <PostPreview 
+                      content={{
+                        ...selectedContent,
+                        title: editTitle,
+                        copy_text: editCopyText,
+                        copy_texts: editCopyTexts,
+                        media_urls: mediaUrls,
+                        thumbnail_url: thumbnailUrl,
+                        description: editBriefing,
+                      } as any} 
+                      platform={previewPlatform} 
+                    />
                   </div>
                 </>
               )}
