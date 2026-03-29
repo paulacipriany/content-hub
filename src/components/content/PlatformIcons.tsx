@@ -81,7 +81,7 @@ export const PLATFORM_ICONS: Record<string, (props: { size?: number }) => JSX.El
   blog: BlogSvg,
 };
 
-export const platformIcon = (platforms: Platform | Platform[], size = 14) => {
+export const platformIcon = (platforms: Platform | Platform[], size = 14, _iconsOnly = false) => {
   const arr = Array.isArray(platforms) ? platforms : [platforms];
   if (arr.length === 0) return null;
   
