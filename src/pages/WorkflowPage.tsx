@@ -194,16 +194,8 @@ const WorkflowPage = () => {
     }
   };
 
-  const savePositions = async (items: ContentWithRelations[], status: WorkflowStatus) => {
-    // Media-based sorting algorithm to avoid cascading updates
-    // For now, simple re-assignment of sort_order for simplicity in this MVP
-    // Better: use middle values (e.g. 1000, 2000, 3000)
-    for (let i = 0; i < items.length; i++) {
-      const newOrder = (i + 1) * 1000;
-      if (items[i].sort_order !== newOrder) {
-        await updateContentFields(items[i].id, { sort_order: newOrder });
-      }
-    }
+  const savePositions = async (_items: ContentWithRelations[], _status: WorkflowStatus) => {
+    // sort_order is handled client-side only; no DB column exists
   };
 
   const handleClientCardClick = (content: ContentWithRelations) => {
