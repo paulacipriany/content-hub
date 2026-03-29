@@ -189,40 +189,13 @@ const WorkflowPage = () => {
         await savePositions(reordered, activeContainer as WorkflowStatus);
       }
     } else {
-      // Container changed (handled in onDragOver for UI)
-      // Save status change and position
-      const targetItems = columns[overContainer as WorkflowStatus];
-      const targetContent = targetItems.find(i => i.id === activeId);
-      if (targetContent) {
-        // Find adjacent items to calculate sort_order
-        const itemIdx = targetItems.findIndex(i => i.id === activeId);
-        const prevItem = targetItems[itemIdx - 1];
-        const nextItem = targetItems[itemIdx + 1];
-        
-        let newSortOrder = 0;
-        if (prevItem && nextItem) newSortOrder = (prevItem.sort_order! + nextItem.sort_order!) / 2;
-        else if (prevItem) newSortOrder = prevItem.sort_order! + 1000;
-        else if (nextItem) newSortOrder = nextItem.sort_order! - 1000;
-        else newSortOrder = Date.now();
-
-        await updateContentFields(activeId, { 
-          status: overContainer,
-          sort_order: newSortOrder
-        });
-      }
+      // Container changed – persist the new status
+      await updateContentFields(activeId, { status: overContainer });
     }
   };
 
-  const savePositions = async (items: ContentWithRelations[], status: WorkflowStatus) => {
-    // Media-based sorting algorithm to avoid cascading updates
-    // For now, simple re-assignment of sort_order for simplicity in this MVP
-    // Better: use middle values (e.g. 1000, 2000, 3000)
-    for (let i = 0; i < items.length; i++) {
-      const newOrder = (i + 1) * 1000;
-      if (items[i].sort_order !== newOrder) {
-        await updateContentFields(items[i].id, { sort_order: newOrder });
-      }
-    }
+  const savePositions = async (_items: ContentWithRelations[], _status: WorkflowStatus) => {
+    // sort_order is handled client-side only; no DB column exists
   };
 
   const handleClientCardClick = (content: ContentWithRelations) => {
