@@ -909,8 +909,8 @@ const ContentPanel = () => {
             </div>
           ) : (
             <>
-              {/* Copy text (editable) — hidden for stories */}
-              {selectedContent.content_type !== 'stories' && (
+              {/* Copy text (editable) — hidden for stories and client-request */}
+              {selectedContent.content_type !== 'stories' && selectedContent.status !== 'client-request' && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Copy</label>
@@ -975,7 +975,8 @@ const ContentPanel = () => {
               </div>
               )}
 
-              {/* Media Upload */}
+              {/* Media Upload — hidden for client-request */}
+              {selectedContent.status !== 'client-request' && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                   <ImagePlus size={12} />Mídia
@@ -1029,6 +1030,7 @@ const ContentPanel = () => {
                   className="hidden"
                 />
               </div>
+              )}
             </>
           )}
 
