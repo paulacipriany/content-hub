@@ -1103,7 +1103,7 @@ const ContentPanel = () => {
                       className={cn(
                         "w-7 h-7 rounded-full flex items-center justify-center transition-all",
                         previewPlatform === p
-                          ? "bg-primary text-primary-foreground shadow-sm"
+                          ? "bg-[#c5daf7] text-[#1369db] shadow-sm"
                           : "bg-secondary text-muted-foreground hover:bg-accent"
                       )}
                       title={PLATFORM_LABELS[p]}
@@ -1157,7 +1157,7 @@ const ContentPanel = () => {
                         className={cn(
                           "w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm",
                           previewPlatform === p
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-[#c5daf7] text-[#1369db]"
                             : "bg-secondary text-muted-foreground hover:bg-accent"
                         )}
                         title={PLATFORM_LABELS[p]}
