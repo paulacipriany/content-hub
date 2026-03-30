@@ -97,7 +97,7 @@ const TasksPage = () => {
           </Button>
         }
       />
-      <div className="bg-[#c5daf7] min-h-screen">
+      <div className="min-h-screen">
         {/* Filter bar */}
         <div className="flex items-center gap-2 px-6 py-4 flex-wrap">
           <Popover>
