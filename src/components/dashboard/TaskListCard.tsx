@@ -284,7 +284,7 @@ const SortableTaskRow = ({ task, ...props }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id, data: { type: 'task', task } });
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }} className="relative group/sortable">
-      <div {...attributes} {...listeners} className="absolute -left-7 top-2 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-20 transition-opacity">
+      <div {...attributes} {...listeners} className="absolute -left-7 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-20 transition-opacity">
         <div className="flex flex-col gap-[2px]">{[1,2,3].map(i => <div key={i} className="w-4 border-t border-slate-900" />)}</div>
       </div>
       <TaskRow task={task} {...props} />
