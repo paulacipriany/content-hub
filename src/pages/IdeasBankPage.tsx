@@ -64,8 +64,7 @@ const IdeasBankPage = () => {
       />
       <div className="p-6">
         <div className="border border-border rounded-xl overflow-hidden bg-card">
-          <div className="grid grid-cols-[40px_1fr_180px_180px_80px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            <div></div>
+          <div className="grid grid-cols-[1fr_180px_180px_80px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <div>Título do Conteúdo</div>
             <div>Formato</div>
             <div>Plataformas</div>
@@ -85,11 +84,8 @@ const IdeasBankPage = () => {
               return (
                 <div
                   key={idea.id}
-                  className="grid grid-cols-[40px_1fr_180px_180px_80px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors"
+                  className="grid grid-cols-[1fr_180px_180px_80px] items-center px-4 py-3 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors"
                 >
-                  <div className="flex items-center justify-center">
-                    {platformIcon(platforms, 16)}
-                  </div>
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-foreground truncate block">{idea.title}</span>
                     {idea.description && (
