@@ -533,9 +533,9 @@ const ContentPanel = () => {
             </div>
           ) : (
             <div className="flex items-center gap-2 px-2 flex-1 min-w-0 overflow-hidden">
-              <div className="relative max-w-[50%] flex-shrink-0 overflow-hidden group">
+              <div className="relative max-w-full flex-shrink-0 overflow-hidden group min-w-[200px]">
                 {/* Hidden span dynamically sizes the relative container to perfectly match the input width! */}
-                <span className="font-semibold text-base px-2 opacity-0 whitespace-pre pointer-events-none block" aria-hidden="true">
+                <span className="font-semibold text-base px-2 opacity-0 whitespace-pre pointer-events-none inline-block min-w-full" aria-hidden="true">
                   {editTitle || "Título do conteúdo"}
                 </span>
                 <input
@@ -1206,7 +1206,7 @@ const ContentPanel = () => {
               </Button>
             </form>
           </div>
-        ) : <div className={cn("w-[400px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[450px]")}>
+        ) : <div className={cn("w-[360px] border-l border-border flex flex-col flex-shrink-0 bg-card", isClient && "w-[400px]")}>
           {/* Right Sidebar Header (Preview & Buttons) for Review/Approval/Published phases */}
           {(selectedContent.status === 'approval-client' || selectedContent.status === 'scheduled' || selectedContent.status === 'published') && (
             <div className="p-5 border-b border-border space-y-5 bg-card/50">
