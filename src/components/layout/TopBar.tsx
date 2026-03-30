@@ -98,9 +98,9 @@ const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
           </>
         )}
 
-        <div>
+        <div className="leading-tight">
           {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
-          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-muted-foreground -mt-0.5">{subtitle}</p>}
         </div>
       </div>
 
