@@ -101,8 +101,8 @@ const ApprovalsPage = () => {
             {approvals.map(c => (
               <div
                 key={c.id}
-                className="bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
-                style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
+                className="border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                style={{ backgroundColor: '#c5daf7', borderColor: 'var(--client-100, hsl(var(--border)))' }}
               >
                 {/* Thumbnail */}
                 {c.media_urls && c.media_urls.length > 0 ? (
