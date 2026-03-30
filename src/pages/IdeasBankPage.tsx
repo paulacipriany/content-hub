@@ -64,8 +64,7 @@ const IdeasBankPage = () => {
       />
       <div className="p-6">
         <div className="border border-border rounded-xl overflow-hidden bg-card">
-          <div className="grid grid-cols-[40px_1fr_180px_180px_80px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            <div></div>
+          <div className="grid grid-cols-[1fr_180px_180px_80px] items-center px-4 py-2.5 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <div>Título do Conteúdo</div>
             <div>Formato</div>
             <div>Plataformas</div>
