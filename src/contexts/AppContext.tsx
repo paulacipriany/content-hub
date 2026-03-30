@@ -170,7 +170,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    await supabase.from('contents').update({ status }).eq('id', id);
+    const { error: updateError } = await supabase.from('contents').update({ status }).eq('id', id);
+    if (updateError) {
+      console.error('Update status error:', updateError);
+      throw new Error(`Erro ao atualizar status: ${updateError.message}`);
+    }
+
     await supabase.from('status_history').insert({
       content_id: id,
       from_status: content.status,
@@ -210,7 +215,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateContentDate = async (id: string, date: string | null) => {
     if (!user) return;
-    await supabase.from('contents').update({ publish_date: date }).eq('id', id);
+    const { error } = await supabase.from('contents').update({ publish_date: date }).eq('id', id);
+    if (error) {
+      console.error('Update date error:', error);
+      toast.error('Erro ao atualizar data: ' + error.message);
+      return;
+    }
     setContents(prev => prev.map(c => c.id === id ? { ...c, publish_date: date } : c));
     if (selectedContent?.id === id) {
       setSelectedContent(prev => prev ? { ...prev, publish_date: date } : null);

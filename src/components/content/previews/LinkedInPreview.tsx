@@ -8,7 +8,7 @@ const LinkedInPreview = ({ content }: { content: ContentWithRelations }) => {
   const initials = getInitials(userName);
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden max-w-[350px] mx-auto">
+    <div className="bg-card border border-border rounded-lg overflow-hidden w-full">
       <div className="flex items-center gap-2.5 px-3 py-3">
         <div className="w-12 h-12 rounded-full bg-[hsl(var(--platform-linkedin))] flex items-center justify-center overflow-hidden">
           {getProjectLogo(content) ? (

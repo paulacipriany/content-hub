@@ -8,7 +8,7 @@ const TikTokPreview = ({ content }: { content: ContentWithRelations }) => {
   const initials = getInitials(userName);
 
   return (
-    <div className="bg-[hsl(var(--platform-tiktok))] border border-border rounded-lg overflow-hidden max-w-[350px] mx-auto relative">
+    <div className="bg-[hsl(var(--platform-tiktok))] border border-border rounded-lg overflow-hidden w-full relative">
       <MediaOrPlaceholder content={content} platform="tiktok" />
 
       {/* Overlay content */}

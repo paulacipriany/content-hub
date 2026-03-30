@@ -8,7 +8,7 @@ const TwitterPreview = ({ content }: { content: ContentWithRelations }) => {
   const initials = getInitials(userName);
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden max-w-[350px] mx-auto">
+    <div className="bg-card border border-border rounded-xl overflow-hidden w-full">
       <div className="px-3 py-3">
         <div className="flex gap-2.5">
           <div className="w-10 h-10 rounded-full bg-[hsl(var(--platform-twitter))] flex items-center justify-center flex-shrink-0 overflow-hidden">

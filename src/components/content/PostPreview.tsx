@@ -22,6 +22,20 @@ function truncateStr(str: string | null | undefined, max: number): string {
 }
 
 const PostPreview = ({ content, platform, compact }: PostPreviewProps) => {
+  const hasMedia = (content.media_urls && content.media_urls.length > 0) || content.media_url;
+  const hasCopy = (content.copy_text && content.copy_text.trim().length > 0) || 
+                  (content.copy_texts && Object.values(content.copy_texts as any).some(v => typeof v === 'string' && v.trim().length > 0));
+
+  if (!hasMedia && !hasCopy) {
+    return (
+      <div className="py-4 text-center">
+        <p className="text-[11px] text-muted-foreground/50 font-bold tracking-widest uppercase">
+          Adicione conteúdo para visualizar
+        </p>
+      </div>
+    );
+  }
+
   const truncatedCopyTexts = compact && (content as any).copy_texts
     ? Object.fromEntries(
         Object.entries((content as any).copy_texts).map(([k, v]) => [k, truncateStr(v as string, 120)])

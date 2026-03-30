@@ -8,7 +8,7 @@ const InstagramPreview = ({ content }: { content: ContentWithRelations }) => {
   const initials = getInitials(userName);
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden max-w-[350px] mx-auto">
+    <div className="bg-card border border-border rounded-lg overflow-hidden w-full">
       <div className="flex items-center gap-2.5 px-3 py-2.5">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(var(--platform-instagram))] to-[hsl(45,100%,51%)] p-[2px]">
           <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">

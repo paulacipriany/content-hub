@@ -19,6 +19,7 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -71,6 +72,74 @@ const SortableCard = ({ content, onPreviewClick }: { content: ContentWithRelatio
   );
 };
 
+const DroppableColumn = ({ 
+  status, 
+  items, 
+  isClient, 
+  onPreviewClick,
+  activeId 
+}: { 
+  status: WorkflowStatus; 
+  items: ContentWithRelations[]; 
+  isClient: boolean; 
+  onPreviewClick: (c: ContentWithRelations) => void;
+  activeId: string | null;
+}) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+    data: { type: 'Column', status }
+  });
+
+  const cssVar = STATUS_CSS_VARS[status];
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "rounded-xl flex flex-col transition-all min-h-[500px] border-2 border-transparent",
+        items.length === 0 ? "w-20 min-w-[5rem]" : "w-72",
+        isOver && "border-dashed border-primary/20 bg-primary/5 shadow-inner"
+      )}
+      style={{
+        backgroundColor: `hsl(var(${cssVar}) / 0.1)`,
+      }}
+    >
+      <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+        {items.length === 0 ? (
+          <div className="px-2 py-6 flex flex-col items-center gap-3">
+            <span className="text-[10px] font-bold text-muted-foreground [writing-mode:vertical-lr] rotate-180 whitespace-nowrap uppercase tracking-widest opacity-60">
+              {STATUS_LABELS[status]}
+            </span>
+            <span className="text-[10px] text-muted-foreground font-medium opacity-50">(0)</span>
+          </div>
+        ) : (
+          <>
+            <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-foreground uppercase tracking-tight">{STATUS_LABELS[status]}</span>
+                <span className="text-[10px] font-semibold text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-full">
+                  {items.length}
+                </span>
+              </div>
+            </div>
+            <div className="px-3 pb-3 space-y-2.5 flex-1">
+              {items.map(item => (
+                isClient
+                  ? (
+                    <div key={item.id}>
+                      <ContentCard content={item} hideStatus readOnly onClick={() => onPreviewClick(item)} />
+                    </div>
+                  )
+                  : <SortableCard key={item.id} content={item} onPreviewClick={onPreviewClick} />
+              ))}
+            </div>
+          </>
+        )}
+      </SortableContext>
+    </div>
+  );
+};
+
 const STATUS_CSS_VARS: Record<WorkflowStatus, string> = {
   'idea': '--status-idea',
   'idea-bank': '--status-idea',
@@ -102,22 +171,34 @@ const WorkflowPage = () => {
     return initialState;
   });
 
-  // Sync internal state with projectContents when they change
+  // Sync internal state with projectContents when they change, but ONLY if not dragging
+  // to avoid jumping during dnd interaction
   useEffect(() => {
+    if (activeId) return;
+    
     const newColumns = {} as Record<WorkflowStatus, ContentWithRelations[]>;
     statusOrder.forEach(status => {
       newColumns[status] = projectContents
         .filter(c => c.status === status)
-        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+        .sort((a, b) => (new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     });
     setColumns(newColumns);
-  }, [projectContents]);
+  }, [projectContents, activeId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
   const activeContent = activeId ? projectContents.find(c => c.id === activeId) : null;
+
+  const findContainer = (id: string) => {
+    if (statusOrder.includes(id as WorkflowStatus)) return id as WorkflowStatus;
+    
+    for (const [status, items] of Object.entries(columns)) {
+      if (items.some(item => item.id === id)) return status as WorkflowStatus;
+    }
+    return undefined;
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -130,17 +211,17 @@ const WorkflowPage = () => {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    const activeContainer = active.data.current?.content?.status;
-    const overContainer = over.data.current?.content?.status || over.id; // Could be the column id
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
 
     if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
     setColumns(prev => {
-      const activeItems = prev[activeContainer as WorkflowStatus] || [];
-      const overItems = prev[overContainer as WorkflowStatus] || [];
+      const activeItems = prev[activeContainer] || [];
+      const overItems = prev[overContainer] || [];
 
       const activeIndex = activeItems.findIndex(i => i.id === activeId);
-      if (activeIndex === -1) return prev; // already moved
+      if (activeIndex === -1) return prev; 
 
       const movingItem = activeItems[activeIndex];
       const overIndex = overItems.findIndex(i => i.id === overId);
@@ -149,8 +230,8 @@ const WorkflowPage = () => {
 
       return {
         ...prev,
-        [activeContainer as WorkflowStatus]: activeItems.filter(i => i.id !== activeId),
-        [overContainer as WorkflowStatus]: [
+        [activeContainer]: activeItems.filter(i => i.id !== activeId),
+        [overContainer]: [
           ...overItems.slice(0, newIndex),
           movingItem,
           ...overItems.slice(newIndex)
@@ -161,34 +242,42 @@ const WorkflowPage = () => {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
-    if (!over) return;
-
     const activeId = active.id as string;
-    const overId = over.id as string;
-
-    const activeContainer = active.data.current?.content?.status;
-    const overContainer = over.data.current?.content?.status || over.id;
-
-    if (!activeContainer || !overContainer) return;
-
-    const activeItems = columns[activeContainer as WorkflowStatus];
-    const overItems = columns[overContainer as WorkflowStatus];
     
-    const activeIndex = activeItems.findIndex(i => i.id === activeId);
-    const overIndex = overItems.findIndex(i => i.id === overId);
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
 
-    if (activeContainer === overContainer) {
-      if (activeIndex !== overIndex) {
-        const reordered = arrayMove(activeItems, activeIndex, overIndex);
-        setColumns(prev => ({ ...prev, [activeContainer as WorkflowStatus]: reordered }));
-        
-        // Save new order to database
-        await savePositions(reordered, activeContainer as WorkflowStatus);
+    const overId = over.id as string;
+    const overContainer = findContainer(overId);
+    setActiveId(null);
+
+    if (!overContainer) return;
+
+    // Use projectContents to find the ORIGINAL status of the item before local state changes
+    const originalItem = projectContents.find(c => c.id === activeId);
+    if (!originalItem) return;
+    
+    const originalStatus = originalItem.status as WorkflowStatus;
+
+    if (originalStatus !== overContainer) {
+      // Container actually changed – persist the new status
+      try {
+        await updateContentStatus(activeId, overContainer);
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao atualizar status do conteúdo');
       }
     } else {
-      // Container changed – persist the new status
-      await updateContentFields(activeId, { status: overContainer });
+      // Internal reordering (unsupported in DB, but keep UI sync for current session)
+      const currentItems = columns[originalStatus];
+      const activeIndex = currentItems.findIndex(i => i.id === activeId);
+      const overIndex = currentItems.findIndex(i => i.id === overId);
+
+      if (activeIndex !== overIndex && overIndex !== -1) {
+        const reordered = arrayMove(currentItems, activeIndex, overIndex);
+        setColumns(prev => ({ ...prev, [originalStatus]: reordered }));
+      }
     }
   };
 
@@ -233,53 +322,17 @@ const WorkflowPage = () => {
       <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} actions={isClient && selectedProject ? <CreateContentDialog defaultProjectId={selectedProject.id} /> : undefined} />
       <div className="p-6 overflow-x-auto">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-          <div className="flex gap-4 min-w-max">
-            {statusOrder.filter(status => !(isClient && (status === 'idea' || status === 'production'))).map(status => {
-              const items = columns[status] || [];
-              const cssVar = STATUS_CSS_VARS[status];
-              
-              return (
-                <div
-                  key={status}
-                  className={cn(
-                    "rounded-xl flex flex-col transition-all min-h-[200px]",
-                    items.length === 0 ? "w-20 min-w-[5rem]" : "w-72"
-                  )}
-                  style={{
-                    backgroundColor: `hsl(var(${cssVar}) / 0.1)`,
-                  }}
-                >
-                  <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                    {items.length === 0 ? (
-                      <div className="px-2 py-4 flex flex-col items-center gap-2">
-                        <span className="text-[10px] font-semibold text-muted-foreground [writing-mode:vertical-lr] rotate-180 whitespace-nowrap">
-                          {STATUS_LABELS[status]}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-medium">(0)</span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                          <span className="text-sm font-bold text-foreground">{STATUS_LABELS[status]}</span>
-                          <span className="text-sm font-medium text-muted-foreground">({items.length})</span>
-                        </div>
-                        <div className="px-3 pb-3 space-y-2.5 flex-1">
-                          {items.map(item => (
-                            isClient
-                              ? (
-                                <div key={item.id}>
-                                  <ContentCard content={item} hideStatus readOnly onClick={() => handleClientCardClick(item)} />
-                                </div>
-                              )
-                              : <SortableCard key={item.id} content={item} onPreviewClick={handleClientCardClick} />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </SortableContext>
-                </div>
-              );
-            })}
+          <div className="flex gap-4 min-w-max pb-8">
+            {statusOrder.filter(status => !(isClient && (status === 'idea' || status === 'production'))).map(status => (
+              <DroppableColumn
+                key={status}
+                status={status}
+                items={columns[status] || []}
+                isClient={isClient}
+                onPreviewClick={handleClientCardClick}
+                activeId={activeId}
+              />
+            ))}
           </div>
 
           <DragOverlay>

@@ -16,9 +16,10 @@ const MediaOrPlaceholder = ({ content, platform }: MediaOrPlaceholderProps) => {
   const urls: string[] = mediaUrls && Array.isArray(mediaUrls) && mediaUrls.length > 0
     ? mediaUrls
     : mediaUrl ? [mediaUrl] : [];
+  const poster = (content as any).thumbnail_url;
 
   if (urls.length > 0) {
-    return <CarouselMedia urls={urls} platform={platform} contentType={content.content_type} />;
+    return <CarouselMedia urls={urls} platform={platform} contentType={content.content_type} poster={poster} />;
   }
 
   return (

@@ -7,16 +7,22 @@ interface CarouselMediaProps {
   urls: string[];
   platform: string;
   contentType?: string;
+  poster?: string | null;
 }
 
-const CarouselMedia = ({ urls, platform, contentType }: CarouselMediaProps) => {
+const CarouselMedia = ({ urls, platform, contentType, poster }: CarouselMediaProps) => {
   const [current, setCurrent] = useState(0);
   const aspectClass = getAspectClass(platform, contentType);
 
   return (
     <div className="relative group">
       {urls[current].match(/\.(mp4|webm|mov)$/i) ? (
-        <video src={urls[current]} controls className={cn("w-full object-cover", aspectClass)} />
+        <video 
+          src={urls[current]} 
+          controls 
+          poster={poster || undefined}
+          className={cn("w-full object-cover", aspectClass)} 
+        />
       ) : (
         <div className={cn("w-full bg-black/5 dark:bg-white/5 flex items-center justify-center", aspectClass)}>
           <img src={urls[current]} alt={`Slide ${current + 1}`} className="w-full h-full object-contain" />

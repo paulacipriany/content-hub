@@ -8,7 +8,7 @@ const YouTubePreview = ({ content }: { content: ContentWithRelations }) => {
   const initials = getInitials(userName);
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden max-w-[350px] mx-auto">
+    <div className="bg-card border border-border rounded-lg overflow-hidden w-full">
       <div className="relative">
         <MediaOrPlaceholder content={content} platform="youtube" />
         <span className="absolute bottom-1 right-1 text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
