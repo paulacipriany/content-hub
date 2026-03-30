@@ -98,8 +98,6 @@ const TasksPage = () => {
         }
       />
       <div className="bg-[#c5daf7] min-h-screen">
-        {/* Color accent bar */}
-        <div className="h-2 w-full" style={{ background: `linear-gradient(90deg, ${projectColor}, ${projectColor}cc)` }} />
         {/* Filter bar */}
         <div className="flex items-center gap-2 px-6 py-4 flex-wrap">
           <Popover>
