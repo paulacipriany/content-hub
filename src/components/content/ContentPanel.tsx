@@ -525,24 +525,36 @@ const ContentPanel = () => {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary text-secondary-foreground border border-border/50 whitespace-nowrap">
                 {CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}
               </span>
+              {!isIdeaBank && (
+                <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+                  {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+                </span>
+              )}
             </div>
           ) : (
-            <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-              <input
-                value={editTitle}
-                onChange={e => setEditTitle(e.target.value)}
-                className="font-semibold text-base text-foreground bg-transparent border-none outline-none flex-1 truncate focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 -ml-1 transition-colors"
-                placeholder="Título do conteúdo"
-              />
+            <div className="flex items-center gap-2 px-2 flex-1 min-w-0 overflow-hidden">
+              <div className="relative max-w-[50%] flex-shrink-0 overflow-hidden group">
+                {/* Hidden span dynamically sizes the relative container to perfectly match the input width! */}
+                <span className="font-semibold text-base px-2 opacity-0 whitespace-pre pointer-events-none block" aria-hidden="true">
+                  {editTitle || "Título do conteúdo"}
+                </span>
+                <input
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  className="absolute inset-0 w-full h-full font-semibold text-base text-foreground bg-transparent border-none outline-none truncate focus:ring-0 hover:bg-secondary/50 focus:bg-secondary rounded px-2 transition-colors"
+                  placeholder="Título do conteúdo"
+                />
+              </div>
+              
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary text-secondary-foreground border border-border/50 whitespace-nowrap flex-shrink-0">
                 {CONTENT_TYPE_LABELS[selectedContent.content_type as ContentType]}
               </span>
+              {!isIdeaBank && (
+                <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
+                  {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
+                </span>
+              )}
             </div>
-          )}
-          {!isClient && !isIdeaBank && (
-            <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground flex-shrink-0", STATUS_COLORS[selectedContent.status as WorkflowStatus])}>
-              {STATUS_LABELS[selectedContent.status as WorkflowStatus]}
-            </span>
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
