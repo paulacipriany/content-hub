@@ -546,16 +546,6 @@ const ContentPanel = () => {
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
-          {!draftSaved && !isClient && (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={handleSaveDraft}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 h-8 animate-pulse shadow-md"
-            >
-              <Check size={14} /> Salvar Alterações
-            </Button>
-          )}
           {isClient ? (
             isClientApproval ? (
               <>
