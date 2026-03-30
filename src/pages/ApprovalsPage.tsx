@@ -190,8 +190,8 @@ const ApprovalsPage = () => {
                     size="sm" 
                     className="gap-1 text-xs font-semibold border-0 w-full justify-center" 
                     style={{ 
-                      backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#1369db', 
-                      color: userApproved[c.id] ? '#9ca3af' : '#ffffff' 
+                      backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#c8ff00', 
+                      color: userApproved[c.id] ? '#9ca3af' : '#000000' 
                     }} 
                     disabled={userApproved[c.id]}
                     onClick={() => setSelectedContent(c)}
