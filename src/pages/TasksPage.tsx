@@ -90,7 +90,7 @@ const TasksPage = () => {
       <TopBar
         title="Tarefas"
         subtitle="Gerencie as tarefas do projeto"
-        className="bg-[#c5daf7] border-[#c5daf7]"
+        
         actions={
           <Button size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="gap-1.5 h-9 text-sm rounded-lg" style={{ backgroundColor: '#ff88db', color: '#000000' }}>
             <Plus size={16} /> Criar lista
