@@ -163,7 +163,7 @@ const CreateContentDialog = ({ trigger, defaultProjectId, defaultStatus }: Creat
           <Button
             size="sm"
             className="gap-1.5 h-9"
-            style={{ backgroundColor: '#ff88db', color: '#000000' }}
+            style={{ backgroundColor: '#000000', color: '#f8f7f9', textTransform: 'uppercase', fontSize: '15px', letterSpacing: '1px', borderRadius: '5px' }}
           >
             <Plus size={16} />
             <span className="hidden sm:inline">{role === 'client' ? 'Solicitar conteúdo' : 'Criar conteúdo'}</span>
