@@ -167,7 +167,7 @@ const ClientMembersPage = () => {
             <Button 
               onClick={() => setAddDialogOpen(true)}
               size="sm"
-              style={{ backgroundColor: '#000000', color: '#f8f7f9', textTransform: 'uppercase', fontSize: '15px', letterSpacing: '1px', borderRadius: '5px' }}
+              className="btn-action-primary"
             >
               <UserPlus size={16} className="mr-1.5" />
               Adicionar usuário

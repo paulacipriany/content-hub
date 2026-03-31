@@ -92,7 +92,7 @@ const TasksPage = () => {
         subtitle="Gerencie as tarefas do projeto"
         
         actions={
-          <Button size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="gap-1.5 h-9" style={{ backgroundColor: '#000000', color: '#f8f7f9', textTransform: 'uppercase', fontSize: '15px', letterSpacing: '1px', borderRadius: '5px' }}>
+          <Button size="sm" onClick={() => taskListRef.current?.triggerNewList()} className="gap-1.5 h-9 btn-action-primary">
             <Plus size={16} /> Criar lista
           </Button>
         }
