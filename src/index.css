@@ -268,3 +268,19 @@
   border-radius: 0.5rem;
   margin: 0.5em 0;
 }
+
+.btn-action-primary {
+  background-color: #000000;
+  color: #f8f7f9;
+  text-transform: uppercase;
+  font-size: 15px;
+  letter-spacing: 1px;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.btn-action-primary:hover {
+  background-color: #d7ff73;
+  color: #000000;
+  border-color: #000000;
+}
