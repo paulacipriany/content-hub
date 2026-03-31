@@ -151,7 +151,7 @@ const ApprovalsPage = () => {
                           variant="outline"
                           size="sm"
                           className="gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
-                          style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                          style={{ backgroundColor: '#f8f7f9', color: '#000000' }}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigator.clipboard.writeText(c.copy_text ?? '');
@@ -166,7 +166,7 @@ const ApprovalsPage = () => {
                           variant="outline"
                           size="sm"
                           className="gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
-                          style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                          style={{ backgroundColor: '#f8f7f9', color: '#000000' }}
                           disabled={downloading === c.id}
                           onClick={(e) => {
                             e.stopPropagation();
