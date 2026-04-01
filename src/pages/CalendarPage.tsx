@@ -773,7 +773,7 @@ const CalendarPage = () => {
                         )}
                         <div className="space-y-2">
                           {dayContents.map(c => (
-                            <WeeklyContentCard key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
+                            <WeeklyContentCard key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} hideProjectName />
                           ))}
                         </div>
                         {dayTasks.length > 0 && (
