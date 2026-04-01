@@ -60,9 +60,11 @@ const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Prop
       <div className="flex items-center gap-1.5 px-2.5 py-1.5">
         <span className="shrink-0">{platformIcon([firstPlatform] as any, 14)}</span>
         <span className="text-xs font-semibold text-foreground">{contentTypeLabel}</span>
-        <span className="text-[11px] text-muted-foreground truncate ml-auto">
-          {projectName}
-        </span>
+        {!hideProjectName && projectName && (
+          <span className="text-[11px] text-muted-foreground truncate ml-auto">
+            {projectName}
+          </span>
+        )}
       </div>
 
       {/* Media thumbnails or copy text */}
