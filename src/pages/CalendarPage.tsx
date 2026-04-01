@@ -714,22 +714,21 @@ const CalendarPage = () => {
             <div className="flex-1 overflow-y-auto">
               {/* Day name headers */}
               {viewMode === 'week' ? (
-                <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40 sticky top-0 bg-background z-10">
-                  <div className="border-r border-border/40" />
+                <div className="grid grid-cols-7 border-b border-border/40 sticky top-0 bg-background z-10">
                   {getWeekDays().map((d, i) => (
                     <div key={i} className="flex flex-col items-center py-2 border-r border-border/40 last:border-r-0 min-w-0">
                       <span className={cn(
-                        "text-[11px] font-medium uppercase tracking-wide",
+                        "text-[11px] font-medium lowercase tracking-wide",
                         isDateToday(d) ? "text-primary" : "text-muted-foreground"
                       )}>
-                        {DAYS_SHORT[d.getDay()]}
+                        {DAYS_SHORT[d.getDay()].toLowerCase()}
                       </span>
                       <span
                         className={cn(
-                          "text-[26px] leading-tight font-light mt-0.5 w-11 h-11 flex items-center justify-center rounded-full transition-colors",
+                          "text-[22px] leading-tight font-light mt-0.5 w-9 h-9 flex items-center justify-center rounded-full transition-colors",
                           isDateToday(d)
                             ? "bg-primary text-primary-foreground font-normal"
-                            : "text-foreground hover:bg-muted"
+                            : "text-foreground"
                         )}
                       >
                         {d.getDate()}
