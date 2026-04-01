@@ -67,36 +67,18 @@ const WeeklyContentCard = ({ content, onClick, disabled }: Props) => {
       {/* Media thumbnails or copy text */}
       {hasMedia ? (
         <div className="relative px-2 pb-1.5">
-          {mediaUrls.length === 1 ? (
-            <div className="relative rounded-lg overflow-hidden">
-              <img
-                src={mediaUrls[0]}
-                alt=""
-                className="w-full aspect-square object-cover rounded-lg"
-              />
-              {content.publish_time && (
-                <span className="absolute bottom-1.5 left-1.5 bg-card/90 backdrop-blur-sm text-[10px] font-medium text-foreground px-1.5 py-0.5 rounded">
-                  {content.publish_time.slice(0, 5)}
-                </span>
-              )}
-            </div>
-          ) : (
-            <div className="relative grid grid-cols-2 gap-1 rounded-lg overflow-hidden">
-              {mediaUrls.slice(0, 4).map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt=""
-                  className="w-full aspect-square object-cover rounded-md"
-                />
-              ))}
-              {content.publish_time && (
-                <span className="absolute bottom-1.5 left-1.5 bg-card/90 backdrop-blur-sm text-[10px] font-medium text-foreground px-1.5 py-0.5 rounded">
-                  {content.publish_time.slice(0, 5)}
-                </span>
-              )}
-            </div>
-          )}
+          <div className="relative rounded-lg overflow-hidden">
+            <img
+              src={mediaUrls[0]}
+              alt=""
+              className="w-full aspect-square object-cover rounded-lg"
+            />
+            {content.publish_time && (
+              <span className="absolute bottom-1.5 left-1.5 bg-card/90 backdrop-blur-sm text-[10px] font-medium text-foreground px-1.5 py-0.5 rounded">
+                {content.publish_time.slice(0, 5)}
+              </span>
+            )}
+          </div>
         </div>
       ) : hasCopy ? (
         <div className="px-2.5 pb-1.5">
