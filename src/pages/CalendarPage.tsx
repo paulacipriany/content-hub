@@ -749,49 +749,44 @@ const CalendarPage = () => {
 
               {/* Week view with hourly grid */}
               {viewMode === 'week' && (
-                <div className="flex flex-col">
-                  {/* Fixed top section: commemorative dates, tasks, and contents without time */}
-                  <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
-                    <div className="border-r border-border/40 bg-muted/5" />
-                    {getWeekDays().map((d, i) => {
-                      const dateStr = fmtDateStr(d);
-                      return (
-                        <DroppableFixedCell key={i} dateStr={dateStr}>
-                          {renderFixedTopSection(dateStr)}
-                        </DroppableFixedCell>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Hourly grid */}
-                  <div className="relative">
-                    {TIME_SLOTS.map((hour) => (
-                      <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/40">
-                        {/* Time label */}
-                        <div className="border-r border-border/40 bg-muted/5 flex items-start justify-end pr-2 pt-1">
-                          <span className="text-[10px] text-muted-foreground font-medium">
-                            {String(hour).padStart(2, '0')}:00
-                          </span>
-                        </div>
-                        
-                        {/* Day columns */}
-                        {getWeekDays().map((d, i) => {
-                          const dateStr = fmtDateStr(d);
-                          const hourContents = showContents ? getContentsForDateAndHour(dateStr, hour) : [];
-                          
-                          return (
-                            <DroppableHourCell key={i} dateStr={dateStr} hour={hour}>
-                              <div className="space-y-1">
-                                {hourContents.map(c => (
-                                  <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
-                                ))}
+                <div className="grid grid-cols-7 flex-1">
+                  {getWeekDays().map((d, i) => {
+                    const dateStr = fmtDateStr(d);
+                    const dayContents = showContents ? getContentsForDate(dateStr) : [];
+                    const dayTasks = showTasks ? getTasksForDate(dateStr) : [];
+                    const commemoratives = showDates ? getCommemorativesForDate(dateStr) : [];
+                    return (
+                      <DroppableDay
+                        key={i}
+                        dateStr={dateStr}
+                        isToday={isDateToday(d)}
+                        tall
+                      >
+                        {commemoratives.length > 0 && (
+                          <div className="space-y-0.5 mb-1.5">
+                            {commemoratives.map((title, ci) => (
+                              <div key={ci} className="flex items-start gap-1 px-1.5 py-[3px] text-[12px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-l-2 border-l-amber-500/50">
+                                <Star size={10} className="flex-shrink-0 mt-[2px]" />
+                                <span className="break-words whitespace-normal leading-tight">{title}</span>
                               </div>
-                            </DroppableHourCell>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="space-y-2">
+                          {dayContents.map(c => (
+                            <WeeklyContentCard key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} />
+                          ))}
+                        </div>
+                        {dayTasks.length > 0 && (
+                          <div className="space-y-0.5 mt-1.5">
+                            {dayTasks.map(t => (
+                              <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
+                            ))}
+                          </div>
+                        )}
+                      </DroppableDay>
+                    );
+                  })}
                 </div>
               )}
 
