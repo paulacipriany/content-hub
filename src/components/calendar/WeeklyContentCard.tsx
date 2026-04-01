@@ -19,6 +19,7 @@ interface Props {
   content: ContentWithRelations;
   onClick: () => void;
   disabled?: boolean;
+  hideProjectName?: boolean;
 }
 
 const WeeklyContentCard = ({ content, onClick, disabled }: Props) => {
