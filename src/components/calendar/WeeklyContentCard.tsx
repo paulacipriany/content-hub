@@ -22,7 +22,7 @@ interface Props {
   hideProjectName?: boolean;
 }
 
-const WeeklyContentCard = ({ content, onClick, disabled }: Props) => {
+const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Props) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
     data: { type: 'content', content },
