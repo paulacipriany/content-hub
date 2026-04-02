@@ -73,6 +73,8 @@ const ClientAppearancePage = () => {
       <TopBar
         title="Aparência"
         subtitle={selectedProject.name}
+        backTo={`/clients/${selectedProject.id}/settings`}
+        backLabel="Voltar para configurações"
         actions={
           <Button onClick={handleSave} disabled={saving} className="btn-action-primary">
             {saving ? <Loader2 size={16} className="mr-1.5 animate-spin" /> : null}
