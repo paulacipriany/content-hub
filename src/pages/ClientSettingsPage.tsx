@@ -46,8 +46,7 @@ const ClientSettingsPage = () => {
       icon: Palette, 
       label: 'Aparência', 
       desc: 'Cor e logo do projeto',
-      onClick: () => {},
-      disabled: true
+      onClick: () => navigate(`/clients/${selectedProject.id}/appearance`),
     },
   ];
 
