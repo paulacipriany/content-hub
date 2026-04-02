@@ -19,7 +19,7 @@ interface TopBarProps {
   backLabel?: string;
 }
 
-const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
+const TopBar = ({ title, subtitle, actions, className, backTo, backLabel }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject, pendingUsersCount } = useApp();
   const { role } = useAuth();
