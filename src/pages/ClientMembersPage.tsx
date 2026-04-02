@@ -162,6 +162,8 @@ const ClientMembersPage = () => {
       <TopBar 
         title="Acessos" 
         subtitle={`Gerenciar acessos de ${selectedProject.name}`}
+        backTo={`/clients/${selectedProject.id}/settings`}
+        backLabel="Voltar para configurações"
         actions={
           canManage ? (
             <Button 

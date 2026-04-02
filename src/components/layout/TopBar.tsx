@@ -1,4 +1,4 @@
-import { Bell, ArrowRightLeft, MessageSquare, CheckCheck, ChevronDown, UserPlus, Check } from 'lucide-react';
+import { Bell, ArrowRightLeft, MessageSquare, CheckCheck, ChevronDown, UserPlus, Check, ArrowLeft } from 'lucide-react';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -15,9 +15,11 @@ interface TopBarProps {
   subtitle?: string;
   actions?: React.ReactNode;
   className?: string;
+  backTo?: string;
+  backLabel?: string;
 }
 
-const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
+const TopBar = ({ title, subtitle, actions, className, backTo, backLabel }: TopBarProps) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { contents, setSelectedContent, projects, selectedProject, setSelectedProject, pendingUsersCount } = useApp();
   const { role } = useAuth();
@@ -99,6 +101,15 @@ const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
         )}
 
         <div className="leading-tight">
+          {backTo && (
+            <button
+              onClick={() => navigate(backTo)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-0.5"
+            >
+              <ArrowLeft size={12} />
+              {backLabel || 'Voltar'}
+            </button>
+          )}
           {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
           {subtitle && <p className="text-xs text-muted-foreground -mt-0.5">{subtitle}</p>}
         </div>
