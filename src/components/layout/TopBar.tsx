@@ -15,6 +15,8 @@ interface TopBarProps {
   subtitle?: string;
   actions?: React.ReactNode;
   className?: string;
+  backTo?: string;
+  backLabel?: string;
 }
 
 const TopBar = ({ title, subtitle, actions, className }: TopBarProps) => {
