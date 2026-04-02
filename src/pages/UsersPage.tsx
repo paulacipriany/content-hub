@@ -253,9 +253,6 @@ const UsersPage = () => {
         </Button>
       } />
       <div className="p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-xl font-bold text-foreground">Gestão de Usuários</h2>
-        </div>
 
         {/* Filter Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-secondary/30 p-4 rounded-xl border border-border">
