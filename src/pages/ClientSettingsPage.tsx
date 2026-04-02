@@ -64,7 +64,7 @@ const ClientSettingsPage = () => {
             <button
               key={s.label}
               onClick={s.onClick}
-              disabled={s.disabled}
+              disabled={(s as any).disabled}
               className="w-full flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:shadow-sm hover:border-primary/20 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div 
