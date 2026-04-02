@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
@@ -25,11 +25,21 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const IdeasBankPage = () => {
   useClientFromUrl();
-  const { projectContents, selectedProject, setSelectedContent, deleteContent } = useApp();
+  const { projectContents, selectedProject, setSelectedContent, deleteContent, updateContentStatus } = useApp();
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
   const ideas = projectContents.filter(c => c.status === 'idea-bank');
+
+  const handleSendToWorkflow = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await updateContentStatus(id, 'idea');
+      toast({ title: 'Ideia enviada para o workflow' });
+    } catch (err: any) {
+      toast({ title: 'Erro ao enviar', description: err.message, variant: 'destructive' });
+    }
+  };
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -111,6 +121,13 @@ const IdeasBankPage = () => {
                       title="Editar"
                     >
                       <Pencil size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => handleSendToWorkflow(e, idea.id)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      title="Enviar para Workflow"
+                    >
+                      <Send size={14} />
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, idea.id)}
