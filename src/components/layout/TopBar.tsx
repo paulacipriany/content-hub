@@ -1,4 +1,4 @@
-import { Bell, ArrowRightLeft, MessageSquare, CheckCheck, ChevronDown, UserPlus, Check } from 'lucide-react';
+import { Bell, ArrowRightLeft, MessageSquare, CheckCheck, ChevronDown, UserPlus, Check, ArrowLeft } from 'lucide-react';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
