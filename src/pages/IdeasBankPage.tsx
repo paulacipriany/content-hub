@@ -25,11 +25,21 @@ const contentTypeBadgeColors: Record<string, string> = {
 
 const IdeasBankPage = () => {
   useClientFromUrl();
-  const { projectContents, selectedProject, setSelectedContent, deleteContent } = useApp();
+  const { projectContents, selectedProject, setSelectedContent, deleteContent, updateContentStatus } = useApp();
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
 
   const ideas = projectContents.filter(c => c.status === 'idea-bank');
+
+  const handleSendToWorkflow = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await updateContentStatus(id, 'idea');
+      toast({ title: 'Ideia enviada para o workflow' });
+    } catch (err: any) {
+      toast({ title: 'Erro ao enviar', description: err.message, variant: 'destructive' });
+    }
+  };
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
