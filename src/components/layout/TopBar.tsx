@@ -101,6 +101,15 @@ const TopBar = ({ title, subtitle, actions, className, backTo, backLabel }: TopB
         )}
 
         <div className="leading-tight">
+          {backTo && (
+            <button
+              onClick={() => navigate(backTo)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-0.5"
+            >
+              <ArrowLeft size={12} />
+              {backLabel || 'Voltar'}
+            </button>
+          )}
           {title && <h1 className="text-lg font-semibold text-foreground">{title}</h1>}
           {subtitle && <p className="text-xs text-muted-foreground -mt-0.5">{subtitle}</p>}
         </div>
