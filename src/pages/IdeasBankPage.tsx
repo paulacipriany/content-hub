@@ -123,6 +123,13 @@ const IdeasBankPage = () => {
                       <Pencil size={14} />
                     </button>
                     <button
+                      onClick={(e) => handleSendToWorkflow(e, idea.id)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      title="Enviar para Workflow"
+                    >
+                      <Send size={14} />
+                    </button>
+                    <button
                       onClick={(e) => handleDelete(e, idea.id)}
                       className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                       title="Excluir"
