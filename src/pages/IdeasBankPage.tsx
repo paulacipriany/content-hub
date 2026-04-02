@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CreateContentDialog from '@/components/content/CreateContentDialog';
