@@ -176,6 +176,13 @@ const ClientMembersPage = () => {
         }
       />
       <div className="p-6 max-w-2xl space-y-6">
+        <button
+          onClick={() => navigate(`/clients/${selectedProject.id}/settings`)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Voltar para configurações
+        </button>
         {/* Members list */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">
