@@ -212,7 +212,7 @@ const MediaLibraryPage = () => {
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-2">Filtros:</span>
               
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[160px] text-xs focus:ring-0">
+                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[200px] text-xs focus:ring-0">
                   <SelectValue placeholder="Tipo de postagem" />
                 </SelectTrigger>
                 <SelectContent>
