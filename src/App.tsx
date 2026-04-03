@@ -19,6 +19,11 @@ import ApprovalsPage from "@/pages/ApprovalsPage";
 import MediaLibraryPage from "@/pages/MediaLibraryPage";
 import ReportsPage from "@/pages/ReportsPage";
 import SettingsPage from "@/pages/SettingsPage";
+import SettingsTeamPage from "@/pages/SettingsTeamPage";
+import SettingsPermissionsPage from "@/pages/SettingsPermissionsPage";
+import SettingsNotificationsPage from "@/pages/SettingsNotificationsPage";
+import SettingsAppearancePage from "@/pages/SettingsAppearancePage";
+import SettingsIntegrationsPage from "@/pages/SettingsIntegrationsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
 import ClientSettingsPage from "@/pages/ClientSettingsPage";
 import UsersPage from "@/pages/UsersPage";
@@ -84,6 +89,11 @@ const App = () => (
               <Route path="/users" element={<UsersPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/settings/team" element={<SettingsTeamPage />} />
+              <Route path="/settings/permissions" element={<SettingsPermissionsPage />} />
+              <Route path="/settings/notifications" element={<SettingsNotificationsPage />} />
+              <Route path="/settings/appearance" element={<SettingsAppearancePage />} />
+              <Route path="/settings/integrations" element={<SettingsIntegrationsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
