@@ -76,5 +76,5 @@ const ClientSettingsPage = () => {
       </div>
     </>
   );
-
+};
 export default ClientSettingsPage;
