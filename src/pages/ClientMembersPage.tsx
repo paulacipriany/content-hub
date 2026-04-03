@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +7,7 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Shield, Crown } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Crown, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -24,6 +25,7 @@ const ClientMembersPage = () => {
   useClientFromUrl();
   const { selectedProject } = useApp();
   const { user, role: currentUserRole } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
@@ -162,8 +164,6 @@ const ClientMembersPage = () => {
       <TopBar 
         title="Acessos" 
         subtitle={`Gerenciar acessos de ${selectedProject.name}`}
-        backTo={`/clients/${selectedProject.id}/settings`}
-        backLabel="Voltar para configurações"
         actions={
           canManage ? (
             <Button 
@@ -178,6 +178,13 @@ const ClientMembersPage = () => {
         }
       />
       <div className="p-6 max-w-2xl space-y-6">
+        <button
+          onClick={() => navigate(`/clients/${selectedProject.id}/settings`)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Voltar para configurações
+        </button>
         {/* Members list */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">
