@@ -1,20 +1,15 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Palette, Link2, Users } from 'lucide-react';
-import ManagePlatformsDialog from '@/components/settings/ManagePlatformsDialog';
-import { Platform } from '@/data/types';
-import { platformIcon } from '@/components/content/PlatformIcons';
 
 const ClientSettingsPage = () => {
   useClientFromUrl();
   const navigate = useNavigate();
   const { selectedProject } = useApp();
   const { role } = useAuth();
-  const [platformsDialogOpen, setPlatformsDialogOpen] = useState(false);
 
   if (!selectedProject) return null;
 
@@ -24,16 +19,14 @@ const ClientSettingsPage = () => {
     return null;
   }
 
-  const isClient = false; // Only admin/moderator can access this page
-  const currentPlatforms = ((selectedProject as any).platforms ?? ['instagram']) as Platform[];
+  const isClient = false;
 
   const sections = [
     { 
       icon: Link2, 
       label: 'Redes Sociais', 
       desc: 'Gerencie as plataformas ativas',
-      onClick: () => setPlatformsDialogOpen(true),
-      preview: platformIcon(currentPlatforms, 16, true)
+      onClick: () => navigate(`/clients/${selectedProject.id}/platforms`),
     },
     { 
       icon: Users, 
@@ -77,24 +70,11 @@ const ClientSettingsPage = () => {
                 <p className="text-sm font-medium text-foreground">{s.label}</p>
                 <p className="text-xs text-muted-foreground">{s.desc}</p>
               </div>
-              {s.preview && (
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {s.preview}
-                </div>
-              )}
             </button>
           ))}
         </div>
       </div>
-
-      <ManagePlatformsDialog
-        open={platformsDialogOpen}
-        onOpenChange={setPlatformsDialogOpen}
-        projectId={selectedProject.id}
-        currentPlatforms={currentPlatforms}
-      />
     </>
   );
 };
-
 export default ClientSettingsPage;
