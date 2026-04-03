@@ -4,8 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Palette, Link2, Users } from 'lucide-react';
-import { Platform } from '@/data/types';
-import { platformIcon } from '@/components/content/PlatformIcons';
+import { Palette, Link2, Users } from 'lucide-react';
 
 const ClientSettingsPage = () => {
   useClientFromUrl();
