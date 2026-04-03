@@ -29,6 +29,7 @@ import PostReportsPage from "@/pages/PostReportsPage";
 import ReviewPage from "@/pages/ReviewPage";
 import SchedulingPage from "@/pages/SchedulingPage";
 import ClientAppearancePage from "@/pages/ClientAppearancePage";
+import ClientPlatformsPage from "@/pages/ClientPlatformsPage";
 import AllTasksPage from "@/pages/AllTasksPage";
 import MyCalendarPage from "@/pages/MyCalendarPage";
 import LoginPage from "@/pages/LoginPage";
