@@ -71,22 +71,13 @@ const ClientSettingsPage = () => {
                 <p className="text-sm font-medium text-foreground">{s.label}</p>
                 <p className="text-xs text-muted-foreground">{s.desc}</p>
               </div>
-              {s.preview && (
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {s.preview}
-                </div>
-              )}
             </button>
           ))}
         </div>
       </div>
-
-      <ManagePlatformsDialog
-        open={platformsDialogOpen}
-        onOpenChange={setPlatformsDialogOpen}
-        projectId={selectedProject.id}
-        currentPlatforms={currentPlatforms}
-      />
+    </>
+  );
+};
     </>
   );
 };
