@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Palette, Link2, Users } from 'lucide-react';
-import ManagePlatformsDialog from '@/components/settings/ManagePlatformsDialog';
 import { Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 
