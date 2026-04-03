@@ -83,6 +83,14 @@ const ClientAppearancePage = () => {
         }
       />
       <div className="p-6 max-w-2xl space-y-8">
+        {/* Back link */}
+        <button
+          onClick={() => navigate(`/clients/${selectedProject.id}/settings`)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Voltar para configurações
+        </button>
 
         {/* Logo section */}
         <div className="space-y-3">
