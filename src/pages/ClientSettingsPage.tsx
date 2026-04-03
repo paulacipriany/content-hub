@@ -29,8 +29,7 @@ const ClientSettingsPage = () => {
       icon: Link2, 
       label: 'Redes Sociais', 
       desc: 'Gerencie as plataformas ativas',
-      onClick: () => setPlatformsDialogOpen(true),
-      preview: platformIcon(currentPlatforms, 16, true)
+      onClick: () => navigate(`/clients/${selectedProject.id}/platforms`),
     },
     { 
       icon: Users, 
