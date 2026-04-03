@@ -12,7 +12,6 @@ const ClientSettingsPage = () => {
   const navigate = useNavigate();
   const { selectedProject } = useApp();
   const { role } = useAuth();
-  const [platformsDialogOpen, setPlatformsDialogOpen] = useState(false);
 
   if (!selectedProject) return null;
 
