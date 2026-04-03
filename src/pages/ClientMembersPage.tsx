@@ -25,6 +25,7 @@ const ClientMembersPage = () => {
   useClientFromUrl();
   const { selectedProject } = useApp();
   const { user, role: currentUserRole } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
