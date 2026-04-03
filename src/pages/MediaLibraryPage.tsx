@@ -272,7 +272,7 @@ const MediaLibraryPage = () => {
           </div>
 
           {/* Search (right) */}
-          <div className="relative w-full md:max-w-sm">
+          <div className="relative w-full md:max-w-[220px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
