@@ -27,6 +27,7 @@ interface MediaItem {
   source: 'library' | 'content';
   publish_date: string | null;
   content_type: ContentType | null;
+  platforms: Platform[] | null;
   created_at: string;
 }
 
