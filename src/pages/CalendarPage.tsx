@@ -61,40 +61,41 @@ const STATUS_CSS_VAR: Record<string, string> = {
 };
 
 // --- Expanded content card for calendar (like reference image) ---
-const DraggableContent = ({ content, onClick, disabled }: { content: ContentWithRelations; onClick: () => void; disabled?: boolean }) => {
+const DraggableContent = ({ content, onClick, disabled, platformProfiles }: { content: ContentWithRelations; onClick: () => void; disabled?: boolean; platformProfiles?: Map<string, string> }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: content.id,
     data: { type: 'content', content },
     disabled,
   });
   const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
-  const borderColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
+  const firstPlatform = platforms[0];
+  const dotColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
+  const contentTypeLabel = CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type;
+  
+  // Get platform handle from profiles or derive from project name
+  const handle = platformProfiles?.get(firstPlatform) || 
+    (content.project?.name ? content.project.name.toLowerCase().replace(/\s+/g, '.').slice(0, 15) : '');
+
   return (
     <div
       ref={setNodeRef} {...listeners} {...attributes}
       onClick={onClick}
       className={cn(
-        "w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm",
-        "hover:shadow-md transition-all overflow-hidden min-w-0 max-h-[42px]",
+        "w-full text-left py-[3px] px-1.5 rounded-sm",
+        "hover:bg-muted/60 transition-all overflow-hidden min-w-0",
         disabled ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30"
       )}
-      style={{ borderLeftColor: borderColor }}
       title={content.title}
     >
-      {/* Header: Platform icons + Title in one line */}
-      <div className="flex items-center gap-0.5 min-w-0 relative">
-        {platforms.slice(0, 1).map((p, i) => (
-          <span key={i} className="shrink-0">{platformIcon([p] as any, 12)}</span>
-        ))}
-        <p className="text-[13px] font-medium text-foreground truncate leading-tight">
-          {content.title}
-        </p>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+        <span className="shrink-0">{platformIcon([firstPlatform] as any, 14)}</span>
+        <span className="text-[12px] font-semibold text-foreground whitespace-nowrap">{contentTypeLabel}</span>
+        {handle && (
+          <span className="text-[11px] text-muted-foreground truncate">@{handle}</span>
+        )}
       </div>
-      {/* Status label only */}
-      <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5 pl-4">
-        {STATUS_LABELS[content.status as WorkflowStatus]}
-      </p>
     </div>
   );
 };
