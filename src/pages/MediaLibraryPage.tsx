@@ -100,6 +100,7 @@ const MediaLibraryPage = () => {
             source: 'content',
             publish_date: content.publish_date ?? null,
             content_type: content.content_type ?? null,
+            platforms: (content.platform as Platform[]) ?? null,
             created_at: content.created_at,
           });
         }
