@@ -202,6 +202,7 @@ export type Database = {
           publish_date: string | null
           publish_time: string | null
           status: Database["public"]["Enums"]["workflow_status"]
+          thumbnail_url: string | null
           title: string
           updated_at: string
         }
@@ -223,6 +224,7 @@ export type Database = {
           publish_date?: string | null
           publish_time?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
@@ -244,6 +246,7 @@ export type Database = {
           publish_date?: string | null
           publish_time?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
         }
