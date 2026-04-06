@@ -37,6 +37,7 @@ const MediaLibraryPage = () => {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [platformFilter, setPlatformFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
