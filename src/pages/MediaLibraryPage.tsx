@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CONTENT_TYPE_LABELS, VISIBLE_CONTENT_TYPES, ContentType } from '@/data/types';
+import { CONTENT_TYPE_LABELS, VISIBLE_CONTENT_TYPES, ContentType, PLATFORM_LABELS, Platform } from '@/data/types';
 import { cn } from '@/lib/utils';
 import { DateRange } from "react-day-picker";
 
@@ -27,6 +27,7 @@ interface MediaItem {
   source: 'library' | 'content';
   publish_date: string | null;
   content_type: ContentType | null;
+  platforms: Platform[] | null;
   created_at: string;
 }
 
@@ -37,6 +38,7 @@ const MediaLibraryPage = () => {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [platformFilter, setPlatformFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +69,7 @@ const MediaLibraryPage = () => {
         source: 'library' as const,
         publish_date: content?.publish_date ?? null,
         content_type: content?.content_type ?? null,
+        platforms: (content?.platform as Platform[]) ?? null,
         created_at: m.created_at,
       };
     });
@@ -97,6 +100,7 @@ const MediaLibraryPage = () => {
             source: 'content',
             publish_date: content.publish_date ?? null,
             content_type: content.content_type ?? null,
+            platforms: (content.platform as Platform[]) ?? null,
             created_at: content.created_at,
           });
         }
@@ -162,15 +166,15 @@ const MediaLibraryPage = () => {
 
   const filtered = useMemo(() => {
     return mediaItems.filter(item => {
-      // Search filter
       const matchesSearch = !search.trim() || 
         item.filename.toLowerCase().includes(search.toLowerCase()) ||
         (item.contentTitle && item.contentTitle.toLowerCase().includes(search.toLowerCase()));
       
-      // Type filter
       const matchesType = typeFilter === 'all' || item.content_type === typeFilter;
       
-      // Date filter
+      const matchesPlatform = platformFilter === 'all' || 
+        (item.platforms && item.platforms.includes(platformFilter as Platform));
+      
       const matchesDate = !dateRange?.from || (() => {
         if (!item.publish_date) return false;
         const from = format(dateRange.from, 'yyyy-MM-dd');
@@ -178,9 +182,9 @@ const MediaLibraryPage = () => {
         return item.publish_date >= from && item.publish_date <= to;
       })();
 
-      return matchesSearch && matchesType && matchesDate;
+      return matchesSearch && matchesType && matchesPlatform && matchesDate;
     });
-  }, [mediaItems, search, typeFilter, dateRange]);
+  }, [mediaItems, search, typeFilter, platformFilter, dateRange]);
 
 
   return (
@@ -225,6 +229,20 @@ const MediaLibraryPage = () => {
 
               <div className="w-px h-4 bg-border mx-1" />
 
+              <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[200px] text-xs focus:ring-0">
+                  <SelectValue placeholder="Plataforma" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as plataformas</SelectItem>
+                  {Object.entries(PLATFORM_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="w-px h-4 bg-border mx-1" />
+
               <Popover>
                 <PopoverTrigger asChild>
                   <button className={cn(
@@ -259,11 +277,11 @@ const MediaLibraryPage = () => {
               </Popover>
             </div>
             
-            {(typeFilter !== 'all' || dateRange?.from) && (
+            {(typeFilter !== 'all' || platformFilter !== 'all' || dateRange?.from) && (
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => { setTypeFilter('all'); setDateRange(undefined); }}
+                onClick={() => { setTypeFilter('all'); setPlatformFilter('all'); setDateRange(undefined); }}
                 className="text-xs h-8 text-muted-foreground hover:text-foreground"
               >
                 Limpar filtros
