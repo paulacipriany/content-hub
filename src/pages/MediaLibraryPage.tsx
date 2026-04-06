@@ -166,15 +166,15 @@ const MediaLibraryPage = () => {
 
   const filtered = useMemo(() => {
     return mediaItems.filter(item => {
-      // Search filter
       const matchesSearch = !search.trim() || 
         item.filename.toLowerCase().includes(search.toLowerCase()) ||
         (item.contentTitle && item.contentTitle.toLowerCase().includes(search.toLowerCase()));
       
-      // Type filter
       const matchesType = typeFilter === 'all' || item.content_type === typeFilter;
       
-      // Date filter
+      const matchesPlatform = platformFilter === 'all' || 
+        (item.platforms && item.platforms.includes(platformFilter as Platform));
+      
       const matchesDate = !dateRange?.from || (() => {
         if (!item.publish_date) return false;
         const from = format(dateRange.from, 'yyyy-MM-dd');
@@ -182,9 +182,9 @@ const MediaLibraryPage = () => {
         return item.publish_date >= from && item.publish_date <= to;
       })();
 
-      return matchesSearch && matchesType && matchesDate;
+      return matchesSearch && matchesType && matchesPlatform && matchesDate;
     });
-  }, [mediaItems, search, typeFilter, dateRange]);
+  }, [mediaItems, search, typeFilter, platformFilter, dateRange]);
 
 
   return (
