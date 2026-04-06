@@ -571,8 +571,8 @@ const CalendarPage = () => {
         {dayContents.slice(0, viewMode === 'week' ? 10 : 4).map(c => (
           <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} platformProfiles={platformProfiles} />
         ))}
-        {viewMode === 'month' && dayContents.length > 3 && (
-          <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 3} mais</span>
+        {viewMode === 'month' && dayContents.length > 4 && (
+          <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 4} mais</span>
         )}
         {dayTasks.map(t => (
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
