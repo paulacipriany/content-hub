@@ -39,7 +39,11 @@ const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Prop
   const projectLogo = content.project?.logo_url;
 
   const mediaUrls = content.media_urls && content.media_urls.length > 0 ? content.media_urls : content.media_url ? [content.media_url] : [];
-  const hasMedia = mediaUrls.length > 0;
+  const thumbnailUrl = (content as any).thumbnail_url;
+  const firstMedia = mediaUrls[0] ?? '';
+  const isVideo = /\.(mp4|webm|mov)$/i.test(firstMedia);
+  const previewSrc = isVideo ? thumbnailUrl : firstMedia;
+  const hasMedia = previewSrc || (mediaUrls.length > 0 && !isVideo);
   const copyText = content.copy_text;
   const hasCopy = copyText && copyText.trim().length > 0;
 
