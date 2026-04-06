@@ -277,11 +277,11 @@ const MediaLibraryPage = () => {
               </Popover>
             </div>
             
-            {(typeFilter !== 'all' || dateRange?.from) && (
+            {(typeFilter !== 'all' || platformFilter !== 'all' || dateRange?.from) && (
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => { setTypeFilter('all'); setDateRange(undefined); }}
+                onClick={() => { setTypeFilter('all'); setPlatformFilter('all'); setDateRange(undefined); }}
                 className="text-xs h-8 text-muted-foreground hover:text-foreground"
               >
                 Limpar filtros
