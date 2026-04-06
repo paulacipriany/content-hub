@@ -314,6 +314,21 @@ const CalendarPage = () => {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  // Fetch platform profiles for usernames
+  const [platformProfiles, setPlatformProfiles] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    if (!selectedProject) { setPlatformProfiles(new Map()); return; }
+    supabase
+      .from('project_platform_profiles')
+      .select('platform, username')
+      .eq('project_id', selectedProject.id)
+      .then(({ data }) => {
+        const map = new Map<string, string>();
+        (data ?? []).forEach((p: any) => { if (p.username) map.set(p.platform, p.username); });
+        setPlatformProfiles(map);
+      });
+  }, [selectedProject]);
+
   useEffect(() => {
     if (!selectedProject || !user) { setTasks([]); return; }
     const fetchTasks = async () => {
