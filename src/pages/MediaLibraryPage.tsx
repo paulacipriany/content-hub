@@ -69,6 +69,7 @@ const MediaLibraryPage = () => {
         source: 'library' as const,
         publish_date: content?.publish_date ?? null,
         content_type: content?.content_type ?? null,
+        platforms: (content?.platform as Platform[]) ?? null,
         created_at: m.created_at,
       };
     });
