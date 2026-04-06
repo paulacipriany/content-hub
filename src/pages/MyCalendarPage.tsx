@@ -2,16 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star } from 'lucide-react';
-import { STATUS_COLORS, STATUS_LABELS, WorkflowStatus, ContentWithRelations } from '@/data/types';
+import { CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import PostPreview from '@/components/content/PostPreview';
-import { contrastText } from '@/lib/clientPalette';
 import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -85,36 +84,30 @@ const MyCalendarPage = () => {
 
   const ContentCard = ({ content }: { content: ContentWithRelations }) => {
     const platforms: string[] = Array.isArray(content.platform) ? content.platform : [content.platform];
-    const borderColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
+    const firstPlatform = platforms[0];
+    const dotColor = `hsl(var(${STATUS_CSS_VAR[content.status] ?? '--status-idea'}))`;
     const project = projectMap[content.project_id];
+    const contentTypeLabel = CONTENT_TYPE_LABELS[content.content_type as ContentType] || content.content_type;
+    const handle = project?.name ? project.name.toLowerCase().replace(/\s+/g, '.').slice(0, 15) : '';
 
     return (
       <div
         onClick={() => setPreviewContent(content)}
-        className="w-full text-left px-1 py-0.5 bg-card border border-border/60 shadow-sm border-l-[2px] rounded-sm hover:shadow-md transition-all cursor-pointer overflow-hidden min-w-0 max-h-[40px]"
-        style={{ borderLeftColor: borderColor }}
+        className="w-full text-left py-[3px] px-1.5 rounded-sm hover:bg-muted/60 transition-all cursor-pointer overflow-hidden min-w-0"
         title={`${content.title} — ${project?.name ?? ''}`}
       >
-        <div className="flex items-center gap-0.5 min-w-0">
-          {platforms.slice(0, 1).map((p, i) => (
-            <span key={i} className="shrink-0">{platformIcon([p] as any, 10)}</span>
-          ))}
-          <p className="text-[10px] font-medium text-foreground truncate leading-none">
-            {content.title}
-          </p>
-        </div>
-        <div className="flex items-center gap-1 min-w-0">
-          {project && (
-            <span
-              className="text-[7px] px-1 rounded font-semibold uppercase truncate"
-              style={{ backgroundColor: project.color, color: contrastText(project.color) }}
-            >
-              {project.name}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+          <span className="shrink-0">{platformIcon([firstPlatform] as any, 14)}</span>
+          <span className="text-[12px] font-semibold text-foreground whitespace-nowrap">{contentTypeLabel}</span>
+          {handle && (
+            <span className="text-[11px] text-muted-foreground truncate">
+              {project && (
+                <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ backgroundColor: project.color }} />
+              )}
+              {handle}
             </span>
           )}
-          <span className="text-[8px] text-muted-foreground truncate leading-none">
-            {STATUS_LABELS[content.status as WorkflowStatus]}
-          </span>
         </div>
       </div>
     );
@@ -269,13 +262,21 @@ const MyCalendarPage = () => {
         )}
       </div>
 
-      {/* Preview sheet */}
-      <Sheet open={!!previewContent} onOpenChange={open => !open && setPreviewContent(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-lg p-0 overflow-y-auto">
-          <SheetTitle className="sr-only">Preview</SheetTitle>
-          {previewContent && <PostPreview content={previewContent} platform={(Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) as any} />}
-        </SheetContent>
-      </Sheet>
+      {/* Post preview dialog */}
+      <Dialog open={!!previewContent} onOpenChange={open => !open && setPreviewContent(null)}>
+        <DialogContent className="sm:max-w-sm p-0 overflow-hidden rounded-xl">
+          {previewContent && (
+            <div className="flex flex-col max-h-[80vh] overflow-y-auto">
+              <DialogHeader className="px-4 pt-4 pb-2">
+                <DialogTitle className="text-base font-semibold text-foreground">Detalhes do post</DialogTitle>
+              </DialogHeader>
+              <div className="px-4 pb-4">
+                <PostPreview content={previewContent} platform={(Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform) as any} />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
