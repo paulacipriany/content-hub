@@ -1,20 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star, Copy, Download } from 'lucide-react';
-import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star } from 'lucide-react';
+import { CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import PostPreview from '@/components/content/PostPreview';
-import { contrastText } from '@/lib/clientPalette';
 import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import JSZip from 'jszip';
-import { useToast } from '@/hooks/use-toast';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
