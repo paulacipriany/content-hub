@@ -39,7 +39,11 @@ const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Prop
   const projectLogo = content.project?.logo_url;
 
   const mediaUrls = content.media_urls && content.media_urls.length > 0 ? content.media_urls : content.media_url ? [content.media_url] : [];
-  const hasMedia = mediaUrls.length > 0;
+  const thumbnailUrl = (content as any).thumbnail_url;
+  const firstMedia = mediaUrls[0] ?? '';
+  const isVideo = /\.(mp4|webm|mov)$/i.test(firstMedia);
+  const previewSrc = isVideo ? thumbnailUrl : firstMedia;
+  const hasMedia = previewSrc || (mediaUrls.length > 0 && !isVideo);
   const copyText = content.copy_text;
   const hasCopy = copyText && copyText.trim().length > 0;
 
@@ -71,11 +75,15 @@ const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Prop
       {hasMedia ? (
         <div className="relative px-2 pb-1.5">
           <div className="relative rounded-lg overflow-hidden">
-            <img
-              src={mediaUrls[0]}
-              alt=""
-              className="w-full aspect-square object-cover rounded-lg"
-            />
+            {isVideo && !previewSrc ? (
+              <video src={firstMedia} className="w-full aspect-square object-cover rounded-lg" muted />
+            ) : (
+              <img
+                src={previewSrc || firstMedia}
+                alt=""
+                className="w-full aspect-square object-cover rounded-lg"
+              />
+            )}
             {content.publish_time && (
               <span className="absolute bottom-1.5 left-1.5 bg-card/90 backdrop-blur-sm text-[10px] font-medium text-foreground px-1.5 py-0.5 rounded">
                 {content.publish_time.slice(0, 5)}
