@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CONTENT_TYPE_LABELS, VISIBLE_CONTENT_TYPES, ContentType } from '@/data/types';
+import { CONTENT_TYPE_LABELS, VISIBLE_CONTENT_TYPES, ContentType, PLATFORM_LABELS, Platform } from '@/data/types';
 import { cn } from '@/lib/utils';
 import { DateRange } from "react-day-picker";
 
