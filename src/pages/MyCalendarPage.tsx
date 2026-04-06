@@ -15,9 +15,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
-import { contrastText } from '@/lib/clientPalette';
-import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
-import { supabase } from '@/integrations/supabase/client';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
