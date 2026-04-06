@@ -229,6 +229,20 @@ const MediaLibraryPage = () => {
 
               <div className="w-px h-4 bg-border mx-1" />
 
+              <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[200px] text-xs focus:ring-0">
+                  <SelectValue placeholder="Plataforma" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as plataformas</SelectItem>
+                  {Object.entries(PLATFORM_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="w-px h-4 bg-border mx-1" />
+
               <Popover>
                 <PopoverTrigger asChild>
                   <button className={cn(
