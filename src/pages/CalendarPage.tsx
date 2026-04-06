@@ -841,63 +841,18 @@ const CalendarPage = () => {
       </div>
       </DndContext>
 
-      {/* Client preview sheet */}
-      <Sheet open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+      {/* Post preview dialog */}
+      <Dialog open={!!previewContent} onOpenChange={(open) => { if (!open) setPreviewContent(null); }}>
+        <DialogContent className="sm:max-w-sm p-0 overflow-hidden rounded-xl">
           {previewContent && (() => {
             const previewPlatform = Array.isArray(previewContent.platform) ? previewContent.platform[0] : previewContent.platform;
             return (
-              <div className="flex flex-col h-full">
-                <div className="px-6 pt-6 pb-4 border-b border-border">
-                  <SheetTitle className="text-lg font-semibold text-foreground mb-3">
-                    {previewContent.title}
-                  </SheetTitle>
-                  <div className="flex flex-wrap gap-2">
-                    <span className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-primary-foreground",
-                      STATUS_COLORS[previewContent.status as WorkflowStatus]
-                    )}>
-                      {STATUS_LABELS[previewContent.status as WorkflowStatus]}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                      {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType] || previewContent.content_type}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                      {platformIcon(previewContent.platform, 14)}
-                    </span>
-                  </div>
-                </div>
+              <div className="flex flex-col max-h-[80vh] overflow-y-auto">
+                <DialogHeader className="px-4 pt-4 pb-2">
+                  <DialogTitle className="text-base font-semibold text-foreground">Detalhes do post</DialogTitle>
+                </DialogHeader>
 
-                <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  {previewContent.publish_date && (
-                    <div className="flex items-center gap-1.5">
-                      <CalIcon size={12} />
-                      <span>
-                        {new Date(previewContent.publish_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                        {(previewContent as any).publish_time && ` às ${(previewContent as any).publish_time}`}
-                      </span>
-                    </div>
-                  )}
-                  {previewContent.assignee_profile && (
-                    <div className="flex items-center gap-1.5">
-                      <User size={12} />
-                      <span>{previewContent.assignee_profile.display_name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {previewContent.description && (
-                  <div className="px-6 py-4 border-b border-border/50">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Briefing</h4>
-                    <div 
-                      className="text-sm text-foreground prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground" 
-                      dangerouslySetInnerHTML={{ __html: previewContent.description }}
-                    />
-                  </div>
-                )}
-
-                <div className="px-6 py-4 flex-1">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pré-visualização</h4>
+                <div className="px-4 pb-4">
                   {previewPlatform ? (
                     <PostPreview content={previewContent} platform={previewPlatform as Platform} />
                   ) : (
@@ -905,35 +860,27 @@ const CalendarPage = () => {
                   )}
                 </div>
 
-                {previewContent.hashtags && previewContent.hashtags.length > 0 && (
-                  <div className="px-6 py-3 border-t border-border/50">
-                    <div className="flex flex-wrap gap-1.5">
-                      {previewContent.hashtags.map((tag, i) => (
-                        <span key={i} className="text-xs text-primary font-medium">#{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Fixed Footer with Quick Actions for Client */}
+                {/* Quick Actions */}
                 {(previewContent.status === 'approval-client' || previewContent.status === 'scheduled' || previewContent.status === 'published') && (
-                  <div className="mt-auto px-6 py-5 border-t border-border bg-card sticky bottom-0 z-20 flex gap-2">
+                  <div className="px-4 pb-4 flex gap-2">
                     <Button
                       variant="outline"
-                      className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
-                      style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                      size="sm"
+                      className="flex-1 gap-1.5 text-[12px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
+                      style={{ backgroundColor: '#f8f7f9', color: '#000000' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(previewContent.copy_text ?? '');
                         toast({ title: 'Texto copiado!' });
                       }}
                     >
-                      <Copy size={14} /> Copiar texto
+                      <Copy size={12} /> Copiar
                     </Button>
                     <Button
                       variant="outline"
-                      className="flex-1 h-10 gap-1.5 text-[13px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
-                      style={{ backgroundColor: '#c5daf7', color: '#1369db' }}
+                      size="sm"
+                      className="flex-1 gap-1.5 text-[12px] font-bold uppercase tracking-[1px] border-0 rounded-[5px]"
+                      style={{ backgroundColor: '#f8f7f9', color: '#000000' }}
                       onClick={async (e) => {
                         e.stopPropagation();
                         const urls: string[] = [];
@@ -943,11 +890,8 @@ const CalendarPage = () => {
                         if (previewContent.media_url && !urls.includes(previewContent.media_url)) {
                           urls.push(previewContent.media_url);
                         }
-                        
                         if (urls.length === 0) return;
-                        
-                        toast({ title: 'Preparando download...', description: 'Aguarde um momento.' });
-
+                        toast({ title: 'Preparando download...' });
                         try {
                           const zip = new JSZip();
                           await Promise.all(urls.map(async (url, i) => {
@@ -965,19 +909,19 @@ const CalendarPage = () => {
                           toast({ title: 'Download concluído!' });
                         } catch (err) {
                           console.error('Download error:', err);
-                          toast({ title: 'Erro ao baixar mídias', description: 'Por favor, tente novamente.', variant: 'destructive' });
+                          toast({ title: 'Erro ao baixar mídias', variant: 'destructive' });
                         }
                       }}
                     >
-                      <Download size={14} /> Baixar mídias
+                      <Download size={12} /> Baixar
                     </Button>
                   </div>
                 )}
               </div>
             );
           })()}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Add commemorative date dialog */}
       <Dialog open={addDateDialogOpen} onOpenChange={setAddDateDialogOpen}>
