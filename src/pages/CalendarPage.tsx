@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper, Copy, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, Calendar as CalIcon, Star, PartyPopper, Copy, Download, Filter } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -289,10 +289,23 @@ const CalendarPage = () => {
   const isClient = role === 'client';
   
   const clientAllowedStatuses: WorkflowStatus[] = ['approval-client', 'review', 'scheduled', 'programmed', 'published'];
-  const displayContents = useMemo(() => {
+  const baseContents = useMemo(() => {
     if (!isClient) return projectContents;
     return projectContents.filter(c => clientAllowedStatuses.includes(c.status as WorkflowStatus));
   }, [projectContents, isClient]);
+  const displayContents = useMemo(() => {
+    let filtered = baseContents;
+    if (filterPlatforms.length > 0) {
+      filtered = filtered.filter(c => {
+        const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+        return platforms.some(p => filterPlatforms.includes(p as Platform));
+      });
+    }
+    if (filterContentTypes.length > 0) {
+      filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
+    }
+    return filtered;
+  }, [baseContents, filterPlatforms, filterContentTypes]);
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
@@ -302,7 +315,8 @@ const CalendarPage = () => {
   const [newTaskText, setNewTaskText] = useState('');
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
-
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
   const [showDates, setShowDates] = useState(true);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
