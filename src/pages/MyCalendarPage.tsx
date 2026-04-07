@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star } from 'lucide-react';
-import { CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star, Filter } from 'lucide-react';
+import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
@@ -11,6 +11,8 @@ import PostPreview from '@/components/content/PostPreview';
 import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -32,6 +34,8 @@ const MyCalendarPage = () => {
   const [viewMode, setViewMode] = useState<'week' | 'month'>('month');
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -46,7 +50,21 @@ const MyCalendarPage = () => {
     d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   const fmtDateStr = (d: Date) => format(d, 'yyyy-MM-dd');
 
-  const getContentsForDate = (dateStr: string) => contents.filter(c => c.publish_date === dateStr);
+  const filteredContents = useMemo(() => {
+    let filtered = contents;
+    if (filterPlatforms.length > 0) {
+      filtered = filtered.filter(c => {
+        const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+        return platforms.some(p => filterPlatforms.includes(p as Platform));
+      });
+    }
+    if (filterContentTypes.length > 0) {
+      filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
+    }
+    return filtered;
+  }, [contents, filterPlatforms, filterContentTypes]);
+
+  const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
   const getWeekDays = () => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -193,6 +211,52 @@ const MyCalendarPage = () => {
               <CalendarDays size={14} className="inline mr-1" />Mês
             </button>
           </div>
+          {/* Platform filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                filterPlatforms.length > 0 ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground border-border hover:bg-muted"
+              )}>
+                <Filter size={11} />Plataforma
+                {filterPlatforms.length > 0 && <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">{filterPlatforms.length}</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-2" align="start">
+              <div className="space-y-1">
+                {(Object.entries(PLATFORM_LABELS) as [Platform, string][]).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                    <Checkbox checked={filterPlatforms.includes(key)} onCheckedChange={(checked) => setFilterPlatforms(prev => checked ? [...prev, key] : prev.filter(p => p !== key))} />
+                    <span className="flex items-center gap-1.5">{platformIcon([key] as any, 14)}{label}</span>
+                  </label>
+                ))}
+                {filterPlatforms.length > 0 && <button onClick={() => setFilterPlatforms([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* Content type filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                filterContentTypes.length > 0 ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground border-border hover:bg-muted"
+              )}>
+                <Filter size={11} />Tipo
+                {filterContentTypes.length > 0 && <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">{filterContentTypes.length}</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-2" align="start">
+              <div className="space-y-1">
+                {(Object.entries(CONTENT_TYPE_LABELS) as [ContentType, string][]).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                    <Checkbox checked={filterContentTypes.includes(key)} onCheckedChange={(checked) => setFilterContentTypes(prev => checked ? [...prev, key] : prev.filter(t => t !== key))} />
+                    {label}
+                  </label>
+                ))}
+                {filterContentTypes.length > 0 && <button onClick={() => setFilterContentTypes([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={goToday} className="px-3 py-1 rounded-md text-xs font-medium border border-border hover:bg-muted transition-colors">Hoje</button>
