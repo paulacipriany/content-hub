@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star, Filter } from 'lucide-react';
-import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, STATUS_LABELS, STATUS_COLORS, ContentType, Platform, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
