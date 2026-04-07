@@ -150,7 +150,14 @@ const MyCalendarPage = () => {
               ))}
             </div>
           )}
-          {dayContents.map(c => <ContentCard key={c.id} content={c} />)}
+          {dayContents.slice(0, 4).map(c => <ContentCard key={c.id} content={c} />)}
+          {dayContents.length > 4 && (
+            <div className="flex justify-end px-1 pt-0.5">
+              <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold leading-none">
+                +{dayContents.length - 4} mais
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
