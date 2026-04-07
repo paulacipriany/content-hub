@@ -694,6 +694,102 @@ const CalendarPage = () => {
                     </button>
                   </>
                 )}
+                {/* Platform filter */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                        filterPlatforms.length > 0
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "text-muted-foreground border-border hover:bg-muted"
+                      )}
+                    >
+                      <Filter size={11} />
+                      Plataforma
+                      {filterPlatforms.length > 0 && (
+                        <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">
+                          {filterPlatforms.length}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-1">
+                      {(Object.entries(PLATFORM_LABELS) as [Platform, string][]).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                          <Checkbox
+                            checked={filterPlatforms.includes(key)}
+                            onCheckedChange={(checked) => {
+                              setFilterPlatforms(prev =>
+                                checked ? [...prev, key] : prev.filter(p => p !== key)
+                              );
+                            }}
+                          />
+                          <span className="flex items-center gap-1.5">
+                            {platformIcon([key] as any, 14)}
+                            {label}
+                          </span>
+                        </label>
+                      ))}
+                      {filterPlatforms.length > 0 && (
+                        <button
+                          onClick={() => setFilterPlatforms([])}
+                          className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border"
+                        >
+                          Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Content type filter */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                        filterContentTypes.length > 0
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "text-muted-foreground border-border hover:bg-muted"
+                      )}
+                    >
+                      <Filter size={11} />
+                      Tipo
+                      {filterContentTypes.length > 0 && (
+                        <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">
+                          {filterContentTypes.length}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-1">
+                      {(Object.entries(CONTENT_TYPE_LABELS) as [ContentType, string][]).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                          <Checkbox
+                            checked={filterContentTypes.includes(key)}
+                            onCheckedChange={(checked) => {
+                              setFilterContentTypes(prev =>
+                                checked ? [...prev, key] : prev.filter(t => t !== key)
+                              );
+                            }}
+                          />
+                          {label}
+                        </label>
+                      ))}
+                      {filterContentTypes.length > 0 && (
+                        <button
+                          onClick={() => setFilterContentTypes([])}
+                          className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border"
+                        >
+                          Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* View mode toggle */}
