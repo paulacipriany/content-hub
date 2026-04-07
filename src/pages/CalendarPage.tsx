@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, PanelLeftClose, PanelLeftOpen, Calendar as CalIcon, User, Star, Trash2, PartyPopper, Copy, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarRange, GripVertical, LayoutGrid, CheckSquare, Eye, EyeOff, Calendar as CalIcon, Star, PartyPopper, Copy, Download, Filter } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS, CONTENT_TYPE_LABELS, PLATFORM_LABELS, WorkflowStatus, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
@@ -289,7 +289,7 @@ const CalendarPage = () => {
   const isClient = role === 'client';
   
   const clientAllowedStatuses: WorkflowStatus[] = ['approval-client', 'review', 'scheduled', 'programmed', 'published'];
-  const displayContents = useMemo(() => {
+  const baseContents = useMemo(() => {
     if (!isClient) return projectContents;
     return projectContents.filter(c => clientAllowedStatuses.includes(c.status as WorkflowStatus));
   }, [projectContents, isClient]);
@@ -302,7 +302,21 @@ const CalendarPage = () => {
   const [newTaskText, setNewTaskText] = useState('');
   const [showContents, setShowContents] = useState(true);
   const [showTasks, setShowTasks] = useState(true);
-
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
+  const displayContents = useMemo(() => {
+    let filtered = baseContents;
+    if (filterPlatforms.length > 0) {
+      filtered = filtered.filter(c => {
+        const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+        return platforms.some(p => filterPlatforms.includes(p as Platform));
+      });
+    }
+    if (filterContentTypes.length > 0) {
+      filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
+    }
+    return filtered;
+  }, [baseContents, filterPlatforms, filterContentTypes]);
   const [showDates, setShowDates] = useState(true);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
@@ -680,6 +694,102 @@ const CalendarPage = () => {
                     </button>
                   </>
                 )}
+                {/* Platform filter */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                        filterPlatforms.length > 0
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "text-muted-foreground border-border hover:bg-muted"
+                      )}
+                    >
+                      <Filter size={11} />
+                      Plataforma
+                      {filterPlatforms.length > 0 && (
+                        <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">
+                          {filterPlatforms.length}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-1">
+                      {(Object.entries(PLATFORM_LABELS) as [Platform, string][]).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                          <Checkbox
+                            checked={filterPlatforms.includes(key)}
+                            onCheckedChange={(checked) => {
+                              setFilterPlatforms(prev =>
+                                checked ? [...prev, key] : prev.filter(p => p !== key)
+                              );
+                            }}
+                          />
+                          <span className="flex items-center gap-1.5">
+                            {platformIcon([key] as any, 14)}
+                            {label}
+                          </span>
+                        </label>
+                      ))}
+                      {filterPlatforms.length > 0 && (
+                        <button
+                          onClick={() => setFilterPlatforms([])}
+                          className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border"
+                        >
+                          Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Content type filter */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                        filterContentTypes.length > 0
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "text-muted-foreground border-border hover:bg-muted"
+                      )}
+                    >
+                      <Filter size={11} />
+                      Tipo
+                      {filterContentTypes.length > 0 && (
+                        <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">
+                          {filterContentTypes.length}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-1">
+                      {(Object.entries(CONTENT_TYPE_LABELS) as [ContentType, string][]).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                          <Checkbox
+                            checked={filterContentTypes.includes(key)}
+                            onCheckedChange={(checked) => {
+                              setFilterContentTypes(prev =>
+                                checked ? [...prev, key] : prev.filter(t => t !== key)
+                              );
+                            }}
+                          />
+                          {label}
+                        </label>
+                      ))}
+                      {filterContentTypes.length > 0 && (
+                        <button
+                          onClick={() => setFilterContentTypes([])}
+                          className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border"
+                        >
+                          Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* View mode toggle */}
