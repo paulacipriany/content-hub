@@ -261,6 +261,32 @@ const MyCalendarPage = () => {
               </div>
             </PopoverContent>
           </Popover>
+          {/* Status filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                filterStatuses.length > 0 ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground border-border hover:bg-muted"
+              )}>
+                <Filter size={11} />Status
+                {filterStatuses.length > 0 && <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">{filterStatuses.length}</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-52 p-2" align="start">
+              <div className="space-y-1">
+                {(Object.entries(STATUS_LABELS) as [WorkflowStatus, string][]).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                    <Checkbox checked={filterStatuses.includes(key)} onCheckedChange={(checked) => setFilterStatuses(prev => checked ? [...prev, key] : prev.filter(s => s !== key))} />
+                    <span className="flex items-center gap-1.5">
+                      <span className={cn("w-2 h-2 rounded-full", STATUS_COLORS[key])} />
+                      {label}
+                    </span>
+                  </label>
+                ))}
+                {filterStatuses.length > 0 && <button onClick={() => setFilterStatuses([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={goToday} className="px-3 py-1 rounded-md text-xs font-medium border border-border hover:bg-muted transition-colors">Hoje</button>
