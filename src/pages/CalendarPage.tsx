@@ -572,7 +572,11 @@ const CalendarPage = () => {
           <DraggableContent key={c.id} content={c} onClick={() => setPreviewContent(c)} disabled={isClient} platformProfiles={platformProfiles} />
         ))}
         {viewMode === 'month' && dayContents.length > 4 && (
-          <span className="text-[10px] text-muted-foreground pl-1">+{dayContents.length - 4} mais</span>
+          <div className="flex justify-end px-1 pt-0.5">
+            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold leading-none">
+              +{dayContents.length - 4} mais
+            </span>
+          </div>
         )}
         {dayTasks.map(t => (
           <EditableCalTask key={t.id} task={t} onToggle={toggleTask} onUpdate={updateTaskText} />
