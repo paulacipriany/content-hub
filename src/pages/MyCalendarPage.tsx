@@ -36,6 +36,7 @@ const MyCalendarPage = () => {
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
   const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
+  const [filterStatuses, setFilterStatuses] = useState<WorkflowStatus[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -61,8 +62,11 @@ const MyCalendarPage = () => {
     if (filterContentTypes.length > 0) {
       filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
     }
+    if (filterStatuses.length > 0) {
+      filtered = filtered.filter(c => filterStatuses.includes(c.status as WorkflowStatus));
+    }
     return filtered;
-  }, [contents, filterPlatforms, filterContentTypes]);
+  }, [contents, filterPlatforms, filterContentTypes, filterStatuses]);
 
   const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
