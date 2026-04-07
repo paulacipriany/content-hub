@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star, Filter } from 'lucide-react';
-import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
+import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, STATUS_LABELS, STATUS_COLORS, ContentType, Platform, WorkflowStatus, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
@@ -36,6 +36,7 @@ const MyCalendarPage = () => {
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
   const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
+  const [filterStatuses, setFilterStatuses] = useState<WorkflowStatus[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -61,8 +62,11 @@ const MyCalendarPage = () => {
     if (filterContentTypes.length > 0) {
       filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
     }
+    if (filterStatuses.length > 0) {
+      filtered = filtered.filter(c => filterStatuses.includes(c.status as WorkflowStatus));
+    }
     return filtered;
-  }, [contents, filterPlatforms, filterContentTypes]);
+  }, [contents, filterPlatforms, filterContentTypes, filterStatuses]);
 
   const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
@@ -254,6 +258,32 @@ const MyCalendarPage = () => {
                   </label>
                 ))}
                 {filterContentTypes.length > 0 && <button onClick={() => setFilterContentTypes([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* Status filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                filterStatuses.length > 0 ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground border-border hover:bg-muted"
+              )}>
+                <Filter size={11} />Status
+                {filterStatuses.length > 0 && <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">{filterStatuses.length}</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-52 p-2" align="start">
+              <div className="space-y-1">
+                {(Object.entries(STATUS_LABELS) as [WorkflowStatus, string][]).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                    <Checkbox checked={filterStatuses.includes(key)} onCheckedChange={(checked) => setFilterStatuses(prev => checked ? [...prev, key] : prev.filter(s => s !== key))} />
+                    <span className="flex items-center gap-1.5">
+                      <span className={cn("w-2 h-2 rounded-full", STATUS_COLORS[key])} />
+                      {label}
+                    </span>
+                  </label>
+                ))}
+                {filterStatuses.length > 0 && <button onClick={() => setFilterStatuses([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
               </div>
             </PopoverContent>
           </Popover>
