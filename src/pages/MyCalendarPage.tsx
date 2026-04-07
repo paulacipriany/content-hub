@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star } from 'lucide-react';
-import { CONTENT_TYPE_LABELS, ContentType, ContentWithRelations } from '@/data/types';
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange, Star, Filter } from 'lucide-react';
+import { CONTENT_TYPE_LABELS, PLATFORM_LABELS, ContentType, Platform, ContentWithRelations } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { format, startOfWeek, addDays } from 'date-fns';
@@ -11,6 +11,8 @@ import PostPreview from '@/components/content/PostPreview';
 import { getCommemorativeDatesForDay } from '@/data/commemorativeDates';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const DAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
@@ -32,6 +34,8 @@ const MyCalendarPage = () => {
   const [viewMode, setViewMode] = useState<'week' | 'month'>('month');
   const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -46,7 +50,21 @@ const MyCalendarPage = () => {
     d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   const fmtDateStr = (d: Date) => format(d, 'yyyy-MM-dd');
 
-  const getContentsForDate = (dateStr: string) => contents.filter(c => c.publish_date === dateStr);
+  const filteredContents = useMemo(() => {
+    let filtered = contents;
+    if (filterPlatforms.length > 0) {
+      filtered = filtered.filter(c => {
+        const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
+        return platforms.some(p => filterPlatforms.includes(p as Platform));
+      });
+    }
+    if (filterContentTypes.length > 0) {
+      filtered = filtered.filter(c => filterContentTypes.includes(c.content_type as ContentType));
+    }
+    return filtered;
+  }, [contents, filterPlatforms, filterContentTypes]);
+
+  const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
   const getWeekDays = () => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
