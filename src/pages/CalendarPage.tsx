@@ -293,6 +293,17 @@ const CalendarPage = () => {
     if (!isClient) return projectContents;
     return projectContents.filter(c => clientAllowedStatuses.includes(c.status as WorkflowStatus));
   }, [projectContents, isClient]);
+  const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
+  const [activeTask, setActiveTask] = useState<CalTask | null>(null);
+  const [tasks, setTasks] = useState<CalTask[]>([]);
+  const [newTaskText, setNewTaskText] = useState('');
+  const [showContents, setShowContents] = useState(true);
+  const [showTasks, setShowTasks] = useState(true);
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
   const displayContents = useMemo(() => {
     let filtered = baseContents;
     if (filterPlatforms.length > 0) {
@@ -306,17 +317,6 @@ const CalendarPage = () => {
     }
     return filtered;
   }, [baseContents, filterPlatforms, filterContentTypes]);
-  const [previewContent, setPreviewContent] = useState<ContentWithRelations | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-  const [activeContent, setActiveContent] = useState<ContentWithRelations | null>(null);
-  const [activeTask, setActiveTask] = useState<CalTask | null>(null);
-  const [tasks, setTasks] = useState<CalTask[]>([]);
-  const [newTaskText, setNewTaskText] = useState('');
-  const [showContents, setShowContents] = useState(true);
-  const [showTasks, setShowTasks] = useState(true);
-  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
-  const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
   const [showDates, setShowDates] = useState(true);
   const [customDates, setCustomDates] = useState<{ id: string; date: string; title: string }[]>([]);
   const [addDateDialogOpen, setAddDateDialogOpen] = useState(false);
