@@ -97,6 +97,7 @@ const ContentPanel = () => {
   const isClientApproval = isClient && selectedContent?.status === 'approval-client';
   const isReview = selectedContent?.status === 'review';
   const isProduction = selectedContent?.status === 'production';
+  const isClientRequest = selectedContent?.status === 'client-request';
   const [newComment, setNewComment] = useState('');
   const [commentImageUrl, setCommentImageUrl] = useState<string | null>(null);
   const [commentUploading, setCommentUploading] = useState(false);
