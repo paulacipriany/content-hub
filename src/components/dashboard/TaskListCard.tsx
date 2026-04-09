@@ -313,7 +313,7 @@ const SortableTaskList = ({ list, renderList, hideHandle, onEdit, onAddTask, onD
 };
 
 const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projectId, hideDone = false, filters, showNewListInline = true, singleListId }, ref) => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TaskList[]>([]);
   const [members, setMembers] = useState<MemberProfile[]>([]);
