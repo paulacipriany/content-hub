@@ -35,8 +35,8 @@ const ReviewPage = () => {
             {reviewContents.map(c => (
               <div
                 key={c.id}
-                className="bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
-                style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
+                className="border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                style={{ backgroundColor: '#eaf2fc', borderColor: '#000000', borderWidth: '2px' }}
               >
                 {/* Thumbnail */}
                 {c.media_urls && c.media_urls.length > 0 ? (
