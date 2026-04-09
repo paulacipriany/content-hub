@@ -1364,7 +1364,7 @@ const ContentPanel = () => {
             </div>
           )}
 
-          {selectedContent.status !== 'idea' && (
+          {selectedContent.status !== 'idea' && !isClientRequest && (
             <div className={cn("p-5 flex flex-col min-h-0", isClient ? "flex-1 overflow-hidden" : "max-h-[50%]")}>
               {/* Admin/Agency Quick Actions (REMOVED: Now handled in fixed header above for consistency) */}
 
