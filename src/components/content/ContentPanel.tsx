@@ -957,7 +957,7 @@ const ContentPanel = () => {
             <div className="py-4 border-t border-border/50">
               <p className="text-xs text-muted-foreground italic">Role para a direita para ver o preview do post e os comentários.</p>
             </div>
-          ) : (
+          ) : isClientRequest ? null : (
             <>
               {/* Copy text (editable) — hidden for stories */}
               {selectedContent.content_type !== 'stories' && (
