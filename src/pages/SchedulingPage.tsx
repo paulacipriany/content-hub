@@ -123,15 +123,6 @@ const SchedulingPage = () => {
           <div className="space-y-6">
             {Object.entries(grouped).map(([date, items]) => (
               <div key={date}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar size={14} className="text-muted-foreground" />
-                  <h3 className="text-sm font-semibold text-foreground">
-                    {date === 'Sem data'
-                      ? 'Sem data definida'
-                      : new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-                  </h3>
-                  <span className="text-xs text-muted-foreground">({items.length})</span>
-                </div>
                 <div className="space-y-3">
                   {items.map(content => {
                     const platforms = Array.isArray(content.platform) ? content.platform : [content.platform];
