@@ -156,7 +156,7 @@ const SchedulingPage = () => {
                             {platformIcon(platforms as Platform[], 14, true)}
                           </div>
                           <span className="text-sm font-medium text-foreground block mb-1">{content.title}</span>
-                          {(() => {
+                          {content.content_type !== 'stories' && (() => {
                             const copyPreview = content.copy_text ? content.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
                             return copyPreview ? (
                               <p className="text-xs text-muted-foreground truncate">{copyPreview}{content.copy_text && content.copy_text.replace(/<[^>]*>/g, '').length > 120 ? '…' : ''}</p>

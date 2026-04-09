@@ -56,7 +56,7 @@ const ReviewPage = () => {
                     {platformIcon(c.platform, 14, true)}
                   </div>
                   <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>
-                  {(() => {
+                  {c.content_type !== 'stories' && (() => {
                     const copyPreview = c.copy_text ? c.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
                     return copyPreview ? (
                       <p className="text-xs text-muted-foreground truncate">{copyPreview}{c.copy_text && c.copy_text.replace(/<[^>]*>/g, '').length > 120 ? '…' : ''}</p>
