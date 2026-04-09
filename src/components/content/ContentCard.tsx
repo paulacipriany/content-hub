@@ -65,7 +65,7 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHand
         style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
       >
         {/* Action icons - visible on hover */}
-        {hideStatus && !readOnly && content.status !== 'published' && (
+        {hideStatus && (!readOnly || (readOnly && content.status === 'client-request')) && content.status !== 'published' && (
           <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             {dragHandleProps && (
               <div
