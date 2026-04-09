@@ -77,6 +77,7 @@ interface TaskListCardProps {
   filters?: TaskFilters;
   showNewListInline?: boolean;
   singleListId?: string;
+  onEmptyChange?: (isEmpty: boolean) => void;
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled' | 'group';
