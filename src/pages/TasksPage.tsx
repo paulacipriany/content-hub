@@ -100,6 +100,7 @@ const TasksPage = () => {
       />
       <div className="min-h-screen">
         {/* Filter bar */}
+        {!tasksEmpty && (
         <div className="flex items-center gap-2 px-6 py-4 flex-wrap">
           <Popover>
             <PopoverTrigger asChild>
