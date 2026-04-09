@@ -37,6 +37,7 @@ const MyCalendarPage = () => {
   const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
   const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
   const [filterStatuses, setFilterStatuses] = useState<WorkflowStatus[]>([]);
+  const [filterProjects, setFilterProjects] = useState<string[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
@@ -53,6 +54,9 @@ const MyCalendarPage = () => {
 
   const filteredContents = useMemo(() => {
     let filtered = contents;
+    if (filterProjects.length > 0) {
+      filtered = filtered.filter(c => filterProjects.includes(c.project_id));
+    }
     if (filterPlatforms.length > 0) {
       filtered = filtered.filter(c => {
         const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
@@ -66,7 +70,7 @@ const MyCalendarPage = () => {
       filtered = filtered.filter(c => filterStatuses.includes(c.status as WorkflowStatus));
     }
     return filtered;
-  }, [contents, filterPlatforms, filterContentTypes, filterStatuses]);
+  }, [contents, filterProjects, filterPlatforms, filterContentTypes, filterStatuses]);
 
   const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
@@ -215,6 +219,32 @@ const MyCalendarPage = () => {
               <CalendarDays size={14} className="inline mr-1" />Mês
             </button>
           </div>
+          {/* Project filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border",
+                filterProjects.length > 0 ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground border-border hover:bg-muted"
+              )}>
+                <Filter size={11} />Cliente
+                {filterProjects.length > 0 && <span className="ml-0.5 px-1 py-0 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px]">{filterProjects.length}</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-52 p-2" align="start">
+              <div className="space-y-1">
+                {activeProjects.map(p => (
+                  <label key={p.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-xs">
+                    <Checkbox checked={filterProjects.includes(p.id)} onCheckedChange={(checked) => setFilterProjects(prev => checked ? [...prev, p.id] : prev.filter(id => id !== p.id))} />
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                      {p.name}
+                    </span>
+                  </label>
+                ))}
+                {filterProjects.length > 0 && <button onClick={() => setFilterProjects([])} className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1 mt-1 border-t border-border">Limpar filtro</button>}
+              </div>
+            </PopoverContent>
+          </Popover>
           {/* Platform filter */}
           <Popover>
             <PopoverTrigger asChild>
@@ -288,9 +318,9 @@ const MyCalendarPage = () => {
             </PopoverContent>
           </Popover>
           {/* Clear all filters */}
-          {(filterPlatforms.length > 0 || filterContentTypes.length > 0 || filterStatuses.length > 0) && (
+          {(filterProjects.length > 0 || filterPlatforms.length > 0 || filterContentTypes.length > 0 || filterStatuses.length > 0) && (
             <button
-              onClick={() => { setFilterPlatforms([]); setFilterContentTypes([]); setFilterStatuses([]); }}
+              onClick={() => { setFilterProjects([]); setFilterPlatforms([]); setFilterContentTypes([]); setFilterStatuses([]); }}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-destructive border border-destructive/30 hover:bg-destructive/10 transition-colors"
             >
               Limpar todos
