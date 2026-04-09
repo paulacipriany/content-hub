@@ -54,6 +54,9 @@ const MyCalendarPage = () => {
 
   const filteredContents = useMemo(() => {
     let filtered = contents;
+    if (filterProjects.length > 0) {
+      filtered = filtered.filter(c => filterProjects.includes(c.project_id));
+    }
     if (filterPlatforms.length > 0) {
       filtered = filtered.filter(c => {
         const platforms = Array.isArray(c.platform) ? c.platform : [c.platform];
@@ -67,7 +70,7 @@ const MyCalendarPage = () => {
       filtered = filtered.filter(c => filterStatuses.includes(c.status as WorkflowStatus));
     }
     return filtered;
-  }, [contents, filterPlatforms, filterContentTypes, filterStatuses]);
+  }, [contents, filterProjects, filterPlatforms, filterContentTypes, filterStatuses]);
 
   const getContentsForDate = (dateStr: string) => filteredContents.filter(c => c.publish_date === dateStr);
 
