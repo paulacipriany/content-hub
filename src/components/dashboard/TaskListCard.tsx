@@ -598,9 +598,10 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div
-          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-secondary"
+          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style={{ backgroundColor: '#fef9c3' }}
         >
-          <CheckCircle size={32} className="text-primary" />
+          <CheckCircle size={32} style={{ color: '#ca8a04' }} />
         </div>
         <h2 className="text-lg font-semibold text-foreground mb-1">Nenhuma tarefa ou lista encontrada.</h2>
         <p className="text-sm text-muted-foreground">Crie uma nova lista para começar a organizar suas tarefas.</p>
