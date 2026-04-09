@@ -211,7 +211,7 @@ const MediaLibraryPage = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           {/* Filters (left) */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-3 h-10 rounded-lg border" style={{ backgroundColor: '#eaf2fc', borderColor: '#000000', borderWidth: '2px' }}>
+            <div className="flex items-center gap-2 px-3 h-10 rounded-lg bg-card border border-border">
               <Filter size={14} className="text-muted-foreground" />
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-2">Filtros:</span>
               
