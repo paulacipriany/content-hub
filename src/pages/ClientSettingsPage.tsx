@@ -58,8 +58,7 @@ const ClientSettingsPage = () => {
               key={s.label}
               onClick={s.onClick}
               disabled={(s as any).disabled}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:shadow-sm transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: 'var(--client-50, hsl(var(--card)))', borderWidth: '1.5px', borderColor: 'var(--client-200, hsl(var(--border)))' }}
+              className="w-full flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:shadow-sm hover:border-primary/20 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div 
                 className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
