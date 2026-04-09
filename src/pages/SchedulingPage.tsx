@@ -106,7 +106,7 @@ const SchedulingPage = () => {
 
   return (
     <>
-      <TopBar title="Agendamento" subtitle={`${scheduled.length} conteúdo${scheduled.length !== 1 ? 's' : ''} agendado${scheduled.length !== 1 ? 's' : ''}`} />
+      <TopBar title="Agendamento" subtitle={`${scheduled.length} conteúdo${scheduled.length !== 1 ? 's' : ''} para agendar`} />
       <div className="p-6">
         {scheduled.length === 0 ? (
           <div className="text-center py-20">
