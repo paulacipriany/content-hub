@@ -55,6 +55,7 @@ const TasksPage = () => {
   useClientFromUrl();
   const { selectedProject, loading } = useApp();
   const [filters, setFilters] = useState<TaskFilters>({ statuses: [], priorities: [], dateFilter: 'all' });
+  const [tasksEmpty, setTasksEmpty] = useState(false);
 
   const taskListRef = useRef<TaskListCardHandle>(null);
 
