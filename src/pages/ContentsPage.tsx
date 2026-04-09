@@ -68,7 +68,7 @@ const ContentsPage = () => {
           <span className="text-xs ml-auto" style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }}>{filtered.length} conteúdos</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 flex-1">
           {filtered.map(c => (
             <ContentCard key={c.id} content={c} />
           ))}
