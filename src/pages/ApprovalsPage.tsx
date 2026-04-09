@@ -102,7 +102,7 @@ const ApprovalsPage = () => {
               <div
                 key={c.id}
                 className="border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
-                style={{ backgroundColor: '#c5daf7', borderColor: '#000000', borderWidth: '2px' }}
+                style={{ backgroundColor: '#eaf2fc', borderColor: '#000000', borderWidth: '2px' }}
               >
                 {/* Thumbnail */}
                 {c.media_urls && c.media_urls.length > 0 ? (
