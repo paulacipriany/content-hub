@@ -55,6 +55,7 @@ const TasksPage = () => {
   useClientFromUrl();
   const { selectedProject, loading } = useApp();
   const [filters, setFilters] = useState<TaskFilters>({ statuses: [], priorities: [], dateFilter: 'all' });
+  const [tasksEmpty, setTasksEmpty] = useState(false);
 
   const taskListRef = useRef<TaskListCardHandle>(null);
 
@@ -99,6 +100,7 @@ const TasksPage = () => {
       />
       <div className="min-h-screen">
         {/* Filter bar */}
+        {!tasksEmpty && (
         <div className="flex items-center gap-2 px-6 py-4 flex-wrap">
           <Popover>
             <PopoverTrigger asChild>
@@ -173,9 +175,10 @@ const TasksPage = () => {
 
 
         </div>
+        )}
 
         <div className="px-6">
-          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} onEmptyChange={setTasksEmpty} />
         </div>
       </div>
     </>

@@ -77,6 +77,7 @@ interface TaskListCardProps {
   filters?: TaskFilters;
   showNewListInline?: boolean;
   singleListId?: string;
+  onEmptyChange?: (isEmpty: boolean) => void;
 }
 
 type TaskStatus = 'backlog' | 'planning' | 'in_progress' | 'paused' | 'done' | 'cancelled' | 'group';
@@ -312,7 +313,7 @@ const SortableTaskList = ({ list, renderList, hideHandle, onEdit, onAddTask, onD
   );
 };
 
-const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projectId, hideDone = false, filters, showNewListInline = true, singleListId }, ref) => {
+const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projectId, hideDone = false, filters, showNewListInline = true, singleListId, onEmptyChange }, ref) => {
   const { user, role } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TaskList[]>([]);
@@ -587,6 +588,10 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   };
 
   const unlistedTasks = useMemo(() => tasks.filter(t => !t.list_id).filter(filterTask), [tasks, filterTask]);
+
+  const isEmpty = !loading && displayedLists.length === 0 && unlistedTasks.length === 0;
+  useEffect(() => { onEmptyChange?.(isEmpty); }, [isEmpty, onEmptyChange]);
+
   if (loading) return <div className="text-center py-20 text-muted-foreground">Carregando...</div>;
 
   if (displayedLists.length === 0 && unlistedTasks.length === 0) {
