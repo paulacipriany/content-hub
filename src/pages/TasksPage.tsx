@@ -175,9 +175,10 @@ const TasksPage = () => {
 
 
         </div>
+        )}
 
         <div className="px-6">
-          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} />
+          <TaskListCard ref={taskListRef} projectId={selectedProject.id} filters={filters} showNewListInline={false} onEmptyChange={setTasksEmpty} />
         </div>
       </div>
     </>
