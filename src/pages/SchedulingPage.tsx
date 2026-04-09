@@ -159,7 +159,7 @@ const SchedulingPage = () => {
                         <div className="flex-1 min-w-0">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-2" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
                             <Clock size={13} />
-                            {content.publish_date ? new Date(content.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{content.publish_time ? ` às ${content.publish_time}` : ''}
+                            {content.publish_time ? `às ${content.publish_time}` : 'Sem horário'}
                           </span>
                           <div className="flex items-center gap-1.5 mb-1">
                             {platformIcon(platforms as Platform[], 14, true)}
