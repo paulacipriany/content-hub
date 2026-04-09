@@ -65,9 +65,9 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHand
         style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
       >
         {/* Action icons - visible on hover */}
-        {hideStatus && !readOnly && content.status !== 'published' && (
+        {hideStatus && (!readOnly || (readOnly && content.status === 'client-request')) && content.status !== 'published' && (
           <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            {dragHandleProps && (
+            {dragHandleProps && !readOnly && (
               <div
                 {...dragHandleProps}
                 className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors cursor-grab active:cursor-grabbing"
@@ -76,13 +76,15 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHand
                 <GripVertical size={12} />
               </div>
             )}
-            <button
-              onClick={handleEdit}
-              className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
-              title="Editar"
-            >
-              <Pencil size={12} />
-            </button>
+            {!readOnly && (
+              <button
+                onClick={handleEdit}
+                className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
+                title="Editar"
+              >
+                <Pencil size={12} />
+              </button>
+            )}
             <button
               onClick={handleDeleteClick}
               className="w-6 h-6 rounded-md flex items-center justify-center bg-muted hover:bg-destructive text-muted-foreground hover:text-destructive-foreground transition-colors"
