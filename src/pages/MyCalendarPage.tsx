@@ -37,6 +37,7 @@ const MyCalendarPage = () => {
   const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
   const [filterContentTypes, setFilterContentTypes] = useState<ContentType[]>([]);
   const [filterStatuses, setFilterStatuses] = useState<WorkflowStatus[]>([]);
+  const [filterProjects, setFilterProjects] = useState<string[]>([]);
 
   const projectMap = useMemo(() => {
     const map: Record<string, { name: string; color: string }> = {};
