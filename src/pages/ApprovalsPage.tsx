@@ -188,7 +188,7 @@ const ApprovalsPage = () => {
                 <div className="flex flex-col items-stretch gap-2 flex-shrink-0 w-[170px]">
                   <Button 
                     size="sm" 
-                    className="gap-1 text-xs font-semibold border-0 w-full justify-center" 
+                    className="gap-1 text-xs font-semibold border-0 w-full justify-center transition-all duration-200 hover:brightness-90 hover:scale-[1.03] hover:shadow-md" 
                     style={{ 
                       backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#c8ff00', 
                       color: userApproved[c.id] ? '#9ca3af' : '#000000' 
@@ -198,7 +198,7 @@ const ApprovalsPage = () => {
                   >
                     <MessageSquare size={14} /> Revisar
                   </Button>
-                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center" style={{ backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#ff88db', color: userApproved[c.id] ? '#9ca3af' : '#1a1a1a' }} disabled={userApproved[c.id]} onClick={async () => {
+                  <Button size="sm" className="gap-1 text-xs font-semibold border-0 w-full justify-center transition-all duration-200 hover:brightness-90 hover:scale-[1.03] hover:shadow-md" style={{ backgroundColor: userApproved[c.id] ? '#e5e7eb' : '#ff88db', color: userApproved[c.id] ? '#9ca3af' : '#1a1a1a' }} disabled={userApproved[c.id]} onClick={async () => {
                     if (!user) return;
                     const { allApproved, error } = await recordApproval(c.id, user.id);
                     if (error) {
