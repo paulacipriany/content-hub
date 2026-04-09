@@ -597,8 +597,14 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   if (displayedLists.length === 0 && unlistedTasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-sm text-muted-foreground">Nenhuma tarefa ou lista encontrada.</p>
-        <p className="text-xs text-muted-foreground mt-1">Crie uma nova lista para começar a organizar suas tarefas.</p>
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          style={{ backgroundColor: '#fef9c3' }}
+        >
+          <CheckCircle size={32} style={{ color: '#ca8a04' }} />
+        </div>
+        <h2 className="text-lg font-semibold text-foreground mb-1">Nenhuma tarefa ou lista encontrada.</h2>
+        <p className="text-sm text-muted-foreground">Crie uma nova lista para começar a organizar suas tarefas.</p>
       </div>
     );
   }
