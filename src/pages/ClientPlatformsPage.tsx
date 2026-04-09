@@ -144,7 +144,7 @@ const ClientPlatformsPage = () => {
           </Button>
         }
       />
-      <div className="p-6 max-w-2xl space-y-6">
+      <div className="p-6 space-y-6">
         <button
           onClick={() => navigate(`/clients/${selectedProject.id}/settings`)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
