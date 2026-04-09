@@ -588,6 +588,10 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   };
 
   const unlistedTasks = useMemo(() => tasks.filter(t => !t.list_id).filter(filterTask), [tasks, filterTask]);
+
+  const isEmpty = !loading && displayedLists.length === 0 && unlistedTasks.length === 0;
+  useEffect(() => { onEmptyChange?.(isEmpty); }, [isEmpty, onEmptyChange]);
+
   if (loading) return <div className="text-center py-20 text-muted-foreground">Carregando...</div>;
 
   if (displayedLists.length === 0 && unlistedTasks.length === 0) {
