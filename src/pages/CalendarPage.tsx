@@ -844,6 +844,16 @@ const CalendarPage = () => {
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                {/* Clear all filters */}
+                {(filterPlatforms.length > 0 || filterContentTypes.length > 0 || filterStatuses.length > 0) && (
+                  <button
+                    onClick={() => { setFilterPlatforms([]); setFilterContentTypes([]); setFilterStatuses([]); }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-destructive border border-destructive/30 hover:bg-destructive/10 transition-colors"
+                  >
+                    Limpar todos
+                  </button>
+                )}
               </div>
 
               {/* View mode toggle */}
