@@ -501,10 +501,16 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  const isAdminOrMod = role === 'admin' || role === 'moderator';
   const displayedLists = useMemo(() => {
     if (singleListId) return lists.filter(l => l.id === singleListId);
-    return lists;
-  }, [lists, singleListId]);
+    if (isAdminOrMod) return lists;
+    // Show only lists created by user or with tasks assigned to them
+    return lists.filter(l => {
+      if (l.created_by === user?.id) return true;
+      return tasks.some(t => t.list_id === l.id && t.assigned_to === user?.id);
+    });
+  }, [lists, singleListId, isAdminOrMod, user?.id, tasks]);
 
   const renderList = (list: TaskList, handleProps?: { attributes: any; listeners: any }) => {
     const lTasks = tasks.filter(t => t.list_id === list.id).filter(filterTask);
