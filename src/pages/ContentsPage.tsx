@@ -41,7 +41,7 @@ const ContentsPage = () => {
   return (
     <>
       <TopBar title="Conteúdos" subtitle="Todos os conteúdos deste cliente" />
-      <div className="p-6">
+      <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <select
             value={filterPlatform}
@@ -68,7 +68,7 @@ const ContentsPage = () => {
           <span className="text-xs ml-auto" style={{ color: 'var(--client-600, hsl(var(--muted-foreground)))' }}>{filtered.length} conteúdos</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 flex-1">
           {filtered.map(c => (
             <ContentCard key={c.id} content={c} />
           ))}
