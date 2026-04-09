@@ -130,10 +130,10 @@ const SchedulingPage = () => {
                       <div
                         key={content.id}
                         className={cn(
-                          "bg-card border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-all cursor-pointer",
+                          "border rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-all cursor-pointer",
                           exitingIds.has(content.id) && "opacity-0 scale-95 -translate-x-4 transition-all duration-500 ease-out"
                         )}
-                        style={{ borderColor: 'var(--client-100, hsl(var(--border)))' }}
+                        style={{ backgroundColor: '#c5daf7', borderColor: '#000000', borderWidth: '2px' }}
                         onClick={() => setPreviewContent(content)}
                       >
                         {/* Thumbnail */}
