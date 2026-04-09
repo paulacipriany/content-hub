@@ -208,98 +208,80 @@ const MediaLibraryPage = () => {
         )}
       />
       <div className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          {/* Filters (left) */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-3 h-10 rounded-lg bg-card border border-border">
-              <Filter size={14} className="text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-2">Filtros:</span>
-              
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[200px] text-xs focus:ring-0">
-                  <SelectValue placeholder="Tipo de postagem" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os tipos</SelectItem>
-                  {VISIBLE_CONTENT_TYPES.map(t => (
-                    <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="w-px h-4 bg-border mx-1" />
-
-              <Select value={platformFilter} onValueChange={setPlatformFilter}>
-                <SelectTrigger className="h-7 border-none bg-transparent shadow-none px-2 w-[200px] text-xs focus:ring-0">
-                  <SelectValue placeholder="Plataforma" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as plataformas</SelectItem>
-                  {Object.entries(PLATFORM_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="w-px h-4 bg-border mx-1" />
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className={cn(
-                    "flex items-center gap-1.5 h-7 px-2 rounded-md transition-colors text-xs font-medium",
-                    dateRange?.from ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
-                  )}>
-                    <CalIcon size={14} />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        `${format(dateRange.from, 'dd/MM/yy')} - ${format(dateRange.to, 'dd/MM/yy')}`
-                      ) : format(dateRange.from, 'dd/MM/yy')
-                    ) : 'Período de postagem'}
-                    {dateRange?.from && (
-                      <X 
-                        size={14} 
-                        className="ml-1 hover:text-foreground" 
-                        onClick={(e) => { e.stopPropagation(); setDateRange(undefined); }} 
-                      />
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    locale={ptBR}
-                    className="p-3"
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {(typeFilter !== 'all' || platformFilter !== 'all' || dateRange?.from) && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => { setTypeFilter('all'); setPlatformFilter('all'); setDateRange(undefined); }}
-                className="text-xs h-8 text-muted-foreground hover:text-foreground"
-              >
-                Limpar filtros
-              </Button>
-            )}
-          </div>
-
-          {/* Search (right) */}
-          <div className="relative w-full md:max-w-[220px]">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-secondary/30 p-4 rounded-xl border border-border mb-6">
+          <div className="relative md:col-span-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
             <input
               type="text"
               placeholder="Buscar por nome..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 rounded-lg bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
+              className="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
             />
           </div>
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Tipo de postagem" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              {VISIBLE_CONTENT_TYPES.map(t => (
+                <SelectItem key={t} value={t}>{CONTENT_TYPE_LABELS[t]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={platformFilter} onValueChange={setPlatformFilter}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Plataforma" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as plataformas</SelectItem>
+              {Object.entries(PLATFORM_LABELS).map(([key, label]) => (
+                <SelectItem key={key} value={key}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-xs transition-colors w-full",
+                dateRange?.from ? "text-foreground" : "text-muted-foreground"
+              )}>
+                <CalIcon size={14} className="text-muted-foreground" />
+                {dateRange?.from ? (
+                  <span className="flex items-center gap-1">
+                    {dateRange.to ? (
+                      `${format(dateRange.from, 'dd/MM/yy')} - ${format(dateRange.to, 'dd/MM/yy')}`
+                    ) : format(dateRange.from, 'dd/MM/yy')}
+                    <X 
+                      size={14} 
+                      className="ml-1 hover:text-foreground text-muted-foreground" 
+                      onClick={(e) => { e.stopPropagation(); setDateRange(undefined); }} 
+                    />
+                  </span>
+                ) : 'Período de postagem'}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={setDateRange}
+                locale={ptBR}
+                className="p-3"
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <p className="text-xs text-muted-foreground mb-3">
