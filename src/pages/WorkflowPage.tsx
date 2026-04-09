@@ -320,7 +320,7 @@ const WorkflowPage = () => {
   return (
     <>
       <TopBar title="Workflow" subtitle={isClient ? "Acompanhe o status dos seus conteúdos" : "Arraste os cards entre colunas para mudar o status"} actions={isClient && selectedProject ? <CreateContentDialog defaultProjectId={selectedProject.id} /> : undefined} />
-      <div className="p-6 overflow-x-auto">
+      <div className="p-6 overflow-x-auto flex-1 flex flex-col">
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 min-w-max pb-8">
             {statusOrder.filter(status => !(isClient && (status === 'idea' || status === 'production'))).map(status => (
