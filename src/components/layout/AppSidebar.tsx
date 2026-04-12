@@ -196,7 +196,12 @@ const AppSidebar = () => {
           }).
           map((item) => {
             const fullPath = `${clientBasePath}${item.path}`;
-            const isActive = location.pathname === fullPath;
+            const isActive = location.pathname === fullPath || 
+              (item.path === '/settings' && (
+                location.pathname === `${clientBasePath}/platforms` ||
+                location.pathname === `${clientBasePath}/members` ||
+                location.pathname === `${clientBasePath}/appearance`
+              ));
 
             // Sub-items: always visible, indented
             if ((item as any).subItem) {
