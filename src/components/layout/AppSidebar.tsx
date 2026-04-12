@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -42,6 +42,7 @@ const AppSidebar = () => {
   const { sidebarCollapsed, setSidebarCollapsed, selectedProject, projects, setSelectedProject, contents, pendingUsersCount } = useApp();
   const { profile, role, signOut, user } = useAuth();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [otherProjectsOpen, setOtherProjectsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -265,10 +266,14 @@ const AppSidebar = () => {
             {/* Other clients */}
             {projects.filter((p) => p.id !== selectedProject.id).length > 0 &&
           <div className="pt-4 -mx-2 space-y-0.5">
-                <div className="px-4 mb-1">
+                <button
+                  onClick={() => setOtherProjectsOpen(!otherProjectsOpen)}
+                  className="flex items-center justify-between w-full px-4 mb-1 group cursor-pointer"
+                >
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros projetos</span>
-                </div>
-                {projects.filter((p) => p.id !== selectedProject.id).map((project) => {
+                  <ChevronDown size={14} className={cn("text-sidebar-fg/60 transition-transform", otherProjectsOpen && "rotate-180")} />
+                </button>
+                {otherProjectsOpen && projects.filter((p) => p.id !== selectedProject.id).map((project) => {
               return (
                 <button
                   key={project.id}
