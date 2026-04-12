@@ -51,7 +51,7 @@ const ClientSettingsPage = () => {
   return (
     <>
       <TopBar title="Configurações" subtitle={selectedProject.name} actions={<></>} />
-      <div className="p-6 max-w-2xl">
+      <div className="p-6">
         <div className="space-y-2">
           {filteredSections.map(s => (
             <button
