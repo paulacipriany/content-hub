@@ -266,10 +266,14 @@ const AppSidebar = () => {
             {/* Other clients */}
             {projects.filter((p) => p.id !== selectedProject.id).length > 0 &&
           <div className="pt-4 -mx-2 space-y-0.5">
-                <div className="px-4 mb-1">
+                <button
+                  onClick={() => setOtherProjectsOpen(!otherProjectsOpen)}
+                  className="flex items-center justify-between w-full px-4 mb-1 group cursor-pointer"
+                >
                   <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Outros projetos</span>
-                </div>
-                {projects.filter((p) => p.id !== selectedProject.id).map((project) => {
+                  <ChevronDown size={14} className={cn("text-sidebar-fg/60 transition-transform", otherProjectsOpen && "rotate-180")} />
+                </button>
+                {otherProjectsOpen && projects.filter((p) => p.id !== selectedProject.id).map((project) => {
               return (
                 <button
                   key={project.id}
