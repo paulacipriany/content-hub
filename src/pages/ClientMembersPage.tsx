@@ -7,34 +7,56 @@ import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Shield, Crown, ArrowLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { UserPlus, Trash2, Pencil, Crown, ArrowLeft, Clock, Search, Filter, ArrowUpDown } from 'lucide-react';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface MemberWithProfile {
   id: string;
   user_id: string;
   created_at: string;
-  profile?: { display_name: string | null; user_id: string; avatar_url?: string | null } | null;
-  role?: string | null;
-  isOwner?: boolean;
+  display_name: string | null;
+  avatar_url: string | null;
+  role: string | null;
+  isOwner: boolean;
 }
+
+const roleLabels: Record<string, string> = {
+  admin: 'Admin',
+  moderator: 'Gestor',
+  social_media: 'Social Media',
+  client: 'Cliente',
+};
+
+const roleBadgeVariant: Record<string, string> = {
+  admin: 'bg-red-500/15 text-red-400',
+  moderator: 'bg-amber-500/15 text-amber-400',
+  social_media: 'bg-blue-500/15 text-blue-400',
+  client: 'bg-emerald-500/15 text-emerald-400',
+};
 
 const ClientMembersPage = () => {
   useClientFromUrl();
   const { selectedProject } = useApp();
   const { user, role: currentUserRole } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const [members, setMembers] = useState<MemberWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<MemberWithProfile | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
   const [searchEmail, setSearchEmail] = useState('');
   const [adding, setAdding] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<MemberWithProfile | null>(null);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
 
   const isAdmin = currentUserRole === 'admin';
   const isOwner = selectedProject?.owner_id === user?.id;
@@ -44,14 +66,12 @@ const ClientMembersPage = () => {
     if (!selectedProject) return;
     setLoading(true);
 
-    // Fetch project members
     const { data: memberRows } = await supabase
       .from('project_members')
       .select('*')
       .eq('project_id', selectedProject.id)
       .order('created_at', { ascending: true });
 
-    // Collect all user IDs (members + owner)
     const memberUserIds = (memberRows ?? []).map(m => m.user_id);
     const allUserIds = [...new Set([selectedProject.owner_id, ...memberUserIds])];
 
@@ -63,25 +83,26 @@ const ClientMembersPage = () => {
     const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
     const roleMap = new Map((roles ?? []).map(r => [r.user_id, r.role]));
 
-    // Build members list: owner first, then other members
     const allMembers: MemberWithProfile[] = [];
 
-    // Add owner as first member
     allMembers.push({
       id: 'owner',
       user_id: selectedProject.owner_id,
       created_at: selectedProject.created_at,
-      profile: profileMap.get(selectedProject.owner_id) ?? null,
+      display_name: profileMap.get(selectedProject.owner_id)?.display_name ?? null,
+      avatar_url: profileMap.get(selectedProject.owner_id)?.avatar_url ?? null,
       role: roleMap.get(selectedProject.owner_id) ?? null,
       isOwner: true,
     });
 
-    // Add other members (excluding owner if duplicated)
     (memberRows ?? []).forEach(m => {
       if (m.user_id !== selectedProject.owner_id) {
         allMembers.push({
-          ...m,
-          profile: profileMap.get(m.user_id) ?? null,
+          id: m.id,
+          user_id: m.user_id,
+          created_at: m.created_at,
+          display_name: profileMap.get(m.user_id)?.display_name ?? null,
+          avatar_url: profileMap.get(m.user_id)?.avatar_url ?? null,
           role: roleMap.get(m.user_id) ?? null,
           isOwner: false,
         });
@@ -98,29 +119,24 @@ const ClientMembersPage = () => {
     if ((!searchName.trim() && !searchEmail.trim()) || !selectedProject || !user) return;
     setAdding(true);
 
-    // Build query based on provided fields
     let query = supabase.from('profiles').select('user_id, display_name');
-    
-    if (searchName.trim() && searchEmail.trim()) {
-      query = query.or(`display_name.ilike.%${searchName.trim()}%`);
-    } else if (searchName.trim()) {
+    if (searchName.trim()) {
       query = query.ilike('display_name', `%${searchName.trim()}%`);
     } else if (searchEmail.trim()) {
-      // Search by display_name that might contain email
       query = query.ilike('display_name', `%${searchEmail.trim()}%`);
     }
 
     const { data: profileMatch } = await query.limit(1).single();
 
     if (!profileMatch) {
-      toast({ title: 'Usuário não encontrado', description: 'Verifique o nome e tente novamente.', variant: 'destructive' });
+      toast.error('Usuário não encontrado. Verifique o nome e tente novamente.');
       setAdding(false);
       return;
     }
 
     const exists = members.find(m => m.user_id === profileMatch.user_id);
     if (exists) {
-      toast({ title: 'Já é membro', description: 'Este usuário já está vinculado a este cliente.', variant: 'destructive' });
+      toast.error('Este usuário já está vinculado a este cliente.');
       setAdding(false);
       return;
     }
@@ -131,9 +147,9 @@ const ClientMembersPage = () => {
     } as any);
 
     if (error) {
-      toast({ title: 'Erro ao adicionar', description: error.message, variant: 'destructive' });
+      toast.error('Erro ao adicionar: ' + error.message);
     } else {
-      toast({ title: 'Usuário adicionado!' });
+      toast.success('Usuário adicionado!');
       setSearchName('');
       setSearchEmail('');
       setAddDialogOpen(false);
@@ -146,38 +162,44 @@ const ClientMembersPage = () => {
     if (!deleteTarget) return;
     await supabase.from('project_members').delete().eq('id', deleteTarget.id);
     setDeleteTarget(null);
-    toast({ title: 'Usuário removido' });
+    toast.success('Usuário removido');
     await fetchMembers();
   };
 
   if (!selectedProject) return null;
 
-  const roleLabels: Record<string, string> = {
-    admin: 'Admin',
-    moderator: 'Gestor',
-    social_media: 'Social Media',
-    client: 'Cliente',
-  };
+  const initials = (name: string | null) =>
+    name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
+
+  const filteredMembers = members.filter(m => {
+    const matchesSearch = !searchTerm || m.display_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || m.role === filterRole;
+    return matchesSearch && matchesRole;
+  }).sort((a, b) => {
+    // Owner always first
+    if (a.isOwner) return -1;
+    if (b.isOwner) return 1;
+    if (sortBy === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (sortBy === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (sortBy === 'name') return (a.display_name ?? '').localeCompare(b.display_name ?? '');
+    return 0;
+  });
 
   return (
     <>
       <TopBar 
         title="Acessos" 
-        subtitle={`Gerenciar acessos de ${selectedProject.name}`}
+        subtitle={selectedProject.name}
         actions={
           canManage ? (
-            <Button 
-              onClick={() => setAddDialogOpen(true)}
-              size="sm"
-              className="btn-action-primary"
-            >
+            <Button onClick={() => setAddDialogOpen(true)} className="btn-action-primary">
               <UserPlus size={16} className="mr-1.5" />
-              Adicionar usuário
+              ADICIONAR USUÁRIO
             </Button>
           ) : <></>
         }
       />
-      <div className="p-6 max-w-2xl space-y-6">
+      <div className="p-6 space-y-6">
         <button
           onClick={() => navigate(`/clients/${selectedProject.id}/settings`)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -185,70 +207,122 @@ const ClientMembersPage = () => {
           <ArrowLeft size={16} />
           Voltar para configurações
         </button>
-        {/* Members list */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">
-            Membros ({members.length})
-          </h2>
-          {loading ? (
-            <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum usuário vinculado a este cliente.</p>
-          ) : (
-            <div className="space-y-2">
-              {members.map(member => {
-                const name = member.profile?.display_name ?? 'Usuário';
-                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+        {/* Filter Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-secondary/30 p-4 rounded-xl border border-border">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
+            <Input 
+              placeholder="Buscar por nome..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
+          
+          <Select value={filterRole} onValueChange={setFilterRole}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Cargo" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cargos</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="moderator">Gestor</SelectItem>
+              <SelectItem value="social_media">Social Media</SelectItem>
+              <SelectItem value="client">Cliente</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-9 text-xs">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown size={14} className="text-muted-foreground" />
+                <SelectValue placeholder="Ordenar por" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mais recentes</SelectItem>
+              <SelectItem value="oldest">Mais antigos</SelectItem>
+              <SelectItem value="name">Nome (A-Z)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground font-medium px-2 py-1">
+              {filteredMembers.length} membro{filteredMembers.length !== 1 ? 's' : ''} encontrado{filteredMembers.length !== 1 ? 's' : ''}
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {filteredMembers.map(member => {
+                const name = member.display_name ?? 'Usuário';
+                const role = member.role ?? 'client';
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/20 shadow-sm transition-colors"
                   >
-                    {member.profile?.avatar_url ? (
-                      <img src={member.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: 'var(--client-100, hsl(var(--primary) / 0.1))' }}
-                      >
-                        <span className="text-xs font-semibold" style={{ color: 'var(--client-600, hsl(var(--primary)))' }}>
-                          {initials}
-                        </span>
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {member.avatar_url ? (
+                        <img src={member.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <span className="text-primary text-xs font-bold">{initials(member.display_name)}</span>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground truncate">{name}</p>
                         {member.isOwner && (
                           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                             <Crown size={10} />
                             Dono
                           </span>
                         )}
+                        <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm ${roleBadgeVariant[role] ?? 'bg-muted text-muted-foreground'}`}>
+                          {roleLabels[role] ?? role}
+                        </span>
                       </div>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Shield size={10} />
-                        {member.role ? roleLabels[member.role] ?? member.role : 'Sem role'}
-                      </p>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <Clock size={10} />
+                          Desde {format(new Date(member.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                      {new Date(member.created_at).toLocaleDateString('pt-BR')}
-                    </span>
-                    {canManage && !member.isOwner && (
-                      <button
-                        onClick={() => setDeleteTarget(member)}
-                        className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors flex-shrink-0"
-                        title="Remover"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+                    <div className="flex items-center gap-0.5">
+                      {canManage && !member.isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteTarget(member)}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
+              {filteredMembers.length === 0 && (
+                <div className="text-center py-16 bg-secondary/10 rounded-xl border-2 border-dashed border-border">
+                  <Filter className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
+                  <p className="text-sm text-muted-foreground">Nenhum membro corresponde aos filtros aplicados.</p>
+                  <Button variant="link" onClick={() => { setSearchTerm(''); setFilterRole('all'); }} className="text-xs mt-1">
+                    Limpar filtros
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Add Member Modal */}
@@ -256,7 +330,7 @@ const ClientMembersPage = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserPlus size={18} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
+              <UserPlus size={18} className="text-primary" />
               Adicionar usuário
             </DialogTitle>
             <DialogDescription>
@@ -295,7 +369,6 @@ const ClientMembersPage = () => {
               <Button
                 onClick={handleAdd}
                 disabled={adding || (!searchName.trim() && !searchEmail.trim())}
-                style={{ backgroundColor: 'var(--client-500, hsl(var(--primary)))', color: 'var(--client-500-contrast, hsl(var(--primary-foreground)))' }}
               >
                 {adding ? 'Adicionando...' : 'Adicionar'}
               </Button>
@@ -310,7 +383,7 @@ const ClientMembersPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Remover usuário</AlertDialogTitle>
             <AlertDialogDescription>
-              Remover "{deleteTarget?.profile?.display_name ?? 'Usuário'}" deste cliente? O usuário perderá acesso.
+              Remover "{deleteTarget?.display_name ?? 'Usuário'}" deste cliente? O usuário perderá acesso.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
