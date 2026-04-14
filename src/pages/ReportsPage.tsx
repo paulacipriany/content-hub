@@ -116,7 +116,7 @@ const ReportsPage = () => {
 
   return (
     <>
-      <TopBar title="Relatórios" subtitle="Métricas de produtividade" />
+      <TopBar title="Estatísticas" subtitle="Métricas de produtividade" />
       <div className="p-6 space-y-6">
         {/* Stats cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
