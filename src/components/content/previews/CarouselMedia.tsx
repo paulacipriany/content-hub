@@ -24,8 +24,8 @@ const CarouselMedia = ({ urls, platform, contentType, poster }: CarouselMediaPro
           className={cn("w-full object-cover", aspectClass)} 
         />
       ) : (
-        <div className={cn("w-full bg-black/5 dark:bg-white/5 flex items-center justify-center", aspectClass)}>
-          <img src={urls[current]} alt={`Slide ${current + 1}`} className="w-full h-full object-contain" />
+        <div className={cn("w-full overflow-hidden", aspectClass)}>
+          <img src={urls[current]} alt={`Slide ${current + 1}`} className="w-full h-full object-cover" />
         </div>
       )}
       {urls.length > 1 && (
