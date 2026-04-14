@@ -16,7 +16,7 @@ const ReportsPage = () => {
     status: key,
     label,
     count: projectContents.filter(c => c.status === key).length,
-  })).filter(s => s.count > 0);
+  }));
 
   // Platform breakdown
   const clientPlatforms = ((selectedProject as any)?.platforms ?? ['instagram']) as Platform[];
