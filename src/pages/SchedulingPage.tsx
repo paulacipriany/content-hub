@@ -153,11 +153,11 @@ const SchedulingPage = () => {
                             {content.publish_date ? new Date(content.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{content.publish_time ? ` às ${content.publish_time}` : ''}
                           </span>
                           <div className="flex items-center gap-1.5 mb-1">
+                            <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
+                              {CONTENT_TYPE_LABELS[content.content_type as ContentType] ?? content.content_type}
+                            </span>
                             {platformIcon(platforms as Platform[], 14, true)}
                           </div>
-                          <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium mb-1 uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
-                            {CONTENT_TYPE_LABELS[content.content_type as ContentType] ?? content.content_type}
-                          </span>
                           <span className="text-sm font-medium text-foreground block">{content.title}</span>
                         </div>
                         <div className="flex-shrink-0">
