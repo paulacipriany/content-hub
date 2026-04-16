@@ -155,7 +155,7 @@ const SchedulingPage = () => {
                           <div className="flex items-center gap-1.5 mb-1">
                             {platformIcon(platforms as Platform[], 14, true)}
                           </div>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium mb-1" style={{ backgroundColor: '#ff88db', color: '#000000' }}>
+                          <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium mb-1 uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
                             {CONTENT_TYPE_LABELS[content.content_type as ContentType] ?? content.content_type}
                           </span>
                           <span className="text-sm font-medium text-foreground block">{content.title}</span>
