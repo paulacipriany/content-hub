@@ -197,17 +197,17 @@ const SchedulingPage = () => {
           {previewContent && (
             <div className="flex flex-col h-full">
               <div className="px-6 pt-6 pb-4 border-b border-border">
-                <SheetTitle className="text-lg font-semibold text-foreground mb-3">
-                  {previewContent.title}
-                </SheetTitle>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                     {CONTENT_TYPE_LABELS[previewContent.content_type as ContentType]}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                  <span className="inline-flex items-center gap-1.5">
                     {platformIcon(previewContent.platform, 14, true)}
                   </span>
                 </div>
+                <SheetTitle className="text-lg font-semibold text-foreground">
+                  {previewContent.title}
+                </SheetTitle>
               </div>
 
               <div className="px-6 py-3 border-b border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
