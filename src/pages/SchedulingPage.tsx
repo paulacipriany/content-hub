@@ -156,17 +156,9 @@ const SchedulingPage = () => {
                             {platformIcon(platforms as Platform[], 14, true)}
                           </div>
                           <span className="text-sm font-medium text-foreground block mb-1">{content.title}</span>
-                          {content.content_type !== 'stories' && (() => {
-                            const copyPreview = content.copy_text ? content.copy_text.replace(/<[^>]*>/g, '').slice(0, 120) : null;
-                            return copyPreview ? (
-                              <p className="text-xs text-muted-foreground truncate">{copyPreview}{content.copy_text && content.copy_text.replace(/<[^>]*>/g, '').length > 120 ? '…' : ''}</p>
-                            ) : (
-                              <p className="text-xs text-muted-foreground truncate">Sem copy</p>
-                            );
-                          })()}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Por {content.assignee_profile?.display_name ?? 'N/A'}
-                          </p>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-secondary text-secondary-foreground">
+                            {CONTENT_TYPE_LABELS[content.content_type as ContentType] ?? content.content_type}
+                          </span>
                         </div>
                         <div className="flex-shrink-0">
                           <Button
