@@ -10,7 +10,7 @@ const StoriesPreview = ({ content }: { content: ContentWithRelations }) => {
   const text = getDisplayText(content, platform, 80);
 
   return (
-    <div className="bg-black rounded-xl overflow-hidden max-w-[360px] mx-auto relative aspect-[9/16]">
+    <div className="bg-black rounded-xl overflow-hidden w-full mx-auto relative aspect-[9/16]">
       {/* Media fills entire story */}
       <div className="absolute inset-0">
         <MediaOrPlaceholder content={{ ...content, content_type: 'stories' } as ContentWithRelations} platform={platform || 'instagram'} />
