@@ -62,8 +62,10 @@ const WeeklyContentCard = ({ content, onClick, disabled, hideProjectName }: Prop
     >
       {/* Header: platform icon + type + source name */}
       <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+        <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase shrink-0" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
+          {contentTypeLabel}
+        </span>
         <span className="shrink-0">{platformIcon([firstPlatform] as any, 14)}</span>
-        <span className="text-xs font-semibold text-foreground">{contentTypeLabel}</span>
         {!hideProjectName && projectName && (
           <span className="text-[11px] text-muted-foreground truncate ml-auto">
             {projectName}
