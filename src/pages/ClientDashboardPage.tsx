@@ -139,6 +139,37 @@ const ClientDashboardPage = () => {
   return (
     <>
       <TopBar title="Dashboard" subtitle={selectedProject.name} />
+      <div className="px-6 pt-4">
+        <div className="flex items-center gap-1 border-b border-border">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
+              activeTab === 'overview'
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Visão Geral
+          </button>
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-1.5",
+              activeTab === 'notes'
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <StickyNote size={14} /> Anotações
+          </button>
+        </div>
+      </div>
+      {activeTab === 'notes' ? (
+        <div className="p-6">
+          <ProjectNotes projectId={selectedProject.id} />
+        </div>
+      ) : (
       <div className="p-6 space-y-6">
         {/* Alert banners */}
         {banners.length > 0 && (
