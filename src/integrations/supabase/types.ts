@@ -420,6 +420,94 @@ export type Database = {
           },
         ]
       }
+      project_note_items: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          note_id: string
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          note_id: string
+          sort_order?: number
+          text?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          note_id?: string
+          sort_order?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_note_items_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "project_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_notes: {
+        Row: {
+          color: string
+          content: string | null
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          pinned: boolean
+          project_id: string
+          sort_order: number
+          title: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          content?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          pinned?: boolean
+          project_id: string
+          sort_order?: number
+          title?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          pinned?: boolean
+          project_id?: string
+          sort_order?: number
+          title?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_platform_profiles: {
         Row: {
           created_at: string
