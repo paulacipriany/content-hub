@@ -8,6 +8,7 @@ import { CheckCircle, Eye, MessageSquare, Clock, Check, Copy, Download, Loader2 
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
+import { CONTENT_TYPE_LABELS, ContentType, Platform } from '@/data/types';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { recordApproval } from '@/lib/approvalUtils';
@@ -119,6 +120,9 @@ const ApprovalsPage = () => {
                     {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </span>
                   <div className="flex items-center gap-1.5 mb-1">
+                    <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
+                      {CONTENT_TYPE_LABELS[c.content_type as ContentType] ?? c.content_type}
+                    </span>
                     {platformIcon(c.platform, 14)}
                   </div>
                   <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>

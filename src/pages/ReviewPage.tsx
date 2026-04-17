@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, CONTENT_TYPE_LABELS, ContentType, Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { Eye, Pencil, Clock, Check } from 'lucide-react';
@@ -53,6 +53,9 @@ const ReviewPage = () => {
                     {c.publish_date ? new Date(c.publish_date).toLocaleDateString('pt-BR') : 'Sem data'}{c.publish_time ? ` às ${c.publish_time}` : ''}
                   </span>
                   <div className="flex items-center gap-1.5 mb-1">
+                    <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
+                      {CONTENT_TYPE_LABELS[c.content_type as ContentType] ?? c.content_type}
+                    </span>
                     {platformIcon(c.platform, 14, true)}
                   </div>
                   <span className="text-sm font-medium text-foreground block mb-1">{c.title}</span>
