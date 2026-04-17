@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays, StickyNote } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ const globalNavItems = [
 const clientNavItems = [
 { icon: Home, label: 'Dashboard', path: '/dashboard' },
 { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
+{ icon: StickyNote, label: 'Anotações', path: '/notes' },
 { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
 { icon: Calendar, label: 'Calendário', path: '/calendar' },
 { icon: GitBranch, label: 'Workflow', path: '/workflow' },
