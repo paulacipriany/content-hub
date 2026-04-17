@@ -13,10 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import ProjectNotes from '@/components/notes/ProjectNotes';
-import { StickyNote } from 'lucide-react';
-
-type DashboardTab = 'overview' | 'notes';
 
 const ClientDashboardPage = () => {
   useClientFromUrl();
@@ -24,7 +20,6 @@ const ClientDashboardPage = () => {
   const { role, user } = useAuth();
   const navigate = useNavigate();
   const [approvedIds, setApprovedIds] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
 
   useEffect(() => {
     if (user) {
