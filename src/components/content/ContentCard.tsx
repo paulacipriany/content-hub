@@ -96,9 +96,11 @@ const ContentCard = ({ content, compact, hideStatus, readOnly, onClick, dragHand
         )}
 
         <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium uppercase" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>
+              {CONTENT_TYPE_LABELS[content.content_type as ContentType]}
+            </span>
             {platformIcon(content.platform, 14, true)}
-            <span className="text-xs font-medium text-muted-foreground">{CONTENT_TYPE_LABELS[content.content_type as ContentType]}</span>
           </div>
           {!hideStatus && (
             <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground", STATUS_COLORS[content.status as WorkflowStatus])}>
