@@ -8,6 +8,7 @@ import { CheckCircle, Eye, MessageSquare, Clock, Check, Copy, Download, Loader2 
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
+import { CONTENT_TYPE_LABELS, ContentType, Platform } from '@/data/types';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { recordApproval } from '@/lib/approvalUtils';
