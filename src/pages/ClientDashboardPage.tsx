@@ -291,7 +291,6 @@ const ClientDashboardPage = () => {
         {/* Post Reports Section */}
         <PostReportsSection contents={projectContents} basePath={basePath} />
       </div>
-      )}
     </>
   );
 };
