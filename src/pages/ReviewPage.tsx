@@ -1,7 +1,7 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus } from '@/data/types';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, CONTENT_TYPE_LABELS, ContentType, Platform } from '@/data/types';
 import { platformIcon } from '@/components/content/PlatformIcons';
 import { cn } from '@/lib/utils';
 import { Eye, Pencil, Clock, Check } from 'lucide-react';
