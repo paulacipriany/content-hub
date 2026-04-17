@@ -90,8 +90,8 @@ const DraggableContent = ({ content, onClick, disabled, platformProfiles }: { co
     >
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+        <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase shrink-0" style={{ backgroundColor: '#ff88db', color: '#000000', borderRadius: '5px' }}>{contentTypeLabel}</span>
         <span className="shrink-0">{platformIcon([firstPlatform] as any, 14)}</span>
-        <span className="text-[12px] font-semibold text-foreground whitespace-nowrap">{contentTypeLabel}</span>
         {handle && (
           <span className="text-[11px] text-muted-foreground truncate">@{handle}</span>
         )}
