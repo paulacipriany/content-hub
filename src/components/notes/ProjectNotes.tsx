@@ -461,12 +461,15 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
                 <input
+                  ref={el => (itemRefs.current[idx] = el)}
                   value={item.text}
                   onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      setItems([...items, { text: '', done: false }]);
+                      const newItems = [...items.slice(0, idx + 1), { text: '', done: false }, ...items.slice(idx + 1)];
+                      focusIndexRef.current = idx + 1;
+                      setItems(newItems);
                     }
                   }}
                   placeholder="Item da lista"
