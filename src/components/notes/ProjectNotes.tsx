@@ -752,6 +752,7 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
 
           {note.type === 'note' ? (
             <textarea
+              ref={contentRef}
               value={content}
               onChange={e => setContent(e.target.value)}
               placeholder="Nota..."
