@@ -686,6 +686,8 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
   const fileRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
   const focusIndexRef = useRef<number | null>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const lastFocusedItemRef = useRef<number>(0);
 
   useEffect(() => {
     if (focusIndexRef.current !== null) {
