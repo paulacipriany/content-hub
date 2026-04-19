@@ -392,6 +392,15 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
   const [items, setItems] = useState<{ text: string; done: boolean }[]>([{ text: '', done: false }]);
   const [showColors, setShowColors] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const focusIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (focusIndexRef.current !== null) {
+      itemRefs.current[focusIndexRef.current]?.focus();
+      focusIndexRef.current = null;
+    }
+  }, [items]);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
@@ -452,12 +461,15 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
                 <input
+                  ref={el => (itemRefs.current[idx] = el)}
                   value={item.text}
                   onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      setItems([...items, { text: '', done: false }]);
+                      const newItems = [...items.slice(0, idx + 1), { text: '', done: false }, ...items.slice(idx + 1)];
+                      focusIndexRef.current = idx + 1;
+                      setItems(newItems);
                     }
                   }}
                   placeholder="Item da lista"
@@ -561,6 +573,15 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
   const [showColors, setShowColors] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const focusIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (focusIndexRef.current !== null) {
+      itemRefs.current[focusIndexRef.current]?.focus();
+      focusIndexRef.current = null;
+    }
+  }, [items]);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
@@ -638,13 +659,16 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                     {item.done && <Check size={10} className="text-background" />}
                   </button>
                   <input
+                    ref={el => (itemRefs.current[idx] = el)}
                     value={item.text}
                     onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        const newItem = { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: items.length };
-                        setItems([...items, newItem]);
+                        const newItem = { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: idx + 1 };
+                        const newItems = [...items.slice(0, idx + 1), newItem, ...items.slice(idx + 1)];
+                        focusIndexRef.current = idx + 1;
+                        setItems(newItems);
                       }
                     }}
                     placeholder="Item da lista"
