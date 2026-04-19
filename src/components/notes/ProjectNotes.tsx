@@ -822,18 +822,24 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
 
             <button
               onClick={() => {
-                const url = window.prompt('URL do link (ex: https://...)');
-                if (!url) return;
-                const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
                 if (note.type === 'note') {
-                  setContent(prev => prev ? `${prev}\n${normalized}` : normalized);
+                  const result = insertLinkInField(contentRef.current, content);
+                  if (!result) return;
+                  setContent(result.value);
+                  requestAnimationFrame(() => {
+                    contentRef.current?.focus();
+                    contentRef.current?.setSelectionRange(result.caret, result.caret);
+                  });
                 } else {
-                  setItems(prev => {
-                    const lastEmpty = prev.findIndex(i => !i.text.trim());
-                    if (lastEmpty >= 0) {
-                      return prev.map((it, i) => i === lastEmpty ? { ...it, text: normalized } : it);
-                    }
-                    return [...prev, { id: crypto.randomUUID(), note_id: note.id, text: normalized, done: false, sort_order: prev.length }];
+                  const idx = lastFocusedItemRef.current;
+                  const el = itemRefs.current[idx];
+                  const current = items[idx]?.text ?? '';
+                  const result = insertLinkInField(el, current);
+                  if (!result) return;
+                  setItems(items.map((it, i) => i === idx ? { ...it, text: result.value } : it));
+                  requestAnimationFrame(() => {
+                    itemRefs.current[idx]?.focus();
+                    itemRefs.current[idx]?.setSelectionRange(result.caret, result.caret);
                   });
                 }
               }}
