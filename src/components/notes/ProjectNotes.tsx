@@ -348,7 +348,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
                 >
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
-                <span className={cn("text-foreground/80", item.done && "line-through opacity-60")}>{item.text}</span>
+                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")}>{linkifyText(item.text)}</span>
               </div>
             ))}
             {note.items.length > 8 && (
