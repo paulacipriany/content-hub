@@ -758,6 +758,29 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ''; }} />
 
+            <button
+              onClick={() => {
+                const url = window.prompt('URL do link (ex: https://...)');
+                if (!url) return;
+                const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+                if (note.type === 'note') {
+                  setContent(prev => prev ? `${prev}\n${normalized}` : normalized);
+                } else {
+                  setItems(prev => {
+                    const lastEmpty = prev.findIndex(i => !i.text.trim());
+                    if (lastEmpty >= 0) {
+                      return prev.map((it, i) => i === lastEmpty ? { ...it, text: normalized } : it);
+                    }
+                    return [...prev, { id: crypto.randomUUID(), note_id: note.id, text: normalized, done: false, sort_order: prev.length }];
+                  });
+                }
+              }}
+              className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70"
+              title="Adicionar link"
+            >
+              <Link2 size={14} />
+            </button>
+
             <div className="relative">
               <button onClick={() => setShowColors(!showColors)} className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70">
                 <Palette size={14} />
