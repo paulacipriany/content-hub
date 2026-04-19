@@ -517,6 +517,7 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
 
         {type === 'note' ? (
           <textarea
+            ref={contentRef}
             value={content}
             onChange={e => setContent(e.target.value)}
             placeholder="Criar uma nota..."
