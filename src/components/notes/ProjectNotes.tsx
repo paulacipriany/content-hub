@@ -332,7 +332,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
         {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 line-clamp-2">{note.title}</h3>}
 
         {note.type === 'note' && note.content && (
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content)}</p>
         )}
 
         {note.type === 'checklist' && note.items && note.items.length > 0 && (
