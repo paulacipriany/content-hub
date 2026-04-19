@@ -540,6 +540,7 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
                 <input
                   ref={el => (itemRefs.current[idx] = el)}
                   value={item.text}
+                  onFocus={() => { lastFocusedItemRef.current = idx; }}
                   onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
