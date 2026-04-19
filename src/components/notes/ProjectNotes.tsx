@@ -5,30 +5,78 @@ import { useToast } from '@/hooks/use-toast';
 import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/* Renders text with auto-detected URLs as clickable links */
-const URL_REGEX = /(https?:\/\/[^\s]+)/g;
-const linkifyText = (text: string) => {
-  if (!text) return text;
-  const parts = text.split(URL_REGEX);
+/* Renders text supporting markdown links [text](url) and raw URLs */
+const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+const RAW_URL_REGEX = /(https?:\/\/[^\s)]+)/g;
+
+const renderLinkPart = (key: string | number, href: string, label: string) => (
+  <a
+    key={key}
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    onClick={(e) => e.stopPropagation()}
+    className="underline text-primary hover:opacity-80 break-all"
+  >
+    {label}
+  </a>
+);
+
+const linkifyRawUrls = (text: string, prefix: string): React.ReactNode[] => {
+  if (!text) return [];
+  const parts = text.split(RAW_URL_REGEX);
   return parts.map((part, i) => {
-    if (URL_REGEX.test(part)) {
-      // Reset regex state because /g is stateful
-      URL_REGEX.lastIndex = 0;
-      return (
-        <a
-          key={i}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="underline text-primary hover:opacity-80 break-all"
-        >
-          {part}
-        </a>
-      );
+    if (RAW_URL_REGEX.test(part)) {
+      RAW_URL_REGEX.lastIndex = 0;
+      return renderLinkPart(`${prefix}${i}`, part, part);
     }
-    return <span key={i}>{part}</span>;
+    return <span key={`${prefix}${i}`}>{part}</span>;
   });
+};
+
+const linkifyText = (text: string): React.ReactNode => {
+  if (!text) return text;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  const re = new RegExp(MD_LINK_REGEX.source, 'g');
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(...linkifyRawUrls(text.slice(lastIndex, match.index), `${key}-pre-`));
+    }
+    nodes.push(renderLinkPart(`md-${key}`, match[2], match[1]));
+    lastIndex = match.index + match[0].length;
+    key++;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(...linkifyRawUrls(text.slice(lastIndex), `${key}-post-`));
+  }
+  return nodes;
+};
+
+/* Inserts a markdown link at selection inside an input/textarea */
+const insertLinkInField = (
+  el: HTMLInputElement | HTMLTextAreaElement | null,
+  currentValue: string
+): { value: string; caret: number } | null => {
+  const selStart = el?.selectionStart ?? currentValue.length;
+  const selEnd = el?.selectionEnd ?? currentValue.length;
+  const selectedText = currentValue.slice(selStart, selEnd);
+
+  let label = selectedText;
+  if (!label) {
+    const t = window.prompt('Texto a exibir:');
+    if (t === null) return null;
+    label = t.trim();
+    if (!label) return null;
+  }
+  const url = window.prompt('URL do link (ex: https://...)');
+  if (!url) return null;
+  const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  const insert = `[${label}](${normalized})`;
+  const newValue = currentValue.slice(0, selStart) + insert + currentValue.slice(selEnd);
+  return { value: newValue, caret: selStart + insert.length };
 };
 
 type NoteType = 'note' | 'checklist';
