@@ -573,6 +573,15 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
   const [showColors, setShowColors] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const focusIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (focusIndexRef.current !== null) {
+      itemRefs.current[focusIndexRef.current]?.focus();
+      focusIndexRef.current = null;
+    }
+  }, [items]);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
