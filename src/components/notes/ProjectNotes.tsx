@@ -673,6 +673,10 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                         const newItems = [...items.slice(0, idx + 1), newItem, ...items.slice(idx + 1)];
                         focusIndexRef.current = idx + 1;
                         setItems(newItems);
+                      } else if (e.key === 'Backspace' && item.text === '' && items.length > 1) {
+                        e.preventDefault();
+                        focusIndexRef.current = Math.max(0, idx - 1);
+                        setItems(items.filter((_, i) => i !== idx));
                       }
                     }}
                     placeholder="Item da lista"
