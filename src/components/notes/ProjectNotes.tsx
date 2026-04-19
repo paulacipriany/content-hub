@@ -468,6 +468,8 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
   const focusIndexRef = useRef<number | null>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const lastFocusedItemRef = useRef<number>(0);
 
   useEffect(() => {
     if (focusIndexRef.current !== null) {
