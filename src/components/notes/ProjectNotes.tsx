@@ -392,6 +392,15 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
   const [items, setItems] = useState<{ text: string; done: boolean }[]>([{ text: '', done: false }]);
   const [showColors, setShowColors] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const focusIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (focusIndexRef.current !== null) {
+      itemRefs.current[focusIndexRef.current]?.focus();
+      focusIndexRef.current = null;
+    }
+  }, [items]);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
