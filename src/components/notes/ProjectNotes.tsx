@@ -2,8 +2,34 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette } from 'lucide-react';
+import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/* Renders text with auto-detected URLs as clickable links */
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+const linkifyText = (text: string) => {
+  if (!text) return text;
+  const parts = text.split(URL_REGEX);
+  return parts.map((part, i) => {
+    if (URL_REGEX.test(part)) {
+      // Reset regex state because /g is stateful
+      URL_REGEX.lastIndex = 0;
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="underline text-primary hover:opacity-80 break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+};
 
 type NoteType = 'note' | 'checklist';
 
@@ -306,7 +332,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
         {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 line-clamp-2">{note.title}</h3>}
 
         {note.type === 'note' && note.content && (
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content)}</p>
         )}
 
         {note.type === 'checklist' && note.items && note.items.length > 0 && (
@@ -322,7 +348,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
                 >
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
-                <span className={cn("text-foreground/80", item.done && "line-through opacity-60")}>{item.text}</span>
+                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")}>{linkifyText(item.text)}</span>
               </div>
             ))}
             {note.items.length > 8 && (
@@ -517,6 +543,29 @@ const NoteEditor = ({ initialType, onSave, onCancel }: NoteEditorProps) => {
           </button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ''; }} />
 
+          <button
+            onClick={() => {
+              const url = window.prompt('URL do link (ex: https://...)');
+              if (!url) return;
+              const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+              if (type === 'note') {
+                setContent(prev => prev ? `${prev}\n${normalized}` : normalized);
+              } else {
+                setItems(prev => {
+                  const lastEmpty = prev.findIndex(i => !i.text.trim());
+                  if (lastEmpty >= 0) {
+                    return prev.map((it, i) => i === lastEmpty ? { ...it, text: normalized } : it);
+                  }
+                  return [...prev, { text: normalized, done: false }];
+                });
+              }
+            }}
+            className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70"
+            title="Adicionar link"
+          >
+            <Link2 size={14} />
+          </button>
+
           <div className="relative">
             <button
               onClick={() => setShowColors(!showColors)}
@@ -708,6 +757,29 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
               {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ''; }} />
+
+            <button
+              onClick={() => {
+                const url = window.prompt('URL do link (ex: https://...)');
+                if (!url) return;
+                const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+                if (note.type === 'note') {
+                  setContent(prev => prev ? `${prev}\n${normalized}` : normalized);
+                } else {
+                  setItems(prev => {
+                    const lastEmpty = prev.findIndex(i => !i.text.trim());
+                    if (lastEmpty >= 0) {
+                      return prev.map((it, i) => i === lastEmpty ? { ...it, text: normalized } : it);
+                    }
+                    return [...prev, { id: crypto.randomUUID(), note_id: note.id, text: normalized, done: false, sort_order: prev.length }];
+                  });
+                }
+              }}
+              className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70"
+              title="Adicionar link"
+            >
+              <Link2 size={14} />
+            </button>
 
             <div className="relative">
               <button onClick={() => setShowColors(!showColors)} className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70">
