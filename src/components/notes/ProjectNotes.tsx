@@ -683,11 +683,33 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
   const [items, setItems] = useState<NoteItem[]>(note.items ?? []);
   const [showColors, setShowColors] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingContent, setEditingContent] = useState(false);
+  const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
   const focusIndexRef = useRef<number | null>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const lastFocusedItemRef = useRef<number>(0);
+
+  // Auto-focus textarea/input when entering edit mode
+  useEffect(() => {
+    if (editingContent && contentRef.current) {
+      contentRef.current.focus();
+      const len = contentRef.current.value.length;
+      contentRef.current.setSelectionRange(len, len);
+    }
+  }, [editingContent]);
+
+  useEffect(() => {
+    if (editingItemIdx !== null) {
+      const el = itemRefs.current[editingItemIdx];
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+      }
+    }
+  }, [editingItemIdx]);
 
   useEffect(() => {
     if (focusIndexRef.current !== null) {
