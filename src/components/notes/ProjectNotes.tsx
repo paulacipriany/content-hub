@@ -411,6 +411,16 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
     onRefresh();
   };
 
+  const updateContent = async (next: string) => {
+    onUpdate(note, { content: next });
+    await supabase.from('project_notes').update({ content: next }).eq('id', note.id);
+  };
+
+  const updateItemText = async (item: NoteItem, next: string) => {
+    await supabase.from('project_note_items').update({ text: next }).eq('id', item.id);
+    onRefresh();
+  };
+
   return (
     <div
       className="group relative rounded-xl border border-border overflow-hidden transition-all hover:shadow-md cursor-pointer"
@@ -436,7 +446,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
         {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 line-clamp-2">{note.title}</h3>}
 
         {note.type === 'note' && note.content && (
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content)}</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content, updateContent)}</p>
         )}
 
         {note.type === 'checklist' && note.items && note.items.length > 0 && (
@@ -452,7 +462,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
                 >
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
-                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")}>{linkifyText(item.text)}</span>
+                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")} onContextMenu={(e) => e.stopPropagation()}>{linkifyText(item.text, (next) => updateItemText(item, next))}</span>
               </div>
             ))}
             {note.items.length > 8 && (
