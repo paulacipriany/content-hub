@@ -564,7 +564,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                 <DropdownMenuTrigger asChild>
                   <button 
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0"
+                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 outline-none"
                     title="Opções da lista"
                   >
                     <div className="flex flex-col gap-[3px]">
@@ -572,40 +572,41 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setEditingListTitleId(list.id)}>
+                <DropdownMenuContent align="start" className="w-52">
+                  <DropdownMenuItem onSelect={() => setEditingListTitleId(list.id)}>
                     <Pencil size={14} className="mr-2" /> Editar
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onPointerDown={(e) => { e.stopPropagation(); }} 
-                    onClick={(e) => { 
-                      e.preventDefault(); 
-                      // Use the drag handle listeners to start dragging
-                      const evt = new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse', button: 0 } as any);
-                      handleProps?.listeners?.onPointerDown?.(evt as any);
-                      toast.info('Arraste a lista para a nova posição');
-                    }}
-                  >
+                  <DropdownMenuItem onSelect={() => toast.info('Arraste a lista pela alça para reordenar.')}>
                     <Move size={14} className="mr-2" /> Mover
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => copyList(list.id)}>
+                  <DropdownMenuItem onSelect={() => copyList(list.id)}>
                     <Copy size={14} className="mr-2" /> Copiar
                   </DropdownMenuItem>
                   <DropdownMenuItem 
-                    onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }}
+                    onSelect={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }}
                     className="text-red-600 focus:text-red-600"
                   >
                     <Archive size={14} className="mr-2" /> Arquivar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setAddingToList(list.id)}>
+                  <DropdownMenuItem onSelect={() => setAddingToList(list.id)}>
                     <ListPlus size={14} className="mr-2" /> Inserir uma tarefa
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setAddingGroupToList(list.id)}>
+                  <DropdownMenuItem onSelect={() => setAddingGroupToList(list.id)}>
                     <FolderPlus size={14} className="mr-2" /> Adicionar um grupo
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+            )}
+            {handleProps && (
+              <button 
+                {...handleProps.attributes} 
+                {...handleProps.listeners} 
+                className="cursor-grab active:cursor-grabbing opacity-0 group-hover/list-sortable:opacity-50 hover:!opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 -ml-1"
+                title="Arrastar para reordenar"
+              >
+                <GripVertical size={16} className="text-slate-400" />
+              </button>
             )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
             <div className="flex-1">
