@@ -387,6 +387,38 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   const updateListTitle = (id: string, title: string) => { setLists(p => p.map(l => l.id === id ? { ...l, title } : l)); supabase.from('task_lists').update({ title } as any).eq('id', id).then(); };
   const deleteList = async (id: string) => { setLists(p => p.filter(l => l.id !== id)); setTasks(p => p.filter(t => t.list_id !== id)); await supabase.from('task_lists').delete().eq('id', id); fetchAll(); };
 
+  const copyList = async (id: string) => {
+    if (!user) return;
+    const orig = lists.find(l => l.id === id);
+    if (!orig) return;
+    const { data: newList, error } = await supabase.from('task_lists').insert({
+      project_id: projectId,
+      title: `${orig.title} (cópia)`,
+      description: orig.description ?? null,
+      sort_order: lists.length,
+      created_by: user.id,
+    } as any).select().single();
+    if (error || !newList) { toast.error('Erro ao copiar lista'); return; }
+    const origTasks = tasks.filter(t => t.list_id === id);
+    if (origTasks.length) {
+      const rows = origTasks.map((t, idx) => ({
+        project_id: projectId,
+        text: t.text,
+        created_by: user.id,
+        sort_order: idx,
+        list_id: (newList as any).id,
+        assigned_to: t.assigned_to,
+        due_date: t.due_date,
+        status: t.status,
+        priority: t.priority,
+        done: false,
+      }));
+      await supabase.from('project_tasks').insert(rows as any);
+    }
+    await fetchAll();
+    toast.success('Lista copiada!');
+  };
+
   const addTask = async (lid: string) => {
     if (!newTaskText.trim() || !user) return;
     const { data: newTask, error } = await supabase.from('project_tasks').insert({ 
