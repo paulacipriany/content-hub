@@ -853,7 +853,10 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                 </div>
               ))}
               <button
-                onClick={() => setItems([...items, { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: items.length }])}
+                onClick={() => {
+                  setItems([...items, { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: items.length }]);
+                  setEditingItemIdx(items.length);
+                }}
                 className="flex items-center gap-1.5 text-xs text-foreground/60 hover:text-foreground pt-1"
               >
                 <Plus size={12} /> Adicionar item
