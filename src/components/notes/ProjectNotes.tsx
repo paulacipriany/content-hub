@@ -683,11 +683,33 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
   const [items, setItems] = useState<NoteItem[]>(note.items ?? []);
   const [showColors, setShowColors] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingContent, setEditingContent] = useState(false);
+  const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLInputElement | null)[]>([]);
   const focusIndexRef = useRef<number | null>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const lastFocusedItemRef = useRef<number>(0);
+
+  // Auto-focus textarea/input when entering edit mode
+  useEffect(() => {
+    if (editingContent && contentRef.current) {
+      contentRef.current.focus();
+      const len = contentRef.current.value.length;
+      contentRef.current.setSelectionRange(len, len);
+    }
+  }, [editingContent]);
+
+  useEffect(() => {
+    if (editingItemIdx !== null) {
+      const el = itemRefs.current[editingItemIdx];
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+      }
+    }
+  }, [editingItemIdx]);
 
   useEffect(() => {
     if (focusIndexRef.current !== null) {
@@ -751,14 +773,27 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
           />
 
           {note.type === 'note' ? (
-            <textarea
-              ref={contentRef}
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="Nota..."
-              rows={8}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none resize-none"
-            />
+            editingContent ? (
+              <textarea
+                ref={contentRef}
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                onBlur={() => setEditingContent(false)}
+                placeholder="Nota..."
+                rows={8}
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none resize-none"
+              />
+            ) : (
+              <div
+                onClick={() => setEditingContent(true)}
+                className={cn(
+                  "w-full text-sm whitespace-pre-wrap cursor-text min-h-[12rem] py-1",
+                  content ? "text-foreground" : "text-foreground/50"
+                )}
+              >
+                {content ? linkifyText(content) : 'Nota...'}
+              </div>
+            )
           ) : (
             <div className="space-y-1 max-h-96 overflow-y-auto">
               {items.map((item, idx) => (
@@ -772,37 +807,56 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                   >
                     {item.done && <Check size={10} className="text-background" />}
                   </button>
-                  <input
-                    ref={el => (itemRefs.current[idx] = el)}
-                    value={item.text}
-                    onFocus={() => { lastFocusedItemRef.current = idx; }}
-                    onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const newItem = { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: idx + 1 };
-                        const newItems = [...items.slice(0, idx + 1), newItem, ...items.slice(idx + 1)];
-                        focusIndexRef.current = idx + 1;
-                        setItems(newItems);
-                      } else if (e.key === 'Backspace' && item.text === '' && items.length > 1) {
-                        e.preventDefault();
-                        focusIndexRef.current = Math.max(0, idx - 1);
-                        setItems(items.filter((_, i) => i !== idx));
-                      }
-                    }}
-                    placeholder="Item da lista"
-                    className={cn(
-                      "flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none",
-                      item.done && 'line-through opacity-60'
-                    )}
-                  />
+                  {editingItemIdx === idx ? (
+                    <input
+                      ref={el => (itemRefs.current[idx] = el)}
+                      value={item.text}
+                      onFocus={() => { lastFocusedItemRef.current = idx; }}
+                      onBlur={() => setEditingItemIdx(null)}
+                      onChange={e => setItems(items.map((it, i) => i === idx ? { ...it, text: e.target.value } : it))}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const newItem = { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: idx + 1 };
+                          const newItems = [...items.slice(0, idx + 1), newItem, ...items.slice(idx + 1)];
+                          focusIndexRef.current = idx + 1;
+                          setItems(newItems);
+                          setEditingItemIdx(idx + 1);
+                        } else if (e.key === 'Backspace' && item.text === '' && items.length > 1) {
+                          e.preventDefault();
+                          focusIndexRef.current = Math.max(0, idx - 1);
+                          setItems(items.filter((_, i) => i !== idx));
+                          setEditingItemIdx(Math.max(0, idx - 1));
+                        }
+                      }}
+                      placeholder="Item da lista"
+                      className={cn(
+                        "flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none",
+                        item.done && 'line-through opacity-60'
+                      )}
+                    />
+                  ) : (
+                    <div
+                      onClick={() => { lastFocusedItemRef.current = idx; setEditingItemIdx(idx); }}
+                      className={cn(
+                        "flex-1 text-sm cursor-text break-words",
+                        item.text ? 'text-foreground' : 'text-foreground/50',
+                        item.done && 'line-through opacity-60'
+                      )}
+                    >
+                      {item.text ? linkifyText(item.text) : 'Item da lista'}
+                    </div>
+                  )}
                   <button onClick={() => setItems(items.filter((_, i) => i !== idx))} className="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded text-foreground/60">
                     <X size={12} />
                   </button>
                 </div>
               ))}
               <button
-                onClick={() => setItems([...items, { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: items.length }])}
+                onClick={() => {
+                  setItems([...items, { id: crypto.randomUUID(), note_id: note.id, text: '', done: false, sort_order: items.length }]);
+                  setEditingItemIdx(items.length);
+                }}
                 className="flex items-center gap-1.5 text-xs text-foreground/60 hover:text-foreground pt-1"
               >
                 <Plus size={12} /> Adicionar item
@@ -823,6 +877,7 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
             <button
               onClick={() => {
                 if (note.type === 'note') {
+                  if (!editingContent) setEditingContent(true);
                   const result = insertLinkInField(contentRef.current, content);
                   if (!result) return;
                   setContent(result.value);
@@ -832,6 +887,7 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                   });
                 } else {
                   const idx = lastFocusedItemRef.current;
+                  if (editingItemIdx !== idx) setEditingItemIdx(idx);
                   const el = itemRefs.current[idx];
                   const current = items[idx]?.text ?? '';
                   const result = insertLinkInField(el, current);
