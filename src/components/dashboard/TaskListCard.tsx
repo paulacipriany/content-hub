@@ -6,7 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, CalendarIcon, X, UserPlus, User, ChevronDown, ChevronRight, MoreHorizontal, Pencil, GripVertical, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, CalendarIcon, X, UserPlus, User, ChevronDown, ChevronRight, MoreHorizontal, Pencil, GripVertical, CheckCircle, Move, Copy, Archive, ListPlus, FolderPlus } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -143,15 +144,16 @@ const TaskListPieChart = ({ total, completed }: { total: number; completed: numb
 };
 
 // ─── Inline editable text ────────────────────────────────────────
-const EditableText = ({ text, className, onSave }: { text: string; className?: string; onSave: (text: string) => void }) => {
+const EditableText = ({ text, className, onSave, forceEdit, onEditStart, onEditEnd }: { text: string; className?: string; onSave: (text: string) => void; forceEdit?: boolean; onEditStart?: () => void; onEditEnd?: () => void }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(text);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { setValue(text); }, [text]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
-  const commit = () => { setEditing(false); if (value.trim() && value.trim() !== text) onSave(value.trim()); else setValue(text); };
-  if (editing) return <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); }}} className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)} />;
-  return <span onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true); }} className={cn("cursor-pointer", className)} title="Clique duplo para editar">{text}</span>;
+  useEffect(() => { if (editing) { inputRef.current?.focus(); inputRef.current?.select(); } }, [editing]);
+  useEffect(() => { if (forceEdit) { setEditing(true); onEditStart?.(); } }, [forceEdit, onEditStart]);
+  const commit = () => { setEditing(false); onEditEnd?.(); if (value.trim() && value.trim() !== text) onSave(value.trim()); else setValue(text); };
+  if (editing) return <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); onEditEnd?.(); }}} className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)} />;
+  return <span onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true); onEditStart?.(); }} className={cn("cursor-pointer", className)} title="Clique duplo para editar">{text}</span>;
 };
 
 // ─── Status badge with popover ───────────────────────────────────
@@ -337,6 +339,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [activeList, setActiveList] = useState<TaskList | null>(null);
+  const [editingListTitleId, setEditingListTitleId] = useState<string | null>(null);
   const newListInputRef = useRef<HTMLInputElement>(null);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
   const groupInputRef = useRef<HTMLInputElement>(null);
@@ -383,6 +386,38 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
 
   const updateListTitle = (id: string, title: string) => { setLists(p => p.map(l => l.id === id ? { ...l, title } : l)); supabase.from('task_lists').update({ title } as any).eq('id', id).then(); };
   const deleteList = async (id: string) => { setLists(p => p.filter(l => l.id !== id)); setTasks(p => p.filter(t => t.list_id !== id)); await supabase.from('task_lists').delete().eq('id', id); fetchAll(); };
+
+  const copyList = async (id: string) => {
+    if (!user) return;
+    const orig = lists.find(l => l.id === id);
+    if (!orig) return;
+    const { data: newList, error } = await supabase.from('task_lists').insert({
+      project_id: projectId,
+      title: `${orig.title} (cópia)`,
+      description: orig.description ?? null,
+      sort_order: lists.length,
+      created_by: user.id,
+    } as any).select().single();
+    if (error || !newList) { toast.error('Erro ao copiar lista'); return; }
+    const origTasks = tasks.filter(t => t.list_id === id);
+    if (origTasks.length) {
+      const rows = origTasks.map((t, idx) => ({
+        project_id: projectId,
+        text: t.text,
+        created_by: user.id,
+        sort_order: idx,
+        list_id: (newList as any).id,
+        assigned_to: t.assigned_to,
+        due_date: t.due_date,
+        status: t.status,
+        priority: t.priority,
+        done: false,
+      }));
+      await supabase.from('project_tasks').insert(rows as any);
+    }
+    await fetchAll();
+    toast.success('Lista copiada!');
+  };
 
   const addTask = async (lid: string) => {
     if (!newTaskText.trim() || !user) return;
@@ -525,10 +560,52 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
           <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-[72px]">{doneT.length}/{totalT} concluídas</div>
           <div className="flex items-center gap-3">
             {handleProps && (
-              <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
-                <div className="flex flex-col gap-[3px]">
-                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
-                </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button 
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 outline-none"
+                    title="Opções da lista"
+                  >
+                    <div className="flex flex-col gap-[3px]">
+                      {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-52">
+                  <DropdownMenuItem onSelect={() => setEditingListTitleId(list.id)}>
+                    <Pencil size={14} className="mr-2" /> Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => toast.info('Arraste a lista pela alça para reordenar.')}>
+                    <Move size={14} className="mr-2" /> Mover
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => copyList(list.id)}>
+                    <Copy size={14} className="mr-2" /> Copiar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onSelect={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Archive size={14} className="mr-2" /> Arquivar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setAddingToList(list.id)}>
+                    <ListPlus size={14} className="mr-2" /> Inserir uma tarefa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setAddingGroupToList(list.id)}>
+                    <FolderPlus size={14} className="mr-2" /> Adicionar um grupo
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {handleProps && (
+              <button 
+                {...handleProps.attributes} 
+                {...handleProps.listeners} 
+                className="cursor-grab active:cursor-grabbing opacity-0 group-hover/list-sortable:opacity-50 hover:!opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 -ml-1"
+                title="Arrastar para reordenar"
+              >
+                <GripVertical size={16} className="text-slate-400" />
               </button>
             )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
@@ -538,12 +615,11 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                   <EditableText 
                     text={list.title} 
                     className="text-[22px] font-bold text-primary" 
-                    onSave={(t) => updateListTitle(list.id, t)} 
+                    onSave={(t) => updateListTitle(list.id, t)}
+                    forceEdit={editingListTitleId === list.id}
+                    onEditEnd={() => setEditingListTitleId(prev => prev === list.id ? null : prev)}
                   />
                 </Link>
-                <button onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }} className="opacity-0 group-hover/list:opacity-100 hover:text-red-500 text-slate-400 p-2 transition-opacity">
-                  <Trash2 size={18} />
-                </button>
               </div>
               {list.description && <div className="mt-2 text-sm text-muted-foreground italic max-w-2xl line-clamp-1 leading-relaxed">{list.description.replace(/<[^>]*>?/gm, ' ')}</div>}
             </div>
