@@ -773,14 +773,27 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
           />
 
           {note.type === 'note' ? (
-            <textarea
-              ref={contentRef}
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="Nota..."
-              rows={8}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none resize-none"
-            />
+            editingContent ? (
+              <textarea
+                ref={contentRef}
+                value={content}
+                onChange={e => setContent(e.target.value)}
+                onBlur={() => setEditingContent(false)}
+                placeholder="Nota..."
+                rows={8}
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-foreground/50 outline-none resize-none"
+              />
+            ) : (
+              <div
+                onClick={() => setEditingContent(true)}
+                className={cn(
+                  "w-full text-sm whitespace-pre-wrap cursor-text min-h-[12rem] py-1",
+                  content ? "text-foreground" : "text-foreground/50"
+                )}
+              >
+                {content ? linkifyText(content) : 'Nota...'}
+              </div>
+            )
           ) : (
             <div className="space-y-1 max-h-96 overflow-y-auto">
               {items.map((item, idx) => (
