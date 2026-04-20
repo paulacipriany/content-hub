@@ -339,6 +339,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [activeList, setActiveList] = useState<TaskList | null>(null);
+  const [editingListTitleId, setEditingListTitleId] = useState<string | null>(null);
   const newListInputRef = useRef<HTMLInputElement>(null);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
   const groupInputRef = useRef<HTMLInputElement>(null);
