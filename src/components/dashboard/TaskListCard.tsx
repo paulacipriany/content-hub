@@ -143,15 +143,16 @@ const TaskListPieChart = ({ total, completed }: { total: number; completed: numb
 };
 
 // ─── Inline editable text ────────────────────────────────────────
-const EditableText = ({ text, className, onSave }: { text: string; className?: string; onSave: (text: string) => void }) => {
+const EditableText = ({ text, className, onSave, forceEdit, onEditStart, onEditEnd }: { text: string; className?: string; onSave: (text: string) => void; forceEdit?: boolean; onEditStart?: () => void; onEditEnd?: () => void }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(text);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { setValue(text); }, [text]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
-  const commit = () => { setEditing(false); if (value.trim() && value.trim() !== text) onSave(value.trim()); else setValue(text); };
-  if (editing) return <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); }}} className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)} />;
-  return <span onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true); }} className={cn("cursor-pointer", className)} title="Clique duplo para editar">{text}</span>;
+  useEffect(() => { if (editing) { inputRef.current?.focus(); inputRef.current?.select(); } }, [editing]);
+  useEffect(() => { if (forceEdit) { setEditing(true); onEditStart?.(); } }, [forceEdit, onEditStart]);
+  const commit = () => { setEditing(false); onEditEnd?.(); if (value.trim() && value.trim() !== text) onSave(value.trim()); else setValue(text); };
+  if (editing) return <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(text); setEditing(false); onEditEnd?.(); }}} className={cn("bg-transparent border-b border-primary/40 outline-none w-full", className)} />;
+  return <span onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true); onEditStart?.(); }} className={cn("cursor-pointer", className)} title="Clique duplo para editar">{text}</span>;
 };
 
 // ─── Status badge with popover ───────────────────────────────────
