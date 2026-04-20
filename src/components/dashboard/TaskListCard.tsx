@@ -560,11 +560,52 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
           <div className="text-[12px] text-muted-foreground font-medium mb-1 tracking-tight pl-[72px]">{doneT.length}/{totalT} concluídas</div>
           <div className="flex items-center gap-3">
             {handleProps && (
-              <button {...handleProps.attributes} {...handleProps.listeners} className="cursor-grab active:cursor-grabbing opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0">
-                <div className="flex flex-col gap-[3px]">
-                  {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
-                </div>
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button 
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0"
+                    title="Opções da lista"
+                  >
+                    <div className="flex flex-col gap-[3px]">
+                      {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setEditingListTitleId(list.id)}>
+                    <Pencil size={14} className="mr-2" /> Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onPointerDown={(e) => { e.stopPropagation(); }} 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      // Use the drag handle listeners to start dragging
+                      const evt = new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse', button: 0 } as any);
+                      handleProps?.listeners?.onPointerDown?.(evt as any);
+                      toast.info('Arraste a lista para a nova posição');
+                    }}
+                  >
+                    <Move size={14} className="mr-2" /> Mover
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => copyList(list.id)}>
+                    <Copy size={14} className="mr-2" /> Copiar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Archive size={14} className="mr-2" /> Arquivar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setAddingToList(list.id)}>
+                    <ListPlus size={14} className="mr-2" /> Inserir uma tarefa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setAddingGroupToList(list.id)}>
+                    <FolderPlus size={14} className="mr-2" /> Adicionar um grupo
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
             <div className="flex-1">
@@ -573,12 +614,11 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                   <EditableText 
                     text={list.title} 
                     className="text-[22px] font-bold text-primary" 
-                    onSave={(t) => updateListTitle(list.id, t)} 
+                    onSave={(t) => updateListTitle(list.id, t)}
+                    forceEdit={editingListTitleId === list.id}
+                    onEditEnd={() => setEditingListTitleId(prev => prev === list.id ? null : prev)}
                   />
                 </Link>
-                <button onClick={() => { setDeleteListId(list.id); setDeleteListDialogOpen(true); }} className="opacity-0 group-hover/list:opacity-100 hover:text-red-500 text-slate-400 p-2 transition-opacity">
-                  <Trash2 size={18} />
-                </button>
               </div>
               {list.description && <div className="mt-2 text-sm text-muted-foreground italic max-w-2xl line-clamp-1 leading-relaxed">{list.description.replace(/<[^>]*>?/gm, ' ')}</div>}
             </div>
