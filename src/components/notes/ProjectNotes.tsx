@@ -9,104 +9,48 @@ import { cn } from '@/lib/utils';
 const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
 const RAW_URL_REGEX = /(https?:\/\/[^\s)]+)/g;
 
-/**
- * Edits or removes a link occurrence in the source text via right-click.
- * - kind 'md': replaces `[label](href)` substring at the given index
- * - kind 'raw': replaces the bare URL substring at the given index
- */
-const handleLinkContextMenu = (
-  e: React.MouseEvent,
-  source: string,
-  match: { kind: 'md' | 'raw'; original: string; index: number; label: string; href: string },
-  onChangeSource: ((next: string) => void) | undefined,
-) => {
-  if (!onChangeSource) return;
-  e.preventDefault();
-  e.stopPropagation();
-  const action = window.prompt('Digite "e" para editar ou "r" para remover o link:', 'e');
-  if (!action) return;
-  const a = action.trim().toLowerCase();
-
-  if (a.startsWith('r')) {
-    // remove: keep just the label as plain text (md) or remove the URL entirely (raw)
-    const replacement = match.kind === 'md' ? match.label : '';
-    const next = source.slice(0, match.index) + replacement + source.slice(match.index + match.original.length);
-    onChangeSource(next);
-    return;
-  }
-  if (a.startsWith('e')) {
-    const newLabel = window.prompt('Texto a exibir:', match.label);
-    if (newLabel === null) return;
-    const newUrl = window.prompt('URL do link:', match.href);
-    if (newUrl === null || !newUrl.trim()) return;
-    const normalized = /^https?:\/\//i.test(newUrl) ? newUrl : `https://${newUrl}`;
-    const finalLabel = newLabel.trim() || normalized;
-    const replacement = `[${finalLabel}](${normalized})`;
-    const next = source.slice(0, match.index) + replacement + source.slice(match.index + match.original.length);
-    onChangeSource(next);
-  }
-};
-
-const renderLinkPart = (
-  key: string | number,
-  href: string,
-  label: string,
-  onContextMenu?: (e: React.MouseEvent) => void,
-) => (
+const renderLinkPart = (key: string | number, href: string, label: string) => (
   <a
     key={key}
     href={href}
     target="_blank"
     rel="noopener noreferrer"
     onClick={(e) => e.stopPropagation()}
-    onContextMenu={onContextMenu}
     className="underline text-primary hover:opacity-80 break-all"
-    title={onContextMenu ? 'Clique com o botão direito para editar/remover' : undefined}
   >
     {label}
   </a>
 );
 
-const linkifyText = (
-  text: string,
-  onChangeSource?: (next: string) => void,
-): React.ReactNode => {
+const linkifyRawUrls = (text: string, prefix: string): React.ReactNode[] => {
+  if (!text) return [];
+  const parts = text.split(RAW_URL_REGEX);
+  return parts.map((part, i) => {
+    if (RAW_URL_REGEX.test(part)) {
+      RAW_URL_REGEX.lastIndex = 0;
+      return renderLinkPart(`${prefix}${i}`, part, part);
+    }
+    return <span key={`${prefix}${i}`}>{part}</span>;
+  });
+};
+
+const linkifyText = (text: string): React.ReactNode => {
   if (!text) return text;
   const nodes: React.ReactNode[] = [];
-  // Tokenize: find all md links and raw urls in order, with their absolute indices
-  type Token = { kind: 'md' | 'raw'; index: number; length: number; label: string; href: string; original: string };
-  const tokens: Token[] = [];
-
-  const mdRe = new RegExp(MD_LINK_REGEX.source, 'g');
-  let m: RegExpExecArray | null;
-  while ((m = mdRe.exec(text)) !== null) {
-    tokens.push({ kind: 'md', index: m.index, length: m[0].length, label: m[1], href: m[2], original: m[0] });
-  }
-
-  // Find raw urls but skip those that fall inside md link ranges
-  const inMd = (i: number) => tokens.some(t => t.kind === 'md' && i >= t.index && i < t.index + t.length);
-  const rawRe = new RegExp(RAW_URL_REGEX.source, 'g');
-  while ((m = rawRe.exec(text)) !== null) {
-    if (!inMd(m.index)) {
-      tokens.push({ kind: 'raw', index: m.index, length: m[0].length, label: m[0], href: m[0], original: m[0] });
+  let lastIndex = 0;
+  let key = 0;
+  const re = new RegExp(MD_LINK_REGEX.source, 'g');
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(...linkifyRawUrls(text.slice(lastIndex, match.index), `${key}-pre-`));
     }
+    nodes.push(renderLinkPart(`md-${key}`, match[2], match[1]));
+    lastIndex = match.index + match[0].length;
+    key++;
   }
-  tokens.sort((a, b) => a.index - b.index);
-
-  let cursor = 0;
-  tokens.forEach((t, i) => {
-    if (t.index > cursor) {
-      nodes.push(<span key={`t-${i}-pre`}>{text.slice(cursor, t.index)}</span>);
-    }
-    nodes.push(
-      renderLinkPart(`t-${i}`, t.href, t.label, (e) =>
-        handleLinkContextMenu(e, text, t, onChangeSource),
-      ),
-    );
-    cursor = t.index + t.length;
-  });
-  if (cursor < text.length) {
-    nodes.push(<span key="t-end">{text.slice(cursor)}</span>);
+  if (lastIndex < text.length) {
+    nodes.push(...linkifyRawUrls(text.slice(lastIndex), `${key}-post-`));
   }
   return nodes;
 };
@@ -411,16 +355,6 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
     onRefresh();
   };
 
-  const updateContent = async (next: string) => {
-    onUpdate(note, { content: next });
-    await supabase.from('project_notes').update({ content: next }).eq('id', note.id);
-  };
-
-  const updateItemText = async (item: NoteItem, next: string) => {
-    await supabase.from('project_note_items').update({ text: next }).eq('id', item.id);
-    onRefresh();
-  };
-
   return (
     <div
       className="group relative rounded-xl border border-border overflow-hidden transition-all hover:shadow-md cursor-pointer"
@@ -446,7 +380,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
         {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 line-clamp-2">{note.title}</h3>}
 
         {note.type === 'note' && note.content && (
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content, updateContent)}</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content)}</p>
         )}
 
         {note.type === 'checklist' && note.items && note.items.length > 0 && (
@@ -462,7 +396,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
                 >
                   {item.done && <Check size={10} className="text-background" />}
                 </button>
-                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")} onContextMenu={(e) => e.stopPropagation()}>{linkifyText(item.text, (next) => updateItemText(item, next))}</span>
+                <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")}>{linkifyText(item.text)}</span>
               </div>
             ))}
             {note.items.length > 8 && (
