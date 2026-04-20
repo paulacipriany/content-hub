@@ -877,6 +877,7 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
             <button
               onClick={() => {
                 if (note.type === 'note') {
+                  if (!editingContent) setEditingContent(true);
                   const result = insertLinkInField(contentRef.current, content);
                   if (!result) return;
                   setContent(result.value);
@@ -886,6 +887,7 @@ const NoteEditDialog = ({ note, onClose, onSaved, onDelete }: NoteEditDialogProp
                   });
                 } else {
                   const idx = lastFocusedItemRef.current;
+                  if (editingItemIdx !== idx) setEditingItemIdx(idx);
                   const el = itemRefs.current[idx];
                   const current = items[idx]?.text ?? '';
                   const result = insertLinkInField(el, current);
