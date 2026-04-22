@@ -673,7 +673,34 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   const isEmpty = !loading && displayedLists.length === 0 && unlistedTasks.length === 0;
   useEffect(() => { onEmptyChange?.(isEmpty); }, [isEmpty, onEmptyChange]);
 
-  if (loading) return <div className="text-center py-20 text-muted-foreground">Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="w-full py-12 px-6" aria-busy="true" aria-label="Carregando listas">
+        {[0, 1].map(i => (
+          <div key={i} className="mb-12 pl-4">
+            <div className="mb-4">
+              <Skeleton className="h-3 w-20 mb-2 ml-[72px]" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-6 rounded" />
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <Skeleton className="h-7 w-48" />
+              </div>
+            </div>
+            <div className="space-y-2 pl-[72px]">
+              {[0, 1, 2].map(j => (
+                <div key={j} className="flex items-center gap-3 py-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-4 flex-1 max-w-md" />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </div>
+              ))}
+              <Skeleton className="h-9 w-32 rounded-full mt-2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (displayedLists.length === 0 && unlistedTasks.length === 0) {
     return (
