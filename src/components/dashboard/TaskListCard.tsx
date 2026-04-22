@@ -377,9 +377,15 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
 
   const createList = async () => {
     if (!creatingListName.trim() || !user) return;
-    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: creatingListName.trim(), description: creatingListDescription, sort_order: lists.length, created_by: user.id } as any).select().single();
+    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: creatingListName.trim(), description: creatingListDescription, sort_order: 0, created_by: user.id } as any).select().single();
     if (error) { toast.error('Erro ao criar lista'); return; }
-    if (data) setLists(p => [...p, data as TaskList]);
+    if (data) {
+      const newList = data as TaskList;
+      const reordered = [newList, ...lists];
+      setLists(reordered);
+      // Persist new sort order so the new list stays on top
+      await Promise.all(reordered.map((l, idx) => supabase.from('task_lists').update({ sort_order: idx } as any).eq('id', l.id)));
+    }
     setCreatingListName(''); setCreatingListDescription(''); setShowNewListDetails(false); setShowNewListInput(false);
     toast.success('Lista criada!');
   };
