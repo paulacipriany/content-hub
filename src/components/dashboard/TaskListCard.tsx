@@ -13,6 +13,7 @@ import { format, isPast, isToday, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { isToday as isTodayFn, isPast as isPastFn } from 'date-fns';
 import { toast } from 'sonner';
 import {
