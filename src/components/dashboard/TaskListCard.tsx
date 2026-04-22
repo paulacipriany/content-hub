@@ -569,9 +569,10 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button 
-                    onPointerDown={(e) => e.stopPropagation()}
-                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 outline-none"
-                    title="Opções da lista"
+                    {...handleProps.attributes}
+                    {...handleProps.listeners}
+                    className="opacity-30 group-hover/list-sortable:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 outline-none cursor-grab active:cursor-grabbing"
+                    title="Arrastar para reordenar ou clicar para opções"
                   >
                     <div className="flex flex-col gap-[3px]">
                       {[1,2,3].map(i => <div key={i} className="w-5 border-t border-slate-400" />)}
@@ -582,7 +583,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                   <DropdownMenuItem onSelect={() => setEditingListTitleId(list.id)}>
                     <Pencil size={14} className="mr-2" /> Editar
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => toast.info('Arraste a lista pela alça para reordenar.')}>
+                  <DropdownMenuItem onSelect={() => toast.info('Arraste a lista pelo ícone para reordenar.')}>
                     <Move size={14} className="mr-2" /> Mover
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => copyList(list.id)}>
@@ -603,16 +604,6 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-            {handleProps && (
-              <button 
-                {...handleProps.attributes} 
-                {...handleProps.listeners} 
-                className="cursor-grab active:cursor-grabbing opacity-0 group-hover/list-sortable:opacity-50 hover:!opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded flex-shrink-0 -ml-1"
-                title="Arrastar para reordenar"
-              >
-                <GripVertical size={16} className="text-slate-400" />
-              </button>
             )}
             <TaskListPieChart total={totalT} completed={doneT.length} />
             <div className="flex-1">
