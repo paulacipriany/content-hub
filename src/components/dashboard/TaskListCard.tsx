@@ -376,8 +376,16 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
   };
 
   const createList = async () => {
-    if (!creatingListName.trim() || !user) return;
-    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: creatingListName.trim(), description: creatingListDescription, sort_order: 0, created_by: user.id } as any).select().single();
+    if (!user) return;
+    const trimmed = creatingListName.trim();
+    if (!trimmed) { toast.error('O nome da lista não pode estar vazio.'); return; }
+    if (trimmed.length > 100) { toast.error('O nome da lista deve ter no máximo 100 caracteres.'); return; }
+    const normalized = trimmed.toLowerCase();
+    if (lists.some(l => l.title.trim().toLowerCase() === normalized)) {
+      toast.error('Já existe uma lista com esse nome neste projeto.');
+      return;
+    }
+    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: trimmed, description: creatingListDescription, sort_order: 0, created_by: user.id } as any).select().single();
     if (error) { toast.error('Erro ao criar lista'); return; }
     if (data) {
       const newList = data as TaskList;
