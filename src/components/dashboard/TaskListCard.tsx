@@ -250,7 +250,7 @@ const TaskRow = ({
   return (
     <div className={cn("group/task flex items-center gap-3 py-1.5 transition-colors", task.done && "opacity-60")}>
       <button onClick={() => toggleDone(task.id)} className="flex-shrink-0">
-        <div className={cn("w-[1.1rem] h-[1.1rem] rounded border flex items-center justify-center transition-all", task.done ? "border-emerald-500 bg-emerald-50 text-emerald-600" : "border-slate-400 hover:border-slate-600 bg-[#c5daf7] shadow-sm")}>
+        <div className={cn("w-[1.1rem] h-[1.1rem] rounded border flex items-center justify-center transition-all", task.done ? "border-emerald-500 bg-emerald-50 text-emerald-600" : "border-slate-400 hover:border-slate-600 bg-background shadow-sm")}>
           {task.done && <span className="text-[10px] font-bold">✓</span>}
         </div>
       </button>
