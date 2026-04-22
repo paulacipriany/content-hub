@@ -386,8 +386,8 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
       toast.error('Já existe uma lista com esse nome neste projeto.');
       return;
     }
-    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: trimmed, description: creatingListDescription, sort_order: 0, created_by: user.id } as any).select().single();
-    if (error) { toast.error('Erro ao criar lista'); return; }
+    const { data, error } = await supabase.from('task_lists').insert({ project_id: projectId, title: trimmed, sort_order: 0, created_by: user.id } as any).select().single();
+    if (error) { console.error('Create list error:', error); toast.error('Erro ao criar lista: ' + error.message); return; }
     if (data) {
       const newList = data as TaskList;
       const reordered = [newList, ...lists];
