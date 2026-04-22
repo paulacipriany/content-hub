@@ -657,7 +657,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
 
           <div className="pt-3">
             {addingToList === list.id ? (
-              <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }} className="max-w-xl bg-[#c5daf7] border rounded-xl shadow-lg p-5 border-primary/20 animate-in slide-in-from-top-1 duration-200">
+              <form onSubmit={(e) => { e.preventDefault(); addTask(list.id); }} className="max-w-xl bg-card border rounded-xl shadow-lg p-5 border-primary/20 animate-in slide-in-from-top-1 duration-200">
                 <input ref={newTaskInputRef} autoFocus value={newTaskText} onChange={e => setNewTaskText(e.target.value)} placeholder="Descreva a tarefa..." className="w-full text-lg outline-none mb-4" />
                 <div className="flex gap-2"><Button type="submit" size="sm" className="rounded-full bg-primary text-white hover:bg-primary/90 px-6">Adicionar</Button><Button type="button" size="sm" variant="ghost" onClick={() => resetNewTaskForm()} className="rounded-full">Cancelar</Button></div>
               </form>
