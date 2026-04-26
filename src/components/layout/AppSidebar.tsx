@@ -25,6 +25,7 @@ const clientNavItems = [
 { icon: Home, label: 'Dashboard', path: '/dashboard' },
 { icon: ListTodo, label: 'Tarefas', path: '/tasks' },
 { icon: StickyNote, label: 'Anotações', path: '/notes' },
+{ icon: FileText, label: 'Roteiros', path: '/scripts', hideFromClient: true },
 { icon: Lightbulb, label: 'Banco de Ideias', path: '/ideas', hideFromClient: true },
 { icon: Calendar, label: 'Calendário', path: '/calendar' },
 { icon: GitBranch, label: 'Workflow', path: '/workflow' },
