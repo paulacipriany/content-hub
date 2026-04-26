@@ -65,16 +65,16 @@ const ScriptsPage = () => {
     navigate(`/clients/${selectedProject.id}/scripts/${(data as any).id}`);
   };
 
-  const deleteScript = async (id: string) => {
-    const ok = await confirmDelete({ title: 'Excluir roteiro', description: 'Esta ação não pode ser desfeita.' });
-    if (!ok) return;
-    const { error } = await supabase.from('project_scripts' as any).delete().eq('id', id);
-    if (error) {
-      toast.error('Erro ao excluir');
-      return;
-    }
-    toast.success('Roteiro excluído');
-    setScripts(prev => prev.filter(s => s.id !== id));
+  const deleteScript = (id: string) => {
+    confirmDelete(async () => {
+      const { error } = await supabase.from('project_scripts' as any).delete().eq('id', id);
+      if (error) {
+        toast.error('Erro ao excluir');
+        return;
+      }
+      toast.success('Roteiro excluído');
+      setScripts(prev => prev.filter(s => s.id !== id));
+    }, 'este roteiro');
   };
 
   if (!selectedProject) return null;
