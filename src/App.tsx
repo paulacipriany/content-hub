@@ -30,6 +30,8 @@ import UsersPage from "@/pages/UsersPage";
 import TasksPage from "@/pages/TasksPage";
 import TaskListDetailsPage from "@/pages/TaskListDetailsPage";
 import NotesPage from "@/pages/NotesPage";
+import ScriptsPage from "@/pages/ScriptsPage";
+import ScriptDetailPage from "@/pages/ScriptDetailPage";
 import IdeasBankPage from "@/pages/IdeasBankPage";
 import PostReportsPage from "@/pages/PostReportsPage";
 import ReviewPage from "@/pages/ReviewPage";
