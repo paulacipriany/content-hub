@@ -258,8 +258,48 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
     );
   }
 
-  const pinnedNotes = notes.filter(n => n.pinned);
-  const otherNotes = notes.filter(n => !n.pinned);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | NoteType>('all');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    notes.forEach(n => extractTags(n).forEach(t => set.add(t)));
+    return [...set].sort();
+  }, [notes]);
+
+  const filteredNotes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return notes.filter(n => {
+      if (typeFilter !== 'all' && n.type !== typeFilter) return false;
+      if (selectedTags.length > 0) {
+        const noteTags = extractTags(n);
+        if (!selectedTags.every(t => noteTags.includes(t))) return false;
+      }
+      if (q) {
+        const inTitle = (n.title ?? '').toLowerCase().includes(q);
+        const inContent = (n.content ?? '').toLowerCase().includes(q);
+        const inItems = (n.items ?? []).some(i => i.text.toLowerCase().includes(q));
+        if (!inTitle && !inContent && !inItems) return false;
+      }
+      return true;
+    });
+  }, [notes, search, typeFilter, selectedTags]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setTypeFilter('all');
+    setSelectedTags([]);
+  };
+
+  const hasActiveFilters = !!search || typeFilter !== 'all' || selectedTags.length > 0;
+
+  const pinnedNotes = filteredNotes.filter(n => n.pinned);
+  const otherNotes = filteredNotes.filter(n => !n.pinned);
 
   return (
     <div className="space-y-6">
