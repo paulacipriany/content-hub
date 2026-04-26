@@ -1,9 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2 } from 'lucide-react';
+import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2, Search, Filter, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const HASHTAG_REGEX = /#([\p{L}\p{N}_-]{2,30})/gu;
+
+const extractTags = (note: { title?: string; content?: string; items?: { text: string }[] }): string[] => {
+  const sources: string[] = [];
+  if (note.title) sources.push(note.title);
+  if (note.content) sources.push(note.content);
+  if (note.items) note.items.forEach(i => sources.push(i.text));
+  const tags = new Set<string>();
+  for (const text of sources) {
+    if (!text) continue;
+    const matches = text.matchAll(HASHTAG_REGEX);
+    for (const m of matches) tags.add(m[1].toLowerCase());
+  }
+  return [...tags];
+};
 
 /* Renders text supporting markdown links [text](url) and raw URLs */
 const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -234,6 +250,46 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
     }
   };
 
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | NoteType>('all');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    notes.forEach(n => extractTags(n).forEach(t => set.add(t)));
+    return [...set].sort();
+  }, [notes]);
+
+  const filteredNotes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return notes.filter(n => {
+      if (typeFilter !== 'all' && n.type !== typeFilter) return false;
+      if (selectedTags.length > 0) {
+        const noteTags = extractTags(n);
+        if (!selectedTags.every(t => noteTags.includes(t))) return false;
+      }
+      if (q) {
+        const inTitle = (n.title ?? '').toLowerCase().includes(q);
+        const inContent = (n.content ?? '').toLowerCase().includes(q);
+        const inItems = (n.items ?? []).some(i => i.text.toLowerCase().includes(q));
+        if (!inTitle && !inContent && !inItems) return false;
+      }
+      return true;
+    });
+  }, [notes, search, typeFilter, selectedTags]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setTypeFilter('all');
+    setSelectedTags([]);
+  };
+
+  const hasActiveFilters = !!search || typeFilter !== 'all' || selectedTags.length > 0;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -242,8 +298,8 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
     );
   }
 
-  const pinnedNotes = notes.filter(n => n.pinned);
-  const otherNotes = notes.filter(n => !n.pinned);
+  const pinnedNotes = filteredNotes.filter(n => n.pinned);
+  const otherNotes = filteredNotes.filter(n => !n.pinned);
 
   return (
     <div className="space-y-6">
@@ -283,6 +339,93 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         </div>
       )}
 
+      {/* Search & Filters */}
+      {notes.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por título ou conteúdo..."
+                className="w-full h-9 pl-9 pr-9 text-sm rounded-md border border-border bg-background outline-none focus:ring-2 focus:ring-ring"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent text-muted-foreground"
+                  title="Limpar busca"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1 bg-muted/50 rounded-md p-0.5">
+              {([
+                { v: 'all', label: 'Todas', icon: Filter },
+                { v: 'note', label: 'Notas', icon: Type },
+                { v: 'checklist', label: 'Listas', icon: ListChecks },
+              ] as const).map(opt => {
+                const Icon = opt.icon;
+                const active = typeFilter === opt.v;
+                return (
+                  <button
+                    key={opt.v}
+                    onClick={() => setTypeFilter(opt.v)}
+                    className={cn(
+                      "flex items-center gap-1.5 h-8 px-2.5 text-xs rounded transition-colors",
+                      active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <Icon size={12} />
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="h-8 px-2.5 text-xs rounded-md text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1"
+              >
+                <X size={12} /> Limpar
+              </button>
+            )}
+
+            <span className="text-xs text-muted-foreground ml-auto">
+              {filteredNotes.length} de {notes.length}
+            </span>
+          </div>
+
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Hash size={12} className="text-muted-foreground" />
+              {allTags.map(tag => {
+                const active = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={cn(
+                      "text-xs px-2 py-0.5 rounded-full border transition-colors",
+                      active
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/30'
+                    )}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {pinnedNotes.length > 0 && (
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Fixadas</p>
@@ -302,6 +445,14 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
           <Type size={48} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Nenhuma anotação ainda.</p>
           <p className="text-xs mt-1">Crie sua primeira nota acima!</p>
+        </div>
+      )}
+
+      {notes.length > 0 && filteredNotes.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <Search size={40} className="mx-auto mb-3 opacity-30" />
+          <p className="text-sm">Nenhuma anotação corresponde aos filtros.</p>
+          <button onClick={clearFilters} className="text-xs mt-2 text-primary hover:underline">Limpar filtros</button>
         </div>
       )}
 
