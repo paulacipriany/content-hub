@@ -329,9 +329,11 @@ interface NotesGridProps {
 
 const NotesGrid = ({ notes, onUpdate, onDelete, onOpen, onRefresh }: NotesGridProps) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
       {notes.map(note => (
-        <NoteCard key={note.id} note={note} onUpdate={onUpdate} onDelete={onDelete} onOpen={onOpen} onRefresh={onRefresh} />
+        <div key={note.id} className="break-inside-avoid mb-3">
+          <NoteCard note={note} onUpdate={onUpdate} onDelete={onDelete} onOpen={onOpen} onRefresh={onRefresh} />
+        </div>
       ))}
     </div>
   );
@@ -371,26 +373,26 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
       </button>
 
       {note.image_url && (
-        <div className="w-full max-h-48 overflow-hidden">
-          <img src={note.image_url} alt="" className="w-full h-full object-cover" />
+        <div className="w-full overflow-hidden">
+          <img src={note.image_url} alt="" className="w-full h-auto object-cover" />
         </div>
       )}
 
       <div className="p-3 space-y-2">
-        {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 line-clamp-2">{note.title}</h3>}
+        {note.title && <h3 className="text-sm font-semibold text-foreground pr-7 break-words">{note.title}</h3>}
 
         {note.type === 'note' && note.content && (
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap line-clamp-6">{linkifyText(note.content)}</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap break-words">{linkifyText(note.content)}</p>
         )}
 
         {note.type === 'checklist' && note.items && note.items.length > 0 && (
           <div className="space-y-1">
-            {note.items.slice(0, 8).map(item => (
-              <div key={item.id} className="flex items-center gap-2 text-xs" onClick={(e) => e.stopPropagation()}>
+            {note.items.map(item => (
+              <div key={item.id} className="flex items-start gap-2 text-xs" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => toggleItemDone(item)}
                   className={cn(
-                    "w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0",
+                    "w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5",
                     item.done ? 'bg-foreground border-foreground' : 'border-foreground/40'
                   )}
                 >
@@ -399,9 +401,6 @@ const NoteCard = ({ note, onUpdate, onDelete, onOpen, onRefresh }: NoteCardProps
                 <span className={cn("text-foreground/80 break-words", item.done && "line-through opacity-60")}>{linkifyText(item.text)}</span>
               </div>
             ))}
-            {note.items.length > 8 && (
-              <p className="text-[10px] text-foreground/60">+ {note.items.length - 8} item(s)</p>
-            )}
           </div>
         )}
 
