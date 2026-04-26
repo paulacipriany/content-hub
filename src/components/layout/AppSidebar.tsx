@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays, StickyNote } from 'lucide-react';
+import { Home, FolderOpen, Calendar, GitBranch, CheckCircle, Image, BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Plus, LogOut, Users, Sun, Moon, ListTodo, Lightbulb, ClipboardList, Eye, CalendarClock, User, CalendarDays, StickyNote, FileText } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
