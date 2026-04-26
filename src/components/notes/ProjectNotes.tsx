@@ -250,14 +250,6 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | NoteType>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -297,6 +289,14 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   };
 
   const hasActiveFilters = !!search || typeFilter !== 'all' || selectedTags.length > 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const pinnedNotes = filteredNotes.filter(n => n.pinned);
   const otherNotes = filteredNotes.filter(n => !n.pinned);
