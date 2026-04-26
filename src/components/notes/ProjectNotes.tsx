@@ -1,9 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2 } from 'lucide-react';
+import { Pin, PinOff, Trash2, Image as ImageIcon, ListChecks, Type, X, Plus, Check, Loader2, Palette, Link2, Search, Filter, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const HASHTAG_REGEX = /#([\p{L}\p{N}_-]{2,30})/gu;
+
+const extractTags = (note: { title?: string; content?: string; items?: { text: string }[] }): string[] => {
+  const sources: string[] = [];
+  if (note.title) sources.push(note.title);
+  if (note.content) sources.push(note.content);
+  if (note.items) note.items.forEach(i => sources.push(i.text));
+  const tags = new Set<string>();
+  for (const text of sources) {
+    if (!text) continue;
+    const matches = text.matchAll(HASHTAG_REGEX);
+    for (const m of matches) tags.add(m[1].toLowerCase());
+  }
+  return [...tags];
+};
 
 /* Renders text supporting markdown links [text](url) and raw URLs */
 const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
