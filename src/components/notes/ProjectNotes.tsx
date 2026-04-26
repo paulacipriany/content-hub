@@ -329,9 +329,11 @@ interface NotesGridProps {
 
 const NotesGrid = ({ notes, onUpdate, onDelete, onOpen, onRefresh }: NotesGridProps) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
       {notes.map(note => (
-        <NoteCard key={note.id} note={note} onUpdate={onUpdate} onDelete={onDelete} onOpen={onOpen} onRefresh={onRefresh} />
+        <div key={note.id} className="break-inside-avoid mb-3">
+          <NoteCard note={note} onUpdate={onUpdate} onDelete={onDelete} onOpen={onOpen} onRefresh={onRefresh} />
+        </div>
       ))}
     </div>
   );
