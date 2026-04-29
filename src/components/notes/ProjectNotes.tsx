@@ -318,7 +318,11 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         <div className="space-y-2 bg-muted/50 border border-border rounded-xl p-3">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
+              {isFiltering ? (
+                <Loader2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin pointer-events-none" />
+              ) : (
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
+              )}
               <input
                 type="text"
                 value={search}
