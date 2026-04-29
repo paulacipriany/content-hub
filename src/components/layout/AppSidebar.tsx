@@ -145,43 +145,50 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {!isClient && globalNavItems.
-        filter((item) => {
-          if ((item as any).adminOnly && role !== 'admin') return false;
-          if ((item as any).adminOrModerator && role !== 'admin' && role !== 'moderator') return false;
-          if ((item as any).hideFromClient && isClient) return false;
-          return true;
-        }).
-        map((item) => {
-          const isActive = location.pathname === item.path || item.path !== '/' && location.pathname.startsWith(item.path);
-          return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={cn(
-                "flex items-center gap-3 w-full py-2 rounded-md text-sm text-left transition-colors",
-                globalCollapsed ? "px-0 justify-center" : "px-3",
-                isActive ?
-                "bg-sidebar-hover text-sidebar-fg-active" :
-                "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
-              )}
-              title={globalCollapsed ? item.label : undefined}>
-              
-              <item.icon size={18} className="flex-shrink-0" />
-              {!globalCollapsed && <span className="flex-1">{item.label}</span>}
-              {!globalCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
-                  {pendingUsersCount}
-                </span>
-              )}
-              {globalCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
-                <span className="absolute ml-5 -mt-4 min-w-[14px] h-[14px] px-1 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
-                  {pendingUsersCount}
-                </span>
-              )}
-            </button>);
+        {!isClient && (
+          <div className="space-y-0.5">
+            {!sidebarCollapsed && (
+              <button
+                onClick={() => setMainMenuOpen(o => !o)}
+                className="flex items-center justify-between w-full px-3 mb-1 group cursor-pointer"
+              >
+                <span className="text-xs uppercase tracking-wider text-sidebar-fg/60 font-medium">Menu principal</span>
+                <ChevronDown size={14} className={cn("text-sidebar-fg/60 transition-transform", mainMenuOpen && "rotate-180")} />
+              </button>
+            )}
+            {(sidebarCollapsed || mainMenuOpen) && globalNavItems
+              .filter((item) => {
+                if ((item as any).adminOnly && role !== 'admin') return false;
+                if ((item as any).adminOrModerator && role !== 'admin' && role !== 'moderator') return false;
+                if ((item as any).hideFromClient && isClient) return false;
+                return true;
+              })
+              .map((item) => {
+                const isActive = location.pathname === item.path || item.path !== '/' && location.pathname.startsWith(item.path);
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    className={cn(
+                      "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
+                      isActive ?
+                        "bg-sidebar-hover text-sidebar-fg-active" :
+                        "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
+                    )}
+                    title={sidebarCollapsed ? item.label : undefined}>
 
-        })}
+                    <item.icon size={18} className="flex-shrink-0" />
+                    {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
+                    {!sidebarCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
+                        {pendingUsersCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+          </div>
+        )}
 
         {/* Client sections - only when a client is selected */}
         {selectedProject &&
