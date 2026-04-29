@@ -308,18 +308,18 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         <div className="space-y-2 bg-muted/50 border border-border rounded-xl p-3">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por título ou conteúdo..."
-                className="w-full h-9 pl-9 pr-9 text-sm rounded-md border border-border bg-background outline-none focus:ring-2 focus:ring-ring"
+                className="peer w-full h-9 pl-9 pr-9 text-sm rounded-md border border-border bg-background outline-none transition-all hover:border-foreground/30 focus:border-ring focus:ring-2 focus:ring-ring/40 focus:shadow-sm placeholder:text-muted-foreground"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent text-muted-foreground"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent hover:text-foreground text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   title="Limpar busca"
                 >
                   <X size={12} />
