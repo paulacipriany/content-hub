@@ -308,18 +308,18 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         <div className="space-y-2 bg-muted/50 border border-border rounded-xl p-3">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por título ou conteúdo..."
-                className="w-full h-9 pl-9 pr-9 text-sm rounded-md border border-border bg-background outline-none focus:ring-2 focus:ring-ring"
+                className="peer w-full h-9 pl-9 pr-9 text-sm rounded-md border border-border bg-background outline-none transition-all hover:border-foreground/30 focus:border-ring focus:ring-2 focus:ring-ring/40 focus:shadow-sm placeholder:text-muted-foreground"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent text-muted-foreground"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent hover:text-foreground text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   title="Limpar busca"
                 >
                   <X size={12} />
@@ -327,7 +327,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
               )}
             </div>
 
-            <div className="flex items-center gap-1 bg-muted/50 rounded-md p-0.5">
+            <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
               {([
                 { v: 'all', label: 'Todas', icon: Filter },
                 { v: 'note', label: 'Notas', icon: Type },
@@ -340,8 +340,10 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
                     key={opt.v}
                     onClick={() => setTypeFilter(opt.v)}
                     className={cn(
-                      "flex items-center gap-1.5 h-8 px-2.5 text-xs rounded transition-colors",
-                      active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                      "flex items-center gap-1.5 h-8 px-2.5 text-xs rounded transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? 'bg-foreground text-background shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     )}
                   >
                     <Icon size={12} />
@@ -354,7 +356,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="h-8 px-2.5 text-xs rounded-md text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1"
+                className="h-8 px-2.5 text-xs rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <X size={12} /> Limpar
               </button>
@@ -375,10 +377,10 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     className={cn(
-                      "text-xs px-2 py-0.5 rounded-full border transition-colors",
+                      "text-xs px-2 py-0.5 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       active
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/30'
+                        ? 'bg-foreground text-background border-foreground hover:opacity-90'
+                        : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/40 hover:bg-accent'
                     )}
                   >
                     #{tag}
