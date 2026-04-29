@@ -377,10 +377,10 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     className={cn(
-                      "text-xs px-2 py-0.5 rounded-full border transition-colors",
+                      "text-xs px-2 py-0.5 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       active
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/30'
+                        ? 'bg-foreground text-background border-foreground hover:opacity-90'
+                        : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/40 hover:bg-accent'
                     )}
                   >
                     #{tag}
