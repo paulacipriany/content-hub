@@ -27,7 +27,7 @@ const NotesPage = () => {
 
   return (
     <>
-      <TopBar title="Anotações" subtitle="Notas, listas e ideias do projeto" />
+      <TopBar title="Anotações" subtitle="Notas, listas e ideias do projeto" actions={<></>} />
       <div className="p-6">
         <ProjectNotes projectId={selectedProject.id} />
       </div>
