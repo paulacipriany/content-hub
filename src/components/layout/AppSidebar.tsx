@@ -67,9 +67,11 @@ const AppSidebar = () => {
 
   const isClient = role === 'client';
 
-  // When a project is selected, collapse the global nav items to icons only
-  // (the client section remains expanded). Sidebar can still be fully collapsed.
-  const globalCollapsed = sidebarCollapsed || !!selectedProject;
+  // Collapsible global menu — auto-collapses when a project is selected
+  const [mainMenuOpen, setMainMenuOpen] = useState(!selectedProject);
+  useEffect(() => {
+    setMainMenuOpen(!selectedProject);
+  }, [selectedProject?.id]);
 
   // Count posts pending approval for selected project
   const approvalCount = selectedProject ?
