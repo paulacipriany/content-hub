@@ -486,6 +486,37 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   );
 };
 
+/* ---------- Skeleton ---------- */
+
+const SKELETON_HEIGHTS = [120, 180, 90, 220, 150, 110, 200, 140, 170, 100, 190, 130];
+
+const NotesSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      {/* Filter bar skeleton */}
+      <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-xl p-3">
+        <div className="h-9 flex-1 max-w-md rounded-md bg-muted animate-pulse" />
+        <div className="h-9 w-48 rounded-md bg-muted animate-pulse" />
+      </div>
+      {/* Quick create skeleton */}
+      <div className="max-w-xl mx-auto">
+        <div className="h-12 rounded-xl bg-muted animate-pulse" />
+      </div>
+      {/* Cards skeleton */}
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
+        {SKELETON_HEIGHTS.map((h, i) => (
+          <div key={i} className="break-inside-avoid mb-3">
+            <div
+              className="rounded-lg bg-muted animate-pulse"
+              style={{ height: h, animationDelay: `${i * 60}ms` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ---------- Notes Grid ---------- */
 
 interface NotesGridProps {
