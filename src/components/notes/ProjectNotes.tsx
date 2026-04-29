@@ -251,8 +251,21 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   };
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | NoteType>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Debounce search to avoid layout flicker on each keystroke
+  useEffect(() => {
+    if (search === debouncedSearch) return;
+    setIsFiltering(true);
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setIsFiltering(false);
+    }, 220);
+    return () => clearTimeout(t);
+  }, [search, debouncedSearch]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -261,7 +274,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   }, [notes]);
 
   const filteredNotes = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return notes.filter(n => {
       if (typeFilter !== 'all' && n.type !== typeFilter) return false;
       if (selectedTags.length > 0) {
@@ -276,7 +289,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
       }
       return true;
     });
-  }, [notes, search, typeFilter, selectedTags]);
+  }, [notes, debouncedSearch, typeFilter, selectedTags]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -284,6 +297,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
 
   const clearFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setTypeFilter('all');
     setSelectedTags([]);
   };
@@ -291,11 +305,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   const hasActiveFilters = !!search || typeFilter !== 'all' || selectedTags.length > 0;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <NotesSkeleton />;
   }
 
   const pinnedNotes = filteredNotes.filter(n => n.pinned);
@@ -308,7 +318,11 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         <div className="space-y-2 bg-muted/50 border border-border rounded-xl p-3">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
+              {isFiltering ? (
+                <Loader2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin pointer-events-none" />
+              ) : (
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors peer-focus:text-foreground" />
+              )}
               <input
                 type="text"
                 value={search}
@@ -428,35 +442,37 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         </div>
       )}
 
-      {pinnedNotes.length > 0 && (
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Fixadas</p>
-          <NotesGrid notes={pinnedNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
-        </div>
-      )}
+      <div className={cn("transition-opacity duration-150 min-h-[120px]", isFiltering && "opacity-60")} aria-busy={isFiltering}>
+        {pinnedNotes.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Fixadas</p>
+            <NotesGrid notes={pinnedNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
+          </div>
+        )}
 
-      {otherNotes.length > 0 && (
-        <div>
-          {pinnedNotes.length > 0 && <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Outras</p>}
-          <NotesGrid notes={otherNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
-        </div>
-      )}
+        {otherNotes.length > 0 && (
+          <div>
+            {pinnedNotes.length > 0 && <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Outras</p>}
+            <NotesGrid notes={otherNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
+          </div>
+        )}
 
-      {notes.length === 0 && !showCreate && (
-        <div className="text-center py-20 text-muted-foreground">
-          <Type size={48} className="mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma anotação ainda.</p>
-          <p className="text-xs mt-1">Crie sua primeira nota acima!</p>
-        </div>
-      )}
+        {notes.length === 0 && !showCreate && (
+          <div className="text-center py-20 text-muted-foreground">
+            <Type size={48} className="mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Nenhuma anotação ainda.</p>
+            <p className="text-xs mt-1">Crie sua primeira nota acima!</p>
+          </div>
+        )}
 
-      {notes.length > 0 && filteredNotes.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <Search size={40} className="mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma anotação corresponde aos filtros.</p>
-          <button onClick={clearFilters} className="text-xs mt-2 text-primary hover:underline">Limpar filtros</button>
-        </div>
-      )}
+        {notes.length > 0 && filteredNotes.length === 0 && !isFiltering && (
+          <div className="text-center py-16 text-muted-foreground">
+            <Search size={40} className="mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Nenhuma anotação corresponde aos filtros.</p>
+            <button onClick={clearFilters} className="text-xs mt-2 text-primary hover:underline">Limpar filtros</button>
+          </div>
+        )}
+      </div>
 
       {editingNote && (
         <NoteEditDialog
@@ -466,6 +482,37 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
           onDelete={handleDelete}
         />
       )}
+    </div>
+  );
+};
+
+/* ---------- Skeleton ---------- */
+
+const SKELETON_HEIGHTS = [120, 180, 90, 220, 150, 110, 200, 140, 170, 100, 190, 130];
+
+const NotesSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      {/* Filter bar skeleton */}
+      <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-xl p-3">
+        <div className="h-9 flex-1 max-w-md rounded-md bg-muted animate-pulse" />
+        <div className="h-9 w-48 rounded-md bg-muted animate-pulse" />
+      </div>
+      {/* Quick create skeleton */}
+      <div className="max-w-xl mx-auto">
+        <div className="h-12 rounded-xl bg-muted animate-pulse" />
+      </div>
+      {/* Cards skeleton */}
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
+        {SKELETON_HEIGHTS.map((h, i) => (
+          <div key={i} className="break-inside-avoid mb-3">
+            <div
+              className="rounded-lg bg-muted animate-pulse"
+              style={{ height: h, animationDelay: `${i * 60}ms` }}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
