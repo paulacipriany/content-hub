@@ -442,35 +442,37 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
         </div>
       )}
 
-      {pinnedNotes.length > 0 && (
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Fixadas</p>
-          <NotesGrid notes={pinnedNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
-        </div>
-      )}
+      <div className={cn("transition-opacity duration-150 min-h-[120px]", isFiltering && "opacity-60")} aria-busy={isFiltering}>
+        {pinnedNotes.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Fixadas</p>
+            <NotesGrid notes={pinnedNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
+          </div>
+        )}
 
-      {otherNotes.length > 0 && (
-        <div>
-          {pinnedNotes.length > 0 && <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Outras</p>}
-          <NotesGrid notes={otherNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
-        </div>
-      )}
+        {otherNotes.length > 0 && (
+          <div>
+            {pinnedNotes.length > 0 && <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">Outras</p>}
+            <NotesGrid notes={otherNotes} onUpdate={handleUpdate} onDelete={handleDelete} onOpen={setEditingNote} onRefresh={fetchNotes} />
+          </div>
+        )}
 
-      {notes.length === 0 && !showCreate && (
-        <div className="text-center py-20 text-muted-foreground">
-          <Type size={48} className="mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma anotação ainda.</p>
-          <p className="text-xs mt-1">Crie sua primeira nota acima!</p>
-        </div>
-      )}
+        {notes.length === 0 && !showCreate && (
+          <div className="text-center py-20 text-muted-foreground">
+            <Type size={48} className="mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Nenhuma anotação ainda.</p>
+            <p className="text-xs mt-1">Crie sua primeira nota acima!</p>
+          </div>
+        )}
 
-      {notes.length > 0 && filteredNotes.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <Search size={40} className="mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma anotação corresponde aos filtros.</p>
-          <button onClick={clearFilters} className="text-xs mt-2 text-primary hover:underline">Limpar filtros</button>
-        </div>
-      )}
+        {notes.length > 0 && filteredNotes.length === 0 && !isFiltering && (
+          <div className="text-center py-16 text-muted-foreground">
+            <Search size={40} className="mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Nenhuma anotação corresponde aos filtros.</p>
+            <button onClick={clearFilters} className="text-xs mt-2 text-primary hover:underline">Limpar filtros</button>
+          </div>
+        )}
+      </div>
 
       {editingNote && (
         <NoteEditDialog
