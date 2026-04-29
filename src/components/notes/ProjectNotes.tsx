@@ -303,42 +303,6 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Quick create */}
-      {!showCreate ? (
-        <div className="max-w-xl mx-auto">
-          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm hover:shadow transition-shadow">
-            <button
-              onClick={() => { setCreateType('note'); setShowCreate(true); }}
-              className="flex-1 text-left text-sm text-muted-foreground"
-            >
-              Criar uma nota...
-            </button>
-            <button
-              onClick={() => { setCreateType('checklist'); setShowCreate(true); }}
-              className="p-1.5 rounded hover:bg-accent text-muted-foreground"
-              title="Nova lista"
-            >
-              <ListChecks size={16} />
-            </button>
-            <button
-              onClick={() => { setCreateType('note'); setShowCreate(true); }}
-              className="p-1.5 rounded hover:bg-accent text-muted-foreground"
-              title="Nova nota"
-            >
-              <Type size={16} />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="max-w-xl mx-auto">
-          <NoteEditor
-            initialType={createType}
-            onSave={handleCreate}
-            onCancel={() => setShowCreate(false)}
-          />
-        </div>
-      )}
-
       {/* Search & Filters */}
       {notes.length > 0 && (
         <div className="space-y-2">
@@ -423,6 +387,42 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Quick create */}
+      {!showCreate ? (
+        <div className="max-w-xl mx-auto">
+          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3 shadow-sm hover:shadow transition-shadow">
+            <button
+              onClick={() => { setCreateType('note'); setShowCreate(true); }}
+              className="flex-1 text-left text-sm text-muted-foreground"
+            >
+              Criar uma nota...
+            </button>
+            <button
+              onClick={() => { setCreateType('checklist'); setShowCreate(true); }}
+              className="p-1.5 rounded hover:bg-accent text-muted-foreground"
+              title="Nova lista"
+            >
+              <ListChecks size={16} />
+            </button>
+            <button
+              onClick={() => { setCreateType('note'); setShowCreate(true); }}
+              className="p-1.5 rounded hover:bg-accent text-muted-foreground"
+              title="Nova nota"
+            >
+              <Type size={16} />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-xl mx-auto">
+          <NoteEditor
+            initialType={createType}
+            onSave={handleCreate}
+            onCancel={() => setShowCreate(false)}
+          />
         </div>
       )}
 
