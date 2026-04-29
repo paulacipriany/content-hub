@@ -157,17 +157,23 @@ const AppSidebar = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-left transition-colors",
+                "flex items-center gap-3 w-full py-2 rounded-md text-sm text-left transition-colors",
+                globalCollapsed ? "px-0 justify-center" : "px-3",
                 isActive ?
                 "bg-sidebar-hover text-sidebar-fg-active" :
                 "text-sidebar-fg hover:bg-sidebar-hover hover:text-sidebar-fg-active"
               )}
-              title={sidebarCollapsed ? item.label : undefined}>
+              title={globalCollapsed ? item.label : undefined}>
               
               <item.icon size={18} className="flex-shrink-0" />
-              {!sidebarCollapsed && <span className="flex-1">{item.label}</span>}
-              {!sidebarCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
+              {!globalCollapsed && <span className="flex-1">{item.label}</span>}
+              {!globalCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
                 <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
+                  {pendingUsersCount}
+                </span>
+              )}
+              {globalCollapsed && item.path === '/users' && pendingUsersCount > 0 && (
+                <span className="absolute ml-5 -mt-4 min-w-[14px] h-[14px] px-1 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ backgroundColor: '#d7ff73', color: '#000000' }}>
                   {pendingUsersCount}
                 </span>
               )}
