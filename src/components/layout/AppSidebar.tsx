@@ -67,6 +67,10 @@ const AppSidebar = () => {
 
   const isClient = role === 'client';
 
+  // When a project is selected, collapse the global nav items to icons only
+  // (the client section remains expanded). Sidebar can still be fully collapsed.
+  const globalCollapsed = sidebarCollapsed || !!selectedProject;
+
   // Count posts pending approval for selected project
   const approvalCount = selectedProject ?
   contents.filter((c) => c.project_id === selectedProject.id && c.status === 'approval-client').length :
