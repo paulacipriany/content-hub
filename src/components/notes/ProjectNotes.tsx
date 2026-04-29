@@ -327,7 +327,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
               )}
             </div>
 
-            <div className="flex items-center gap-1 bg-muted/50 rounded-md p-0.5">
+            <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
               {([
                 { v: 'all', label: 'Todas', icon: Filter },
                 { v: 'note', label: 'Notas', icon: Type },
@@ -340,8 +340,10 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
                     key={opt.v}
                     onClick={() => setTypeFilter(opt.v)}
                     className={cn(
-                      "flex items-center gap-1.5 h-8 px-2.5 text-xs rounded transition-colors",
-                      active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                      "flex items-center gap-1.5 h-8 px-2.5 text-xs rounded transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? 'bg-foreground text-background shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     )}
                   >
                     <Icon size={12} />
@@ -354,7 +356,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="h-8 px-2.5 text-xs rounded-md text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1"
+                className="h-8 px-2.5 text-xs rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <X size={12} /> Limpar
               </button>
