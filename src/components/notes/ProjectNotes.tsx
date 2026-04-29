@@ -251,8 +251,21 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   };
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | NoteType>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Debounce search to avoid layout flicker on each keystroke
+  useEffect(() => {
+    if (search === debouncedSearch) return;
+    setIsFiltering(true);
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setIsFiltering(false);
+    }, 220);
+    return () => clearTimeout(t);
+  }, [search, debouncedSearch]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -261,7 +274,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   }, [notes]);
 
   const filteredNotes = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return notes.filter(n => {
       if (typeFilter !== 'all' && n.type !== typeFilter) return false;
       if (selectedTags.length > 0) {
@@ -276,7 +289,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
       }
       return true;
     });
-  }, [notes, search, typeFilter, selectedTags]);
+  }, [notes, debouncedSearch, typeFilter, selectedTags]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -284,6 +297,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
 
   const clearFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setTypeFilter('all');
     setSelectedTags([]);
   };
@@ -291,11 +305,7 @@ const ProjectNotes = ({ projectId }: ProjectNotesProps) => {
   const hasActiveFilters = !!search || typeFilter !== 'all' || selectedTags.length > 0;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <NotesSkeleton />;
   }
 
   const pinnedNotes = filteredNotes.filter(n => n.pinned);
