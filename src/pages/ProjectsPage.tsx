@@ -430,6 +430,13 @@ const ProjectsPage = () => {
               <p className="text-xs mt-1">Crie seu primeiro projeto para organizar seus conteúdos!</p>
             </div>
           )}
+          {projects.length > 0 && filteredProjects.length === 0 && (
+            <div className="col-span-full text-center py-20 text-muted-foreground">
+              <Search size={40} className="mx-auto mb-4 opacity-50" />
+              <p className="text-sm">Nenhum projeto encontrado.</p>
+              <p className="text-xs mt-1">Tente ajustar a busca ou os filtros.</p>
+            </div>
+          )}
         </div>
       </div>
 
