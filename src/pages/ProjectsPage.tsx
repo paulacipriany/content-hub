@@ -79,6 +79,24 @@ const ProjectsPage = () => {
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Filters
+  const [search, setSearch] = useState('');
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+
+  const filteredProjects = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return projects.filter(p => {
+      if (term && !p.name.toLowerCase().includes(term)) return false;
+      if (filterPlatforms.length > 0) {
+        const pl = ((p as any).platforms ?? []) as Platform[];
+        if (!filterPlatforms.some(fp => pl.includes(fp))) return false;
+      }
+      return true;
+    });
+  }, [projects, search, filterPlatforms]);
+
+  const activeFiltersCount = (search ? 1 : 0) + (filterPlatforms.length > 0 ? 1 : 0);
+
   const handleNewLogoUpload = async (file: File) => {
     setUploadingNew(true);
     const tempId = crypto.randomUUID();
