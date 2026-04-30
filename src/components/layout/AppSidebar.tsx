@@ -67,10 +67,15 @@ const AppSidebar = () => {
 
   const isClient = role === 'client';
 
-  // Collapsible global menu — auto-collapses when a project is selected
+  // Collapsible global menu — auto-collapses when a project is selected,
+  // and auto-expands when no project is selected
   const [mainMenuOpen, setMainMenuOpen] = useState(!selectedProject);
   useEffect(() => {
-    setMainMenuOpen(!selectedProject);
+    if (selectedProject) {
+      setMainMenuOpen(false);
+    } else {
+      setMainMenuOpen(true);
+    }
   }, [selectedProject?.id]);
 
   // Count posts pending approval for selected project
