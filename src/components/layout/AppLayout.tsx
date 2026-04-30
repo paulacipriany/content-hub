@@ -24,7 +24,7 @@ const NotificationContext = createContext<NotificationContextType>({
 export const useNotifications = () => useContext(NotificationContext);
 
 const AppLayout = () => {
-  const { selectedContent, setSelectedContent, contents, projects, setSelectedProject, loading } = useApp();
+  const { selectedContent, setSelectedContent, contents, projects, selectedProject, setSelectedProject, loading } = useApp();
   const { role } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,6 +36,15 @@ const AppLayout = () => {
       setSelectedContent(null);
     }
   }, [location.pathname]);
+
+  // Clear selected project when navigating outside any project route (non-client roles)
+  useEffect(() => {
+    if (role === 'client') return;
+    const isProjectRoute = /^\/clients\/[^/]+/.test(location.pathname);
+    if (!isProjectRoute && selectedProject) {
+      setSelectedProject(null);
+    }
+  }, [location.pathname, role, selectedProject]);
 
   // Redirect client-role users from home to their first project dashboard
   useEffect(() => {
