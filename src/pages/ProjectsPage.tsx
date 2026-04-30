@@ -151,13 +151,16 @@ const ProjectsPage = () => {
 
   return (
     <>
-      <TopBar title="Projetos" subtitle="Gerencie seus projetos e campanhas" />
-      <div className="p-6">
-        <div className="flex justify-end mb-4">
-          <Button size="sm" className="gap-1.5" style={{ backgroundColor: '#ff88db', color: '#000000' }} onClick={() => setShowCreate(true)}>
-            <Plus size={16} /> Novo projeto
+      <TopBar
+        title="Projetos"
+        subtitle="Gerencie seus projetos e campanhas"
+        actions={
+          <Button size="sm" className="gap-1.5 h-9 btn-action-primary" onClick={() => setShowCreate(true)}>
+            <Plus size={16} /> <span className="hidden sm:inline">Novo projeto</span>
           </Button>
-        </div>
+        }
+      />
+      <div className="p-6">
 
         {showCreate && (
           <div className="bg-card border border-border rounded-xl p-5 mb-4 space-y-3">
