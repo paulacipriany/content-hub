@@ -1,15 +1,16 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2 } from 'lucide-react';
+import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, Platform } from '@/data/types';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, Platform, PLATFORM_LABELS } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { PlatformSelector, platformIcon } from '@/components/content/PlatformIcons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,6 +78,24 @@ const ProjectsPage = () => {
 
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Filters
+  const [search, setSearch] = useState('');
+  const [filterPlatforms, setFilterPlatforms] = useState<Platform[]>([]);
+
+  const filteredProjects = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return projects.filter(p => {
+      if (term && !p.name.toLowerCase().includes(term)) return false;
+      if (filterPlatforms.length > 0) {
+        const pl = ((p as any).platforms ?? []) as Platform[];
+        if (!filterPlatforms.some(fp => pl.includes(fp))) return false;
+      }
+      return true;
+    });
+  }, [projects, search, filterPlatforms]);
+
+  const activeFiltersCount = (search ? 1 : 0) + (filterPlatforms.length > 0 ? 1 : 0);
 
   const handleNewLogoUpload = async (file: File) => {
     setUploadingNew(true);
@@ -211,8 +230,91 @@ const ProjectsPage = () => {
           </div>
         )}
 
+        {/* Filters bar */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar projeto..."
+              className="w-full h-9 pl-9 pr-8 rounded-md bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring/20"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                title="Limpar"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 h-9">
+                <Filter size={14} />
+                Redes sociais
+                {filterPlatforms.length > 0 && (
+                  <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold">
+                    {filterPlatforms.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-2">
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1.5">Filtrar por rede</div>
+              <div className="space-y-0.5">
+                {(Object.keys(PLATFORM_LABELS) as Platform[]).map(pl => {
+                  const checked = filterPlatforms.includes(pl);
+                  return (
+                    <button
+                      key={pl}
+                      onClick={() => setFilterPlatforms(prev => checked ? prev.filter(p => p !== pl) : [...prev, pl])}
+                      className={cn(
+                        "flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-left transition-colors",
+                        checked ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
+                        checked ? "bg-primary border-primary" : "border-border"
+                      )}>
+                        {checked && <Check size={12} className="text-primary-foreground" />}
+                      </div>
+                      <span className="flex-1">{PLATFORM_LABELS[pl]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {filterPlatforms.length > 0 && (
+                <button
+                  onClick={() => setFilterPlatforms([])}
+                  className="w-full mt-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  Limpar seleção
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {activeFiltersCount > 0 && (
+            <button
+              onClick={() => { setSearch(''); setFilterPlatforms([]); }}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Limpar filtros
+            </button>
+          )}
+
+          <div className="ml-auto text-xs text-muted-foreground">
+            {filteredProjects.length} de {projects.length}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map(project => {
+          {filteredProjects.map(project => {
             const projectContents = contents.filter(c => c.project_id === project.id);
             const isEditing = editingId === project.id;
 
@@ -326,6 +428,13 @@ const ProjectsPage = () => {
               <FolderOpen size={48} className="mx-auto mb-4 opacity-50" />
               <p className="text-sm">Nenhum projeto ainda.</p>
               <p className="text-xs mt-1">Crie seu primeiro projeto para organizar seus conteúdos!</p>
+            </div>
+          )}
+          {projects.length > 0 && filteredProjects.length === 0 && (
+            <div className="col-span-full text-center py-20 text-muted-foreground">
+              <Search size={40} className="mx-auto mb-4 opacity-50" />
+              <p className="text-sm">Nenhum projeto encontrado.</p>
+              <p className="text-xs mt-1">Tente ajustar a busca ou os filtros.</p>
             </div>
           )}
         </div>
