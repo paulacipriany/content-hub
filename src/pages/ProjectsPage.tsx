@@ -1,15 +1,16 @@
 import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2 } from 'lucide-react';
+import { FolderOpen, Plus, Pencil, Trash2, X, Check, ImagePlus, Loader2, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, Platform } from '@/data/types';
+import { STATUS_LABELS, STATUS_COLORS, WorkflowStatus, Platform, PLATFORM_LABELS } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { PlatformSelector, platformIcon } from '@/components/content/PlatformIcons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
