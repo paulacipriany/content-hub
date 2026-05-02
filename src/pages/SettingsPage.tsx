@@ -1,41 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/layout/TopBar';
-import { Users, Shield, Bell, Palette, Link2, ChevronRight } from 'lucide-react';
+import { Users, Shield, Bell, Palette, ChevronRight } from 'lucide-react';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
 
   const sections = [
-    {
-      icon: Users,
-      label: 'Equipe',
-      desc: 'Gerencie membros e permissões',
-      to: '/settings/team',
-    },
-    {
-      icon: Shield,
-      label: 'Permissões',
-      desc: 'Configure roles e acessos',
-      to: '/settings/permissions',
-    },
-    {
-      icon: Bell,
-      label: 'Notificações',
-      desc: 'Preferências de notificação',
-      to: '/settings/notifications',
-    },
-    {
-      icon: Palette,
-      label: 'Aparência',
-      desc: 'Tema e personalização',
-      to: '/settings/appearance',
-    },
-    {
-      icon: Link2,
-      label: 'Integrações',
-      desc: 'Instagram, Facebook, TikTok, LinkedIn, YouTube',
-      to: '/settings/integrations',
-    },
+    { icon: Users, label: 'Equipe', desc: 'Gerencie membros e permissões', to: '/settings/team' },
+    { icon: Shield, label: 'Permissões', desc: 'Configure roles e acessos', to: '/settings/permissions' },
+    { icon: Bell, label: 'Notificações', desc: 'Preferências de notificação', to: '/settings/notifications' },
+    { icon: Palette, label: 'Aparência', desc: 'Tema e personalização', to: '/settings/appearance' },
   ];
 
   return (
