@@ -29,6 +29,12 @@ const ClientSettingsPage = () => {
       onClick: () => navigate(`/clients/${selectedProject.id}/platforms`),
     },
     { 
+      icon: Plug, 
+      label: 'Integrações', 
+      desc: 'Instagram, Facebook, TikTok, LinkedIn, YouTube',
+      onClick: () => navigate(`/clients/${selectedProject.id}/integrations`),
+    },
+    { 
       icon: Users, 
       label: 'Acessos', 
       desc: 'Gerencie membros e permissões',
