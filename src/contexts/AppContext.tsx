@@ -30,15 +30,35 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, role } = useAuth();
+  const { user, role, profile } = useAuth();
   const location = useLocation();
   const [contents, setContents] = useState<ContentWithRelations[]>([]);
   const [projects, setProjects] = useState<DbProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+  const [sidebarCollapsed, setSidebarCollapsedState] = useState(() => {
     try { return localStorage.getItem('sidebarCollapsed') === '1'; } catch { return false; }
   });
+
+  // Sync from profile when it loads/changes
+  useEffect(() => {
+    const remote = (profile as any)?.sidebar_collapsed;
+    if (typeof remote === 'boolean') {
+      setSidebarCollapsedState(remote);
+      try { localStorage.setItem('sidebarCollapsed', remote ? '1' : '0'); } catch {}
+    }
+  }, [profile?.id, (profile as any)?.sidebar_collapsed]);
+
+  const setSidebarCollapsed = useCallback((v: boolean) => {
+    setSidebarCollapsedState(v);
+    try { localStorage.setItem('sidebarCollapsed', v ? '1' : '0'); } catch {}
+    if (profile?.id) {
+      supabase.from('profiles').update({ sidebar_collapsed: v } as any).eq('id', profile.id).then(({ error }) => {
+        if (error) console.warn('Failed to persist sidebar_collapsed:', error);
+      });
+    }
+  }, [profile?.id]);
+
   const [loading, setLoading] = useState(true);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
 

@@ -14,10 +14,7 @@ const SettingsAppearancePage = () => {
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
   const [fontSize, setFontSize] = useState<'small' | 'default' | 'large'>('default');
   const sidebarCompact = sidebarCollapsed;
-  const setSidebarCompact = (v: boolean) => {
-    setSidebarCollapsed(v);
-    try { localStorage.setItem('sidebarCollapsed', v ? '1' : '0'); } catch {}
-  };
+  const setSidebarCompact = (v: boolean) => setSidebarCollapsed(v);
 
   const themes = [
     { key: 'light', label: 'Claro', icon: Sun, desc: 'Modo claro com fundo branco' },
