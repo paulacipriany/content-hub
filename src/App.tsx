@@ -100,7 +100,7 @@ const App = () => (
               <Route path="/settings/permissions" element={<SettingsPermissionsPage />} />
               <Route path="/settings/notifications" element={<SettingsNotificationsPage />} />
               <Route path="/settings/appearance" element={<SettingsAppearancePage />} />
-              <Route path="/settings/integrations" element={<SettingsIntegrationsPage />} />
+              
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
