@@ -24,6 +24,7 @@ import SettingsPermissionsPage from "@/pages/SettingsPermissionsPage";
 import SettingsNotificationsPage from "@/pages/SettingsNotificationsPage";
 import SettingsAppearancePage from "@/pages/SettingsAppearancePage";
 import SettingsIntegrationsPage from "@/pages/SettingsIntegrationsPage";
+import ClientIntegrationsPage from "@/pages/ClientIntegrationsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
 import ClientSettingsPage from "@/pages/ClientSettingsPage";
 import UsersPage from "@/pages/UsersPage";
