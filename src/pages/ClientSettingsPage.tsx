@@ -3,7 +3,7 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
-import { Palette, Link2, Users } from 'lucide-react';
+import { Palette, Link2, Users, Plug } from 'lucide-react';
 
 const ClientSettingsPage = () => {
   useClientFromUrl();
@@ -27,6 +27,12 @@ const ClientSettingsPage = () => {
       label: 'Redes Sociais', 
       desc: 'Gerencie as plataformas ativas',
       onClick: () => navigate(`/clients/${selectedProject.id}/platforms`),
+    },
+    { 
+      icon: Plug, 
+      label: 'Integrações', 
+      desc: 'Instagram, Facebook, TikTok, LinkedIn, YouTube',
+      onClick: () => navigate(`/clients/${selectedProject.id}/integrations`),
     },
     { 
       icon: Users, 

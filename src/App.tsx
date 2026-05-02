@@ -23,7 +23,7 @@ import SettingsTeamPage from "@/pages/SettingsTeamPage";
 import SettingsPermissionsPage from "@/pages/SettingsPermissionsPage";
 import SettingsNotificationsPage from "@/pages/SettingsNotificationsPage";
 import SettingsAppearancePage from "@/pages/SettingsAppearancePage";
-import SettingsIntegrationsPage from "@/pages/SettingsIntegrationsPage";
+import ClientIntegrationsPage from "@/pages/ClientIntegrationsPage";
 import ClientMembersPage from "@/pages/ClientMembersPage";
 import ClientSettingsPage from "@/pages/ClientSettingsPage";
 import UsersPage from "@/pages/UsersPage";
@@ -92,6 +92,7 @@ const App = () => (
               <Route path="/clients/:id/settings" element={<ClientSettingsPage />} />
               <Route path="/clients/:id/appearance" element={<ClientAppearancePage />} />
               <Route path="/clients/:id/platforms" element={<ClientPlatformsPage />} />
+              <Route path="/clients/:id/integrations" element={<ClientIntegrationsPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
@@ -99,7 +100,7 @@ const App = () => (
               <Route path="/settings/permissions" element={<SettingsPermissionsPage />} />
               <Route path="/settings/notifications" element={<SettingsNotificationsPage />} />
               <Route path="/settings/appearance" element={<SettingsAppearancePage />} />
-              <Route path="/settings/integrations" element={<SettingsIntegrationsPage />} />
+              
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
