@@ -36,7 +36,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [projects, setProjects] = useState<DbProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentWithRelations | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem('sidebarCollapsed') === '1'; } catch { return false; }
+  });
   const [loading, setLoading] = useState(true);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
