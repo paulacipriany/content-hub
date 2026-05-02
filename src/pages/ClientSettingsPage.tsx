@@ -3,7 +3,7 @@ import TopBar from '@/components/layout/TopBar';
 import { useApp } from '@/contexts/AppContext';
 import { useClientFromUrl } from '@/hooks/useClientFromUrl';
 import { useAuth } from '@/contexts/AuthContext';
-import { Palette, Link2, Users } from 'lucide-react';
+import { Palette, Link2, Users, Plug } from 'lucide-react';
 
 const ClientSettingsPage = () => {
   useClientFromUrl();
