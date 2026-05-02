@@ -5,13 +5,19 @@ import { ArrowLeft, Sun, Moon, Monitor, Type, Maximize2, Minimize2 } from 'lucid
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useApp } from '@/contexts/AppContext';
 
 const SettingsAppearancePage = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { sidebarCollapsed, setSidebarCollapsed } = useApp();
   const [fontSize, setFontSize] = useState<'small' | 'default' | 'large'>('default');
-  const [sidebarCompact, setSidebarCompact] = useState(false);
+  const sidebarCompact = sidebarCollapsed;
+  const setSidebarCompact = (v: boolean) => {
+    setSidebarCollapsed(v);
+    try { localStorage.setItem('sidebarCollapsed', v ? '1' : '0'); } catch {}
+  };
 
   const themes = [
     { key: 'light', label: 'Claro', icon: Sun, desc: 'Modo claro com fundo branco' },
