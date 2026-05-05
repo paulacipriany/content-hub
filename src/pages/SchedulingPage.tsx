@@ -110,11 +110,8 @@ const SchedulingPage = () => {
       <div className="p-6">
         {scheduled.length === 0 ? (
           <div className="text-center py-20">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-              style={{ backgroundColor: 'var(--client-100, hsl(var(--secondary)))' }}
-            >
-              <Calendar size={32} style={{ color: 'var(--client-500, hsl(var(--primary)))' }} />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/10">
+              <Calendar size={32} className="text-primary" />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-1">Tudo programado!</h2>
             <p className="text-sm text-muted-foreground">Nenhum conteúdo para agendar no momento.</p>
