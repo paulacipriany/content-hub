@@ -703,7 +703,7 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
     );
   }
 
-  if (displayedLists.length === 0 && unlistedTasks.length === 0) {
+  if (displayedLists.length === 0 && unlistedTasks.length === 0 && !showNewListInput) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/10">
