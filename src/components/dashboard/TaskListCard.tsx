@@ -721,10 +721,10 @@ const TaskListCard = forwardRef<TaskListCardHandle, TaskListCardProps>(({ projec
         <div className="w-full py-12 px-6" style={{ '--primary': '214 84% 47%', '--ring': '214 84% 47%' } as any}>
           {!singleListId && showNewListInput && (
             <div className="pl-12 mb-10">
-              <form onSubmit={e => { e.preventDefault(); createList(); }} className="max-w-xl bg-[#c5daf7] border border-primary/20 rounded-2xl p-8 shadow-xl">
-                <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)} placeholder="Nome da lista..." className="text-2xl font-bold text-primary outline-none w-full mb-4 bg-transparent" />
-                {!showNewListDetails ? <button type="button" onClick={() => setShowNewListDetails(true)} className="text-slate-500 hover:text-primary mb-6 block text-sm">Adicionar detalhes ou anexos...</button> : <div className="mb-6"><RichTextEditor content={creatingListDescription} onChange={setCreatingListDescription} contentId={user?.id} /></div>}
-                <div className="flex gap-3"><Button type="submit" disabled={!creatingListName.trim()} className="rounded-full px-8 bg-primary text-white">Criar lista</Button><Button type="button" variant="ghost" onClick={() => setShowNewListInput(false)} className="rounded-full">Cancelar</Button></div>
+              <form onSubmit={e => { e.preventDefault(); createList(); }} className="max-w-xl bg-card border border-border rounded-2xl p-8 shadow-sm">
+                <input ref={newListInputRef} value={creatingListName} onChange={e => setCreatingListName(e.target.value)} placeholder="Nome da lista..." className="text-2xl font-bold text-foreground outline-none w-full mb-4 bg-transparent placeholder:text-muted-foreground" />
+                {!showNewListDetails ? <button type="button" onClick={() => setShowNewListDetails(true)} className="text-muted-foreground hover:text-foreground mb-6 block text-sm">Adicionar detalhes ou anexos...</button> : <div className="mb-6"><RichTextEditor content={creatingListDescription} onChange={setCreatingListDescription} contentId={user?.id} /></div>}
+                <div className="flex gap-3"><Button type="submit" disabled={!creatingListName.trim()} className="rounded-full px-8 btn-action-primary">Criar lista</Button><Button type="button" variant="ghost" onClick={() => setShowNewListInput(false)} className="rounded-full">Cancelar</Button></div>
               </form>
             </div>
           )}
